@@ -1,0 +1,536 @@
+@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root{
+  --dashbar-h: 74px;
+}
+
+.dashbarShell{
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  width: 100%;
+}
+
+.dashbarEnter{
+  opacity: 0;
+  transform: translateY(-6px);
+  filter: blur(8px);
+  transition:
+    opacity 600ms ease,
+    transform 700ms cubic-bezier(0.2, 0.95, 0.2, 1),
+    filter 700ms ease;
+}
+
+.dashbarShell--ready .dashbarEnter{
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+.dashbarEnter--1{ transition-delay: 60ms; }
+.dashbarEnter--2{ transition-delay: 140ms; }
+.dashbarEnter--3{ transition-delay: 220ms; }
+
+.dashbar{
+  position: relative;
+  width: 100%;
+  min-height: var(--dashbar-h);
+  border-bottom: 1px solid rgba(27,16,46,0.10);
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 60px rgba(12,7,18,0.06);
+  overflow: visible;
+}
+
+.dashbar::after{
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    rgba(242,193,78,0.0) 0%,
+    rgba(242,193,78,0.70) 25%,
+    rgba(242,193,78,0.95) 50%,
+    rgba(242,193,78,0.70) 75%,
+    rgba(242,193,78,0.0) 100%
+  );
+  background-size: 260% 100%;
+  animation: dashbarGoldSweep 16s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dashbar__bg{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.dashbar__bg::before{
+  content: "";
+  position: absolute;
+  inset: -60px;
+  background-image:
+    radial-gradient(circle, rgba(124,58,237,0.14), transparent 65%),
+    radial-gradient(circle, rgba(242,193,78,0.10), transparent 66%),
+    radial-gradient(circle, rgba(42,20,80,0.08), transparent 68%);
+  background-repeat: no-repeat;
+  background-size: 220px 220px, 240px 240px, 260px 260px;
+  background-position: 8% 26%, 52% 10%, 86% 68%;
+  filter: blur(14px);
+  opacity: 0.9;
+  transform: translate3d(-2%, 0, 0);
+  animation: dashbarBlobsA 14s ease-in-out infinite alternate;
+}
+
+.dashbar__bg::after{
+  content: "";
+  position: absolute;
+  inset: -60px;
+  background-image:
+    radial-gradient(circle, rgba(124,58,237,0.10), transparent 66%),
+    radial-gradient(circle, rgba(242,193,78,0.08), transparent 70%);
+  background-repeat: no-repeat;
+  background-size: 240px 240px, 280px 280px;
+  background-position: 24% 84%, 70% 56%;
+  filter: blur(16px);
+  opacity: 0.82;
+  transform: translate3d(2%, 0, 0);
+  animation: dashbarBlobsB 18s ease-in-out infinite alternate;
+}
+
+.dashbar__inner{
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 0 clamp(16px, 2.8vw, 40px);
+  min-height: var(--dashbar-h);
+  display: grid;
+  grid-template-columns: auto minmax(340px, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+}
+
+.dashbar__left{
+  min-width: 0;
+}
+
+.dashbar__brand{
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+
+  color: #2a1450;
+  font-family: "Dancing Script", cursive;
+  font-weight: 700;
+  font-size: clamp(30px, 2.2vw, 38px);
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dashbar__searchWrap{
+  min-width: 0;
+}
+
+.dashbarSearch{
+  position: relative;
+  width: min(760px, 100%);
+  margin: 0 auto;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+
+  border-radius: 18px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background: rgba(255,255,255,0.74);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 14px 42px rgba(12,7,18,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.64);
+
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.dashbarSearch:hover{
+  border-color: rgba(124,58,237,0.18);
+}
+
+.dashbarSearch:focus-within{
+  border-color: rgba(124,58,237,0.24);
+  background: rgba(255,255,255,0.88);
+  box-shadow:
+    0 18px 46px rgba(12,7,18,0.08),
+    0 0 0 4px rgba(124,58,237,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.72);
+}
+
+.dashbarSearch__iconWrap{
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  color: rgba(42,20,80,0.54);
+}
+
+.dashbarSearch__icon{
+  width: 18px;
+  height: 18px;
+}
+
+.dashbarSearch__input{
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  padding: 0 16px 0 0;
+
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(27,16,46,0.92);
+}
+
+.dashbarSearch__input::placeholder{
+  color: rgba(27,16,46,0.42);
+}
+
+.dashbar__right{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.dashbarExplore{
+  position: relative;
+}
+
+.dashbarPill{
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background: rgba(255,255,255,0.74);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 34px rgba(12,7,18,0.04);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  cursor: pointer;
+  color: rgba(27,16,46,0.88);
+
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    color 180ms ease;
+}
+
+.dashbarPill:hover{
+  border-color: rgba(124,58,237,0.24);
+  background: rgba(124,58,237,0.05);
+  box-shadow: 0 18px 44px rgba(12,7,18,0.08);
+  color: rgba(27,16,46,0.96);
+}
+
+.dashbarPill--open{
+  color: rgba(27,16,46,0.96);
+  border-color: rgba(124,58,237,0.24);
+  background: rgba(124,58,237,0.08);
+}
+
+.dashbarPill__icon{
+  width: 16px;
+  height: 16px;
+}
+
+.dashbarPill__text{
+  line-height: 1;
+}
+
+.dashbarPill__chevron{
+  width: 15px;
+  height: 15px;
+  transition: transform 200ms ease;
+}
+
+.dashbarPill__chevron--open{
+  transform: rotate(180deg);
+}
+
+.dashbarMenu{
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 30;
+
+  min-width: 220px;
+  padding: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 26px 80px rgba(12,7,18,0.14);
+
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 180ms ease;
+}
+
+.dashbarMenu--open{
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.dashbarMenu__item{
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 11px 10px;
+  border-radius: 12px;
+  color: rgba(27,16,46,0.88);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.dashbarMenu__item:hover{
+  background: rgba(124,58,237,0.06);
+  transform: translateX(1px);
+}
+
+.dashbarIconBtn{
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background: rgba(255,255,255,0.74);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 34px rgba(12,7,18,0.04);
+
+  display: grid;
+  place-items: center;
+
+  cursor: pointer;
+  color: rgba(27,16,46,0.88);
+
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    color 180ms ease;
+}
+
+.dashbarIconBtn:hover{
+  border-color: rgba(124,58,237,0.24);
+  background: rgba(124,58,237,0.05);
+  box-shadow: 0 18px 44px rgba(12,7,18,0.08);
+  color: rgba(27,16,46,0.96);
+}
+
+.dashbarIconBtn__icon{
+  width: 18px;
+  height: 18px;
+}
+
+.dashbarIconBtn__dot{
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #f2c14e;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.96);
+}
+
+.dashbarProfile{
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background: rgba(255,255,255,0.74);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 34px rgba(12,7,18,0.04);
+
+  display: grid;
+  place-items: center;
+
+  cursor: pointer;
+  color: rgba(27,16,46,0.88);
+
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    color 180ms ease;
+}
+
+.dashbarProfile:hover{
+  border-color: rgba(124,58,237,0.24);
+  background: rgba(124,58,237,0.05);
+  box-shadow: 0 18px 44px rgba(12,7,18,0.08);
+  color: rgba(27,16,46,0.96);
+}
+
+.dashbarProfile__icon{
+  width: 18px;
+  height: 18px;
+}
+
+@keyframes dashbarGoldSweep{
+  0%{ background-position: 0% 50%; }
+  100%{ background-position: 260% 50%; }
+}
+
+@keyframes dashbarBlobsA{
+  0%{
+    transform: translate3d(-2%, 0, 0) scale(1);
+    background-position: 8% 26%, 52% 10%, 86% 68%;
+  }
+  100%{
+    transform: translate3d(2%, -1%, 0) scale(1.03);
+    background-position: 14% 34%, 58% 18%, 80% 60%;
+  }
+}
+
+@keyframes dashbarBlobsB{
+  0%{
+    transform: translate3d(2%, 0, 0) scale(1);
+    background-position: 24% 84%, 70% 56%;
+  }
+  100%{
+    transform: translate3d(-2%, -1%, 0) scale(1.04);
+    background-position: 30% 75%, 64% 46%;
+  }
+}
+
+@media (max-width: 1120px){
+  .dashbar__inner{
+    grid-template-columns: auto minmax(260px, 1fr) auto;
+    gap: 12px;
+  }
+
+  .dashbarPill__text{
+    display: none;
+  }
+}
+
+@media (max-width: 820px){
+  .dashbar__inner{
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    padding: 0 14px;
+  }
+
+  .dashbarSearch{
+    height: 44px;
+    width: min(680px, 100%);
+    border-radius: 16px;
+  }
+
+  .dashbarSearch__input{
+    font-size: 13px;
+  }
+
+  .dashbarPill{
+    width: 42px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .dashbarPill__chevron{
+    display: none;
+  }
+}
+
+@media (max-width: 640px){
+  .dashbar__inner{
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "brand actions"
+      "search search";
+    align-items: center;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .dashbar__left{
+    grid-area: brand;
+  }
+
+  .dashbar__searchWrap{
+    grid-area: search;
+  }
+
+  .dashbar__right{
+    grid-area: actions;
+    gap: 8px;
+  }
+
+  .dashbar{
+    min-height: unset;
+  }
+
+  .dashbarIconBtn,
+  .dashbarPill,
+  .dashbarProfile{
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+  }
+
+  .dashbarMenu{
+    right: 0;
+    min-width: 200px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .dashbarEnter,
+  .dashbarShell--ready .dashbarEnter{
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+
+  .dashbarPill,
+  .dashbarIconBtn,
+  .dashbarProfile,
+  .dashbarSearch,
+  .dashbarMenu,
+  .dashbarPill__chevron{
+    transition: none !important;
+  }
+
+  .dashbar::after,
+  .dashbar__bg::before,
+  .dashbar__bg::after{
+    animation: none !important;
+  }
+}

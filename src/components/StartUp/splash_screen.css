@@ -1,0 +1,301 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;1,500&display=swap");
+
+html, body, #root{
+  height: 100%;
+  margin: 0;
+}
+
+:root{
+  --gold: #f2c14e;
+  --whiteStroke: rgba(243, 238, 252, 0.95);
+
+  --c-center-shift: 260%;
+  --line-width: min(380px, 76vw);
+  --ripple-scale: 50;
+}
+
+@media (max-width: 480px){
+  :root{
+    --c-center-shift: 285%;
+    --line-width: min(320px, 84vw);
+    --ripple-scale: 38;
+  }
+}
+
+@media (min-width: 1024px){
+  :root{
+    --c-center-shift: 250%;
+    --line-width: min(420px, 40vw);
+    --ripple-scale: 55;
+  }
+}
+
+.splash{
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  opacity: 1;
+  background:
+    radial-gradient(900px 560px at 65% 25%, rgba(242, 193, 78, 0.06), transparent 60%),
+    radial-gradient(900px 600px at 35% 75%, rgba(167, 126, 255, 0.12), transparent 62%),
+    linear-gradient(180deg, #05030a, #12081d 45%, #241042);
+}
+
+.splash__shadow{
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+.splash__shadow h1{ display: none; }
+
+.vignette{
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 45%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.72) 100%);
+}
+
+.center{
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 3vw, 28px);
+}
+
+.logoWrap{ text-align: center; }
+
+.logo{
+  width: min(560px, 92vw);
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 22px 60px rgba(0,0,0,0.65));
+}
+
+.p{
+  fill: none;
+  stroke: var(--whiteStroke);
+  stroke-width: 2.4;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+
+.p0{ stroke: var(--gold); }
+
+.cGroup{
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: translateX(var(--c-center-shift));
+}
+
+.logoLine{
+  height: 2px;
+  width: var(--line-width);
+  margin: 2px auto 0;
+
+  background: var(--gold);
+  box-shadow: 0 0 22px rgba(242, 193, 78, 0.18);
+
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: center;
+}
+
+.logoLine::after{
+  content: "";
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: translateX(-120%);
+  opacity: 0;
+}
+
+.tagline{
+  margin-top: clamp(8px, 1.8vw, 12px);
+  font-family: Inter, system-ui, Arial, sans-serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(13px, 2.2vw, 18px);
+  color: rgba(243, 238, 252, 0.92);
+
+  opacity: 0;
+  transform: translateY(14px) scale(0.98);
+  filter: blur(10px);
+}
+
+.skip{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 18px;
+  z-index: 6;
+  text-align: center;
+  font-family: Inter, system-ui, Arial, sans-serif;
+  font-size: 13px;
+  color: rgba(243, 238, 252, 0.72);
+  opacity: 0;
+  transform: translateY(10px);
+  filter: blur(6px);
+  user-select: none;
+  pointer-events: none;
+}
+
+.splash--autoFade{ animation: autoFadeOut 900ms ease forwards; }
+.splash--clickExit{ animation: clickFadeOut 650ms ease forwards; }
+
+.ripple{
+  position: absolute;
+  z-index: 5;
+  left: var(--rx, 50vw);
+  top: var(--ry, 50vh);
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ripple::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: rgba(242, 193, 78, 0.22);
+  opacity: 0;
+}
+
+.ripple::after{
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 9999px;
+  border: 1px solid rgba(242, 193, 78, 0.45);
+  box-shadow: 0 0 18px rgba(242, 193, 78, 0.12);
+  opacity: 0;
+}
+
+.splash--clickExit .ripple{
+  opacity: 1;
+  animation: rippleGrow 650ms ease-out forwards;
+}
+
+.splash--clickExit .ripple::before{
+  opacity: 1;
+  animation: rippleFill 650ms ease-out forwards;
+}
+
+.splash--clickExit .ripple::after{
+  opacity: 1;
+  animation: rippleRing 650ms ease-out forwards;
+}
+
+.splash--on .skip{
+  animation: skipIn 1200ms ease forwards;
+  animation-delay: 700ms;
+}
+
+.splash--on .p0{
+  animation: draw 1900ms ease forwards;
+  animation-delay: 1100ms;
+}
+
+.splash--on .cGroup{
+  animation: cSlide 1200ms cubic-bezier(0.2, 0.95, 0.2, 1) forwards;
+  animation-delay: 3200ms;
+}
+
+.splash--on .p1{ animation: draw 1800ms ease forwards; animation-delay: 3700ms; }
+.splash--on .p2{ animation: draw 1800ms ease forwards; animation-delay: 3900ms; }
+.splash--on .p3{ animation: draw 1800ms ease forwards; animation-delay: 4100ms; }
+.splash--on .p4{ animation: draw 1800ms ease forwards; animation-delay: 4300ms; }
+.splash--on .p5{ animation: draw 1800ms ease forwards; animation-delay: 4500ms; }
+.splash--on .p6{ animation: draw 1800ms ease forwards; animation-delay: 4700ms; }
+
+.splash--on .logoLine{
+  animation: lineGrow 1200ms ease forwards;
+  animation-delay: 4400ms;
+}
+
+.splash--on .logoLine::after{
+  animation: lineShimmer 1400ms ease forwards;
+  animation-delay: 4700ms;
+}
+
+.splash--on .tagline{
+  animation: quoteIn 1400ms ease forwards;
+  animation-delay: 5200ms;
+}
+
+@keyframes autoFadeOut{ to{ opacity: 0; visibility: hidden; } }
+@keyframes clickFadeOut{ to{ opacity: 0; visibility: hidden; } }
+
+@keyframes draw{
+  0%{ stroke-dashoffset: 1; opacity: 0; }
+  18%{ opacity: 1; }
+  100%{ stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes cSlide{
+  from{ transform: translateX(var(--c-center-shift)); }
+  to{ transform: translateX(0%); }
+}
+
+@keyframes lineGrow{
+  to{ opacity: 1; transform: scaleX(1); }
+}
+
+@keyframes lineShimmer{
+  0%{ opacity: 0; transform: translateX(-120%); }
+  30%{ opacity: 1; }
+  100%{ opacity: 0; transform: translateX(120%); }
+}
+
+@keyframes quoteIn{
+  0%{ opacity: 0; transform: translateY(14px) scale(0.98); filter: blur(10px); }
+  60%{ opacity: 0.85; transform: translateY(6px) scale(0.99); filter: blur(3px); }
+  100%{ opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+@keyframes skipIn{
+  0%{ opacity: 0; transform: translateY(10px); filter: blur(8px); }
+  70%{ opacity: 0.85; transform: translateY(2px); filter: blur(2px); }
+  100%{ opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes rippleGrow{
+  from{ transform: translate(-50%, -50%) scale(0); }
+  to{ transform: translate(-50%, -50%) scale(var(--ripple-scale)); }
+}
+
+@keyframes rippleFill{
+  0%{ opacity: 0.25; }
+  100%{ opacity: 0; }
+}
+
+@keyframes rippleRing{
+  0%{ transform: scale(1); opacity: 0.55; }
+  100%{ transform: scale(1.9); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .splash, .splash *{ animation: none !important; }
+  .p{ opacity: 1; stroke-dashoffset: 0; }
+  .cGroup{ transform: translateX(0%) !important; }
+  .logoLine{ opacity: 1; transform: none; }
+  .tagline{ opacity: 1; transform: none; filter: none; }
+  .skip{ opacity: 1; transform: none; filter: none; }
+  .ripple{ display: none; }
+}

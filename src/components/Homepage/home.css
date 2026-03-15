@@ -1,0 +1,57 @@
+:root{
+  --nav-h: 66px;
+}
+
+html, body{
+  height: 100%;
+  overflow: hidden;
+}
+
+.homeScroll{
+  height: calc(100svh - var(--nav-h));
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  scroll-snap-type: y proximity;
+
+  scroll-padding-top: 1px;
+
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+
+  position: relative;
+  z-index: 1;
+
+  scrollbar-width: none;
+}
+.homeScroll::-webkit-scrollbar{
+  width: 0;
+  height: 0;
+}
+
+.homeSnap{
+  height: calc(100svh - var(--nav-h));
+  scroll-snap-align: start;
+
+  scroll-snap-stop: always;
+
+  background: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+.homeSnap{
+  height: calc(100svh - var(--nav-h) + 2px);
+}
+
+.homeSnap + .homeSnap{
+  margin-top: -2px;
+}
+
+.homeFooterSection{
+  min-height: clamp(340px, 48vh, 520px);
+  padding: 0;
+  background: transparent;
+  position: relative;
+  z-index: 1;
+}

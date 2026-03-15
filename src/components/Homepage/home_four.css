@@ -1,0 +1,524 @@
+@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap");
+
+.homeFour{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+.homeFour__inner{
+  position: relative;
+  z-index: 2;
+
+  width: min(1040px, 92vw);
+  height: 100%;
+  margin: 0 auto;
+  padding: clamp(28px, 4vw, 56px) 0;
+
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.homeFour__title{
+  margin: 0;
+  perspective: 1000px;
+}
+
+.homeFour__flip{
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.01em;
+}
+
+.homeFour__char{
+  display: inline-block;
+  transform-origin: center bottom;
+  transform-style: preserve-3d;
+
+  font-family: "Dancing Script", cursive;
+  font-size: clamp(62px, 7vw, 98px);
+  line-height: 0.95;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: rgba(27,16,46,0.97);
+
+  text-shadow:
+    0 8px 24px rgba(42,20,80,0.08),
+    0 2px 6px rgba(255,255,255,0.45);
+}
+
+.homeFour__char--space{
+  width: 0.34em;
+}
+
+.homeFour__desc{
+  margin: 0;
+  min-height: 3.2em;
+  max-width: 62ch;
+
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: clamp(15px, 1.55vw, 18px);
+  line-height: 1.72;
+  color: rgba(27,16,46,0.76);
+  text-wrap: balance;
+}
+
+.homeFour__descCursor{
+  margin-left: 4px;
+  color: rgba(42,20,80,0.58);
+}
+
+.homeFour__inputWrap{
+  width: min(740px, 92vw);
+}
+
+.homeFourForm{
+  width: 100%;
+  display: grid;
+  gap: 10px;
+}
+
+.homeFourInput{
+  position: relative;
+  width: 100%;
+  height: 78px;
+  padding: 0 82px 0 24px;
+
+  border-radius: 26px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.72));
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 22px 72px rgba(12,7,18,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.72);
+
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+.homeFourInput::before{
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background:
+    radial-gradient(180px 70px at 18% 0%, rgba(124,58,237,0.06), transparent 72%),
+    radial-gradient(180px 70px at 86% 100%, rgba(242,193,78,0.07), transparent 74%);
+  pointer-events: none;
+}
+
+.homeFourInput::after{
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -28%;
+  width: 34%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.40),
+    transparent
+  );
+  transform: skewX(-20deg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.homeFourInput:hover::after{
+  opacity: 1;
+  animation: homeFourShine 1.2s ease;
+}
+
+.homeFourInput:focus-within{
+  border-color: rgba(124,58,237,0.26);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,255,255,0.82));
+  box-shadow:
+    0 28px 84px rgba(12,7,18,0.12),
+    0 0 0 4px rgba(124,58,237,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.78);
+}
+
+.homeFourInput--error,
+.homeFourInput--error:focus-within{
+  border-color: rgba(220,38,38,0.26);
+  box-shadow:
+    0 22px 72px rgba(12,7,18,0.08),
+    0 0 0 4px rgba(220,38,38,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.72);
+}
+
+.homeFourInput--success,
+.homeFourInput--success:focus-within{
+  border-color: rgba(34,197,94,0.26);
+  box-shadow:
+    0 22px 72px rgba(12,7,18,0.08),
+    0 0 0 4px rgba(34,197,94,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.72);
+}
+
+.homeFourInput__label{
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.homeFourInput__labelChar{
+  display: inline-block;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: pre;
+}
+
+.homeFourInput__control{
+  position: relative;
+  z-index: 2;
+
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(27,16,46,0.94);
+  letter-spacing: -0.01em;
+}
+
+.homeFourInput__control::placeholder{
+  color: transparent;
+}
+
+.homeFourInput__submit{
+  position: absolute;
+  z-index: 3;
+  right: 14px;
+  top: 13px;
+
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.46));
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 14px 36px rgba(12,7,18,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.62);
+
+  display: grid;
+  place-items: center;
+
+  color: rgba(42,20,80,0.94);
+  cursor: pointer;
+  overflow: hidden;
+
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    color 220ms ease;
+}
+
+.homeFourInput__submit::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,0.55), transparent 42%),
+    linear-gradient(180deg, rgba(124,58,237,0.07), rgba(242,193,78,0.03));
+  opacity: 0.96;
+  pointer-events: none;
+}
+
+.homeFourInput__submit::after{
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(124,58,237,0.0),
+    rgba(124,58,237,0.14),
+    rgba(242,193,78,0.18),
+    rgba(124,58,237,0.0)
+  );
+  opacity: 0;
+  transition: opacity 220ms ease;
+  pointer-events: none;
+}
+
+.homeFourInput__submit:hover{
+  border-color: rgba(124,58,237,0.26);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.60));
+  color: rgba(27,16,46,0.98);
+  box-shadow:
+    0 20px 48px rgba(12,7,18,0.12),
+    0 0 0 4px rgba(124,58,237,0.08),
+    0 8px 24px rgba(242,193,78,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.76);
+}
+
+.homeFourInput__submit:hover::after{
+  opacity: 1;
+}
+
+.homeFourInput__submit:active{
+  box-shadow:
+    0 10px 24px rgba(12,7,18,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.70);
+}
+
+.homeFourInput__submit--success{
+  border-color: rgba(34,197,94,0.26);
+  color: rgba(22,101,52,0.96);
+  background:
+    linear-gradient(180deg, rgba(240,253,244,0.92), rgba(220,252,231,0.68));
+  box-shadow:
+    0 16px 40px rgba(34,197,94,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.78);
+}
+
+.homeFourInput__iconWrap{
+  position: relative;
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+}
+
+.homeFourInput__submitIcon{
+  width: 18px;
+  height: 18px;
+  transition: transform 220ms ease;
+}
+
+.homeFourInput__submit:hover .homeFourInput__submitIcon{
+  transform: translateX(2px);
+}
+
+.homeFourInput__submit--success:hover .homeFourInput__submitIcon{
+  transform: none;
+}
+
+.homeFourFeedback{
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.homeFourFeedback__text,
+.homeFourFeedback__spacer{
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.homeFourFeedback__text--error{
+  color: rgba(185,28,28,0.92);
+}
+
+.homeFourFeedback__text--success{
+  color: rgba(21,128,61,0.94);
+}
+
+.homeFour__decorLayer{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.homeFour__decor{
+  position: absolute;
+  opacity: 0.88;
+  filter: drop-shadow(0 12px 28px rgba(42,20,80,0.08));
+}
+
+.homeFour__decor svg{
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.homeFour__decor--planeA{
+  top: 14%;
+  left: 8%;
+  width: 78px;
+  height: 78px;
+  color: rgba(124,58,237,0.24);
+}
+
+.homeFour__decor--planeB{
+  right: 10%;
+  top: 18%;
+  width: 88px;
+  height: 88px;
+  color: rgba(242,193,78,0.36);
+}
+
+.homeFour__decor--star{
+  left: 14%;
+  bottom: 20%;
+  width: 54px;
+  height: 54px;
+  color: rgba(42,20,80,0.22);
+}
+
+.homeFour__decor--ring{
+  right: 12%;
+  bottom: 18%;
+  width: 110px;
+  height: 110px;
+  color: rgba(124,58,237,0.18);
+}
+
+.homeFour__decor--scribbleA{
+  top: 28%;
+  left: 2%;
+  width: 180px;
+  height: 60px;
+  color: rgba(27,16,46,0.14);
+}
+
+.homeFour__decor--scribbleB{
+  right: 1%;
+  bottom: 28%;
+  width: 190px;
+  height: 60px;
+  color: rgba(27,16,46,0.14);
+}
+
+@keyframes homeFourShine{
+  0%{ left: -28%; }
+  100%{ left: 118%; }
+}
+
+@media (max-width: 860px){
+  .homeFour__inner{
+    width: min(94vw, 94vw);
+  }
+
+  .homeFour__desc{
+    min-height: 4.2em;
+  }
+
+  .homeFour__decor--scribbleA,
+  .homeFour__decor--scribbleB{
+    width: 140px;
+  }
+}
+
+@media (max-width: 560px){
+  .homeFour__title{
+    max-width: 100%;
+  }
+
+  .homeFour__char{
+    font-size: clamp(54px, 14vw, 78px);
+  }
+
+  .homeFour__desc{
+    min-height: 5.2em;
+    font-size: 15px;
+  }
+
+  .homeFour__inputWrap{
+    width: 100%;
+  }
+
+  .homeFourInput{
+    height: 70px;
+    padding: 0 74px 0 20px;
+    border-radius: 22px;
+  }
+
+  .homeFourInput__label{
+    left: 20px;
+  }
+
+  .homeFourInput__labelChar{
+    font-size: 14px;
+  }
+
+  .homeFourInput__control{
+    font-size: 15px;
+  }
+
+  .homeFourInput__submit{
+    top: 11px;
+    right: 11px;
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+  }
+
+  .homeFour__decor--planeA{
+    top: 10%;
+    left: -2%;
+    width: 62px;
+    height: 62px;
+  }
+
+  .homeFour__decor--planeB{
+    top: 12%;
+    right: -3%;
+    width: 68px;
+    height: 68px;
+  }
+
+  .homeFour__decor--ring{
+    width: 82px;
+    height: 82px;
+    right: -2%;
+    bottom: 12%;
+  }
+
+  .homeFour__decor--star{
+    left: 2%;
+    bottom: 12%;
+    width: 42px;
+    height: 42px;
+  }
+
+  .homeFour__decor--scribbleA,
+  .homeFour__decor--scribbleB{
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .homeFourInput,
+  .homeFourInput__submit,
+  .homeFourInput__submitIcon,
+  .homeFourInput::after{
+    transition: none !important;
+    animation: none !important;
+  }
+}

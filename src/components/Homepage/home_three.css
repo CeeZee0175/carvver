@@ -1,0 +1,403 @@
+@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap");
+
+.homeThree{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+.homeThree__inner{
+  position: relative;
+  z-index: 2;
+
+  width: min(1140px, 94vw);
+  height: 100%;
+  margin: 0 auto;
+  padding: clamp(28px, 4vw, 52px) 0;
+
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: clamp(18px, 2.8vh, 28px);
+}
+
+.homeThreeTitle{
+  text-align: center;
+}
+
+.homeThreeTitle__wrap{
+  position: relative;
+  display: inline-block;
+  padding-bottom: 18px;
+}
+
+.homeThree__title{
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+
+  font-family: "Dancing Script", cursive;
+  font-size: clamp(56px, 6vw, 82px);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: rgba(27,16,46,0.97);
+}
+
+.homeThree__cursor{
+  margin-left: 8px;
+  font-size: 0.82em;
+  color: rgba(42,20,80,0.70);
+}
+
+.homeThree__underline{
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  bottom: 0;
+  width: calc(100% + 16px);
+  height: 18px;
+  color: rgba(242,193,78,0.96);
+  overflow: visible;
+  pointer-events: none;
+}
+
+.homeThreeToggle{
+  width: min(520px, 92vw);
+}
+
+.homeThreeToggle__inner{
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 12px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background: rgba(255,255,255,0.78);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 60px rgba(12,7,18,0.06);
+}
+
+.homeThreeToggle__slot{
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.homeThreeToggle__line{
+  position: absolute;
+  top: -2px;
+  left: 14px;
+  right: 14px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(242,193,78,0.10),
+    rgba(242,193,78,0.96),
+    rgba(242,193,78,0.10)
+  );
+  box-shadow: 0 0 16px rgba(242,193,78,0.20);
+}
+
+.homeThreeToggle__btn{
+  appearance: none;
+  border: none;
+  background: transparent;
+
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 850;
+  color: rgba(27,16,46,0.68);
+
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.homeThreeToggle__btn:hover{
+  color: rgba(27,16,46,0.92);
+  background: rgba(124,58,237,0.05);
+}
+
+.homeThreeToggle__btn--active{
+  color: rgba(27,16,46,0.98);
+}
+
+.homeThreeToggle__sep{
+  color: rgba(27,16,46,0.28);
+  font-size: 16px;
+  font-weight: 700;
+  user-select: none;
+}
+
+.homeThreeStack{
+  width: min(800px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+
+.homeThreeStack__stage{
+  position: relative;
+  width: min(800px, 100%);
+  height: 340px;
+}
+
+.homeThreeCard{
+  --card-accent: rgba(124,58,237,0.92);
+  --card-glow: rgba(124,58,237,0.12);
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  width: min(760px, calc(100% - 24px));
+  height: 272px;
+  margin: 0 auto;
+  padding: 24px 26px 22px;
+
+  border-radius: 28px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background:
+    radial-gradient(180px 130px at 10% 0%, var(--card-glow), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,0.90), rgba(255,255,255,0.76));
+  backdrop-filter: blur(12px);
+  box-shadow: 0 22px 76px rgba(12,7,18,0.10);
+
+  overflow: hidden;
+  user-select: none;
+}
+
+.homeThreeCard::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.55);
+}
+
+.homeThreeCard--top{
+  cursor: grab;
+}
+
+.homeThreeCard--top:active{
+  cursor: grabbing;
+}
+
+.homeThreeCard__top{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.homeThreeCard__step{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 84px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(42,20,80,0.12);
+  background: rgba(255,255,255,0.74);
+
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 11.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(42,20,80,0.82);
+}
+
+.homeThreeCard__iconWrap{
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: var(--card-glow);
+  border: 1px solid rgba(42,20,80,0.10);
+  color: var(--card-accent);
+}
+
+.homeThreeCard__icon{
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.homeThreeCard__bar{
+  width: 74px;
+  height: 4px;
+  border-radius: 999px;
+  margin-top: 18px;
+  background: linear-gradient(90deg, var(--card-accent), rgba(242,193,78,0.76));
+}
+
+.homeThreeCard__title{
+  margin: 18px 0 0;
+  max-width: 18ch;
+
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: clamp(26px, 3vw, 34px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 850;
+  color: rgba(27,16,46,0.97);
+}
+
+.homeThreeCard__desc{
+  margin: 14px 0 0;
+  max-width: 62ch;
+
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  color: rgba(27,16,46,0.76);
+}
+
+.homeThreeCard__hint{
+  position: absolute;
+  right: 22px;
+  bottom: 18px;
+
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: rgba(27,16,46,0.45);
+}
+
+.homeThreeDots{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.homeThreeDots__btn{
+  appearance: none;
+  border: none;
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border-radius: 999px;
+  background: rgba(27,16,46,0.20);
+  cursor: pointer;
+  transition:
+    width 180ms ease,
+    background 180ms ease,
+    transform 160ms ease;
+}
+
+.homeThreeDots__btn:hover{
+  background: rgba(27,16,46,0.42);
+  transform: translateY(-1px);
+}
+
+.homeThreeDots__btn--active{
+  width: 24px;
+  background: rgba(42,20,80,0.92);
+}
+
+@media (max-width: 860px){
+  .homeThreeStack__stage{
+    height: 356px;
+  }
+
+  .homeThreeCard{
+    height: 288px;
+    padding: 22px 22px 20px;
+    border-radius: 24px;
+  }
+
+  .homeThreeCard__title{
+    max-width: none;
+    font-size: 26px;
+  }
+
+  .homeThreeCard__desc{
+    font-size: 15px;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 560px){
+  .homeThree__inner{
+    width: min(96vw, 96vw);
+    gap: 18px;
+  }
+
+  .homeThree__title{
+    font-size: clamp(48px, 12vw, 68px);
+  }
+
+  .homeThreeToggle{
+    width: 100%;
+  }
+
+  .homeThreeToggle__btn{
+    font-size: 13px;
+    padding: 0 10px;
+  }
+
+  .homeThreeStack{
+    width: 100%;
+  }
+
+  .homeThreeStack__stage{
+    height: 404px;
+  }
+
+  .homeThreeCard{
+    width: calc(100% - 8px);
+    height: 336px;
+    padding: 20px 18px 18px;
+    border-radius: 22px;
+  }
+
+  .homeThreeCard__iconWrap{
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+  }
+
+  .homeThreeCard__title{
+    font-size: 22px;
+  }
+
+  .homeThreeCard__desc{
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+
+  .homeThreeCard__hint{
+    left: 18px;
+    right: auto;
+    bottom: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .homeThreeToggle__btn,
+  .homeThreeDots__btn{
+    transition: none !important;
+  }
+}
