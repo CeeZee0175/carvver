@@ -1,5 +1,5 @@
-import React, { useEffect, useId, useMemo, useRef } from "react";
-import { animate, useMotionValue } from "framer-motion";
+import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+import { animate, useMotionValue, useReducedMotion } from "framer-motion";
 
 function mapRange(value, fromLow, fromHigh, toLow, toHigh) {
   if (fromLow === fromHigh) return toLow;
@@ -13,6 +13,37 @@ const useInstanceId = () => {
   return `shadowoverlay-${cleanId}`;
 };
 
+function addMediaListener(mq, handler) {
+  if (!mq) return () => {};
+  if (mq.addEventListener) {
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }
+  mq.addListener(handler);
+  return () => mq.removeListener(handler);
+}
+
+function getLiteModePreference(reduceMotion) {
+  if (reduceMotion) return true;
+  if (typeof window === "undefined") return false;
+
+  const isSmallScreen = window.matchMedia("(max-width: 820px)").matches;
+  const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
+  const noHover = window.matchMedia("(hover: none)").matches;
+
+  const lowThreads =
+    typeof navigator !== "undefined" &&
+    typeof navigator.hardwareConcurrency === "number" &&
+    navigator.hardwareConcurrency <= 4;
+
+  const lowMemory =
+    typeof navigator !== "undefined" &&
+    typeof navigator.deviceMemory === "number" &&
+    navigator.deviceMemory <= 4;
+
+  return isSmallScreen || isCoarsePointer || noHover || lowThreads || lowMemory;
+}
+
 export function Component({
   sizing = "fill",
   color = "rgba(128, 128, 128, 1)",
@@ -20,18 +51,88 @@ export function Component({
   noise,
   style,
   className,
+  performanceMode = "auto", // "auto" | "full" | "lite"
 }) {
   const id = useInstanceId();
+  const shouldReduceMotion = useReducedMotion();
 
   const animScale = animation?.scale ?? 0;
   const animSpeed = animation?.speed ?? 0;
-  const animationEnabled = animScale > 0;
+  const baseAnimationEnabled = animScale > 0;
 
   const feColorMatrixRef = useRef(null);
   const feTurbulenceRef = useRef(null);
 
   const hueRotateMotionValue = useMotionValue(180);
   const hueRotateAnimation = useRef(null);
+
+  const [isLiteMode, setIsLiteMode] = useState(() => {
+    if (performanceMode === "lite") return true;
+    if (performanceMode === "full") return false;
+    return getLiteModePreference(shouldReduceMotion);
+  });
+
+  const [isPageVisible, setIsPageVisible] = useState(() => {
+    if (typeof document === "undefined") return true;
+    return !document.hidden;
+  });
+
+  useEffect(() => {
+    if (performanceMode === "lite") {
+      setIsLiteMode(true);
+      return;
+    }
+
+    if (performanceMode === "full") {
+      setIsLiteMode(false);
+      return;
+    }
+
+    const updateMode = () => {
+      setIsLiteMode(getLiteModePreference(shouldReduceMotion));
+    };
+
+    updateMode();
+
+    const mqSmall = typeof window !== "undefined" ? window.matchMedia("(max-width: 820px)") : null;
+    const mqPointer = typeof window !== "undefined" ? window.matchMedia("(pointer: coarse)") : null;
+    const mqHover = typeof window !== "undefined" ? window.matchMedia("(hover: none)") : null;
+
+    const cleanupSmall = addMediaListener(mqSmall, updateMode);
+    const cleanupPointer = addMediaListener(mqPointer, updateMode);
+    const cleanupHover = addMediaListener(mqHover, updateMode);
+
+    window.addEventListener("resize", updateMode);
+
+    return () => {
+      cleanupSmall();
+      cleanupPointer();
+      cleanupHover();
+      window.removeEventListener("resize", updateMode);
+    };
+  }, [performanceMode, shouldReduceMotion]);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      setIsPageVisible(!document.hidden);
+    };
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", handleVisibility);
+    }
+
+    return () => {
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", handleVisibility);
+      }
+    };
+  }, []);
+
+  const animationEnabled =
+    baseAnimationEnabled &&
+    !shouldReduceMotion &&
+    !isLiteMode &&
+    isPageVisible;
 
   const displacementScale = useMemo(() => {
     return animationEnabled ? mapRange(animScale, 1, 100, 25, 130) : 0;
@@ -91,8 +192,28 @@ export function Component({
     };
 
     raf = requestAnimationFrame(tick);
+
     return () => cancelAnimationFrame(raf);
   }, [animationEnabled, animScale, animSpeed]);
+
+  const finalNoiseOpacity = useMemo(() => {
+    const raw = (noise?.opacity || 0) / 2;
+    if (isLiteMode) return Math.min(raw, 0.04);
+    return raw;
+  }, [noise?.opacity, isLiteMode]);
+
+  const finalNoiseScale = useMemo(() => {
+    if (isLiteMode) return Math.min(noise?.scale || 1, 0.8);
+    return noise?.scale || 1;
+  }, [noise?.scale, isLiteMode]);
+
+  const innerFilter = animationEnabled
+    ? `url(#${id}) blur(6px)`
+    : isLiteMode
+    ? "blur(3px)"
+    : "none";
+
+  const innerInset = animationEnabled ? -displacementScale : -2;
 
   return (
     <div
@@ -109,8 +230,9 @@ export function Component({
       <div
         style={{
           position: "absolute",
-          inset: -displacementScale,
-          filter: animationEnabled ? `url(#${id}) blur(6px)` : "none",
+          inset: innerInset,
+          filter: innerFilter,
+          opacity: isLiteMode ? 0.92 : 1,
         }}
       >
         {animationEnabled && (
@@ -134,11 +256,12 @@ export function Component({
                 <feColorMatrix
                   ref={feColorMatrixRef}
                   in="undulation"
+                  result="hue"
                   type="hueRotate"
                   values="180"
                 />
                 <feColorMatrix
-                  in="undulation"
+                  in="hue"
                   result="circulation"
                   type="matrix"
                   values="4 0 0 0 1  4 0 0 0 1  4 0 0 0 1  1 0 0 0 0"
@@ -177,15 +300,15 @@ export function Component({
         />
       </div>
 
-      {noise && (noise.opacity ?? 0) > 0 && (
+      {noise && finalNoiseOpacity > 0 && (
         <div
           style={{
             position: "absolute",
             inset: 0,
             backgroundImage: `url("https://framerusercontent.com/images/g0QcWrxr87K0ufOxIUFBakwYA8.png")`,
-            backgroundSize: (noise.scale || 1) * 200,
+            backgroundSize: finalNoiseScale * 200,
             backgroundRepeat: "repeat",
-            opacity: (noise.opacity || 0) / 2,
+            opacity: finalNoiseOpacity,
           }}
         />
       )}

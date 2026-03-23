@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import {
   Award,
@@ -16,6 +17,7 @@ import "./home_footer.css";
 
 const exploreLinks = [
   { label: "Home", target: "home-hero" },
+  { label: "About Us", route: "/about-us" },
   { label: "Categories", target: "home-categories" },
   { label: "How It Works", target: "home-how" },
   { label: "Stay Tuned", target: "home-updates" },
@@ -126,7 +128,7 @@ function FooterHeading({ children, active }) {
   );
 }
 
-function FooterLinkItem({ item, index, onNavigate, active }) {
+function FooterLinkItem({ item, index, onNavigate, onRouteNavigate, active }) {
   const Icon = item.Icon;
 
   return (
@@ -142,7 +144,15 @@ function FooterLinkItem({ item, index, onNavigate, active }) {
       }}
       whileHover={{ x: 2 }}
       whileTap={{ scale: 0.985 }}
-      onClick={() => item.target && onNavigate(item.target)}
+      onClick={() => {
+        if (item.route) {
+          onRouteNavigate(item.route);
+          return;
+        }
+        if (item.target) {
+          onNavigate(item.target);
+        }
+      }}
       title={item.label}
     >
       <span className="homeFooter__linkMain">
@@ -160,6 +170,7 @@ function FooterLinkItem({ item, index, onNavigate, active }) {
 }
 
 export default function HomeFooter({ fullBleed = false }) {
+  const navigate = useNavigate();
   const ref = useRef(null);
   const inView = useInView(ref, { amount: 0.14, once: true });
   const reduceMotion = useReducedMotion();
@@ -254,6 +265,7 @@ export default function HomeFooter({ fullBleed = false }) {
                     item={item}
                     index={index}
                     onNavigate={scrollToTarget}
+                    onRouteNavigate={navigate}
                     active={inView}
                   />
                 ))}
@@ -269,6 +281,7 @@ export default function HomeFooter({ fullBleed = false }) {
                     item={item}
                     index={index}
                     onNavigate={scrollToTarget}
+                    onRouteNavigate={navigate}
                     active={inView}
                   />
                 ))}
@@ -284,6 +297,7 @@ export default function HomeFooter({ fullBleed = false }) {
                     item={item}
                     index={index}
                     onNavigate={scrollToTarget}
+                    onRouteNavigate={navigate}
                     active={inView}
                   />
                 ))}

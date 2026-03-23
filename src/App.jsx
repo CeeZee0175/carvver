@@ -3,6 +3,8 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import SplashScreen from "./components/StartUp/splash_screen";
 import NavBar from "./components/Homepage/navbar";
 import Home from "./components/Homepage/home";
+import HomeAboutUs from "./components/Homepage/home_aboutUs";
+import HomeFooter from "./components/Homepage/home_footer";
 import SignIn from "./components/Auth/sign-in";
 import SignUp from "./components/Auth/sign-up";
 import DashboardCustomer from "./components/Dashboard/dashboard_customer";
@@ -13,6 +15,16 @@ function HomePage() {
     <>
       <NavBar />
       <Home />
+    </>
+  );
+}
+
+function AboutUsPage() {
+  return (
+    <>
+      <NavBar />
+      <HomeAboutUs />
+      <HomeFooter />
     </>
   );
 }
@@ -46,6 +58,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/about-us" element={<AboutUsPage />} />
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/sign-up" element={<SignUp />} />
       <Route path="/dashboard/customer" element={<DashboardCustomer />} />

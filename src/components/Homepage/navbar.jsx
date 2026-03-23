@@ -186,9 +186,17 @@ export default function NavBar() {
                 </button>
 
                 <div className={`navMenu ${openExplore ? "navMenu--open" : ""}`} role="menu">
-                  <a className="navMenu__item" href="#" role="menuitem" onClick={closeAll}>
+                  <button
+                    className="navMenu__item"
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      closeAll();
+                      navigate("/about-us");
+                    }}
+                  >
                     About Us
-                  </a>
+                  </button>
                   <a className="navMenu__item" href="#" role="menuitem" onClick={closeAll}>
                     Community
                   </a>
@@ -284,7 +292,16 @@ export default function NavBar() {
 
         {openExplore && (
           <div className="mobileSub">
-            <a className="mobileSub__item" href="#" onClick={closeAll}>About Us</a>
+            <button
+              className="mobileSub__item"
+              type="button"
+              onClick={() => {
+                closeAll();
+                navigate("/about-us");
+              }}
+            >
+              About Us
+            </button>
             <a className="mobileSub__item" href="#" onClick={closeAll}>Community</a>
             <a className="mobileSub__item" href="#" onClick={closeAll}>Features</a>
             <a className="mobileSub__item" href="#" onClick={closeAll}>Pricing</a>

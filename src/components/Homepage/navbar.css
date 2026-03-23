@@ -284,14 +284,23 @@
 }
 
 .navMenu__item{
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
   display: block;
+  text-align: left;
+
   padding: 11px 10px;
   border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+
   color: rgba(27,16,46,0.88);
   text-decoration: none;
   font-size: 14px;
   font-weight: 650;
-  border: 1px solid transparent;
+  cursor: pointer;
+
   transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
@@ -510,15 +519,22 @@
 .mobileSub{ padding: 8px 4px 10px; }
 
 .mobileSub__item{
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  text-align: left;
+
   display: block;
   padding: 10px 12px;
   margin-top: 6px;
   border-radius: 14px;
   border: 1px solid rgba(42,20,80,0.10);
   background: rgba(255,255,255,0.94);
+
   color: rgba(27,16,46,0.85);
   text-decoration: none;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .mobileActions{
