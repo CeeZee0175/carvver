@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+import React, { useEffect, useId, useMemo, useRef, useState, useCallback } from "react";
 import { animate, useMotionValue, useReducedMotion } from "framer-motion";
 
 function mapRange(value, fromLow, fromHigh, toLow, toHigh) {
@@ -23,9 +23,20 @@ function addMediaListener(mq, handler) {
   return () => mq.removeListener(handler);
 }
 
-function getLiteModePreference(reduceMotion) {
-  if (reduceMotion) return true;
-  if (typeof window === "undefined") return false;
+function checkGPUCapability() {
+  if (typeof window === "undefined") return true;
+  try {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    return !!gl;
+  } catch (e) {
+    return false;
+  }
+}
+
+function getPerformanceTier(reduceMotion) {
+  if (reduceMotion) return "lite";
+  if (typeof window === "undefined") return "high";
 
   const isSmallScreen = window.matchMedia("(max-width: 820px)").matches;
   const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
@@ -41,7 +52,12 @@ function getLiteModePreference(reduceMotion) {
     typeof navigator.deviceMemory === "number" &&
     navigator.deviceMemory <= 4;
 
-  return isSmallScreen || isCoarsePointer || noHover || lowThreads || lowMemory;
+  const noGPU = !checkGPUCapability();
+
+  if (noGPU || lowThreads || lowMemory) return "lite";
+  if (isSmallScreen || isCoarsePointer || noHover) return "medium";
+
+  return "high";
 }
 
 export function Component({
@@ -51,10 +67,11 @@ export function Component({
   noise,
   style,
   className,
-  performanceMode = "auto", // "auto" | "full" | "lite"
+  performanceMode = "auto",
 }) {
   const id = useInstanceId();
   const shouldReduceMotion = useReducedMotion();
+  const containerRef = useRef(null);
 
   const animScale = animation?.scale ?? 0;
   const animSpeed = animation?.speed ?? 0;
@@ -62,14 +79,13 @@ export function Component({
 
   const feColorMatrixRef = useRef(null);
   const feTurbulenceRef = useRef(null);
-
   const hueRotateMotionValue = useMotionValue(180);
   const hueRotateAnimation = useRef(null);
 
-  const [isLiteMode, setIsLiteMode] = useState(() => {
-    if (performanceMode === "lite") return true;
-    if (performanceMode === "full") return false;
-    return getLiteModePreference(shouldReduceMotion);
+  const [performanceTier, setPerformanceTier] = useState(() => {
+    if (performanceMode === "lite") return "lite";
+    if (performanceMode === "high") return "high";
+    return getPerformanceTier(shouldReduceMotion);
   });
 
   const [isPageVisible, setIsPageVisible] = useState(() => {
@@ -77,40 +93,60 @@ export function Component({
     return !document.hidden;
   });
 
+  const [isInViewport, setIsInViewport] = useState(true);
+  const lastFrameTimeRef = useRef(0);
+  const frameSkipRef = useRef(0);
+
   useEffect(() => {
-    if (performanceMode === "lite") {
-      setIsLiteMode(true);
-      return;
-    }
+    if (performanceMode !== "auto") return;
 
-    if (performanceMode === "full") {
-      setIsLiteMode(false);
-      return;
-    }
-
-    const updateMode = () => {
-      setIsLiteMode(getLiteModePreference(shouldReduceMotion));
+    let resizeTimeout;
+    const updateTier = () => {
+      setPerformanceTier(getPerformanceTier(shouldReduceMotion));
     };
 
-    updateMode();
+    const debouncedResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(updateTier, 250);
+    };
 
     const mqSmall = typeof window !== "undefined" ? window.matchMedia("(max-width: 820px)") : null;
     const mqPointer = typeof window !== "undefined" ? window.matchMedia("(pointer: coarse)") : null;
     const mqHover = typeof window !== "undefined" ? window.matchMedia("(hover: none)") : null;
 
-    const cleanupSmall = addMediaListener(mqSmall, updateMode);
-    const cleanupPointer = addMediaListener(mqPointer, updateMode);
-    const cleanupHover = addMediaListener(mqHover, updateMode);
+    const cleanupSmall = addMediaListener(mqSmall, updateTier);
+    const cleanupPointer = addMediaListener(mqPointer, updateTier);
+    const cleanupHover = addMediaListener(mqHover, updateTier);
 
-    window.addEventListener("resize", updateMode);
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", debouncedResize);
+    }
 
     return () => {
       cleanupSmall();
       cleanupPointer();
       cleanupHover();
-      window.removeEventListener("resize", updateMode);
+      clearTimeout(resizeTimeout);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("resize", debouncedResize);
+      }
     };
   }, [performanceMode, shouldReduceMotion]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInViewport(entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(containerRef.current);
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const handleVisibility = () => {
@@ -131,16 +167,34 @@ export function Component({
   const animationEnabled =
     baseAnimationEnabled &&
     !shouldReduceMotion &&
-    !isLiteMode &&
-    isPageVisible;
+    performanceTier !== "lite" &&
+    isPageVisible &&
+    isInViewport;
+
+  const getFrameSkipRate = useCallback(() => {
+    switch (performanceTier) {
+      case "lite":
+        return 2;
+      case "medium":
+        return 1;
+      case "high":
+        return 0;
+      default:
+        return 0;
+    }
+  }, [performanceTier]);
 
   const displacementScale = useMemo(() => {
-    return animationEnabled ? mapRange(animScale, 1, 100, 25, 130) : 0;
-  }, [animationEnabled, animScale]);
+    if (!animationEnabled) return 0;
+    const baseScale = mapRange(animScale, 1, 100, 25, 130);
+    return performanceTier === "medium" ? baseScale * 0.75 : baseScale;
+  }, [animationEnabled, animScale, performanceTier]);
 
   const animationDuration = useMemo(() => {
-    return animationEnabled ? mapRange(animSpeed, 1, 100, 1200, 80) : 1;
-  }, [animationEnabled, animSpeed]);
+    if (!animationEnabled) return 1;
+    const baseDuration = mapRange(animSpeed, 1, 100, 1200, 80);
+    return performanceTier === "medium" ? baseDuration * 1.2 : baseDuration;
+  }, [animationEnabled, animSpeed, performanceTier]);
 
   useEffect(() => {
     if (!animationEnabled || !feColorMatrixRef.current) return;
@@ -170,6 +224,7 @@ export function Component({
 
     let raf = 0;
     const start = performance.now();
+    const frameSkipRate = getFrameSkipRate();
 
     const speed = mapRange(animSpeed, 1, 100, 0.35, 1.3);
     const ampX = mapRange(animScale, 1, 100, 0.00015, 0.0007);
@@ -179,6 +234,14 @@ export function Component({
     const baseY = mapRange(animScale, 0, 100, 0.0042, 0.0024);
 
     const tick = (t) => {
+      frameSkipRef.current++;
+
+      if (frameSkipRef.current <= frameSkipRate) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+
+      frameSkipRef.current = 0;
       const s = ((t - start) / 1000) * speed;
 
       const x = baseX + Math.sin(s * 0.9) * ampX;
@@ -194,22 +257,78 @@ export function Component({
     raf = requestAnimationFrame(tick);
 
     return () => cancelAnimationFrame(raf);
-  }, [animationEnabled, animScale, animSpeed]);
+  }, [animationEnabled, animScale, animSpeed, getFrameSkipRate]);
 
   const finalNoiseOpacity = useMemo(() => {
     const raw = (noise?.opacity || 0) / 2;
-    if (isLiteMode) return Math.min(raw, 0.04);
+    if (performanceTier === "lite") return Math.min(raw, 0.04);
+    if (performanceTier === "medium") return Math.min(raw, 0.06);
     return raw;
-  }, [noise?.opacity, isLiteMode]);
+  }, [noise?.opacity, performanceTier]);
 
   const finalNoiseScale = useMemo(() => {
-    if (isLiteMode) return Math.min(noise?.scale || 1, 0.8);
+    if (performanceTier === "lite") return Math.min(noise?.scale || 1, 0.8);
+    if (performanceTier === "medium") return Math.min(noise?.scale || 1, 0.9);
     return noise?.scale || 1;
-  }, [noise?.scale, isLiteMode]);
+  }, [noise?.scale, performanceTier]);
+
+  const svgFilterDef = useMemo(() => {
+    if (!animationEnabled) return null;
+
+    const octaves = performanceTier === "medium" ? 1 : 2;
+
+    return (
+      <svg
+        aria-hidden="true"
+        focusable="false"
+        width="0"
+        height="0"
+        style={{ position: "absolute" }}
+      >
+        <defs>
+          <filter id={id}>
+            <feTurbulence
+              ref={feTurbulenceRef}
+              result="undulation"
+              numOctaves={octaves}
+              baseFrequency="0.001 0.004"
+              seed="0"
+              type="turbulence"
+            />
+            <feColorMatrix
+              ref={feColorMatrixRef}
+              in="undulation"
+              result="hue"
+              type="hueRotate"
+              values="180"
+            />
+            <feColorMatrix
+              in="hue"
+              result="circulation"
+              type="matrix"
+              values="4 0 0 0 1  4 0 0 0 1  4 0 0 0 1  1 0 0 0 0"
+            />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="circulation"
+              scale={displacementScale}
+              result="dist"
+            />
+            <feDisplacementMap
+              in="dist"
+              in2="undulation"
+              scale={displacementScale}
+              result="output"
+            />
+          </filter>
+        </defs>
+      </svg>
+    );
+  }, [animationEnabled, id, performanceTier, displacementScale]);
 
   const innerFilter = animationEnabled
     ? `url(#${id}) blur(6px)`
-    : isLiteMode
+    : performanceTier === "lite"
     ? "blur(3px)"
     : "none";
 
@@ -217,6 +336,7 @@ export function Component({
 
   return (
     <div
+      ref={containerRef}
       className={className}
       style={{
         overflow: "hidden",
@@ -224,6 +344,7 @@ export function Component({
         width: "100%",
         height: "100%",
         pointerEvents: "none",
+        willChange: animationEnabled ? "transform" : "auto",
         ...style,
       }}
     >
@@ -232,56 +353,14 @@ export function Component({
           position: "absolute",
           inset: innerInset,
           filter: innerFilter,
-          opacity: isLiteMode ? 0.92 : 1,
+          opacity: performanceTier === "lite" ? 0.92 : 1,
+          willChange: animationEnabled ? "filter" : "auto",
+          transform: "translateZ(0)",
+          backfaceVisibility: "hidden",
+          contain: animationEnabled ? "layout style paint" : "auto",
         }}
       >
-        {animationEnabled && (
-          <svg
-            aria-hidden="true"
-            focusable="false"
-            width="0"
-            height="0"
-            style={{ position: "absolute" }}
-          >
-            <defs>
-              <filter id={id}>
-                <feTurbulence
-                  ref={feTurbulenceRef}
-                  result="undulation"
-                  numOctaves="2"
-                  baseFrequency="0.001 0.004"
-                  seed="0"
-                  type="turbulence"
-                />
-                <feColorMatrix
-                  ref={feColorMatrixRef}
-                  in="undulation"
-                  result="hue"
-                  type="hueRotate"
-                  values="180"
-                />
-                <feColorMatrix
-                  in="hue"
-                  result="circulation"
-                  type="matrix"
-                  values="4 0 0 0 1  4 0 0 0 1  4 0 0 0 1  1 0 0 0 0"
-                />
-                <feDisplacementMap
-                  in="SourceGraphic"
-                  in2="circulation"
-                  scale={displacementScale}
-                  result="dist"
-                />
-                <feDisplacementMap
-                  in="dist"
-                  in2="undulation"
-                  scale={displacementScale}
-                  result="output"
-                />
-              </filter>
-            </defs>
-          </svg>
-        )}
+        {svgFilterDef}
 
         <div
           style={{
@@ -309,9 +388,12 @@ export function Component({
             backgroundSize: finalNoiseScale * 200,
             backgroundRepeat: "repeat",
             opacity: finalNoiseOpacity,
+            willChange: "opacity",
           }}
         />
       )}
     </div>
   );
 }
+
+export default React.memo(Component);
