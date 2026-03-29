@@ -20,13 +20,25 @@ export async function signUp({ firstName, lastName, email, password, role, count
   return data;
 }
 
-export async function signIn({ email, password }) {
+export async function signIn({ email, password, remember }) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) throw error;
+
+  // If remember me is unchecked, move the session to sessionStorage
+  // so it clears when the browser is closed
+  if (!remember && data.session) {
+    const key = `sb-${new URL(import.meta.env.VITE_SUPABASE_URL).hostname.split(".")[0]}-auth-token`;
+    const session = localStorage.getItem(key);
+    if (session) {
+      sessionStorage.setItem(key, session);
+      localStorage.removeItem(key);
+    }
+  }
+
   return data;
 }
 
@@ -51,5 +63,5 @@ export async function getProfile() {
     .single();
 
   if (error) throw error;
-  return data;
+  return { ...data, email: session.user.email };
 }

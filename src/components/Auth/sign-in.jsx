@@ -124,6 +124,7 @@ export default function SignIn() {
     const formData = new FormData(e.currentTarget);
     const email = String(formData.get("email") || "").trim();
     const password = String(formData.get("password") || "").trim();
+    const remember = formData.get("remember") === "on";
 
     if (!email || !password) {
       toast.error("Please fill in all fields.");
@@ -132,9 +133,8 @@ export default function SignIn() {
 
     try {
       setIsLoading(true);
-      await signIn({ email, password });
+      await signIn({ email, password, remember });
 
-      // Fetch profile to determine role and redirect accordingly
       const profile = await getProfile();
 
       toast.success(`Welcome back, ${profile.first_name}!`);
@@ -240,7 +240,13 @@ export default function SignIn() {
 
             <div className="signInForm__row">
               <label className="signCheckbox">
-                <input type="checkbox" className="signCheckbox__input" />
+                {/* name="remember" lets formData read it, defaultChecked ticks it by default */}
+                <input
+                  type="checkbox"
+                  className="signCheckbox__input"
+                  name="remember"
+                  defaultChecked
+                />
                 <span className="signCheckbox__box" aria-hidden="true" />
                 <span className="signCheckbox__text">Remember me</span>
               </label>

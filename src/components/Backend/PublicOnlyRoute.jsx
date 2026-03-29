@@ -23,15 +23,12 @@ export default function PublicOnlyRoute({ children }) {
     });
   }, []);
 
-  // Still checking
   if (session === undefined) return null;
 
-  // Logged in — redirect to their dashboard
   if (session) {
     if (role === "freelancer") return <Navigate to="/dashboard/freelancer" replace />;
     return <Navigate to="/dashboard/customer" replace />;
   }
 
-  // Not logged in — show the page normally
   return children;
 }
