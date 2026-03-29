@@ -55,6 +55,7 @@
   overflow: visible;
 }
 
+/* ── Panels ── */
 .browseHeroPanel,
 .browseControlPanel{
   border-radius: 28px;
@@ -68,7 +69,7 @@
 }
 
 .browseHeroPanel{
-  padding: 24px;
+  padding: 28px 24px;
   text-align: center;
 }
 
@@ -103,7 +104,7 @@
 }
 
 .browseHeroPanel__sub{
-  margin: 10px auto 0;
+  margin: 12px auto 0;
   max-width: 62ch;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: 15px;
@@ -111,6 +112,7 @@
   color: rgba(27,16,46,0.72);
 }
 
+/* ── Control Panel ── */
 .browseControlPanel{
   position: relative;
   z-index: 20;
@@ -133,6 +135,7 @@
   border-top: 1px solid rgba(42,20,80,0.08);
 }
 
+/* ── Filter triggers ── */
 .browseFilterGroup{
   position: relative;
   overflow: visible;
@@ -191,6 +194,34 @@
   transform: rotate(180deg);
 }
 
+/* Clear filters button */
+.browseFilterClear{
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(220,38,38,0.18);
+  background: rgba(220,38,38,0.05);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 850;
+  color: rgba(185,28,28,0.88);
+
+  transition:
+    border-color 200ms ease,
+    background 200ms ease;
+}
+
+.browseFilterClear:hover{
+  border-color: rgba(220,38,38,0.28);
+  background: rgba(220,38,38,0.09);
+}
+
+/* ── Dropdown menus ── */
 .browseFilterMenu{
   display: none;
   position: absolute;
@@ -204,12 +235,11 @@
   background: rgba(255,255,255,0.96);
   backdrop-filter: blur(14px);
   box-shadow: 0 28px 90px rgba(12,7,18,0.16);
-
   overflow: hidden;
 }
 
 .browseFilterMenu--small{
-  width: min(320px, 92vw);
+  width: min(300px, 92vw);
 }
 
 .browseFilterMenu--open{
@@ -331,6 +361,7 @@
   padding: 0 18px;
 }
 
+/* Price / Location menus */
 .browsePriceMenu,
 .browseLocationMenu{
   padding: 18px;
@@ -359,7 +390,7 @@
 
 .browseLocationMenu{
   display: grid;
-  gap: 8px;
+  gap: 4px;
 }
 
 .browseLocationMenu__item{
@@ -367,31 +398,32 @@
   border: 0;
   background: transparent;
   text-align: left;
-  padding: 11px 10px;
-  border-radius: 12px;
+  padding: 10px 10px;
+  border-radius: 10px;
   cursor: pointer;
 
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: 13px;
   font-weight: 750;
   color: rgba(27,16,46,0.86);
-  transition: background 160ms ease, transform 160ms ease;
+  transition: background 160ms ease;
 }
 
 .browseLocationMenu__item:hover{
   background: rgba(124,58,237,0.06);
-  transform: translateX(1px);
 }
 
 .browseLocationMenu__item--active{
   background: rgba(124,58,237,0.08);
   color: rgba(27,16,46,0.96);
+  font-weight: 850;
 }
 
+/* Results bar */
 .browseResultsBar__title{
   margin: 0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1.1;
   font-weight: 850;
   letter-spacing: -0.03em;
@@ -399,86 +431,112 @@
 }
 
 .browseResultsBar__count{
-  margin: 8px 0 0;
+  margin: 6px 0 0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   color: rgba(27,16,46,0.62);
 }
 
+/* ── Service Cards Grid ── */
 .browseServicesGrid{
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
 }
 
 .browseServiceCard{
-  border-radius: 24px;
+  border-radius: 26px;
   border: 1px solid rgba(42,20,80,0.12);
-  background: rgba(255,255,255,0.78);
-  box-shadow: 0 18px 54px rgba(12,7,18,0.05);
+  background: rgba(255,255,255,0.82);
+  box-shadow: 0 20px 60px rgba(12,7,18,0.06);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 280ms ease;
 }
 
+.browseServiceCard:hover{
+  box-shadow: 0 28px 80px rgba(12,7,18,0.11);
+}
+
+/* Cover — taller than before for more visual presence */
 .browseServiceCard__cover{
-  height: 120px;
-  padding: 14px;
+  height: 160px;
+  padding: 18px;
   background:
-    radial-gradient(120px 90px at 15% 10%, var(--card-accent-a), transparent 72%),
-    radial-gradient(120px 90px at 90% 100%, var(--card-accent-b), transparent 74%),
+    radial-gradient(160px 110px at 15% 10%, var(--card-accent-a), transparent 72%),
+    radial-gradient(160px 110px at 90% 100%, var(--card-accent-b), transparent 74%),
     linear-gradient(180deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44));
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.browseServiceCard__cover--skeleton{
+  height: 160px;
+  background: linear-gradient(
+    90deg,
+    rgba(42,20,80,0.06) 25%,
+    rgba(42,20,80,0.10) 50%,
+    rgba(42,20,80,0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: browseSkeletonShimmer 1.4s ease infinite;
 }
 
 .browseServiceCard__tag{
-  height: 28px;
-  padding: 0 10px;
+  height: 30px;
+  padding: 0 12px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.78);
+  background: rgba(255,255,255,0.82);
   border: 1px solid rgba(42,20,80,0.10);
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 850;
   color: rgba(27,16,46,0.78);
 }
 
 .browseServiceCard__coverIconWrap{
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
   display: grid;
   place-items: center;
-  background: rgba(255,255,255,0.74);
+  background: rgba(255,255,255,0.78);
   border: 1px solid rgba(42,20,80,0.10);
 }
 
 .browseServiceCard__coverIcon{
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   color: rgba(42,20,80,0.92);
 }
 
+/* Body */
 .browseServiceCard__body{
-  padding: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .browseServiceCard__top{
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
 }
 
 .browseServiceCard__title{
   margin: 0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 18px;
+  font-size: 19px;
   line-height: 1.2;
   font-weight: 850;
   color: rgba(27,16,46,0.96);
@@ -489,36 +547,35 @@
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: 13px;
   font-weight: 700;
-  color: rgba(27,16,46,0.58);
+  color: rgba(27,16,46,0.56);
 }
 
 .browseServiceCard__save{
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 13px;
   border: 1px solid rgba(42,20,80,0.10);
-  background: rgba(255,255,255,0.78);
+  background: rgba(255,255,255,0.82);
   display: grid;
   place-items: center;
   cursor: pointer;
-  color: rgba(27,16,46,0.62);
+  color: rgba(27,16,46,0.56);
   transition:
     border-color 180ms ease,
     background 180ms ease,
-    color 180ms ease,
-    box-shadow 220ms ease;
+    color 180ms ease;
 }
 
 .browseServiceCard__save:hover{
   border-color: rgba(124,58,237,0.22);
-  background: rgba(124,58,237,0.05);
+  background: rgba(124,58,237,0.06);
 }
 
 .browseServiceCard__save--active{
-  border-color: rgba(124,58,237,0.24);
+  border-color: rgba(124,58,237,0.26);
   background: rgba(124,58,237,0.10);
   color: rgba(42,20,80,0.96);
-  box-shadow: 0 12px 30px rgba(124,58,237,0.10);
 }
 
 .browseServiceCard__saveInner{
@@ -527,8 +584,8 @@
 }
 
 .browseServiceCard__saveIcon{
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
 }
 
 .browseServiceCard__save--active .browseServiceCard__saveIcon{
@@ -538,9 +595,15 @@
 .browseServiceCard__note{
   margin: 14px 0 0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: rgba(27,16,46,0.68);
+  font-size: 14px;
+  line-height: 1.65;
+  color: rgba(27,16,46,0.66);
+
+  /* Cap description to 3 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .browseServiceCard__meta{
@@ -551,17 +614,17 @@
 }
 
 .browseMetaPill{
-  height: 28px;
-  padding: 0 10px;
+  height: 30px;
+  padding: 0 11px;
   border-radius: 999px;
   border: 1px solid rgba(42,20,80,0.10);
-  background: rgba(255,255,255,0.82);
+  background: rgba(255,255,255,0.84);
   display: inline-flex;
   align-items: center;
   gap: 6px;
 
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 850;
   color: rgba(27,16,46,0.72);
 }
@@ -572,7 +635,8 @@
 }
 
 .browseServiceCard__bottom{
-  margin-top: 16px;
+  margin-top: auto;
+  padding-top: 18px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -581,41 +645,47 @@
 
 .browseServiceCard__priceWrap{
   display: grid;
-  gap: 4px;
+  gap: 3px;
 }
 
 .browseServiceCard__priceLabel{
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 800;
-  color: rgba(27,16,46,0.54);
+  color: rgba(27,16,46,0.50);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
 }
 
 .browseServiceCard__price{
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 850;
   letter-spacing: -0.03em;
   color: rgba(27,16,46,0.96);
 }
 
 .browseServiceCard__btn{
-  height: 38px;
-  padding: 0 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(42,20,80,0.12);
-  background: rgba(255,255,255,0.82);
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 13px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background: linear-gradient(180deg, rgba(42,20,80,0.96), rgba(42,20,80,0.82));
   display: inline-flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
 
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 850;
-  color: rgba(27,16,46,0.88);
+  color: #fff;
+
+  transition: box-shadow 220ms ease;
+}
+
+.browseServiceCard__btn:hover{
+  box-shadow: 0 14px 36px rgba(42,20,80,0.18);
 }
 
 .browseServiceCard__btnArrow{
@@ -623,32 +693,124 @@
   height: 14px;
 }
 
+/* ── Empty State ── */
 .browseEmptyState{
   grid-column: 1 / -1;
-  padding: 40px 24px;
-  border-radius: 24px;
+  padding: clamp(40px, 6vw, 72px) 24px;
+  border-radius: 26px;
   border: 1px solid rgba(42,20,80,0.12);
-  background: rgba(255,255,255,0.78);
+  background: rgba(255,255,255,0.80);
   text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+
+.browseEmptyState__iconWrap{
+  width: 56px;
+  height: 56px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  background: rgba(124,58,237,0.07);
+  border: 1px solid rgba(42,20,80,0.10);
+}
+
+.browseEmptyState__icon{
+  width: 24px;
+  height: 24px;
+  color: rgba(42,20,80,0.60);
 }
 
 .browseEmptyState__title{
-  margin: 0;
+  margin: 4px 0 0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 850;
-  color: rgba(27,16,46,0.96);
+  color: rgba(27,16,46,0.92);
 }
 
 .browseEmptyState__desc{
-  margin: 10px auto 0;
-  max-width: 42ch;
+  margin: 0;
+  max-width: 40ch;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: 14px;
-  line-height: 1.6;
-  color: rgba(27,16,46,0.66);
+  line-height: 1.65;
+  color: rgba(27,16,46,0.60);
 }
 
+.browseEmptyState__btn{
+  margin-top: 4px;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background: rgba(255,255,255,0.84);
+  cursor: pointer;
+
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 850;
+  color: rgba(27,16,46,0.88);
+}
+
+/* ── Skeleton Loaders ── */
+.browseSkeleton{
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(42,20,80,0.06) 25%,
+    rgba(42,20,80,0.10) 50%,
+    rgba(42,20,80,0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: browseSkeletonShimmer 1.4s ease infinite;
+}
+
+@keyframes browseSkeletonShimmer{
+  0%{ background-position: 200% 0; }
+  100%{ background-position: -200% 0; }
+}
+
+.browseSkeleton--title{
+  height: 20px;
+  width: 72%;
+  margin-bottom: 10px;
+}
+
+.browseSkeleton--subtitle{
+  height: 14px;
+  width: 48%;
+}
+
+.browseSkeleton--note{
+  height: 14px;
+  width: 90%;
+  margin-top: 16px;
+}
+
+.browseSkeleton--pill{
+  height: 30px;
+  width: 80px;
+  border-radius: 999px;
+}
+
+.browseSkeleton--price{
+  height: 28px;
+  width: 80px;
+}
+
+.browseSkeleton--btn{
+  height: 40px;
+  width: 120px;
+  border-radius: 13px;
+}
+
+.browseServiceCard--skeleton{
+  pointer-events: none;
+}
+
+/* ── Pagination ── */
 .browsePaginationWrap{
   display: flex;
   justify-content: center;
@@ -657,27 +819,28 @@
 .browsePagination{
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 10px 14px;
   border-radius: 999px;
   border: 1px solid rgba(42,20,80,0.12);
-  background: rgba(255,255,255,0.76);
+  background: rgba(255,255,255,0.78);
   backdrop-filter: blur(12px);
   box-shadow: 0 16px 40px rgba(12,7,18,0.05);
 }
 
 .browsePagination__btn{
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
   border: 1px solid rgba(42,20,80,0.10);
-  background: rgba(255,255,255,0.82);
+  background: rgba(255,255,255,0.84);
   cursor: pointer;
 
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: 13px;
   font-weight: 850;
   color: rgba(27,16,46,0.82);
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 
 .browsePagination__btn--active{
@@ -686,6 +849,7 @@
   border-color: rgba(42,20,80,0.92);
 }
 
+/* ── Footer ── */
 .browseCategories__footerSection{
   position: relative;
   z-index: 2;
@@ -693,7 +857,8 @@
   margin-top: 12px;
 }
 
-@media (max-width: 1180px){
+/* ── Responsive ── */
+@media (max-width: 1100px){
   .browseServicesGrid{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -705,7 +870,7 @@
   }
 
   .browseFilterMenu{
-    width: min(620px, 92vw);
+    width: min(92vw, 92vw);
   }
 
   .browseFilterMenu__grid{
@@ -717,7 +882,7 @@
   }
 
   .browseFilterMenu--small{
-    width: min(320px, 92vw);
+    width: min(280px, 92vw);
   }
 }
 
@@ -729,15 +894,15 @@
   .browseHeroPanel,
   .browseControlPanel{
     border-radius: 22px;
-  }
-
-  .browseHeroPanel,
-  .browseControlPanel{
     padding: 18px;
   }
 
   .browseServicesGrid{
     grid-template-columns: 1fr;
+  }
+
+  .browseServiceCard__cover{
+    height: 140px;
   }
 }
 
@@ -750,6 +915,7 @@
   .browseFilterToggle{
     font-size: 12px;
     padding: 0 12px;
+    height: 40px;
   }
 
   .browseFilterMenu,
@@ -761,5 +927,28 @@
   .browseServiceCard__bottom{
     flex-direction: column;
     align-items: flex-start;
+    gap: 10px;
+  }
+
+  .browseServiceCard__btn{
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .browseSkeleton,
+  .browseServiceCard__cover--skeleton{
+    animation: none !important;
+    background: rgba(42,20,80,0.07);
+  }
+
+  .browseFilterTrigger,
+  .browseFilterToggle,
+  .browseFilterClear,
+  .browseFilterMenu,
+  .browseFilterTrigger__chevron,
+  .browseServiceCard__save{
+    transition: none !important;
   }
 }
