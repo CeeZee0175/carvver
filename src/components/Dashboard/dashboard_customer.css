@@ -804,3 +804,121 @@
   width: 100%;
   margin-top: 8px;
 }
+
+/* ── Empty States ── */
+.dashEmptyState{
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  padding: clamp(28px, 4vw, 48px) 20px;
+  gap: 10px;
+}
+
+.dashEmptyState__iconWrap{
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: rgba(124,58,237,0.07);
+  border: 1px solid rgba(42,20,80,0.10);
+}
+
+.dashEmptyState__icon{
+  width: 22px;
+  height: 22px;
+  color: rgba(42,20,80,0.60);
+}
+
+.dashEmptyState__title{
+  margin: 4px 0 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 850;
+  color: rgba(27,16,46,0.80);
+}
+
+.dashEmptyState__desc{
+  margin: 0;
+  max-width: 36ch;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: rgba(27,16,46,0.54);
+}
+
+/* ── Skeleton Loaders ── */
+.dashSkeleton{
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(42,20,80,0.06) 25%,
+    rgba(42,20,80,0.10) 50%,
+    rgba(42,20,80,0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: dashSkeletonShimmer 1.4s ease infinite;
+}
+
+@keyframes dashSkeletonShimmer{
+  0%{ background-position: 200% 0; }
+  100%{ background-position: -200% 0; }
+}
+
+.dashSkeleton--value{
+  height: 34px;
+  width: 52px;
+  border-radius: 8px;
+}
+
+.dashSkeleton--label{
+  height: 14px;
+  width: 80%;
+  margin-top: 10px;
+  border-radius: 6px;
+}
+
+.dashSkeleton--hint{
+  height: 12px;
+  width: 60%;
+  margin-top: 8px;
+  border-radius: 6px;
+}
+
+.dashSkeleton--cover{
+  height: 120px;
+  width: 100%;
+  border-radius: 0;
+}
+
+.dashSkeleton--title{
+  height: 18px;
+  width: 75%;
+  margin-bottom: 8px;
+  border-radius: 6px;
+}
+
+.dashSkeleton--subtitle{
+  height: 14px;
+  width: 50%;
+  border-radius: 6px;
+}
+
+.dashSkeleton--avatar{
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+}
+
+.dashStatCard--skeleton,
+.dashListingCard--skeleton,
+.dashCreatorCard--skeleton{
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .dashSkeleton{
+    animation: none !important;
+    background: rgba(42,20,80,0.07);
+  }
+}
