@@ -72,11 +72,13 @@ export default function SplashScreen({ onFinish, duration = 9000 }) {
       onPointerDown={handleSkip}
     >
       <div className="splash__shadow">
+        {/* "auto" lets the component pick medium on mobile instead of lite */}
         <EtheralShadow
           sizing="fill"
           color="rgba(167, 126, 255, 0.85)"
           animation={{ scale: 55, speed: 40 }}
           noise={{ opacity: 0.18, scale: 1 }}
+          performanceMode="auto"
         />
       </div>
 

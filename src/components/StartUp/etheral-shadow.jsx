@@ -45,16 +45,19 @@ function getPerformanceTier(reduceMotion) {
   const lowThreads =
     typeof navigator !== "undefined" &&
     typeof navigator.hardwareConcurrency === "number" &&
-    navigator.hardwareConcurrency <= 4;
+    navigator.hardwareConcurrency <= 2; // tightened: only truly low-end
 
   const lowMemory =
     typeof navigator !== "undefined" &&
     typeof navigator.deviceMemory === "number" &&
-    navigator.deviceMemory <= 4;
+    navigator.deviceMemory <= 2; // tightened: only truly low memory
 
   const noGPU = !checkGPUCapability();
 
+  // Only drop to lite if the device truly can't handle anything
   if (noGPU || lowThreads || lowMemory) return "lite";
+
+  // Mobile/touch devices get a lighter animation instead of nothing
   if (isSmallScreen || isCoarsePointer || noHover) return "medium";
 
   return "high";
@@ -84,7 +87,7 @@ export function Component({
 
   const [performanceTier, setPerformanceTier] = useState(() => {
     if (performanceMode === "lite") return "lite";
-    if (performanceMode === "high") return "high";
+    if (performanceMode === "high" || performanceMode === "full") return "high"; // "full" now correctly maps to "high"
     return getPerformanceTier(shouldReduceMotion);
   });
 
@@ -94,10 +97,10 @@ export function Component({
   });
 
   const [isInViewport, setIsInViewport] = useState(true);
-  const lastFrameTimeRef = useRef(0);
   const frameSkipRef = useRef(0);
 
   useEffect(() => {
+    // Re-run tier detection for "auto" mode only
     if (performanceMode !== "auto") return;
 
     let resizeTimeout;
@@ -174,9 +177,9 @@ export function Component({
   const getFrameSkipRate = useCallback(() => {
     switch (performanceTier) {
       case "lite":
-        return 2;
+        return 3;
       case "medium":
-        return 1;
+        return 2; // skip more frames on mobile: renders every 3rd frame
       case "high":
         return 0;
       default:
@@ -187,13 +190,15 @@ export function Component({
   const displacementScale = useMemo(() => {
     if (!animationEnabled) return 0;
     const baseScale = mapRange(animScale, 1, 100, 25, 130);
-    return performanceTier === "medium" ? baseScale * 0.75 : baseScale;
+    if (performanceTier === "medium") return baseScale * 0.55; // reduced from 0.75 — lighter warp on mobile
+    return baseScale;
   }, [animationEnabled, animScale, performanceTier]);
 
   const animationDuration = useMemo(() => {
     if (!animationEnabled) return 1;
     const baseDuration = mapRange(animSpeed, 1, 100, 1200, 80);
-    return performanceTier === "medium" ? baseDuration * 1.2 : baseDuration;
+    if (performanceTier === "medium") return baseDuration * 1.6; // slower animation on mobile = fewer DOM updates
+    return baseDuration;
   }, [animationEnabled, animSpeed, performanceTier]);
 
   useEffect(() => {
@@ -203,7 +208,8 @@ export function Component({
 
     hueRotateMotionValue.set(0);
     hueRotateAnimation.current = animate(hueRotateMotionValue, 360, {
-      duration: animationDuration / 25,
+      // Medium tier: slower hue rotation = fewer repaints
+      duration: performanceTier === "medium" ? animationDuration / 14 : animationDuration / 25,
       repeat: Infinity,
       repeatType: "loop",
       ease: "linear",
@@ -217,7 +223,7 @@ export function Component({
     return () => {
       if (hueRotateAnimation.current) hueRotateAnimation.current.stop();
     };
-  }, [animationEnabled, animationDuration, hueRotateMotionValue]);
+  }, [animationEnabled, animationDuration, hueRotateMotionValue, performanceTier]);
 
   useEffect(() => {
     if (!animationEnabled || !feTurbulenceRef.current) return;
@@ -227,8 +233,14 @@ export function Component({
     const frameSkipRate = getFrameSkipRate();
 
     const speed = mapRange(animSpeed, 1, 100, 0.35, 1.3);
-    const ampX = mapRange(animScale, 1, 100, 0.00015, 0.0007);
-    const ampY = mapRange(animScale, 1, 100, 0.00035, 0.0011);
+
+    // Medium tier: smaller amplitude = less intense warping = cheaper to compute
+    const ampX = performanceTier === "medium"
+      ? mapRange(animScale, 1, 100, 0.00008, 0.0003)
+      : mapRange(animScale, 1, 100, 0.00015, 0.0007);
+    const ampY = performanceTier === "medium"
+      ? mapRange(animScale, 1, 100, 0.00018, 0.0006)
+      : mapRange(animScale, 1, 100, 0.00035, 0.0011);
 
     const baseX = mapRange(animScale, 0, 100, 0.0012, 0.0006);
     const baseY = mapRange(animScale, 0, 100, 0.0042, 0.0024);
@@ -257,24 +269,25 @@ export function Component({
     raf = requestAnimationFrame(tick);
 
     return () => cancelAnimationFrame(raf);
-  }, [animationEnabled, animScale, animSpeed, getFrameSkipRate]);
+  }, [animationEnabled, animScale, animSpeed, getFrameSkipRate, performanceTier]);
 
   const finalNoiseOpacity = useMemo(() => {
     const raw = (noise?.opacity || 0) / 2;
     if (performanceTier === "lite") return Math.min(raw, 0.04);
-    if (performanceTier === "medium") return Math.min(raw, 0.06);
+    if (performanceTier === "medium") return Math.min(raw, 0.05); // slightly reduced
     return raw;
   }, [noise?.opacity, performanceTier]);
 
   const finalNoiseScale = useMemo(() => {
     if (performanceTier === "lite") return Math.min(noise?.scale || 1, 0.8);
-    if (performanceTier === "medium") return Math.min(noise?.scale || 1, 0.9);
+    if (performanceTier === "medium") return Math.min(noise?.scale || 1, 0.85); // slightly reduced
     return noise?.scale || 1;
   }, [noise?.scale, performanceTier]);
 
   const svgFilterDef = useMemo(() => {
     if (!animationEnabled) return null;
 
+    // Medium tier: 1 octave (half the noise complexity of high's 2)
     const octaves = performanceTier === "medium" ? 1 : 2;
 
     return (
@@ -314,20 +327,25 @@ export function Component({
               scale={displacementScale}
               result="dist"
             />
-            <feDisplacementMap
-              in="dist"
-              in2="undulation"
-              scale={displacementScale}
-              result="output"
-            />
+            {/* Medium tier: skip the second displacement pass to halve filter cost */}
+            {performanceTier !== "medium" && (
+              <feDisplacementMap
+                in="dist"
+                in2="undulation"
+                scale={displacementScale}
+                result="output"
+              />
+            )}
           </filter>
         </defs>
       </svg>
     );
   }, [animationEnabled, id, performanceTier, displacementScale]);
 
+  // Medium tier: lighter blur
+  const blurAmount = performanceTier === "medium" ? "3px" : "6px";
   const innerFilter = animationEnabled
-    ? `url(#${id}) blur(6px)`
+    ? `url(#${id}) blur(${blurAmount})`
     : performanceTier === "lite"
     ? "blur(3px)"
     : "none";

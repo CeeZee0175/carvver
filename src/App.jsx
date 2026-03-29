@@ -9,6 +9,8 @@ import SignIn from "./components/Auth/sign-in";
 import SignUp from "./components/Auth/sign-up";
 import DashboardCustomer from "./components/Dashboard/dashboard_customer";
 import BrowseCategories from "./components/Dashboard/browse_categories";
+import ProtectedRoute from "./components/Backend/ProtectedRoute";
+import PublicOnlyRoute from "./components/Backend/PublicOnlyRoute";
 
 function HomePage() {
   return (
@@ -57,12 +59,45 @@ function AppRoutes() {
 
   return (
     <Routes>
+      {/* Public routes */}
       <Route path="/" element={<HomePage />} />
       <Route path="/about-us" element={<AboutUsPage />} />
-      <Route path="/sign-in" element={<SignIn />} />
-      <Route path="/sign-up" element={<SignUp />} />
-      <Route path="/dashboard/customer" element={<DashboardCustomer />} />
-      <Route path="/dashboard/customer/browse-services" element={<BrowseCategories />} />
+
+      {/* Public only — redirects to dashboard if already logged in */}
+      <Route
+        path="/sign-in"
+        element={
+          <PublicOnlyRoute>
+            <SignIn />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/sign-up"
+        element={
+          <PublicOnlyRoute>
+            <SignUp />
+          </PublicOnlyRoute>
+        }
+      />
+
+      {/* Protected routes — redirects to /sign-in if not logged in */}
+      <Route
+        path="/dashboard/customer"
+        element={
+          <ProtectedRoute>
+            <DashboardCustomer />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/customer/browse-services"
+        element={
+          <ProtectedRoute>
+            <BrowseCategories />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

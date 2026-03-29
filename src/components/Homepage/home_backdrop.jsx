@@ -13,56 +13,58 @@ function addMediaListener(mq, handler) {
   return () => mq.removeListener(handler);
 }
 
-function getLiteBackdropMode(reduceMotion) {
+function getShouldUseLiteBackdrop(reduceMotion) {
+  // Only use the static glow fallback when the device truly can't animate.
+  // Mobile devices now get the lighter "medium" animation via etheral-shadow's
+  // own tier detection — so we don't need to hide the shadow here anymore.
   if (reduceMotion) return true;
   if (typeof window === "undefined") return false;
-
-  const isSmallScreen = window.matchMedia("(max-width: 820px)").matches;
-  const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
-  const noHover = window.matchMedia("(hover: none)").matches;
 
   const lowThreads =
     typeof navigator !== "undefined" &&
     typeof navigator.hardwareConcurrency === "number" &&
-    navigator.hardwareConcurrency <= 4;
+    navigator.hardwareConcurrency <= 2;
 
   const lowMemory =
     typeof navigator !== "undefined" &&
     typeof navigator.deviceMemory === "number" &&
-    navigator.deviceMemory <= 4;
+    navigator.deviceMemory <= 2;
 
-  return isSmallScreen || isCoarsePointer || noHover || lowThreads || lowMemory;
+  // No GPU = no SVG filter support, use static fallback
+  try {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    if (!gl) return true;
+  } catch {
+    return true;
+  }
+
+  return lowThreads || lowMemory;
 }
 
 export default function HomeBackdrop() {
   const shouldReduceMotion = useReducedMotion();
 
   const [isLiteMode, setIsLiteMode] = useState(() =>
-    getLiteBackdropMode(shouldReduceMotion)
+    getShouldUseLiteBackdrop(shouldReduceMotion)
   );
 
   useEffect(() => {
     const updateMode = () => {
-      setIsLiteMode(getLiteBackdropMode(shouldReduceMotion));
+      setIsLiteMode(getShouldUseLiteBackdrop(shouldReduceMotion));
     };
 
     updateMode();
 
-    const mqSmall = typeof window !== "undefined" ? window.matchMedia("(max-width: 820px)") : null;
-    const mqPointer = typeof window !== "undefined" ? window.matchMedia("(pointer: coarse)") : null;
-    const mqHover = typeof window !== "undefined" ? window.matchMedia("(hover: none)") : null;
-
-    const cleanupSmall = addMediaListener(mqSmall, updateMode);
-    const cleanupPointer = addMediaListener(mqPointer, updateMode);
-    const cleanupHover = addMediaListener(mqHover, updateMode);
-
-    window.addEventListener("resize", updateMode);
+    // Still listen for reduce-motion changes
+    const mqMotion =
+      typeof window !== "undefined"
+        ? window.matchMedia("(prefers-reduced-motion: reduce)")
+        : null;
+    const cleanupMotion = addMediaListener(mqMotion, updateMode);
 
     return () => {
-      cleanupSmall();
-      cleanupPointer();
-      cleanupHover();
-      window.removeEventListener("resize", updateMode);
+      cleanupMotion();
     };
   }, [shouldReduceMotion]);
 
@@ -71,13 +73,15 @@ export default function HomeBackdrop() {
       <div className="homeBackdrop__base" />
 
       {!isLiteMode ? (
+        // "auto" lets etheral-shadow decide the tier itself:
+        // high on desktop, medium (lighter) on mobile, lite only if GPU is missing
         <div className="homeBackdrop__shadow">
           <EtheralShadow
             sizing="fill"
             color="rgba(0,0,0,0.55)"
             animation={{ scale: 45, speed: 35 }}
             noise={{ opacity: 0.08, scale: 1 }}
-            performanceMode="full"
+            performanceMode="auto"
           />
         </div>
       ) : (
