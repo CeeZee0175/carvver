@@ -11,6 +11,7 @@ import {
   useReducedMotion,
   AnimatePresence,
 } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Bookmark,
@@ -34,6 +35,7 @@ import {
   X,
   Clock,
   Map,
+  Home,
 } from "lucide-react";
 import {
   MapContainer,
@@ -66,26 +68,41 @@ const PH_BOUNDS = [
 
 const CATEGORY_GROUPS = [
   {
-    label: "Graphics & Design",
-    items: ["Illustration", "Poster Design", "Logo Design", "Social Media Design"],
+    label: "Creative Services",
+    items: [
+      "Art & Illustration",
+      "Graphic Design",
+      "Video Editing",
+      "Voice Over",
+      "Social Media",
+      "Photography",
+    ],
   },
   {
-    label: "Handmade Products",
-    items: ["Plushies", "Crochet Bouquets", "Painted Tote Bags", "Handmade Gifts"],
+    label: "Handmade & Custom Work",
+    items: [
+      "Handmade Products",
+      "Plushies",
+      "Custom Gifts",
+      "Costumes & Props",
+      "Crochet & Knitting",
+      "Embroidery",
+    ],
   },
   {
-    label: "Costumes & Crafts",
-    items: ["Convention Costumes", "Cosplay Accessories", "Props", "Custom Crafts"],
-  },
-  {
-    label: "Photography",
-    items: ["Product Photography", "Portrait Edits", "Event Shoots", "Photo Retouching"],
-  },
-  {
-    label: "Voice & Audio",
-    items: ["Voice Over", "Intro Recordings", "Character Voices", "Audio Cleanup"],
+    label: "Learning & Support",
+    items: [
+      "Tutoring",
+      "Language Help",
+      "Writing",
+      "Virtual Assistance",
+      "Craft Lessons",
+      "Event Styling",
+    ],
   },
 ];
+
+const ALL_CATEGORY_ITEMS = CATEGORY_GROUPS.flatMap((group) => group.items);
 
 const DELIVERY_OPTIONS = [
   { label: "Any", value: null },
@@ -328,10 +345,6 @@ function getCategoryIcon(category) {
   return CATEGORY_ICONS[category] || Package;
 }
 
-/* ────────────────────────────────────────────────────────────────────────── */
-/* Leaflet icons                                                             */
-/* ────────────────────────────────────────────────────────────────────────── */
-
 function createPinIcon(className) {
   return L.divIcon({
     className: "browseLeafletPinWrap",
@@ -344,41 +357,6 @@ function createPinIcon(className) {
 
 const regionPinIcon = createPinIcon("browseLeafletPin browseLeafletPin--region");
 const cityPinIcon = createPinIcon("browseLeafletPin browseLeafletPin--city");
-
-/* ────────────────────────────────────────────────────────────────────────── */
-/* Map helpers                                                               */
-/* ────────────────────────────────────────────────────────────────────────── */
-
-function MapViewportController({ focusTarget }) {
-  const map = useMap();
-
-  useEffect(() => {
-    const t = setTimeout(() => {
-      map.invalidateSize();
-    }, 80);
-    return () => clearTimeout(t);
-  }, [map]);
-
-  useEffect(() => {
-    if (!focusTarget) return;
-
-    if (focusTarget.type === "city") {
-      map.flyTo(focusTarget.coords, 9, { duration: 0.9 });
-      return;
-    }
-
-    if (focusTarget.type === "region") {
-      map.flyTo(focusTarget.coords, 6.7, { duration: 0.9 });
-      return;
-    }
-
-    if (focusTarget.type === "country") {
-      map.flyTo(PH_CENTER, 5.5, { duration: 0.9 });
-    }
-  }, [focusTarget, map]);
-
-  return null;
-}
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /* Helpers                                                                   */
@@ -446,6 +424,187 @@ function TypewriterHeading({ text = "Browse Services" }) {
   );
 }
 
+function MapViewportController({ focusTarget }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const timer = setTimeout(() => map.invalidateSize(), 80);
+    return () => clearTimeout(timer);
+  }, [map]);
+
+  useEffect(() => {
+    if (!focusTarget) return;
+
+    if (focusTarget.type === "city") {
+      map.flyTo(focusTarget.coords, 9, { duration: 0.9 });
+      return;
+    }
+
+    if (focusTarget.type === "region") {
+      map.flyTo(focusTarget.coords, 6.7, { duration: 0.9 });
+      return;
+    }
+
+    map.flyTo(PH_CENTER, 5.5, { duration: 0.9 });
+  }, [focusTarget, map]);
+
+  return null;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* Category Modal                                                            */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+function CategoryModal({
+  open,
+  onClose,
+  selectedCategories,
+  includeOthers,
+  onApply,
+}) {
+  const reduceMotion = useReducedMotion();
+  const [draftCategories, setDraftCategories] = useState(selectedCategories);
+  const [draftIncludeOthers, setDraftIncludeOthers] = useState(includeOthers);
+
+  useEffect(() => {
+    if (!open) return;
+    setDraftCategories(selectedCategories);
+    setDraftIncludeOthers(includeOthers);
+  }, [open, selectedCategories, includeOthers]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  const toggleCategory = (item) => {
+    setDraftCategories((prev) =>
+      prev.includes(item) ? prev.filter((v) => v !== item) : [...prev, item]
+    );
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="browseModalLayer"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="browseModalOverlay" onClick={onClose} />
+
+          <motion.div
+            className="browseCategoryModal"
+            initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.98 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="browseCategoryModal__header">
+              <div>
+                <h2 className="browseCategoryModal__title">Service Categories</h2>
+                <p className="browseCategoryModal__sub">
+                  Choose one or more categories to narrow down your results.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="browseCategoryModal__close"
+                onClick={onClose}
+                aria-label="Close categories modal"
+              >
+                <X style={{ width: 18, height: 18 }} />
+              </button>
+            </div>
+
+            <div className="browseCategoryModal__body">
+              <div className="browseCategoryModal__grid">
+                {CATEGORY_GROUPS.map((group) => (
+                  <section key={group.label} className="browseCategoryGroup">
+                    <h3 className="browseCategoryGroup__title">{group.label}</h3>
+
+                    <div className="browseCategoryGroup__items">
+                      {group.items.map((item) => {
+                        const checked = draftCategories.includes(item);
+
+                        return (
+                          <button
+                            key={item}
+                            type="button"
+                            className={`browseCategoryOption ${checked ? "browseCategoryOption--checked" : ""}`}
+                            onClick={() => toggleCategory(item)}
+                          >
+                            <span className="browseCategoryOption__box" aria-hidden="true">
+                              {checked && <Check style={{ width: 11, height: 11, color: "#fff" }} />}
+                            </span>
+                            <span className="browseCategoryOption__text">{item}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+                ))}
+              </div>
+
+              <section className="browseCategoryOther">
+                <button
+                  type="button"
+                  className={`browseCategoryOther__toggle ${draftIncludeOthers ? "browseCategoryOther__toggle--checked" : ""}`}
+                  onClick={() => setDraftIncludeOthers((prev) => !prev)}
+                >
+                  <span className="browseCategoryOther__box" aria-hidden="true">
+                    {draftIncludeOthers && <Check style={{ width: 11, height: 11, color: "#fff" }} />}
+                  </span>
+                  <span className="browseCategoryOther__text">Others</span>
+                </button>
+
+                <p className="browseCategoryOther__sub">
+                  Include services that do not fall under the listed categories above.
+                </p>
+              </section>
+            </div>
+
+            <div className="browseCategoryModal__footer">
+              <button
+                type="button"
+                className="browseCategoryModal__clear"
+                onClick={() => {
+                  setDraftCategories([]);
+                  setDraftIncludeOthers(false);
+                }}
+              >
+                Clear
+              </button>
+
+              <button
+                type="button"
+                className="browseCategoryModal__apply"
+                onClick={() => {
+                  onApply({
+                    categories: draftCategories,
+                    includeOthers: draftIncludeOthers,
+                  });
+                  onClose();
+                }}
+              >
+                Apply Categories
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 /* ────────────────────────────────────────────────────────────────────────── */
 /* Location Modal                                                            */
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -476,61 +635,63 @@ function LocationMapModal({
       const city = region?.cities.find((c) => c.name === selectedCity);
       if (city) {
         setFocusTarget({ type: "city", coords: city.coords });
+        return;
       }
-    } else if (selectedRegion) {
-      const region = PHILIPPINES_REGIONS.find((r) => r.name === selectedRegion);
-      if (region) setFocusTarget({ type: "region", coords: region.coords });
-    } else {
-      setFocusTarget({ type: "country", coords: PH_CENTER });
     }
+
+    if (selectedRegion) {
+      const region = PHILIPPINES_REGIONS.find((r) => r.name === selectedRegion);
+      if (region) {
+        setFocusTarget({ type: "region", coords: region.coords });
+        return;
+      }
+    }
+
+    setFocusTarget({ type: "country", coords: PH_CENTER });
   }, [open, selectedRegion, selectedCity]);
 
   useEffect(() => {
     if (!open) return;
-
     const onKey = (e) => {
       if (e.key === "Escape") onClose();
     };
-
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
   const selectedLabel = activeCity || activeRegion || "All Philippines";
 
-  const expandedRegionData = PHILIPPINES_REGIONS.find((r) => r.name === expandedRegion);
-
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          className="browseMapLayer"
+          className="browseModalLayer"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <div className="browseMapOverlay" onClick={onClose} />
+          <div className="browseModalOverlay" onClick={onClose} />
 
           <motion.div
-            className="browseMapModal"
+            className="browseLocationModal"
             initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.98 }}
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="browseMapModal__header">
+            <div className="browseLocationModal__header">
               <div>
-                <h2 className="browseMapModal__title">Location Services</h2>
-                <p className="browseMapModal__sub">
-                  Browse services by region or narrow them down to a specific city.
+                <h2 className="browseLocationModal__title">Location Services</h2>
+                <p className="browseLocationModal__sub">
+                  Select a region or city to discover nearby service providers.
                 </p>
               </div>
 
               <button
                 type="button"
-                className="browseMapModal__close"
+                className="browseLocationModal__close"
                 onClick={onClose}
                 aria-label="Close location modal"
               >
@@ -538,18 +699,18 @@ function LocationMapModal({
               </button>
             </div>
 
-            <div className="browseMapModal__preview">
-              <div className="browseMapModal__mapCard">
-                <div className="browseMapModal__mapTop">
+            <div className="browseLocationModal__preview">
+              <div className="browseLocationModal__mapCard">
+                <div className="browseLocationModal__mapTop">
                   <div>
-                    <span className="browseMapModal__mapEyebrow">Map Preview</span>
-                    <h3 className="browseMapModal__mapTitle">{selectedLabel}</h3>
+                    <span className="browseLocationModal__mapEyebrow">Map Preview</span>
+                    <h3 className="browseLocationModal__mapTitle">{selectedLabel}</h3>
                   </div>
 
-                  <span className="browseMapModal__selectedPill">{selectedLabel}</span>
+                  <span className="browseLocationModal__selectedPill">{selectedLabel}</span>
                 </div>
 
-                <div className="browseMapModal__leafletWrap">
+                <div className="browseLocationModal__leafletWrap">
                   <MapContainer
                     center={PH_CENTER}
                     zoom={5.5}
@@ -558,7 +719,7 @@ function LocationMapModal({
                     maxBounds={PH_BOUNDS}
                     scrollWheelZoom
                     zoomControl={false}
-                    className="browseMapModal__leaflet"
+                    className="browseLocationModal__leaflet"
                   >
                     <ZoomControl position="bottomright" />
 
@@ -583,56 +744,90 @@ function LocationMapModal({
                           },
                         }}
                       >
-                        <Popup>
-                          <div className="browseMapPopup">
-                            <strong>{region.name}</strong>
-                            <div>{region.cities.length} cities</div>
+                        <Popup className="browseLeafletPopup" closeButton={false}>
+                          <div className="browseLeafletPopup__card">
+                            <div>
+                              <h4 className="browseLeafletPopup__title">{region.name}</h4>
+                              <p className="browseLeafletPopup__sub">{region.cities.length} cities available</p>
+                            </div>
+
+                            <button
+                              type="button"
+                              className="browseLeafletPopup__btn"
+                              onClick={() => {
+                                setExpandedRegion(region.name);
+                                setActiveRegion(region.name);
+                                setActiveCity(null);
+                                setFocusTarget({ type: "region", coords: region.coords });
+                              }}
+                            >
+                              Open Region
+                            </button>
                           </div>
                         </Popup>
                       </Marker>
                     ))}
 
-                    {expandedRegionData?.cities.map((city) => (
-                      <Marker
-                        key={city.name}
-                        position={city.coords}
-                        icon={cityPinIcon}
-                        eventHandlers={{
-                          click: () => {
-                            setActiveRegion(expandedRegionData.name);
-                            setActiveCity(city.name);
-                            setFocusTarget({ type: "city", coords: city.coords });
-                          },
-                        }}
-                      >
-                        <Popup>
-                          <div className="browseMapPopup">
-                            <strong>{city.name}</strong>
-                            <div>{expandedRegionData.name}</div>
-                          </div>
-                        </Popup>
-                      </Marker>
-                    ))}
+                    {(() => {
+                      const region = PHILIPPINES_REGIONS.find((r) => r.name === expandedRegion);
+                      if (!region) return null;
+
+                      return region.cities.map((city) => (
+                        <Marker
+                          key={city.name}
+                          position={city.coords}
+                          icon={cityPinIcon}
+                          eventHandlers={{
+                            click: () => {
+                              setActiveRegion(region.name);
+                              setActiveCity(city.name);
+                              setFocusTarget({ type: "city", coords: city.coords });
+                            },
+                          }}
+                        >
+                          <Popup className="browseLeafletPopup" closeButton={false}>
+                            <div className="browseLeafletPopup__card">
+                              <div>
+                                <h4 className="browseLeafletPopup__title">{city.name}</h4>
+                                <p className="browseLeafletPopup__sub">{region.name}</p>
+                              </div>
+
+                              <button
+                                type="button"
+                                className="browseLeafletPopup__btn browseLeafletPopup__btn--city"
+                                onClick={() => {
+                                  setActiveRegion(region.name);
+                                  setActiveCity(city.name);
+                                  setFocusTarget({ type: "city", coords: city.coords });
+                                }}
+                              >
+                                Use City
+                              </button>
+                            </div>
+                          </Popup>
+                        </Marker>
+                      ));
+                    })()}
                   </MapContainer>
                 </div>
 
-                <div className="browseMapModal__legend">
-                  <span className="browseMapModal__legendItem">
-                    <span className="browseMapModal__legendPin browseMapModal__legendPin--region" />
+                <div className="browseLocationModal__legend">
+                  <span className="browseLocationModal__legendItem">
+                    <span className="browseLocationModal__legendPin browseLocationModal__legendPin--region" />
                     Region pin
                   </span>
-                  <span className="browseMapModal__legendItem">
-                    <span className="browseMapModal__legendPin browseMapModal__legendPin--city" />
+                  <span className="browseLocationModal__legendItem">
+                    <span className="browseLocationModal__legendPin browseLocationModal__legendPin--city" />
                     City pin
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="browseMapModal__regions">
+            <div className="browseLocationModal__regions">
               <button
                 type="button"
-                className={`browseMapModal__allBtn ${!activeRegion && !activeCity ? "browseMapModal__allBtn--active" : ""}`}
+                className={`browseLocationModal__allBtn ${!activeRegion && !activeCity ? "browseLocationModal__allBtn--active" : ""}`}
                 onClick={() => {
                   setActiveRegion(null);
                   setActiveCity(null);
@@ -640,7 +835,9 @@ function LocationMapModal({
                 }}
               >
                 <span>All Philippines</span>
-                <span className="browseMapModal__allSub">Show all available locations nationwide</span>
+                <span className="browseLocationModal__allSub">
+                  Show all available locations nationwide
+                </span>
               </button>
 
               {PHILIPPINES_REGIONS.map((region) => {
@@ -719,10 +916,10 @@ function LocationMapModal({
               })}
             </div>
 
-            <div className="browseMapModal__footer">
+            <div className="browseLocationModal__footer">
               <button
                 type="button"
-                className="browseMapModal__clear"
+                className="browseLocationModal__clear"
                 onClick={() => {
                   setActiveRegion(null);
                   setActiveCity(null);
@@ -734,7 +931,7 @@ function LocationMapModal({
 
               <button
                 type="button"
-                className="browseMapModal__apply"
+                className="browseLocationModal__apply"
                 onClick={() => {
                   onApply({
                     region: activeRegion,
@@ -969,6 +1166,7 @@ function FilterDropdown({ label, icon: Icon, open, onToggle, children, wide }) {
 /* ────────────────────────────────────────────────────────────────────────── */
 
 export default function BrowseCategories() {
+  const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
   const cardTransition = { type: "spring", stiffness: 340, damping: 26 };
 
@@ -976,8 +1174,10 @@ export default function BrowseCategories() {
   const [loading, setLoading] = useState(true);
 
   const [openMenu, setOpenMenu] = useState(null);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [draftCategories, setDraftCategories] = useState([]);
+  const [includeOthers, setIncludeOthers] = useState(false);
 
   const [deliveryDays, setDeliveryDays] = useState(null);
 
@@ -1038,6 +1238,7 @@ export default function BrowseCategories() {
 
   const hasFilters =
     selectedCategories.length > 0 ||
+    includeOthers ||
     deliveryDays ||
     minBudget ||
     maxBudget ||
@@ -1048,8 +1249,12 @@ export default function BrowseCategories() {
   const filteredServices = useMemo(() => {
     let list = [...services];
 
-    if (selectedCategories.length > 0) {
-      list = list.filter((s) => selectedCategories.includes(s.category));
+    if (selectedCategories.length > 0 || includeOthers) {
+      list = list.filter((s) => {
+        const inSelected = selectedCategories.includes(s.category);
+        const isOther = includeOthers && !ALL_CATEGORY_ITEMS.includes(s.category);
+        return inSelected || isOther;
+      });
     }
 
     if (minBudget !== "") {
@@ -1094,11 +1299,11 @@ export default function BrowseCategories() {
     }
 
     return list;
-  }, [services, selectedCategories, deliveryDays, minBudget, maxBudget, proOnly, selectedRegion, selectedCity, sortBy]);
+  }, [services, selectedCategories, includeOthers, deliveryDays, minBudget, maxBudget, proOnly, selectedRegion, selectedCity, sortBy]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategories, deliveryDays, minBudget, maxBudget, proOnly, selectedRegion, selectedCity, sortBy]);
+  }, [selectedCategories, includeOthers, deliveryDays, minBudget, maxBudget, proOnly, selectedRegion, selectedCity, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(filteredServices.length / ITEMS_PER_PAGE));
 
@@ -1109,7 +1314,7 @@ export default function BrowseCategories() {
 
   const clearAllFilters = useCallback(() => {
     setSelectedCategories([]);
-    setDraftCategories([]);
+    setIncludeOthers(false);
     setDeliveryDays(null);
     setMinBudget("");
     setMaxBudget("");
@@ -1130,8 +1335,12 @@ export default function BrowseCategories() {
   }, []);
 
   const categoriesLabel =
-    selectedCategories.length === 0
+    selectedCategories.length === 0 && !includeOthers
       ? "Categories"
+      : includeOthers && selectedCategories.length === 0
+      ? "Others"
+      : includeOthers
+      ? `${selectedCategories.length + 1} selected`
       : selectedCategories.length === 1
       ? selectedCategories[0]
       : `${selectedCategories.length} selected`;
@@ -1167,6 +1376,17 @@ export default function BrowseCategories() {
 
       <DashBar />
 
+      <CategoryModal
+        open={categoryModalOpen}
+        onClose={() => setCategoryModalOpen(false)}
+        selectedCategories={selectedCategories}
+        includeOthers={includeOthers}
+        onApply={({ categories, includeOthers: nextOthers }) => {
+          setSelectedCategories(categories);
+          setIncludeOthers(nextOthers);
+        }}
+      />
+
       <LocationMapModal
         open={mapOpen}
         onClose={() => setMapOpen(false)}
@@ -1179,12 +1399,31 @@ export default function BrowseCategories() {
       />
 
       <main className="browseCategories__main">
-        <ScrollReveal y={16}>
-          <section className="browseHeroPanel">
-            <div className="browseHeroPanel__titleWrap">
+        <ScrollReveal y={8}>
+          <section className="browseCrumbs">
+            <motion.button
+              type="button"
+              className="browseCrumbs__home"
+              whileHover={{ x: -1 }}
+              whileTap={{ scale: 0.97 }}
+              transition={cardTransition}
+              onClick={() => navigate("/dashboard/customer")}
+            >
+              <Home className="browseCrumbs__icon" />
+              <span>Home</span>
+            </motion.button>
+
+            <span className="browseCrumbs__sep">/</span>
+            <span className="browseCrumbs__current">Service Listings</span>
+          </section>
+        </ScrollReveal>
+
+        <ScrollReveal y={14} delay={0.04}>
+          <section className="browseHero">
+            <div className="browseHero__titleWrap">
               <TypewriterHeading />
               <motion.svg
-                className="browseHeroPanel__line"
+                className="browseHero__line"
                 viewBox="0 0 300 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
@@ -1202,7 +1441,7 @@ export default function BrowseCategories() {
               </motion.svg>
             </div>
 
-            <p className="browseHeroPanel__sub">
+            <p className="browseHero__sub">
               Discover creative and handmade services from casual freelancers, hobbyists, and trusted
               creators — all in one place.
             </p>
@@ -1212,72 +1451,18 @@ export default function BrowseCategories() {
         <ScrollReveal y={14} delay={0.06}>
           <section className="browseControlPanel" ref={filterRef}>
             <div className="browseFilterBar__inner">
-              <FilterDropdown
-                label={categoriesLabel}
-                icon={SlidersHorizontal}
-                open={openMenu === "categories"}
-                onToggle={() => {
-                  setDraftCategories(selectedCategories);
-                  setOpenMenu((prev) => (prev === "categories" ? null : "categories"));
-                }}
-                wide
+              <motion.button
+                type="button"
+                className={`browseFilterTrigger ${categoryModalOpen ? "browseFilterTrigger--open" : ""}`}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                transition={cardTransition}
+                onClick={() => setCategoryModalOpen(true)}
               >
-                <div className="browseFilterMenu__scroll">
-                  <div className="browseFilterMenu__grid">
-                    {CATEGORY_GROUPS.map((group) => (
-                      <div key={group.label} className="browseFilterMenu__section">
-                        <h3 className="browseFilterMenu__sectionTitle">{group.label}</h3>
-                        <div className="browseFilterMenu__options">
-                          {group.items.map((item) => {
-                            const checked = draftCategories.includes(item);
-
-                            return (
-                              <button
-                                key={item}
-                                type="button"
-                                className={`browseFilterOption ${checked ? "browseFilterOption--checked" : ""}`}
-                                onClick={() =>
-                                  setDraftCategories((prev) =>
-                                    prev.includes(item)
-                                      ? prev.filter((v) => v !== item)
-                                      : [...prev, item]
-                                  )
-                                }
-                              >
-                                <span className="browseFilterOption__box" aria-hidden="true">
-                                  {checked && <Check style={{ width: 11, height: 11, color: "#fff" }} />}
-                                </span>
-                                <span className="browseFilterOption__text">{item}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="browseFilterMenu__footer">
-                  <button
-                    type="button"
-                    className="browseFilterMenu__clear"
-                    onClick={() => setDraftCategories([])}
-                  >
-                    Clear
-                  </button>
-
-                  <button
-                    type="button"
-                    className="browseFilterMenu__apply"
-                    onClick={() => {
-                      setSelectedCategories(draftCategories);
-                      setOpenMenu(null);
-                    }}
-                  >
-                    Apply
-                  </button>
-                </div>
-              </FilterDropdown>
+                <SlidersHorizontal style={{ width: 14, height: 14 }} />
+                <span>{categoriesLabel}</span>
+                <ChevronDown className={`browseFilterTrigger__chevron ${categoryModalOpen ? "browseFilterTrigger__chevron--open" : ""}`} style={{ width: 14, height: 14 }} />
+              </motion.button>
 
               <FilterDropdown
                 label={budgetLabel}
@@ -1320,20 +1505,26 @@ export default function BrowseCategories() {
                   </div>
 
                   <div className="browseFilterMenu__footer browseFilterMenu__footer--compact">
-                    <button
+                    <motion.button
                       type="button"
                       className="browseFilterMenu__clear"
+                      whileHover={{ y: -1 }}
+                      whileTap={{ scale: 0.97 }}
+                      transition={cardTransition}
                       onClick={() => {
                         setDraftMinBudget("");
                         setDraftMaxBudget("");
                       }}
                     >
                       Reset
-                    </button>
+                    </motion.button>
 
-                    <button
+                    <motion.button
                       type="button"
                       className="browseFilterMenu__apply"
+                      whileHover={{ y: -1 }}
+                      whileTap={{ scale: 0.97 }}
+                      transition={cardTransition}
                       onClick={() => {
                         setMinBudget(draftMinBudget);
                         setMaxBudget(draftMaxBudget);
@@ -1341,7 +1532,7 @@ export default function BrowseCategories() {
                       }}
                     >
                       Apply
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
               </FilterDropdown>
@@ -1500,7 +1691,7 @@ export default function BrowseCategories() {
                       type="button"
                       className={`browsePagination__btn ${currentPage === page ? "browsePagination__btn--active" : ""}`}
                       whileHover={reduceMotion ? undefined : { y: -1 }}
-                      whileTap={reduceMotion ? undefined : { scale: 0.95 }}
+                      whileTap={{ scale: 0.95 }}
                       transition={cardTransition}
                       onClick={() => {
                         setCurrentPage(page);
