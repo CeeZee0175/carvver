@@ -540,7 +540,13 @@ export default function DashboardCustomer() {
                     whileHover={reduceMotion ? undefined : { y: -2, scale: 1.01, x: 2 }}
                     whileTap={reduceMotion ? undefined : { scale: 0.97 }}
                     transition={actionTransition}
-                    onClick={() => toast(`${label} coming soon!`)}
+                    onClick={() => {
+                      if (label === "Saved listings") {
+                        navigate("/dashboard/customer/saved");
+                      } else {
+                        toast(`${label} coming soon!`);
+                      }
+                    }}
                   >
                     <Icon className="dashQuickList__icon" />
                     <span>{label}</span>

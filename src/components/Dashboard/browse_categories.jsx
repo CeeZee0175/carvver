@@ -1220,6 +1220,23 @@ export default function BrowseCategories() {
     load();
   }, []);
 
+    // ── Load user's saved service IDs on mount ──
+  useEffect(() => {
+    async function loadSavedIds() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data } = await supabase
+        .from("saved_services")
+        .select("service_id")
+        .eq("user_id", session.user.id);
+
+      if (data) setSavedIds(data.map((row) => row.service_id));
+    }
+
+    loadSavedIds();
+  }, []);
+
   useEffect(() => {
     const onDown = (e) => {
       if (!filterRef.current?.contains(e.target)) setOpenMenu(null);
@@ -1326,13 +1343,45 @@ export default function BrowseCategories() {
     setSortBy("best");
   }, []);
 
-  const handleToggleSave = useCallback((id) => {
-    setSavedIds((prev) => {
-      const next = prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id];
-      toast(prev.includes(id) ? "Removed from saved" : "Saved!", { duration: 1800 });
-      return next;
-    });
-  }, []);
+  const handleToggleSave = useCallback(async (serviceId) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error("Please sign in to save services.");
+      return;
+    }
+
+    const userId = session.user.id;
+    const isSaved = savedIds.includes(serviceId);
+
+    // optimistic update
+    setSavedIds((prev) =>
+      isSaved ? prev.filter((id) => id !== serviceId) : [...prev, serviceId]
+    );
+
+    try {
+      if (isSaved) {
+        const { error } = await supabase
+          .from("saved_services")
+          .delete()
+          .eq("user_id", userId)
+          .eq("service_id", serviceId);
+        if (error) throw error;
+        toast("Removed from saved", { duration: 1800 });
+      } else {
+        const { error } = await supabase
+          .from("saved_services")
+          .insert([{ user_id: userId, service_id: serviceId }]);
+        if (error) throw error;
+        toast("Saved!", { duration: 1800 });
+      }
+    } catch {
+      // rollback on failure
+      setSavedIds((prev) =>
+        isSaved ? [...prev, serviceId] : prev.filter((id) => id !== serviceId)
+      );
+      toast.error("Something went wrong. Please try again.");
+    }
+  }, [savedIds]);
 
   const categoriesLabel =
     selectedCategories.length === 0 && !includeOthers

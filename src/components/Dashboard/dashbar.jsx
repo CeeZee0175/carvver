@@ -298,7 +298,10 @@ export default function DashBar() {
                     <span>My Orders</span>
                   </button>
                   <button type="button" className="dashbarProfileMenu__item" role="menuitem"
-                    onClick={() => handleProfileMenuClick("Saved Listings")}>
+                    onClick={() => {
+                      setOpenProfile(false);
+                      navigate("/dashboard/customer/saved");
+                    }}>
                     <Bookmark className="dashbarProfileMenu__itemIcon" />
                     <span>Saved Listings</span>
                   </button>

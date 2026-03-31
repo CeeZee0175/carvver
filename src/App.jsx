@@ -11,6 +11,7 @@ import DashboardCustomer from "./components/Dashboard/dashboard_customer";
 import BrowseCategories from "./components/Dashboard/browse_categories";
 import ProtectedRoute from "./components/Backend/ProtectedRoute";
 import PublicOnlyRoute from "./components/Backend/PublicOnlyRoute";
+import FavBook from "./components/Dashboard/favBook";
 
 function HomePage() {
   return (
@@ -95,6 +96,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <BrowseCategories />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/customer/saved"
+        element={
+          <ProtectedRoute>
+            <FavBook />
           </ProtectedRoute>
         }
       />
