@@ -377,6 +377,15 @@
 .browseBudgetMenu__input[type="number"]{
   appearance: textfield;
 }
+.browseBudgetMenu__actions{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1px solid rgba(42,20,80,0.08);
+}
 
 /* ── Filter‑menu footer (Reset / Apply inside dropdowns) ── */
 .browseFilterMenu__footer{
@@ -1351,6 +1360,12 @@
   font-size: 12.5px;
   font-weight: 850;
   color: rgba(27,16,46,0.84);
+}
+
+.browseFilterToggle--verified.browseFilterToggle--active{
+  border-color: rgba(59,130,246,0.40);
+  background: rgba(59,130,246,0.08);
+  color: rgba(27,16,46,0.96);
 }
 
 .browseServiceCard__reviewCount{

@@ -19,6 +19,7 @@ import {
   Check,
   ChevronDown,
   GraduationCap,
+  ShieldCheck,
   MapPin,
   Mic2,
   Package,
@@ -1188,6 +1189,7 @@ export default function BrowseCategories() {
 
   const [sortBy, setSortBy] = useState("best");
   const [proOnly, setProOnly] = useState(false);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
 
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
@@ -1204,7 +1206,7 @@ export default function BrowseCategories() {
       try {
         const { data, error } = await supabase
           .from("services")
-          .select("id, title, category, price, location, description, created_at, is_published, is_pro, profiles(first_name, last_name)")
+          .select("id, title, category, price, location, description, created_at, is_published, is_pro, is_verified, profiles(first_name, last_name)")
           .eq("is_published", true)
           .order("created_at", { ascending: false });
 
@@ -1260,6 +1262,7 @@ export default function BrowseCategories() {
     minBudget ||
     maxBudget ||
     proOnly ||
+    verifiedOnly ||
     selectedRegion ||
     selectedCity;
 
@@ -1284,6 +1287,10 @@ export default function BrowseCategories() {
 
     if (proOnly) {
       list = list.filter((s) => s.is_pro);
+    }
+
+    if (verifiedOnly) {
+      list = list.filter((s) => s.is_verified);
     }
 
     if (selectedCity) {
@@ -1316,11 +1323,11 @@ export default function BrowseCategories() {
     }
 
     return list;
-  }, [services, selectedCategories, includeOthers, deliveryDays, minBudget, maxBudget, proOnly, selectedRegion, selectedCity, sortBy]);
+  }, [services, selectedCategories, includeOthers, deliveryDays, minBudget, maxBudget, proOnly, verifiedOnly, selectedRegion, selectedCity, sortBy]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategories, includeOthers, deliveryDays, minBudget, maxBudget, proOnly, selectedRegion, selectedCity, sortBy]);
+  }, [selectedCategories, includeOthers, deliveryDays, minBudget, maxBudget, proOnly, verifiedOnly, selectedRegion, selectedCity, sortBy]);
 
   const totalPages = Math.max(1, Math.ceil(filteredServices.length / ITEMS_PER_PAGE));
 
@@ -1338,6 +1345,7 @@ export default function BrowseCategories() {
     setDraftMinBudget("");
     setDraftMaxBudget("");
     setProOnly(false);
+    setVerifiedOnly(false);
     setSelectedRegion(null);
     setSelectedCity(null);
     setSortBy("best");
@@ -1553,7 +1561,7 @@ export default function BrowseCategories() {
                     </div>
                   </div>
 
-                  <div className="browseFilterMenu__footer browseFilterMenu__footer--compact">
+                  <div className="browseBudgetMenu__actions">
                     <motion.button
                       type="button"
                       className="browseFilterMenu__clear"
@@ -1647,6 +1655,19 @@ export default function BrowseCategories() {
               >
                 <BadgeCheck style={{ width: 14, height: 14 }} />
                 Pro Services
+              </motion.button>
+
+              <motion.button
+                type="button"
+                className={`browseFilterToggle browseFilterToggle--verified ${verifiedOnly ? "browseFilterToggle--active" : ""}`}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                transition={cardTransition}
+                onClick={() => setVerifiedOnly((prev) => !prev)}
+                title="Show only verified creators"
+              >
+                <ShieldCheck style={{ width: 14, height: 14 }} />
+                Verified
               </motion.button>
 
               <FilterDropdown
