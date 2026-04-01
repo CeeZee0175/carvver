@@ -12,6 +12,7 @@ import BrowseCategories from "./components/Dashboard/browse_categories";
 import ProtectedRoute from "./components/Backend/ProtectedRoute";
 import PublicOnlyRoute from "./components/Backend/PublicOnlyRoute";
 import FavBook from "./components/Dashboard/favBook";
+import NotifPage from "./components/Dashboard/notifPage";
 
 function HomePage() {
   return (
@@ -104,6 +105,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <FavBook />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard/customer/notifications"
+        element={
+          <ProtectedRoute>
+            <NotifPage />
           </ProtectedRoute>
         }
       />
