@@ -1,0 +1,207 @@
+@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap");
+
+.authCallbackPage{
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.authCallbackPage__base{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: #fff;
+}
+
+.authCallbackPage__shadow{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.authCallbackPage__bg{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(900px 520px at 30% 10%, rgba(124,58,237,0.10), transparent 60%),
+    radial-gradient(900px 520px at 80% 40%, rgba(242,193,78,0.12), transparent 62%),
+    radial-gradient(900px 520px at 30% 85%, rgba(42,20,80,0.08), transparent 65%);
+}
+
+.authCallbackPage__center{
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+}
+
+.authCallbackCard{
+  position: relative;
+  width: min(520px, 92vw);
+  padding: 34px 30px;
+  border-radius: 30px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.78));
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 26px 90px rgba(12,7,18,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.74);
+  overflow: hidden;
+}
+
+.authCallbackCard__shine{
+  position: absolute;
+  top: 0;
+  left: -20%;
+  width: 34%;
+  height: 100%;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.38), transparent);
+  opacity: 0.7;
+  pointer-events: none;
+  animation: authCallbackShine 7s ease-in-out infinite;
+}
+
+.authCallbackCard__content{
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 16px;
+  text-align: center;
+}
+
+.authCallbackCard__eyebrow{
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(87,34,182,0.84);
+}
+
+.authCallbackCard__title{
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: clamp(30px, 4vw, 38px);
+  line-height: 1.04;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: rgba(27,16,46,0.97);
+}
+
+.authCallbackCard__message{
+  margin: 0 auto;
+  max-width: 34ch;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(27,16,46,0.72);
+}
+
+.authCallbackCard__progress{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 22px;
+}
+
+.authCallbackCard__dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(42,20,80,0.78);
+  animation: authCallbackPulse 1.2s ease-in-out infinite;
+}
+
+.authCallbackCard__dot:nth-child(2){
+  animation-delay: 0.16s;
+}
+
+.authCallbackCard__dot:nth-child(3){
+  animation-delay: 0.32s;
+}
+
+.authCallbackCard__actions{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.authCallbackCard__btn{
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid rgba(42,20,80,0.14);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.74);
+  color: rgba(27,16,46,0.88);
+  cursor: pointer;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.authCallbackCard__btn--primary{
+  border-color: rgba(42,20,80,0.18);
+  background: linear-gradient(180deg, rgba(42,20,80,1), rgba(42,20,80,0.86));
+  color: #fff;
+  box-shadow: 0 20px 60px rgba(42,20,80,0.16);
+}
+
+@keyframes authCallbackShine{
+  0%{
+    left: -22%;
+    opacity: 0;
+  }
+  16%{
+    opacity: 0.65;
+  }
+  44%{
+    opacity: 0;
+  }
+  100%{
+    left: 125%;
+    opacity: 0;
+  }
+}
+
+@keyframes authCallbackPulse{
+  0%,
+  100%{
+    transform: scale(0.8);
+    opacity: 0.45;
+  }
+  50%{
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px){
+  .authCallbackPage__center{
+    padding: 16px;
+  }
+
+  .authCallbackCard{
+    width: 100%;
+    padding: 26px 20px;
+    border-radius: 24px;
+  }
+
+  .authCallbackCard__actions{
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .authCallbackCard__shine,
+  .authCallbackCard__dot{
+    animation: none !important;
+  }
+}

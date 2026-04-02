@@ -1,5 +1,12 @@
 :root{
   --nav-h: 66px;
+  --home-snap-h: calc(100vh - var(--nav-h));
+}
+
+@supports (height: 100dvh){
+  :root{
+    --home-snap-h: calc(100dvh - var(--nav-h));
+  }
 }
 
 html, body{
@@ -9,13 +16,15 @@ html, body{
 }
 
 .homeScroll{
-  height: calc(100svh - var(--nav-h));
+  height: var(--home-snap-h);
+  min-height: var(--home-snap-h);
   overflow-y: auto;
   overflow-x: hidden;
 
   scroll-snap-type: y proximity;
+  scroll-behavior: smooth;
 
-  scroll-padding-top: 1px;
+  scroll-padding-top: 0;
 
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
@@ -31,27 +40,25 @@ html, body{
 }
 
 .homeSnap{
-  height: calc(100svh - var(--nav-h));
+  height: var(--home-snap-h);
+  min-height: var(--home-snap-h);
   scroll-snap-align: start;
-
-  scroll-snap-stop: always;
+  scroll-snap-stop: normal;
 
   background: transparent;
   position: relative;
   z-index: 1;
 }
 
-.homeSnap{
-  height: calc(100svh - var(--nav-h) + 2px);
-}
-
 .homeSnap + .homeSnap{
-  margin-top: -2px;
+  margin-top: 0;
 }
 
 .homeFooterSection{
   min-height: clamp(340px, 48vh, 520px);
   padding: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
   background: transparent;
   position: relative;
   z-index: 1;

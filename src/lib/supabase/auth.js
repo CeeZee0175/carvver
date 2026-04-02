@@ -42,6 +42,24 @@ export async function signIn({ email, password, remember }) {
   return data;
 }
 
+export async function signInWithOAuth({ provider, redirectTo }) {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo,
+    },
+  });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function exchangeCodeForSession(code) {
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error) throw error;
+  return data;
+}
+
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
@@ -64,4 +82,24 @@ export async function getProfile() {
 
   if (error) throw error;
   return { ...data, email: session.user.email };
+}
+
+export async function getProfileById(userId) {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function upsertProfile(profile) {
+  const { error } = await supabase
+    .from("profiles")
+    .upsert(profile, { onConflict: "id" });
+
+  if (error) throw error;
+  return profile;
 }

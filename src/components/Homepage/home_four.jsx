@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, LoaderCircle } from "lucide-react";
+import { createClient } from "../../lib/supabase/client";
 import "./home_four.css";
+
+const supabase = createClient();
+const NEWSLETTER_TABLE = "newsletter_signups";
 
 const labelContainerVariants = {
   initial: {},
@@ -114,6 +118,7 @@ function EmailInput({
   value,
   onChange,
   onSubmit,
+  isSubmitting,
   status,
   message,
 }) {
@@ -126,6 +131,7 @@ function EmailInput({
       className="homeFourForm"
       onSubmit={onSubmit}
       aria-label="Subscribe for updates"
+      aria-busy={isSubmitting}
       noValidate
     >
       <motion.div
@@ -175,20 +181,39 @@ function EmailInput({
           placeholder="Enter your email"
           aria-label="Email address"
           aria-invalid={status === "error"}
+          disabled={isSubmitting}
         />
 
         <motion.button
           type="submit"
           className={`homeFourInput__submit ${
             status === "success" ? "homeFourInput__submit--success" : ""
-          }`}
-          aria-label={status === "success" ? "Subscribed" : "Submit email"}
-          whileHover={{ y: -1.5, scale: 1.03 }}
-          whileTap={{ scale: 0.95 }}
+          } ${isSubmitting ? "homeFourInput__submit--loading" : ""}`}
+          aria-label={
+            isSubmitting
+              ? "Submitting email"
+              : status === "success"
+              ? "Subscribed"
+              : "Submit email"
+          }
+          disabled={isSubmitting}
+          whileHover={isSubmitting ? undefined : { y: -1.5, scale: 1.03 }}
+          whileTap={isSubmitting ? undefined : { scale: 0.95 }}
           transition={{ type: "spring", stiffness: 360, damping: 24 }}
         >
           <AnimatePresence mode="wait" initial={false}>
-            {status === "success" ? (
+            {isSubmitting ? (
+              <motion.span
+                key="loader"
+                initial={{ opacity: 0, scale: 0.72 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.72 }}
+                transition={{ duration: 0.2 }}
+                className="homeFourInput__iconWrap"
+              >
+                <LoaderCircle className="homeFourInput__submitIcon homeFourInput__submitIcon--loading" />
+              </motion.span>
+            ) : status === "success" ? (
               <motion.span
                 key="check"
                 initial={{ opacity: 0, scale: 0.7, rotate: -12 }}
@@ -356,11 +381,26 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
+function getSubscribeErrorMessage(error) {
+  if (!error) return "Couldn't save your email yet. Please try again.";
+
+  if (error.code === "42P01") {
+    return "The signup table is missing. Run the Supabase SQL first.";
+  }
+
+  if (error.code === "42501") {
+    return "Supabase blocked the signup. Add the insert policy and try again.";
+  }
+
+  return "Couldn't save your email yet. Please try again.";
+}
+
 export default function HomeFour() {
   const ref = useRef(null);
   const inView = useInView(ref, { amount: 0.46, once: true });
 
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
 
@@ -373,8 +413,10 @@ export default function HomeFour() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSubmitting) return;
 
     const trimmed = email.trim();
 
@@ -390,9 +432,38 @@ export default function HomeFour() {
       return;
     }
 
-    setEmail(trimmed);
-    setStatus("success");
-    setMessage("Thanks! You’re on the list.");
+    const normalizedEmail = trimmed.toLowerCase();
+
+    setIsSubmitting(true);
+    setStatus("idle");
+    setMessage("");
+
+    try {
+      const { error } = await supabase.from(NEWSLETTER_TABLE).insert({
+        email: normalizedEmail,
+        source: "home_four",
+      });
+
+      if (error?.code === "23505") {
+        setEmail("");
+        setStatus("success");
+        setMessage("You're already on the list. We'll keep you posted.");
+        return;
+      }
+
+      if (error) {
+        throw error;
+      }
+
+      setEmail("");
+      setStatus("success");
+      setMessage("Thanks! You're on the list.");
+    } catch (error) {
+      setStatus("error");
+      setMessage(getSubscribeErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -406,7 +477,7 @@ export default function HomeFour() {
 
         <TypewriterDescription
           active={inView}
-          text="Be the first to hear about new features, platform updates, and everything we’re building at Carvver."
+          text="Be the first to hear about new features, platform updates, and everything we're building at Carvver."
         />
 
         <motion.div
@@ -419,6 +490,7 @@ export default function HomeFour() {
             value={email}
             onChange={handleChange}
             onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
             status={status}
             message={message}
           />

@@ -1,11 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { Eye, EyeOff, Lock, Mail, ArrowRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import "./sign-in.css";
 import { Component as EtheralShadow } from "../StartUp/etheral-shadow";
-import { signIn, getProfile } from "../../lib/supabase/auth";
+import { getProfile, signIn, signInWithOAuth } from "../../lib/supabase/auth";
+import {
+  buildOAuthCallbackUrl,
+  setAuthFlowIntent,
+} from "../../lib/authFlowIntent";
+import {
+  buildCategoryPath,
+  clearFeaturedCategoryIntent,
+  persistFeaturedCategoryFromSearch,
+  resolveFeaturedCategoryIntent,
+} from "../../lib/featuredCategoryIntent";
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function GoogleIcon() {
   return (
@@ -94,7 +106,33 @@ function BrandTitle({ active }) {
   );
 }
 
-function SocialButton({ icon, label, onClick }) {
+function validateSignInField(name, value) {
+  const normalizedValue = typeof value === "string" ? value.trim() : value;
+
+  if (name === "email") {
+    if (!normalizedValue) return "Email is required.";
+    if (!EMAIL_PATTERN.test(normalizedValue)) return "Enter a valid email address.";
+  }
+
+  if (name === "password" && !value) {
+    return "Password is required.";
+  }
+
+  return "";
+}
+
+function getSignInErrors(values) {
+  return {
+    ...(validateSignInField("email", values.email)
+      ? { email: validateSignInField("email", values.email) }
+      : {}),
+    ...(validateSignInField("password", values.password)
+      ? { password: validateSignInField("password", values.password) }
+      : {}),
+  };
+}
+
+function SocialButton({ icon, label, onClick, disabled }) {
   return (
     <motion.button
       type="button"
@@ -103,6 +141,7 @@ function SocialButton({ icon, label, onClick }) {
       whileTap={{ scale: 0.97 }}
       transition={{ type: "spring", stiffness: 360, damping: 24 }}
       onClick={onClick}
+      disabled={disabled}
     >
       <span className="signInSocial__iconWrap" aria-hidden="true">{icon}</span>
       <span className="signInSocial__text">{label}</span>
@@ -113,33 +152,90 @@ function SocialButton({ icon, label, onClick }) {
 export default function SignIn() {
   const ref = useRef(null);
   const inView = useInView(ref, { amount: 0.35, once: true });
+  const location = useLocation();
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [oauthProvider, setOauthProvider] = useState("");
+  const [formValues, setFormValues] = useState({
+    email: "",
+    password: "",
+    remember: true,
+  });
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [formError, setFormError] = useState("");
+  const [socialError, setSocialError] = useState("");
+  const categoryIntent = resolveFeaturedCategoryIntent(location.search);
+
+  useEffect(() => {
+    persistFeaturedCategoryFromSearch(location.search);
+  }, [location.search]);
+
+  const setFieldError = (name, message) => {
+    setFieldErrors((prev) => {
+      if (!message) {
+        const { [name]: _removed, ...rest } = prev;
+        return rest;
+      }
+
+      return {
+        ...prev,
+        [name]: message,
+      };
+    });
+  };
+
+  const handleFieldChange = (e) => {
+    const { name, type, value, checked } = e.target;
+    const nextValue = type === "checkbox" ? checked : value;
+
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: nextValue,
+    }));
+
+    if (fieldErrors[name]) {
+      setFieldError(name, validateSignInField(name, nextValue));
+    }
+
+    if (formError) setFormError("");
+    if (socialError) setSocialError("");
+  };
+
+  const handleFieldBlur = (e) => {
+    const { name, value } = e.target;
+    setFieldError(name, validateSignInField(name, value));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
-    const email = String(formData.get("email") || "").trim();
-    const password = String(formData.get("password") || "").trim();
-    const remember = formData.get("remember") === "on";
-
-    if (!email || !password) {
-      toast.error("Please fill in all fields.");
+    const errors = getSignInErrors(formValues);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setFormError("");
       return;
     }
 
     try {
+      setFormError("");
+      setSocialError("");
       setIsLoading(true);
-      await signIn({ email, password, remember });
+      await signIn({
+        email: formValues.email.trim(),
+        password: formValues.password,
+        remember: formValues.remember,
+      });
 
       const profile = await getProfile();
 
       toast.success(`Welcome back, ${profile.first_name}!`);
 
-      if (profile.role === "customer") {
+      if (categoryIntent) {
+        clearFeaturedCategoryIntent();
+        navigate(buildCategoryPath("/dashboard/customer/browse-services", categoryIntent));
+      } else if (profile.role === "customer") {
         navigate("/dashboard/customer");
       } else if (profile.role === "freelancer") {
         navigate("/dashboard/freelancer");
@@ -147,9 +243,30 @@ export default function SignIn() {
         navigate("/dashboard/customer");
       }
     } catch (err) {
-      toast.error(err.message || "Invalid email or password.");
+      setFormError(err.message || "Invalid email or password.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOAuth = async (provider) => {
+    try {
+      setSocialError("");
+      setFormError("");
+      setOauthProvider(provider);
+
+      setAuthFlowIntent({
+        mode: "sign-in",
+        categoryIntent,
+      });
+
+      await signInWithOAuth({
+        provider,
+        redirectTo: buildOAuthCallbackUrl("sign-in"),
+      });
+    } catch (err) {
+      setOauthProvider("");
+      setSocialError(err.message || `We couldn't start ${provider} sign-in.`);
     }
   };
 
@@ -196,14 +313,14 @@ export default function SignIn() {
             </p>
           </div>
 
-          <motion.form className="signInForm" onSubmit={handleSubmit}
+          <motion.form className="signInForm" onSubmit={handleSubmit} noValidate
             initial={{ opacity: 0, y: 10 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.55, ease: [0.2, 0.95, 0.2, 1], delay: 0.54 }}>
 
             <label className="signFieldBlock">
               <span className="signFieldBlock__label">Email</span>
-              <div className="signField">
+              <div className={`signField ${fieldErrors.email ? "signField--error" : ""}`}>
                 <span className="signField__iconWrap" aria-hidden="true">
                   <Mail className="signField__icon" />
                 </span>
@@ -211,14 +328,24 @@ export default function SignIn() {
                   className="signField__control"
                   type="email" name="email"
                   placeholder="m@example.com"
-                  autoComplete="email" required
+                  autoComplete="email"
+                  value={formValues.email}
+                  onChange={handleFieldChange}
+                  onBlur={handleFieldBlur}
+                  aria-invalid={fieldErrors.email ? "true" : "false"}
+                  aria-describedby={fieldErrors.email ? "sign-in-email-error" : undefined}
                 />
               </div>
+              {fieldErrors.email && (
+                <span className="signFieldBlock__error" id="sign-in-email-error">
+                  {fieldErrors.email}
+                </span>
+              )}
             </label>
 
             <label className="signFieldBlock">
               <span className="signFieldBlock__label">Password</span>
-              <div className="signField signField--password">
+              <div className={`signField signField--password ${fieldErrors.password ? "signField--error" : ""}`}>
                 <span className="signField__iconWrap" aria-hidden="true">
                   <Lock className="signField__icon" />
                 </span>
@@ -226,7 +353,12 @@ export default function SignIn() {
                   className="signField__control signField__control--password"
                   type={showPassword ? "text" : "password"}
                   name="password" placeholder="Password"
-                  autoComplete="current-password" required
+                  autoComplete="current-password"
+                  value={formValues.password}
+                  onChange={handleFieldChange}
+                  onBlur={handleFieldBlur}
+                  aria-invalid={fieldErrors.password ? "true" : "false"}
+                  aria-describedby={fieldErrors.password ? "sign-in-password-error" : undefined}
                 />
                 <button type="button" className="signField__toggle"
                   onClick={() => setShowPassword((prev) => !prev)}
@@ -236,6 +368,11 @@ export default function SignIn() {
                     : <Eye className="signField__toggleIcon" />}
                 </button>
               </div>
+              {fieldErrors.password && (
+                <span className="signFieldBlock__error" id="sign-in-password-error">
+                  {fieldErrors.password}
+                </span>
+              )}
             </label>
 
             <div className="signInForm__row">
@@ -245,7 +382,8 @@ export default function SignIn() {
                   type="checkbox"
                   className="signCheckbox__input"
                   name="remember"
-                  defaultChecked
+                  checked={formValues.remember}
+                  onChange={handleFieldChange}
                 />
                 <span className="signCheckbox__box" aria-hidden="true" />
                 <span className="signCheckbox__text">Remember me</span>
@@ -256,6 +394,8 @@ export default function SignIn() {
                 Forgot password?
               </button>
             </div>
+
+            {formError && <p className="signInForm__error">{formError}</p>}
 
             <motion.button type="submit" className="signPrimaryBtn"
               disabled={isLoading}
@@ -284,18 +424,37 @@ export default function SignIn() {
             initial={{ opacity: 0, y: 8 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, ease: [0.2, 0.95, 0.2, 1], delay: 0.8 }}>
-            <SocialButton icon={<GoogleIcon />} label="Google" onClick={() => toast("Google sign-in coming soon!")} />
-            <SocialButton icon={<FacebookIcon />} label="Facebook" onClick={() => toast("Facebook sign-in coming soon!")} />
-            <SocialButton icon={<TwitterIcon />} label="Twitter" onClick={() => toast("Twitter sign-in coming soon!")} />
+            <SocialButton
+              icon={<GoogleIcon />}
+              label={oauthProvider === "google" ? "Connecting..." : "Google"}
+              onClick={() => handleOAuth("google")}
+              disabled={isLoading || Boolean(oauthProvider)}
+            />
+            <SocialButton
+              icon={<FacebookIcon />}
+              label={oauthProvider === "facebook" ? "Connecting..." : "Facebook"}
+              onClick={() => handleOAuth("facebook")}
+              disabled={isLoading || Boolean(oauthProvider)}
+            />
+            <SocialButton
+              icon={<TwitterIcon />}
+              label={oauthProvider === "twitter" ? "Connecting..." : "Twitter"}
+              onClick={() => handleOAuth("twitter")}
+              disabled={isLoading || Boolean(oauthProvider)}
+            />
           </motion.div>
+          {socialError && <p className="signInForm__error signInForm__error--social">{socialError}</p>}
 
           <motion.div className="signInBottomPrompt"
             initial={{ opacity: 0, y: 8 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1], delay: 0.9 }}>
             <span className="signInBottomPrompt__text">New to our platform?</span>
-            <button type="button" className="signInBottomPrompt__link"
-              onClick={() => navigate("/sign-up")}>
+            <button
+              type="button"
+              className="signInBottomPrompt__link"
+              onClick={() => navigate(buildCategoryPath("/sign-up", categoryIntent))}
+            >
               Create Account
             </button>
           </motion.div>

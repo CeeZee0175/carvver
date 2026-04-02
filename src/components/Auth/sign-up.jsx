@@ -1,11 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, User, MapPinned } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import "./sign-up.css";
 import { Component as EtheralShadow } from "../StartUp/etheral-shadow";
-import { signUp } from "../../lib/supabase/auth";
+import { signInWithOAuth, signUp } from "../../lib/supabase/auth";
+import {
+  buildOAuthCallbackUrl,
+  setAuthFlowIntent,
+} from "../../lib/authFlowIntent";
+import {
+  buildCategoryPath,
+  persistFeaturedCategoryFromSearch,
+  resolveFeaturedCategoryIntent,
+} from "../../lib/featuredCategoryIntent";
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function GoogleIcon() {
   return (
@@ -128,11 +139,83 @@ function RoleToggle({ value, onChange }) {
   );
 }
 
-function SocialButton({ icon, label, onClick }) {
+function validateSignUpField(name, values, role) {
+  const firstName = values.firstName.trim();
+  const lastName = values.lastName.trim();
+  const country = values.country.trim();
+  const email = values.email.trim();
+
+  switch (name) {
+    case "firstName":
+      return firstName ? "" : "First name is required.";
+    case "lastName":
+      return lastName ? "" : "Last name is required.";
+    case "country":
+      if (role === "freelancer" && !country) {
+        return "Country is required for freelancer accounts.";
+      }
+      return "";
+    case "email":
+      if (!email) return "Email is required.";
+      if (!EMAIL_PATTERN.test(email)) return "Enter a valid email address.";
+      return "";
+    case "password":
+      if (!values.password) return "Password is required.";
+      if (values.password.length < 6) return "Password must be at least 6 characters.";
+      return "";
+    case "confirmPassword":
+      if (!values.confirmPassword) return "Please confirm your password.";
+      if (values.password !== values.confirmPassword) return "Passwords do not match.";
+      return "";
+    case "agreeTerms":
+      return values.agreeTerms
+        ? ""
+        : "You need to accept the Terms and Privacy Policy.";
+    default:
+      return "";
+  }
+}
+
+function getSignUpErrors(values, role) {
+  const nextErrors = {};
+
+  [
+    "firstName",
+    "lastName",
+    "country",
+    "email",
+    "password",
+    "confirmPassword",
+    "agreeTerms",
+  ].forEach((fieldName) => {
+    const error = validateSignUpField(fieldName, values, role);
+    if (error) {
+      nextErrors[fieldName] = error;
+    }
+  });
+
+  return nextErrors;
+}
+
+function getSocialSignUpErrors(values, role) {
+  const nextErrors = {};
+
+  ["country", "agreeTerms"].forEach((fieldName) => {
+    const error = validateSignUpField(fieldName, values, role);
+    if (error) {
+      nextErrors[fieldName] = error;
+    }
+  });
+
+  return nextErrors;
+}
+
+function SocialButton({ icon, label, onClick, disabled }) {
   return (
     <motion.button type="button" className="signUpSocial"
       whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.97 }}
-      transition={{ type: "spring", stiffness: 360, damping: 24 }} onClick={onClick}>
+      transition={{ type: "spring", stiffness: 360, damping: 24 }} onClick={onClick}
+      disabled={disabled}>
       <span className="signUpSocial__iconWrap" aria-hidden="true">{icon}</span>
       <span className="signUpSocial__text">{label}</span>
     </motion.button>
@@ -142,42 +225,159 @@ function SocialButton({ icon, label, onClick }) {
 export default function SignUp() {
   const ref = useRef(null);
   const inView = useInView(ref, { amount: 0.35, once: true });
+  const location = useLocation();
   const navigate = useNavigate();
 
   const [role, setRole] = useState("customer");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [oauthProvider, setOauthProvider] = useState("");
+  const [formValues, setFormValues] = useState({
+    firstName: "",
+    lastName: "",
+    country: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    agreeTerms: false,
+    subscribe: false,
+  });
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [formError, setFormError] = useState("");
+  const [socialError, setSocialError] = useState("");
+  const categoryIntent = resolveFeaturedCategoryIntent(location.search);
+
+  useEffect(() => {
+    persistFeaturedCategoryFromSearch(location.search);
+  }, [location.search]);
+
+  const setFieldError = (name, message) => {
+    setFieldErrors((prev) => {
+      if (!message) {
+        const { [name]: _removed, ...rest } = prev;
+        return rest;
+      }
+
+      return {
+        ...prev,
+        [name]: message,
+      };
+    });
+  };
+
+  const handleFieldChange = (e) => {
+    const { name, type, value, checked } = e.target;
+    const nextValue = type === "checkbox" ? checked : value;
+    const nextValues = {
+      ...formValues,
+      [name]: nextValue,
+    };
+
+    setFormValues(nextValues);
+
+    if (fieldErrors[name]) {
+      setFieldError(name, validateSignUpField(name, nextValues, role));
+    }
+
+    if (name === "password" && (fieldErrors.confirmPassword || nextValues.confirmPassword)) {
+      setFieldError(
+        "confirmPassword",
+        validateSignUpField("confirmPassword", nextValues, role)
+      );
+    }
+
+    if (formError) setFormError("");
+    if (socialError) setSocialError("");
+  };
+
+  const handleFieldBlur = (e) => {
+    const { name, type, value, checked } = e.target;
+    const nextValues = {
+      ...formValues,
+      [name]: type === "checkbox" ? checked : value,
+    };
+
+    setFieldError(name, validateSignUpField(name, nextValues, role));
+  };
+
+  const handleRoleChange = (nextRole) => {
+    setRole(nextRole);
+
+    if (nextRole !== "freelancer") {
+      setFieldError("country", "");
+    } else if (fieldErrors.country) {
+      setFieldError("country", validateSignUpField("country", formValues, nextRole));
+    }
+
+    if (formError) setFormError("");
+    if (socialError) setSocialError("");
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
-    const firstName = String(formData.get("firstName") || "").trim();
-    const lastName = String(formData.get("lastName") || "").trim();
-    const email = String(formData.get("email") || "").trim();
-    const password = String(formData.get("password") || "").trim();
-    const confirmPassword = String(formData.get("confirmPassword") || "").trim();
-    const country = String(formData.get("country") || "").trim();
-
-    if (password !== confirmPassword) {
-      toast.error("Passwords don't match!");
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters.");
+    const errors = getSignUpErrors(formValues, role);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setFormError("");
       return;
     }
 
     try {
+      setFormError("");
+      setSocialError("");
       setIsLoading(true);
-      await signUp({ firstName, lastName, email, password, role, country });
+      await signUp({
+        firstName: formValues.firstName.trim(),
+        lastName: formValues.lastName.trim(),
+        email: formValues.email.trim(),
+        password: formValues.password,
+        role,
+        country: formValues.country.trim(),
+      });
       toast.success("Account created! Please check your email to verify.");
+      if (categoryIntent) {
+        navigate(buildCategoryPath("/sign-in", categoryIntent), { replace: true });
+      }
     } catch (err) {
-      toast.error(err.message || "Something went wrong. Please try again.");
+      setFormError(err.message || "Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOAuth = async (provider) => {
+    const errors = getSocialSignUpErrors(formValues, role);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        ...errors,
+      }));
+      return;
+    }
+
+    try {
+      setSocialError("");
+      setFormError("");
+      setOauthProvider(provider);
+
+      setAuthFlowIntent({
+        mode: "sign-up",
+        role,
+        country: role === "freelancer" ? formValues.country.trim() : "",
+        firstName: formValues.firstName.trim(),
+        lastName: formValues.lastName.trim(),
+        categoryIntent,
+      });
+
+      await signInWithOAuth({
+        provider,
+        redirectTo: buildOAuthCallbackUrl("sign-up"),
+      });
+    } catch (err) {
+      setOauthProvider("");
+      setSocialError(err.message || `We couldn't start ${provider} sign-up.`);
     }
   };
 
@@ -229,10 +429,10 @@ export default function SignUp() {
             initial={{ opacity: 0, y: 8 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1], delay: 0.42 }}>
-            <RoleToggle value={role} onChange={setRole} />
+            <RoleToggle value={role} onChange={handleRoleChange} />
           </motion.div>
 
-          <motion.form className="signUpForm" onSubmit={handleSubmit}
+          <motion.form className="signUpForm" onSubmit={handleSubmit} noValidate
             initial={{ opacity: 0, y: 10 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.55, ease: [0.2, 0.95, 0.2, 1], delay: 0.54 }}>
@@ -240,20 +440,40 @@ export default function SignUp() {
             <div className="signUpRow signUpRow--two">
               <label className="signUpFieldBlock">
                 <span className="signUpFieldBlock__label">First Name</span>
-                <div className="signUpField">
+                <div className={`signUpField ${fieldErrors.firstName ? "signUpField--error" : ""}`}>
                   <span className="signUpField__iconWrap" aria-hidden="true"><User className="signUpField__icon" /></span>
                   <input className="signUpField__control" type="text" name="firstName"
-                    placeholder="John" autoComplete="given-name" required />
+                    placeholder="John" autoComplete="given-name"
+                    value={formValues.firstName}
+                    onChange={handleFieldChange}
+                    onBlur={handleFieldBlur}
+                    aria-invalid={fieldErrors.firstName ? "true" : "false"}
+                    aria-describedby={fieldErrors.firstName ? "sign-up-first-name-error" : undefined} />
                 </div>
+                {fieldErrors.firstName && (
+                  <span className="signUpFieldBlock__error" id="sign-up-first-name-error">
+                    {fieldErrors.firstName}
+                  </span>
+                )}
               </label>
 
               <label className="signUpFieldBlock">
                 <span className="signUpFieldBlock__label">Last Name</span>
-                <div className="signUpField">
+                <div className={`signUpField ${fieldErrors.lastName ? "signUpField--error" : ""}`}>
                   <span className="signUpField__iconWrap" aria-hidden="true"><User className="signUpField__icon" /></span>
                   <input className="signUpField__control" type="text" name="lastName"
-                    placeholder="Doe" autoComplete="family-name" required />
+                    placeholder="Doe" autoComplete="family-name"
+                    value={formValues.lastName}
+                    onChange={handleFieldChange}
+                    onBlur={handleFieldBlur}
+                    aria-invalid={fieldErrors.lastName ? "true" : "false"}
+                    aria-describedby={fieldErrors.lastName ? "sign-up-last-name-error" : undefined} />
                 </div>
+                {fieldErrors.lastName && (
+                  <span className="signUpFieldBlock__error" id="sign-up-last-name-error">
+                    {fieldErrors.lastName}
+                  </span>
+                )}
               </label>
             </div>
 
@@ -267,11 +487,21 @@ export default function SignUp() {
                   className="signUpReveal">
                   <label className="signUpFieldBlock">
                     <span className="signUpFieldBlock__label">Country</span>
-                    <div className="signUpField">
+                    <div className={`signUpField ${fieldErrors.country ? "signUpField--error" : ""}`}>
                       <span className="signUpField__iconWrap" aria-hidden="true"><MapPinned className="signUpField__icon" /></span>
                       <input className="signUpField__control" type="text" name="country"
-                        placeholder="Philippines" autoComplete="country-name" required={role === "freelancer"} />
+                        placeholder="Philippines" autoComplete="country-name"
+                        value={formValues.country}
+                        onChange={handleFieldChange}
+                        onBlur={handleFieldBlur}
+                        aria-invalid={fieldErrors.country ? "true" : "false"}
+                        aria-describedby={fieldErrors.country ? "sign-up-country-error" : undefined} />
                     </div>
+                    {fieldErrors.country && (
+                      <span className="signUpFieldBlock__error" id="sign-up-country-error">
+                        {fieldErrors.country}
+                      </span>
+                    )}
                   </label>
                 </motion.div>
               )}
@@ -279,46 +509,78 @@ export default function SignUp() {
 
             <label className="signUpFieldBlock">
               <span className="signUpFieldBlock__label">Email</span>
-              <div className="signUpField">
+              <div className={`signUpField ${fieldErrors.email ? "signUpField--error" : ""}`}>
                 <span className="signUpField__iconWrap" aria-hidden="true"><Mail className="signUpField__icon" /></span>
                 <input className="signUpField__control" type="email" name="email"
-                  placeholder="m@example.com" autoComplete="email" required />
+                  placeholder="m@example.com" autoComplete="email"
+                  value={formValues.email}
+                  onChange={handleFieldChange}
+                  onBlur={handleFieldBlur}
+                  aria-invalid={fieldErrors.email ? "true" : "false"}
+                  aria-describedby={fieldErrors.email ? "sign-up-email-error" : undefined} />
               </div>
+              {fieldErrors.email && (
+                <span className="signUpFieldBlock__error" id="sign-up-email-error">
+                  {fieldErrors.email}
+                </span>
+              )}
             </label>
 
             <label className="signUpFieldBlock">
               <span className="signUpFieldBlock__label">Password</span>
-              <div className="signUpField signUpField--password">
+              <div className={`signUpField signUpField--password ${fieldErrors.password ? "signUpField--error" : ""}`}>
                 <span className="signUpField__iconWrap" aria-hidden="true"><Lock className="signUpField__icon" /></span>
                 <input className="signUpField__control signUpField__control--password"
                   type={showPassword ? "text" : "password"} name="password"
-                  placeholder="Password" autoComplete="new-password" required />
+                  placeholder="Password" autoComplete="new-password"
+                  value={formValues.password}
+                  onChange={handleFieldChange}
+                  onBlur={handleFieldBlur}
+                  aria-invalid={fieldErrors.password ? "true" : "false"}
+                  aria-describedby={fieldErrors.password ? "sign-up-password-error" : undefined} />
                 <button type="button" className="signUpField__toggle"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? "Hide password" : "Show password"}>
                   {showPassword ? <EyeOff className="signUpField__toggleIcon" /> : <Eye className="signUpField__toggleIcon" />}
                 </button>
               </div>
+              {fieldErrors.password && (
+                <span className="signUpFieldBlock__error" id="sign-up-password-error">
+                  {fieldErrors.password}
+                </span>
+              )}
             </label>
 
             <label className="signUpFieldBlock">
               <span className="signUpFieldBlock__label">Confirm Password</span>
-              <div className="signUpField signUpField--password">
+              <div className={`signUpField signUpField--password ${fieldErrors.confirmPassword ? "signUpField--error" : ""}`}>
                 <span className="signUpField__iconWrap" aria-hidden="true"><Lock className="signUpField__icon" /></span>
                 <input className="signUpField__control signUpField__control--password"
                   type={showConfirmPassword ? "text" : "password"} name="confirmPassword"
-                  placeholder="Confirm Password" autoComplete="new-password" required />
+                  placeholder="Confirm Password" autoComplete="new-password"
+                  value={formValues.confirmPassword}
+                  onChange={handleFieldChange}
+                  onBlur={handleFieldBlur}
+                  aria-invalid={fieldErrors.confirmPassword ? "true" : "false"}
+                  aria-describedby={fieldErrors.confirmPassword ? "sign-up-confirm-password-error" : undefined} />
                 <button type="button" className="signUpField__toggle"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
                   aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}>
                   {showConfirmPassword ? <EyeOff className="signUpField__toggleIcon" /> : <Eye className="signUpField__toggleIcon" />}
                 </button>
               </div>
+              {fieldErrors.confirmPassword && (
+                <span className="signUpFieldBlock__error" id="sign-up-confirm-password-error">
+                  {fieldErrors.confirmPassword}
+                </span>
+              )}
             </label>
 
-            <div className="signUpChecks">
-              <label className="signUpCheck signUpCheck--top">
-                <input type="checkbox" className="signUpCheck__input" required />
+            <div className={`signUpChecks ${fieldErrors.agreeTerms ? "signUpChecks--error" : ""}`}>
+              <label className={`signUpCheck signUpCheck--top ${fieldErrors.agreeTerms ? "signUpCheck--error" : ""}`}>
+                <input type="checkbox" className="signUpCheck__input" name="agreeTerms"
+                  checked={formValues.agreeTerms}
+                  onChange={handleFieldChange} />
                 <span className="signUpCheck__box" aria-hidden="true" />
                 <span className="signUpCheck__text">
                   I agree to the{" "}
@@ -329,13 +591,19 @@ export default function SignUp() {
               </label>
 
               <label className="signUpCheck">
-                <input type="checkbox" className="signUpCheck__input" />
+                <input type="checkbox" className="signUpCheck__input" name="subscribe"
+                  checked={formValues.subscribe}
+                  onChange={handleFieldChange} />
                 <span className="signUpCheck__box" aria-hidden="true" />
                 <span className="signUpCheck__text">
                   Subscribe to our newsletter to never miss out on anything.
                 </span>
               </label>
             </div>
+            {fieldErrors.agreeTerms && (
+              <p className="signUpForm__error">{fieldErrors.agreeTerms}</p>
+            )}
+            {formError && <p className="signUpForm__error">{formError}</p>}
 
             <motion.button type="submit" className="signUpPrimaryBtn"
               disabled={isLoading}
@@ -364,17 +632,37 @@ export default function SignUp() {
             initial={{ opacity: 0, y: 8 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, ease: [0.2, 0.95, 0.2, 1], delay: 0.86 }}>
-            <SocialButton icon={<GoogleIcon />} label="Google" onClick={() => toast("Google sign-up coming soon!")} />
-            <SocialButton icon={<FacebookIcon />} label="Facebook" onClick={() => toast("Facebook sign-up coming soon!")} />
-            <SocialButton icon={<TwitterIcon />} label="Twitter" onClick={() => toast("Twitter sign-up coming soon!")} />
+            <SocialButton
+              icon={<GoogleIcon />}
+              label={oauthProvider === "google" ? "Connecting..." : "Google"}
+              onClick={() => handleOAuth("google")}
+              disabled={isLoading || Boolean(oauthProvider)}
+            />
+            <SocialButton
+              icon={<FacebookIcon />}
+              label={oauthProvider === "facebook" ? "Connecting..." : "Facebook"}
+              onClick={() => handleOAuth("facebook")}
+              disabled={isLoading || Boolean(oauthProvider)}
+            />
+            <SocialButton
+              icon={<TwitterIcon />}
+              label={oauthProvider === "twitter" ? "Connecting..." : "Twitter"}
+              onClick={() => handleOAuth("twitter")}
+              disabled={isLoading || Boolean(oauthProvider)}
+            />
           </motion.div>
+          {socialError && <p className="signUpForm__error signUpForm__error--social">{socialError}</p>}
 
           <motion.div className="signUpBottomPrompt"
             initial={{ opacity: 0, y: 8 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1], delay: 0.94 }}>
             <span className="signUpBottomPrompt__text">Already have an account?</span>
-            <button type="button" className="signUpBottomPrompt__link" onClick={() => navigate("/sign-in")}>
+            <button
+              type="button"
+              className="signUpBottomPrompt__link"
+              onClick={() => navigate(buildCategoryPath("/sign-in", categoryIntent))}
+            >
               Sign In
             </button>
           </motion.div>

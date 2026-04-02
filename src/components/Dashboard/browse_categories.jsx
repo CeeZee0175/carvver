@@ -11,7 +11,7 @@ import {
   useReducedMotion,
   AnimatePresence,
 } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Bookmark,
@@ -32,6 +32,7 @@ import {
   Star,
   Video,
   BadgeCheck,
+  Code2,
   ArrowUpDown,
   X,
   Clock,
@@ -54,6 +55,10 @@ import DashBar from "./dashbar";
 import HomeFooter from "../Homepage/home_footer";
 import { Component as EtheralShadow } from "../StartUp/etheral-shadow";
 import { createClient } from "../../lib/supabase/client";
+import {
+  clearFeaturedCategoryIntent,
+  resolveFeaturedCategoryIntent,
+} from "../../lib/featuredCategoryIntent";
 
 const supabase = createClient();
 
@@ -77,6 +82,7 @@ const CATEGORY_GROUPS = [
       "Voice Over",
       "Social Media",
       "Photography",
+      "Web Development",
     ],
   },
   {
@@ -338,6 +344,7 @@ const CATEGORY_ICONS = {
   "Graphic Design": PenTool,
   "Voice Over": Mic2,
   "Social Media": Share2,
+  "Web Development": Code2,
   "Tutoring": GraduationCap,
   "Handmade Products": ShoppingBag,
 };
@@ -1167,9 +1174,11 @@ function FilterDropdown({ label, icon: Icon, open, onToggle, children, wide }) {
 /* ────────────────────────────────────────────────────────────────────────── */
 
 export default function BrowseCategories() {
+  const location = useLocation();
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
   const cardTransition = { type: "spring", stiffness: 340, damping: 26 };
+  const initialCategoryIntent = resolveFeaturedCategoryIntent(location.search);
 
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1177,7 +1186,9 @@ export default function BrowseCategories() {
   const [openMenu, setOpenMenu] = useState(null);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
 
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState(() =>
+    initialCategoryIntent ? [initialCategoryIntent] : []
+  );
   const [includeOthers, setIncludeOthers] = useState(false);
 
   const [deliveryDays, setDeliveryDays] = useState(null);
@@ -1199,6 +1210,18 @@ export default function BrowseCategories() {
   const [savedIds, setSavedIds] = useState([]);
 
   const filterRef = useRef(null);
+
+  useEffect(() => {
+    const nextCategoryIntent = resolveFeaturedCategoryIntent(location.search);
+    if (!nextCategoryIntent) return;
+
+    setSelectedCategories((prev) => {
+      if (prev.length === 1 && prev[0] === nextCategoryIntent) return prev;
+      return [nextCategoryIntent];
+    });
+    setIncludeOthers(false);
+    clearFeaturedCategoryIntent();
+  }, [location.search]);
 
   useEffect(() => {
     async function load() {
