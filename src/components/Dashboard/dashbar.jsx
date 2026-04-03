@@ -193,7 +193,7 @@ export default function DashBar() {
     }
 
     if (label === "About Us") {
-      navigate("/about-us");
+      navigate("/dashboard/customer/about-us");
       return;
     }
 

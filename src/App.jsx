@@ -11,6 +11,7 @@ const AuthCallback = lazy(() => import("./components/Auth/auth_callback"));
 const SignIn = lazy(() => import("./components/Auth/sign-in"));
 const SignUp = lazy(() => import("./components/Auth/sign-up"));
 const DashboardCustomer = lazy(() => import("./components/Dashboard/dashboard_customer"));
+const DashboardAboutUs = lazy(() => import("./components/Dashboard/dashboard_aboutUs"));
 const BrowseCategories = lazy(() => import("./components/Dashboard/browse_categories"));
 const FavBook = lazy(() => import("./components/Dashboard/favBook"));
 const NotifPage = lazy(() => import("./components/Dashboard/notifPage"));
@@ -126,6 +127,16 @@ function AppRoutes() {
           <Suspense fallback={<RouteFallback />}>
             <ProtectedRoute>
               <DashboardCustomer />
+            </ProtectedRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/customer/about-us"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <ProtectedRoute>
+              <DashboardAboutUs />
             </ProtectedRoute>
           </Suspense>
         }

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import {
   Award,
@@ -17,7 +17,7 @@ import "./home_footer.css";
 
 const exploreLinks = [
   { label: "Home", target: "home-hero" },
-  { label: "About Us", route: "/about-us" },
+  { label: "About Us", routeKey: "about-us" },
   { label: "Categories", target: "home-categories" },
   { label: "How It Works", target: "home-how" },
   { label: "Stay Tuned", target: "home-updates" },
@@ -171,9 +171,19 @@ function FooterLinkItem({ item, index, onNavigate, onRouteNavigate, active }) {
 
 export default function HomeFooter({ fullBleed = false }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const ref = useRef(null);
   const inView = useInView(ref, { amount: 0.14, once: true });
   const reduceMotion = useReducedMotion();
+  const aboutUsRoute = location.pathname.startsWith("/dashboard/customer")
+    ? "/dashboard/customer/about-us"
+    : "/about-us";
+
+  const resolvedExploreLinks = exploreLinks.map((item) =>
+    item.routeKey === "about-us"
+      ? { ...item, route: aboutUsRoute }
+      : item
+  );
 
   const scrollToTarget = (id) => {
     if (!id) return;
@@ -259,7 +269,7 @@ export default function HomeFooter({ fullBleed = false }) {
             <div className="homeFooter__col">
               <FooterHeading active={inView}>Explore</FooterHeading>
               <div className="homeFooter__links">
-                {exploreLinks.map((item, index) => (
+                {resolvedExploreLinks.map((item, index) => (
                   <FooterLinkItem
                     key={item.label}
                     item={item}
