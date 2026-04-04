@@ -21,6 +21,7 @@ import toast, { Toaster } from "react-hot-toast";
 import "./dashbar.css";
 import { signOut, getProfile } from "../../lib/supabase/auth";
 import { formatNotificationTime, useNotifications } from "./useNotifications";
+import { getCustomerDisplayName, getCustomerInitials } from "./customerAchievements";
 
 const SPRING = { type: "spring", stiffness: 340, damping: 24 };
 
@@ -95,12 +96,10 @@ export default function DashBar() {
     getProfile()
       .then((profile) => {
         if (!profile) return;
-        const first = profile.first_name || "";
-        const last = profile.last_name || "";
         setUser({
-          fullName: `${first} ${last}`.trim(),
+          fullName: getCustomerDisplayName(profile),
           email: profile.email || "",
-          initials: `${first.charAt(0)}${last.charAt(0)}`.toUpperCase(),
+          initials: getCustomerInitials(profile),
         });
       })
       .catch(() => {
@@ -202,6 +201,17 @@ export default function DashBar() {
 
   const handleProfileMenuClick = (label) => {
     setOpenProfile(false);
+
+    if (label === "View Profile") {
+      navigate("/dashboard/customer/profile");
+      return;
+    }
+
+    if (label === "My Orders") {
+      navigate("/dashboard/customer/orders");
+      return;
+    }
+
     toast(`${label} coming soon!`);
   };
 

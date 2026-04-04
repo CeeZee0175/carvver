@@ -15,6 +15,9 @@ const DashboardAboutUs = lazy(() => import("./components/Dashboard/dashboard_abo
 const BrowseCategories = lazy(() => import("./components/Dashboard/browse_categories"));
 const FavBook = lazy(() => import("./components/Dashboard/favBook"));
 const NotifPage = lazy(() => import("./components/Dashboard/notifPage"));
+const Profile = lazy(() => import("./components/Dashboard/profile"));
+const ProfileAchievements = lazy(() => import("./components/Dashboard/profileAchievements"));
+const CustomerOrders = lazy(() => import("./components/Dashboard/customerOrders"));
 
 function RouteFallback({ withNav = false }) {
   return (
@@ -167,6 +170,36 @@ function AppRoutes() {
           <Suspense fallback={<RouteFallback />}>
             <ProtectedRoute>
               <NotifPage />
+            </ProtectedRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/customer/profile"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/customer/profile/achievements"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <ProtectedRoute>
+              <ProfileAchievements />
+            </ProtectedRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/customer/orders"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <ProtectedRoute>
+              <CustomerOrders />
             </ProtectedRoute>
           </Suspense>
         }
