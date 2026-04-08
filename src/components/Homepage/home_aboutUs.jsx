@@ -12,6 +12,12 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+import founderCarl from "../../assets/Carl Cardinal.jpg";
+import founderShaira from "../../assets/Shaira Brillantes.jpg";
+import founderGeoff from "../../assets/Geoff Montua.jpg";
+import founderAngelo from "../../assets/Angelo Nollano.jpg";
+import founderJhoanis from "../../assets/Jhoanis Zuniga.jpg";
+import founderMark from "../../assets/Mark Caraballe.jpg";
 import "./home_aboutUs.css";
 
 const SCRAMBLE_CHARS =
@@ -116,7 +122,8 @@ const founders = [
       "Carvver should be the place where talented hobbyists and casual freelancers feel taken seriously before the market expects them to look like a full studio.",
     bio:
       "Carl anchors the vision of Carvver around creator opportunity, clearer trust, and a platform that helps Filipino providers grow without being buried by larger marketplaces.",
-    imageSrc: "",
+    imageSrc: founderCarl,
+    imagePosition: "center 18%",
   },
   {
     name: "Shaira Brillantes",
@@ -125,7 +132,8 @@ const founders = [
       "The product should feel welcoming from the first listing, but still structured enough that customers can trust what they are seeing.",
     bio:
       "Shaira focuses on how the platform feels in use, making sure discovery, profile clarity, and milestone-driven credibility work together as one coherent customer and provider experience.",
-    imageSrc: "",
+    imageSrc: founderShaira,
+    imagePosition: "center 20%",
   },
   {
     name: "Geoff Montua",
@@ -134,7 +142,8 @@ const founders = [
       "A creator-first platform only works if the foundation is stable enough to support safer transactions, clearer proof, and smoother day-to-day use.",
     bio:
       "Geoff helps shape the technical backbone behind Carvver, from the web experience itself to the features that make few-click posting and escrow-backed workflows viable at scale.",
-    imageSrc: "",
+    imageSrc: founderGeoff,
+    imagePosition: "center 16%",
   },
   {
     name: "Angelo Nollano",
@@ -143,16 +152,18 @@ const founders = [
       "Trust cannot live in the interface alone; it also has to show up in how the platform is reviewed, moderated, and supported behind the scenes.",
     bio:
       "Angelo represents the operational side of Carvver, helping define how moderation, verification flow, and smoother platform support can make the marketplace feel safer for both sides.",
-    imageSrc: "",
+    imageSrc: founderAngelo,
+    imagePosition: "center 20%",
   },
   {
-    name: "Jhoanis Paulo Zuñiga",
+    name: "Jhoanis Paulo Zu\u00f1iga",
     role: "Co-founder & Chief Growth & Marketing Officer",
     quote:
       "Growth should not depend on creators shouting louder than everyone else. The platform should help them travel further without losing clarity.",
     bio:
       "Jhoanis Paulo shapes how Carvver reaches people, tying together social visibility, creator promotion, and the few-click posting direction that expands discovery beyond one platform.",
-    imageSrc: "",
+    imageSrc: founderJhoanis,
+    imagePosition: "center 18%",
   },
   {
     name: "Mark Caraballe",
@@ -161,7 +172,8 @@ const founders = [
       "A community-driven platform gets stronger when the people using it feel heard early, especially while the product is still learning what the market needs most.",
     bio:
       "Mark brings the community and partnership lens, reinforcing Carvver's early-adopter energy through local outreach, user feedback, and the collaborative direction described in the concept paper.",
-    imageSrc: "",
+    imageSrc: founderMark,
+    imagePosition: "center 20%",
   },
 ];
 
@@ -183,8 +195,8 @@ function getFounderInitials(name) {
 function calculateFounderGap(width) {
   const minWidth = 320;
   const maxWidth = 820;
-  const minGap = 110;
-  const maxGap = 250;
+  const minGap = 124;
+  const maxGap = 274;
 
   if (width <= minWidth) return minGap;
   if (width >= maxWidth) return maxGap;
@@ -467,7 +479,10 @@ function FoundersBand() {
   const previousIndex = wrapIndex(totalFounders, activeIndex - 1);
   const nextIndex = wrapIndex(totalFounders, activeIndex + 1);
   const gap = useMemo(() => calculateFounderGap(stageWidth), [stageWidth]);
-  const lift = Math.round(Math.min(58, gap * 0.18));
+  const sideScale = stageWidth < 560 ? 0.7 : 0.78;
+  const sideOpacity = stageWidth < 560 ? 0.56 : 0.76;
+  const sideBrightness = stageWidth < 560 ? 0.84 : 0.92;
+  const lift = Math.round(Math.min(46, gap * 0.14));
 
   useEffect(() => {
     const updateWidth = () => {
@@ -566,21 +581,25 @@ function FoundersBand() {
                   aria-label={`Open ${founder.name}`}
                   aria-pressed={isActive}
                   onClick={() => goToIndex(index)}
-                  whileHover={reduceMotion ? undefined : { scale: isActive ? 1.01 : 0.87 }}
-                  whileTap={reduceMotion ? undefined : { scale: isActive ? 0.99 : 0.84 }}
+                  whileHover={
+                    reduceMotion ? undefined : { scale: isActive ? 1.015 : sideScale + 0.03 }
+                  }
+                  whileTap={
+                    reduceMotion ? undefined : { scale: isActive ? 0.992 : sideScale - 0.02 }
+                  }
                   animate={{
                     x: isActive ? 0 : isPrevious ? -gap : isNext ? gap : 0,
                     y: isActive ? 0 : -lift,
-                    scale: isActive ? 1 : 0.84,
-                    rotateY: isPrevious ? 16 : isNext ? -16 : 0,
-                    opacity: isVisible ? 1 : 0,
+                    scale: isActive ? 1 : sideScale,
+                    rotateY: isPrevious ? 15 : isNext ? -15 : 0,
+                    opacity: isActive ? 1 : isVisible ? sideOpacity : 0,
                     filter: isActive
-                      ? "blur(0px) brightness(1)"
+                      ? "blur(0px) saturate(1) brightness(1)"
                       : isVisible
-                      ? "blur(0px) brightness(0.92)"
-                      : "blur(12px) brightness(0.72)",
+                      ? `blur(0px) saturate(0.94) brightness(${sideBrightness})`
+                      : "blur(12px) saturate(0.84) brightness(0.72)",
                   }}
-                  transition={{ type: "spring", stiffness: 280, damping: 28 }}
+                  transition={{ type: "spring", stiffness: 265, damping: 28, mass: 0.96 }}
                   style={{
                     zIndex: isActive ? 3 : isVisible ? 2 : 1,
                     pointerEvents: isVisible ? "auto" : "none",
@@ -593,6 +612,9 @@ function FoundersBand() {
                         src={founder.imageSrc}
                         alt={founder.name}
                         className="aboutUsFounderCard__image"
+                        loading="lazy"
+                        decoding="async"
+                        style={{ objectPosition: founder.imagePosition || "center 20%" }}
                         onError={() => markImageFailed(founder.name)}
                       />
                     ) : (
