@@ -21,14 +21,15 @@ import {
   Reveal,
   TypewriterHeading,
 } from "./customerProfileShared";
-import { PROFILE_SPRING } from "./customerProfileConfig";
-import {
-  calculateFreelancerNet,
-  calculatePlatformFee,
-  formatPeso,
-  useCart,
-} from "./useCart";
+import { formatPeso, useCart } from "./useCart";
 import "./cart_page.css";
+
+const CART_ACTION_SPRING = {
+  type: "spring",
+  stiffness: 230,
+  damping: 24,
+  mass: 0.92,
+};
 
 function CartLineItem({ item, onRemove, removing }) {
   const service = item.services;
@@ -75,13 +76,6 @@ function CartLineItem({ item, onRemove, removing }) {
             )}
           </div>
 
-          {!invalid && (
-            <p className="cartLineItem__split">
-              Carvver holds {formatPeso(calculatePlatformFee(price))} from this
-              escrowed payment, leaving {formatPeso(calculateFreelancerNet(price))}
-              for freelancer release later.
-            </p>
-          )}
           {invalid && (
             <p className="cartLineItem__split cartLineItem__split--warning">
               Remove this item before checkout. Only currently published service
@@ -96,9 +90,9 @@ function CartLineItem({ item, onRemove, removing }) {
         <motion.button
           type="button"
           className="cartLineItem__remove"
-          whileHover={{ y: -1 }}
-          whileTap={{ scale: 0.97 }}
-          transition={PROFILE_SPRING}
+          whileHover={{ y: -2, scale: 1.01 }}
+          whileTap={{ scale: 0.985 }}
+          transition={CART_ACTION_SPRING}
           onClick={() => onRemove(item.service_id)}
           disabled={removing}
         >
@@ -123,6 +117,34 @@ function CartSkeleton() {
       </div>
       <div className="cartSkeleton cartSkeleton--actions" />
     </div>
+  );
+}
+
+function CartSummarySkeleton() {
+  return (
+    <section className="cartSummary cartSummary--loading" aria-hidden="true">
+      <div className="cartSummary__head cartSummary__head--loading">
+        <div className="cartSkeleton cartSummarySkeleton__eyebrow" />
+        <div className="cartSkeleton cartSummarySkeleton__title" />
+      </div>
+
+      <div className="cartSummary__rows">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index} className="cartSummary__row cartSummary__row--loading">
+            <div className="cartSkeleton cartSummarySkeleton__label" />
+            <div className="cartSkeleton cartSummarySkeleton__value" />
+          </div>
+        ))}
+      </div>
+
+      <div className="cartWarning cartWarning--loading">
+        <div className="cartSkeleton cartSummarySkeleton__card cartSummarySkeleton__card--short" />
+        <div className="cartSkeleton cartSummarySkeleton__card" />
+      </div>
+
+      <div className="cartSkeleton cartSummarySkeleton__button" />
+      <div className="cartSkeleton cartSummarySkeleton__button cartSummarySkeleton__button--ghost" />
+    </section>
   );
 }
 
@@ -168,8 +190,6 @@ export default function CartPage() {
           ...item,
           invalid,
           amount,
-          platformFee: calculatePlatformFee(amount),
-          freelancerNet: calculateFreelancerNet(amount),
         };
       }),
     [items]
@@ -180,21 +200,17 @@ export default function CartPage() {
 
   const summary = useMemo(() => {
     const subtotal = validItems.reduce((total, item) => total + item.amount, 0);
-    const platformFee = validItems.reduce(
-      (total, item) => total + item.platformFee,
-      0
-    );
-    const freelancerNet = validItems.reduce(
-      (total, item) => total + item.freelancerNet,
-      0
-    );
 
     return {
       subtotal,
-      platformFee,
-      freelancerNet,
     };
   }, [validItems]);
+
+  const heroListingsValue = loading ? "..." : validItems.length;
+  const heroTotalValue = loading ? "..." : formatPeso(summary.subtotal);
+  const showSuccessEmpty =
+    !loading && items.length === 0 && checkoutState === "success";
+  const showEmptyCart = !loading && items.length === 0 && checkoutState !== "success";
 
   const handleRemove = async (serviceId) => {
     try {
@@ -234,8 +250,6 @@ export default function CartPage() {
     }
   };
 
-  const showSuccessEmpty = !loading && items.length === 0 && checkoutState === "success";
-
   return (
     <CustomerDashboardFrame mainClassName="cartPage">
       <Reveal>
@@ -269,31 +283,29 @@ export default function CartPage() {
               </motion.svg>
             </div>
             <p className="cartHero__sub">
-              Keep service listings in one place, pay the exact listed amount,
-              and let Carvver hold the transaction in escrow while the platform
-              keeps its 5% commission from the freelancer payout.
+              Collect the listings you want to book, pay the listed total
+              through PayMongo, and let Carvver hold the payment in escrow while
+              the order gets underway.
             </p>
           </div>
 
           <div className="cartHero__stats">
             <div className="cartHeroStat">
               <span className="cartHeroStat__label">Listings</span>
-              <strong className="cartHeroStat__value">{validItems.length}</strong>
+              <strong className="cartHeroStat__value">{heroListingsValue}</strong>
               <span className="cartHeroStat__hint">Ready for checkout</span>
             </div>
             <div className="cartHeroStat">
               <span className="cartHeroStat__label">Customer total</span>
-              <strong className="cartHeroStat__value">
-                {formatPeso(summary.subtotal)}
-              </strong>
-              <span className="cartHeroStat__hint">No extra platform surcharge</span>
+              <strong className="cartHeroStat__value">{heroTotalValue}</strong>
+              <span className="cartHeroStat__hint">Charged at the listed price</span>
             </div>
             <div className="cartHeroStat">
-              <span className="cartHeroStat__label">Carvver fee</span>
-              <strong className="cartHeroStat__value">
-                {formatPeso(summary.platformFee)}
-              </strong>
-              <span className="cartHeroStat__hint">Held from payout, not from buyer</span>
+              <span className="cartHeroStat__label">Escrow</span>
+              <strong className="cartHeroStat__value">Held safely</strong>
+              <span className="cartHeroStat__hint">
+                Released only after the order moves forward
+              </span>
             </div>
           </div>
         </section>
@@ -321,7 +333,7 @@ export default function CartPage() {
               </h2>
               <p className="cartNotice__desc">
                 {checkoutState === "success"
-                  ? "We’re syncing PayMongo confirmation with your escrow-backed orders now. If your cart does not clear immediately, give it a moment and refresh."
+                  ? "We're syncing PayMongo confirmation with your escrow-backed orders now. If your cart does not clear immediately, give it a moment and refresh."
                   : "Your cart is still intact. You can review the listings or try checkout again whenever you're ready."}
               </p>
             </div>
@@ -353,13 +365,20 @@ export default function CartPage() {
             onAction={() => navigate("/dashboard/customer/orders")}
           />
         </Reveal>
-      ) : !loading && items.length === 0 ? (
+      ) : showEmptyCart ? (
         <Reveal delay={0.1}>
           <EmptySurface
             icon={ShoppingCart}
             title="Your cart is empty"
             description="Add listings from Browse Services or Saved Listings when you want to collect work before a single PayMongo checkout."
             actionLabel="Browse services"
+            className="cartPage__empty"
+            actionButtonClassName="cartPage__emptyBtn"
+            actionMotion={{
+              whileHover: { y: -2, scale: 1.01 },
+              whileTap: { scale: 0.985 },
+              transition: CART_ACTION_SPRING,
+            }}
             onAction={() => navigate("/dashboard/customer/browse-services")}
           />
         </Reveal>
@@ -375,13 +394,13 @@ export default function CartPage() {
                   </h2>
                 </div>
 
-                {items.length > 0 && (
+                {items.length > 0 && !loading && (
                   <motion.button
                     type="button"
                     className="cartSection__linkBtn"
-                    whileHover={{ y: -1 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={PROFILE_SPRING}
+                    whileHover={{ y: -2, scale: 1.01 }}
+                    whileTap={{ scale: 0.985 }}
+                    transition={CART_ACTION_SPRING}
                     onClick={handleClearCart}
                   >
                     <Trash2 className="cartSection__linkIcon" />
@@ -408,111 +427,111 @@ export default function CartPage() {
           </Reveal>
 
           <Reveal delay={0.14} className="cartGrid__side">
-            <section className="cartSummary">
-              <div className="cartSummary__head">
-                <p className="cartSection__eyebrow">Checkout summary</p>
-                <h2 className="cartSection__title">PayMongo + escrow</h2>
-              </div>
+            {loading ? (
+              <CartSummarySkeleton />
+            ) : (
+              <section className="cartSummary">
+                <div className="cartSummary__head">
+                  <p className="cartSection__eyebrow">Checkout summary</p>
+                  <h2 className="cartSection__title">PayMongo + escrow</h2>
+                </div>
 
-              <div className="cartSummary__rows">
-                <div className="cartSummary__row">
-                  <span>Listings subtotal</span>
-                  <strong>{formatPeso(summary.subtotal)}</strong>
-                </div>
-                <div className="cartSummary__row">
-                  <span>Customer total charged</span>
-                  <strong>{formatPeso(summary.subtotal)}</strong>
-                </div>
-                <div className="cartSummary__row cartSummary__row--muted">
-                  <span>Carvver commission held from payout</span>
-                  <strong>{formatPeso(summary.platformFee)}</strong>
-                </div>
-                <div className="cartSummary__row cartSummary__row--muted">
-                  <span>Freelancer payout after escrow release</span>
-                  <strong>{formatPeso(summary.freelancerNet)}</strong>
-                </div>
-              </div>
-
-              {invalidItems.length > 0 && (
-                <div className="cartWarning">
-                  <div className="cartWarning__copy">
-                    <h3 className="cartWarning__title">
-                      Remove unavailable listings first
-                    </h3>
-                    <p className="cartWarning__desc">
-                      {invalidItems.length} listing
-                      {invalidItems.length === 1 ? "" : "s"} in this cart can’t
-                      move into checkout because they are no longer published.
-                    </p>
+                <div className="cartSummary__rows">
+                  <div className="cartSummary__row">
+                    <span>Listings subtotal</span>
+                    <strong>{formatPeso(summary.subtotal)}</strong>
                   </div>
-                  <motion.button
-                    type="button"
-                    className="cartWarning__btn"
-                    whileHover={{ y: -1 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={PROFILE_SPRING}
-                    onClick={handleClearInvalid}
-                  >
-                    Remove invalid items
-                  </motion.button>
-                </div>
-              )}
-
-              <motion.button
-                type="button"
-                className="cartCheckoutBtn"
-                whileHover={checkoutLoading ? {} : { y: -1.5 }}
-                whileTap={checkoutLoading ? {} : { scale: 0.98 }}
-                transition={PROFILE_SPRING}
-                disabled={
-                  checkoutLoading || loading || validItems.length === 0 || invalidItems.length > 0
-                }
-                onClick={handleCheckout}
-              >
-                <span className="cartCheckoutBtn__copy">
-                  <span className="cartCheckoutBtn__eyebrow">Checkout</span>
-                  <strong className="cartCheckoutBtn__title">
-                    {checkoutLoading ? "Opening PayMongo..." : "Pay with PayMongo"}
-                  </strong>
-                </span>
-                <span className="cartCheckoutBtn__iconWrap" aria-hidden="true">
-                  <CreditCard className="cartCheckoutBtn__icon" />
-                </span>
-              </motion.button>
-
-              <div className="cartInfoCard">
-                <div className="cartInfoCard__top">
-                  <div className="cartInfoCard__iconWrap" aria-hidden="true">
-                    <ShieldCheck className="cartInfoCard__icon" />
+                  <div className="cartSummary__row">
+                    <span>Customer total charged</span>
+                    <strong>{formatPeso(summary.subtotal)}</strong>
                   </div>
-                  <div>
-                    <h3 className="cartInfoCard__title">Escrow-first flow</h3>
-                    <p className="cartInfoCard__desc">
-                      Payment creates pending orders and marks funds as held in
-                      escrow. Freelancer release and refund handling can layer on
-                      top of this record later.
-                    </p>
+                  <div className="cartSummary__row cartSummary__row--muted">
+                    <span>Escrow protection</span>
+                    <strong>Included</strong>
                   </div>
                 </div>
-                <ul className="cartInfoCard__list">
-                  <li>GCash and card payments go through PayMongo checkout.</li>
-                  <li>Customers pay only the listed service price.</li>
-                  <li>Carvver keeps 5% from the freelancer payout split.</li>
-                </ul>
-              </div>
 
-              <motion.button
-                type="button"
-                className="cartBrowseBtn"
-                whileHover={{ x: 1 }}
-                whileTap={{ scale: 0.98 }}
-                transition={PROFILE_SPRING}
-                onClick={() => navigate("/dashboard/customer/browse-services")}
-              >
-                <span>Add more listings</span>
-                <ArrowRight className="cartBrowseBtn__icon" />
-              </motion.button>
-            </section>
+                {invalidItems.length > 0 && (
+                  <div className="cartWarning">
+                    <div className="cartWarning__copy">
+                      <h3 className="cartWarning__title">
+                        Remove unavailable listings first
+                      </h3>
+                      <p className="cartWarning__desc">
+                        {invalidItems.length} listing
+                        {invalidItems.length === 1 ? "" : "s"} in this cart can't
+                        move into checkout because they are no longer published.
+                      </p>
+                    </div>
+                    <motion.button
+                      type="button"
+                      className="cartWarning__btn"
+                      whileHover={{ y: -2, scale: 1.01 }}
+                      whileTap={{ scale: 0.985 }}
+                      transition={CART_ACTION_SPRING}
+                      onClick={handleClearInvalid}
+                    >
+                      Remove invalid items
+                    </motion.button>
+                  </div>
+                )}
+
+                <motion.button
+                  type="button"
+                  className="cartCheckoutBtn"
+                  whileHover={checkoutLoading ? {} : { y: -3, scale: 1.008 }}
+                  whileTap={checkoutLoading ? {} : { scale: 0.992 }}
+                  transition={CART_ACTION_SPRING}
+                  disabled={
+                    checkoutLoading || validItems.length === 0 || invalidItems.length > 0
+                  }
+                  onClick={handleCheckout}
+                >
+                  <span className="cartCheckoutBtn__copy">
+                    <span className="cartCheckoutBtn__eyebrow">Checkout</span>
+                    <strong className="cartCheckoutBtn__title">
+                      {checkoutLoading ? "Opening PayMongo..." : "Pay with PayMongo"}
+                    </strong>
+                  </span>
+                  <span className="cartCheckoutBtn__iconWrap" aria-hidden="true">
+                    <CreditCard className="cartCheckoutBtn__icon" />
+                  </span>
+                </motion.button>
+
+                <div className="cartInfoCard">
+                  <div className="cartInfoCard__top">
+                    <div className="cartInfoCard__iconWrap" aria-hidden="true">
+                      <ShieldCheck className="cartInfoCard__icon" />
+                    </div>
+                    <div>
+                      <h3 className="cartInfoCard__title">Escrow-first flow</h3>
+                      <p className="cartInfoCard__desc">
+                        PayMongo handles the checkout while Carvver records the
+                        order with payment held in escrow first, giving both sides
+                        a calmer starting point.
+                      </p>
+                    </div>
+                  </div>
+                  <ul className="cartInfoCard__list">
+                    <li>GCash and card payments go through PayMongo checkout.</li>
+                    <li>You pay only the listed service price.</li>
+                    <li>Funds stay held first while the order is created.</li>
+                  </ul>
+                </div>
+
+                <motion.button
+                  type="button"
+                  className="cartBrowseBtn"
+                  whileHover={{ y: -2, scale: 1.01 }}
+                  whileTap={{ scale: 0.985 }}
+                  transition={CART_ACTION_SPRING}
+                  onClick={() => navigate("/dashboard/customer/browse-services")}
+                >
+                  <span>Add more listings</span>
+                  <ArrowRight className="cartBrowseBtn__icon" />
+                </motion.button>
+              </section>
+            )}
           </Reveal>
         </div>
       )}

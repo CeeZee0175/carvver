@@ -197,9 +197,17 @@ export default function NavBar() {
                   >
                     About Us
                   </button>
-                  <a className="navMenu__item" href="#" role="menuitem" onClick={closeAll}>
+                  <button
+                    className="navMenu__item"
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      closeAll();
+                      navigate("/community");
+                    }}
+                  >
                     Community
-                  </a>
+                  </button>
                   <a className="navMenu__item" href="#" role="menuitem" onClick={closeAll}>
                     Features
                   </a>
@@ -302,7 +310,16 @@ export default function NavBar() {
             >
               About Us
             </button>
-            <a className="mobileSub__item" href="#" onClick={closeAll}>Community</a>
+            <button
+              className="mobileSub__item"
+              type="button"
+              onClick={() => {
+                closeAll();
+                navigate("/community");
+              }}
+            >
+              Community
+            </button>
             <a className="mobileSub__item" href="#" onClick={closeAll}>Features</a>
             <a className="mobileSub__item" href="#" onClick={closeAll}>Pricing</a>
             <a className="mobileSub__item" href="#" onClick={closeAll}>FAQ</a>

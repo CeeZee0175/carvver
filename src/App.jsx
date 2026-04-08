@@ -6,7 +6,9 @@ import Home from "./components/Homepage/home";
 import HomeFooter from "./components/Homepage/home_footer";
 import ProtectedRoute from "./components/Backend/ProtectedRoute";
 import PublicOnlyRoute from "./components/Backend/PublicOnlyRoute";
+
 const HomeAboutUs = lazy(() => import("./components/Homepage/home_aboutUs"));
+const HomeCommunity = lazy(() => import("./components/Homepage/home_community"));
 const AuthCallback = lazy(() => import("./components/Auth/auth_callback"));
 const SignIn = lazy(() => import("./components/Auth/sign-in"));
 const SignUp = lazy(() => import("./components/Auth/sign-up"));
@@ -55,6 +57,16 @@ function AboutUsPage() {
   );
 }
 
+function CommunityPage() {
+  return (
+    <>
+      <NavBar />
+      <HomeCommunity />
+      <HomeFooter />
+    </>
+  );
+}
+
 function AppRoutes() {
   const location = useLocation();
 
@@ -93,8 +105,16 @@ function AppRoutes() {
           </Suspense>
         }
       />
+      <Route
+        path="/community"
+        element={
+          <Suspense fallback={<RouteFallback withNav />}>
+            <CommunityPage />
+          </Suspense>
+        }
+      />
 
-      {/* Public only — redirects to dashboard if already logged in */}
+      {/* Public only - redirects to dashboard if already logged in */}
       <Route
         path="/auth/callback"
         element={
@@ -124,7 +144,7 @@ function AppRoutes() {
         }
       />
 
-      {/* Protected routes — redirects to /sign-in if not logged in */}
+      {/* Protected routes - redirects to /sign-in if not logged in */}
       <Route
         path="/dashboard/customer"
         element={

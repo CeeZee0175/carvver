@@ -83,6 +83,16 @@ async function fetchSavedItems(userId) {
   return data || [];
 }
 
+async function fetchSavedCount(userId) {
+  const { count, error } = await supabase
+    .from("saved_services")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  if (error) throw error;
+  return Number(count || 0);
+}
+
 async function fetchOrders(userId) {
   const { data, error } = await supabase
     .from("orders")
@@ -598,6 +608,7 @@ export function useCustomerProfileData() {
 export function useCustomerOrdersData() {
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
+  const [savedCount, setSavedCount] = useState(0);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -615,15 +626,30 @@ export function useCustomerOrdersData() {
         if (!session?.user?.id) {
           if (!active) return;
           setOrders([]);
+          setSavedCount(0);
           return;
         }
 
-        const data = await fetchOrders(session.user.id);
+        const [ordersResult, savedCountResult] = await Promise.allSettled([
+          fetchOrders(session.user.id),
+          fetchSavedCount(session.user.id),
+        ]);
+
         if (!active) return;
-        setOrders(data);
+
+        if (ordersResult.status === "fulfilled") {
+          setOrders(ordersResult.value);
+        } else {
+          throw ordersResult.reason;
+        }
+
+        setSavedCount(
+          savedCountResult.status === "fulfilled" ? savedCountResult.value : 0
+        );
       } catch (nextError) {
         if (!active) return;
         setOrders([]);
+        setSavedCount(0);
         setError(
           friendlySupabaseMessage(nextError, "Couldn't load customer orders.")
         );
@@ -642,6 +668,7 @@ export function useCustomerOrdersData() {
   return {
     loading,
     orders,
+    savedCount,
     error,
   };
 }

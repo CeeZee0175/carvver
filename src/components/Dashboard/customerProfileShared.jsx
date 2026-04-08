@@ -155,6 +155,8 @@ export function EmptySurface({
   actionLabel,
   onAction,
   className = "",
+  actionButtonClassName = "",
+  actionMotion = null,
 }) {
   return (
     <div className={cn("profileEmpty", className)}>
@@ -166,10 +168,10 @@ export function EmptySurface({
       {actionLabel && onAction && (
         <motion.button
           type="button"
-          className="profileEmpty__btn"
-          whileHover={{ y: -1 }}
-          whileTap={{ scale: 0.98 }}
-          transition={PROFILE_SPRING}
+          className={cn("profileEmpty__btn", actionButtonClassName)}
+          whileHover={actionMotion?.whileHover || { y: -1 }}
+          whileTap={actionMotion?.whileTap || { scale: 0.98 }}
+          transition={actionMotion?.transition || PROFILE_SPRING}
           onClick={onAction}
         >
           {actionLabel}

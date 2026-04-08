@@ -1,0 +1,685 @@
+@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap");
+
+.communityPage {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  padding-bottom: clamp(40px, 6vw, 80px);
+}
+
+.communityPage__base {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  background:
+    linear-gradient(180deg, rgba(250, 247, 241, 1) 0%, rgba(246, 241, 235, 1) 54%, rgba(244, 238, 232, 1) 100%);
+}
+
+.communityPage__bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(840px 480px at 10% 12%, rgba(255, 255, 255, 0.78), transparent 68%),
+    radial-gradient(680px 420px at 88% 14%, rgba(242, 193, 78, 0.12), transparent 66%),
+    radial-gradient(720px 520px at 22% 86%, rgba(124, 58, 237, 0.09), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
+}
+
+.communityPage__decor {
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(42px);
+  opacity: 0.8;
+  animation: communityFloat 16s ease-in-out infinite;
+}
+
+.communityPage__decor--a {
+  top: 11%;
+  left: -5%;
+  width: 260px;
+  height: 260px;
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.communityPage__decor--b {
+  top: 34%;
+  right: -4%;
+  width: 320px;
+  height: 320px;
+  background: rgba(242, 193, 78, 0.1);
+  animation-delay: -5s;
+}
+
+.communityPage__decor--c {
+  bottom: 10%;
+  left: 14%;
+  width: 220px;
+  height: 220px;
+  background: rgba(42, 20, 80, 0.06);
+  animation-delay: -9s;
+}
+
+.communityWrap {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.communityBand {
+  position: relative;
+}
+
+.communityBand::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(42, 20, 80, 0.02) 0%,
+    rgba(42, 20, 80, 0.12) 18%,
+    rgba(242, 193, 78, 0.22) 50%,
+    rgba(42, 20, 80, 0.12) 82%,
+    rgba(42, 20, 80, 0.02) 100%
+  );
+}
+
+.communityHero,
+.communitySection {
+  padding: clamp(34px, 5vw, 62px) 0;
+}
+
+.communityHero__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  gap: clamp(24px, 4vw, 48px);
+  align-items: start;
+}
+
+.communityHero__eyebrow,
+.communitySectionHead__eyebrow,
+.communitySignal__label,
+.communityRoadmap__index {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.communityHero__eyebrow,
+.communitySectionHead__eyebrow {
+  color: rgba(42, 20, 80, 0.56);
+}
+
+.communityHero__titleWrap,
+.communitySectionHead__titleWrap {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 18px;
+}
+
+.communityHero__title {
+  margin: 12px 0 0;
+  font-family: "Dancing Script", cursive;
+  font-size: clamp(62px, 8vw, 98px);
+  line-height: 0.92;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: rgba(27, 16, 46, 0.98);
+}
+
+.communityHero__line,
+.communitySectionHead__line {
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  bottom: 0;
+  width: calc(100% + 16px);
+  height: 18px;
+  color: rgba(242, 193, 78, 0.96);
+}
+
+.communityHero__sub,
+.communityHero__support,
+.communitySectionHead__sub,
+.communityCard__text,
+.communityMeaning__text,
+.communityLane__text,
+.communityStandard__text,
+.communityRoadmap__text,
+.communityCta__text,
+.communityCta__feedback,
+.communitySignal__note {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  color: rgba(27, 16, 46, 0.72);
+}
+
+.communityHero__sub {
+  max-width: 62ch;
+  margin-top: 12px;
+  font-size: clamp(16px, 1.7vw, 20px);
+  line-height: 1.72;
+}
+
+.communityHero__support {
+  max-width: 70ch;
+  margin-top: 14px;
+  font-size: 15px;
+  line-height: 1.76;
+  color: rgba(27, 16, 46, 0.64);
+}
+
+.communityHero__actions {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.communityBtn {
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 18px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    color 220ms ease;
+}
+
+.communityBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.18) 30%,
+    rgba(255, 255, 255, 0.46) 50%,
+    rgba(255, 255, 255, 0.18) 70%,
+    transparent 100%
+  );
+  transform: translateX(-130%);
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.communityBtn:hover::before {
+  transform: translateX(130%);
+}
+
+.communityBtn--primary {
+  background: linear-gradient(180deg, rgba(42, 20, 80, 1), rgba(42, 20, 80, 0.88));
+  color: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 48px rgba(42, 20, 80, 0.16);
+}
+
+.communityBtn--primary:hover {
+  border-color: rgba(242, 193, 78, 0.3);
+  box-shadow: 0 24px 60px rgba(42, 20, 80, 0.2);
+}
+
+.communityBtn--ghost {
+  background: rgba(255, 255, 255, 0.72);
+  color: rgba(27, 16, 46, 0.88);
+  box-shadow:
+    0 14px 34px rgba(12, 7, 18, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.communityBtn--ghost:hover {
+  border-color: rgba(124, 58, 237, 0.22);
+  background: rgba(124, 58, 237, 0.05);
+}
+
+.communityBtn__icon {
+  width: 15px;
+  height: 15px;
+}
+
+.communityBtn__icon--spin {
+  animation: communitySpin 0.9s linear infinite;
+}
+
+.communityHero__signalStack {
+  display: grid;
+  gap: 14px;
+}
+
+.communitySignal,
+.communityCard,
+.communityMeaning__feature,
+.communityLane,
+.communityStandard,
+.communityCta {
+  border-radius: 28px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.76));
+  box-shadow:
+    0 20px 70px rgba(12, 7, 18, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(14px);
+}
+
+.communitySignal {
+  padding: 18px 20px;
+  display: grid;
+  gap: 10px;
+}
+
+.communitySignal__label {
+  color: rgba(87, 34, 182, 0.76);
+}
+
+.communitySignal__value,
+.communitySectionHead__title,
+.communityCard__title,
+.communityMeaning__title,
+.communityLane__title,
+.communityStandard__title,
+.communityRoadmap__title {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  line-height: 1.08;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: rgba(27, 16, 46, 0.97);
+}
+
+.communitySignal__value {
+  font-size: clamp(26px, 2.5vw, 32px);
+}
+
+.communitySignal__note {
+  font-size: 13.6px;
+  line-height: 1.7;
+}
+
+.communitySectionHead {
+  margin-bottom: 24px;
+}
+
+.communitySectionHead__title {
+  margin-top: 10px;
+  font-size: clamp(30px, 3.2vw, 44px);
+}
+
+.communitySectionHead__sub {
+  max-width: 64ch;
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.74;
+}
+
+.communityCards,
+.communityLanes,
+.communityStandards__grid {
+  display: grid;
+  gap: 18px;
+}
+
+.communityCards {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.communityCard {
+  position: relative;
+  min-height: 100%;
+  padding: 22px;
+  overflow: hidden;
+}
+
+.communityCard::after,
+.communityMeaning__feature::after,
+.communityLane::after,
+.communityCta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(320px 200px at 88% 14%, rgba(242, 193, 78, 0.08), transparent 70%),
+    radial-gradient(280px 180px at 10% 90%, rgba(124, 58, 237, 0.08), transparent 72%);
+  pointer-events: none;
+}
+
+.communityCard__iconWrap,
+.communityMeaning__iconWrap,
+.communityLane__iconWrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(42, 20, 80, 0.08);
+  color: rgba(42, 20, 80, 0.92);
+}
+
+.communityCard__icon,
+.communityMeaning__icon,
+.communityLane__icon {
+  width: 20px;
+  height: 20px;
+}
+
+.communityCard__title,
+.communityMeaning__title,
+.communityLane__title,
+.communityStandard__title,
+.communityRoadmap__title {
+  font-size: 21px;
+}
+
+.communityCard__title {
+  margin-top: 16px;
+}
+
+.communityCard__text,
+.communityMeaning__text,
+.communityLane__text,
+.communityStandard__text,
+.communityRoadmap__text,
+.communityCta__text,
+.communityCta__feedback {
+  font-size: 14.8px;
+  line-height: 1.74;
+}
+
+.communityCard__text {
+  margin-top: 12px;
+}
+
+.communityMeaning__grid {
+  display: grid;
+  gap: 16px;
+}
+
+.communityMeaning__feature {
+  position: relative;
+  padding: 20px 22px;
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 16px;
+  align-items: start;
+  overflow: hidden;
+}
+
+.communityMeaning__text {
+  margin-top: 10px;
+}
+
+.communityLanes {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.communityLane {
+  position: relative;
+  min-height: 100%;
+  padding: 22px;
+  overflow: hidden;
+}
+
+.communityLane__labelRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.communityLane__text {
+  margin-top: 16px;
+}
+
+.communityStandards__grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.communityStandard {
+  padding: 20px 0 0;
+  border-radius: 0;
+  border: 0;
+  border-top: 1px solid rgba(42, 20, 80, 0.1);
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.communityStandard__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.communityStandard__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(242, 193, 78, 0.96);
+  box-shadow: 0 0 0 6px rgba(242, 193, 78, 0.14);
+}
+
+.communityStandard__text {
+  margin-top: 12px;
+}
+
+.communityRoadmap__list {
+  display: grid;
+  gap: 18px;
+}
+
+.communityRoadmap__item {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 18px;
+  align-items: start;
+  padding-top: 18px;
+  border-top: 1px solid rgba(42, 20, 80, 0.1);
+}
+
+.communityRoadmap__index {
+  color: rgba(87, 34, 182, 0.8);
+}
+
+.communityRoadmap__text {
+  margin-top: 10px;
+}
+
+.communitySection--cta {
+  padding-bottom: 0;
+}
+
+.communityCta {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.92fr);
+  gap: 22px;
+  padding: clamp(22px, 3vw, 30px);
+}
+
+.communityCta__copy,
+.communityCta__form {
+  position: relative;
+  z-index: 1;
+}
+
+.communityCta__text {
+  max-width: 58ch;
+  margin-top: 14px;
+}
+
+.communityCta__form {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.communityCta__label {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(42, 20, 80, 0.56);
+}
+
+.communityCta__field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 22px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
+}
+
+.communityCta__field--error {
+  border-color: rgba(196, 82, 66, 0.28);
+}
+
+.communityCta__field--success {
+  border-color: rgba(32, 141, 95, 0.22);
+}
+
+.communityCta__input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  border: 0;
+  background: transparent;
+  padding: 0 8px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 15px;
+  color: rgba(27, 16, 46, 0.9);
+  outline: none;
+}
+
+.communityCta__input::placeholder {
+  color: rgba(27, 16, 46, 0.4);
+}
+
+.communityBtn--submit {
+  min-width: 176px;
+}
+
+.communityCta__feedback {
+  min-height: 1.7em;
+}
+
+.communityCta__feedback--error {
+  color: rgba(160, 67, 54, 0.92);
+}
+
+.communityCta__feedback--success {
+  color: rgba(28, 130, 87, 0.92);
+}
+
+.communityPage__cursor {
+  margin-left: 4px;
+  color: rgba(42, 20, 80, 0.56);
+}
+
+@keyframes communityFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0) scale(1.03);
+  }
+}
+
+@keyframes communitySpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1024px) {
+  .communityHero__layout,
+  .communityCta,
+  .communityCards,
+  .communityLanes,
+  .communityStandards__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .communityWrap {
+    width: min(100% - 24px, 100% - 24px);
+  }
+
+  .communityHero__title {
+    font-size: clamp(54px, 15vw, 78px);
+  }
+
+  .communityMeaning__feature,
+  .communityRoadmap__item,
+  .communityCta__field {
+    grid-template-columns: 1fr;
+  }
+
+  .communityBtn--submit {
+    width: 100%;
+  }
+}
+
+@media (max-width: 540px) {
+  .communitySectionHead__title,
+  .communityCard__title,
+  .communityMeaning__title,
+  .communityLane__title,
+  .communityStandard__title,
+  .communityRoadmap__title {
+    font-size: 18px;
+  }
+
+  .communityHero__sub,
+  .communityHero__support,
+  .communitySectionHead__sub,
+  .communityCard__text,
+  .communityMeaning__text,
+  .communityLane__text,
+  .communityStandard__text,
+  .communityRoadmap__text,
+  .communityCta__text,
+  .communityCta__feedback {
+    font-size: 14px;
+  }
+
+  .communitySignal__value {
+    font-size: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .communityPage__decor,
+  .communityBtn,
+  .communitySignal,
+  .communityCard,
+  .communityBtn__icon--spin {
+    animation: none !important;
+    transition: none !important;
+  }
+}

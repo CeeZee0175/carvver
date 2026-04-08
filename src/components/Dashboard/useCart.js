@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "../../lib/supabase/client";
 import { emitCartUpdated, CART_UPDATED_EVENT } from "../../lib/cartSync";
 
@@ -104,38 +104,95 @@ export function useCart() {
   const [items, setItems] = useState([]);
   const [error, setError] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const requestIdRef = useRef(0);
+
+  const syncCartForSession = useCallback(async (session) => {
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+
+    setError("");
+
+    if (!session?.user?.id) {
+      setUserId(null);
+      setItems([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setUserId(session.user.id);
+
+    try {
+      const nextItems = await fetchCartItems(session.user.id);
+
+      if (requestIdRef.current !== requestId) return;
+      setItems(nextItems);
+    } catch (nextError) {
+      if (requestIdRef.current !== requestId) return;
+
+      setItems([]);
+      setError(
+        friendlyCartMessage(nextError, "Couldn't load your cart yet.")
+      );
+    } finally {
+      if (requestIdRef.current === requestId) {
+        setLoading(false);
+      }
+    }
+  }, []);
 
   const reload = useCallback(async () => {
     setLoading(true);
-    setError("");
 
     try {
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!session) {
-        setUserId(null);
-        setItems([]);
-        return;
-      }
-
-      setUserId(session.user.id);
-      const nextItems = await fetchCartItems(session.user.id);
-      setItems(nextItems);
+      await syncCartForSession(session);
     } catch (nextError) {
       setItems([]);
       setError(
         friendlyCartMessage(nextError, "Couldn't load your cart yet.")
       );
-    } finally {
       setLoading(false);
     }
-  }, []);
+  }, [syncCartForSession]);
 
   useEffect(() => {
-    reload();
-  }, [reload]);
+    let active = true;
+
+    const handleSession = async (session) => {
+      if (!active) return;
+      await syncCartForSession(session);
+    };
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleSession(session);
+    });
+
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        handleSession(session);
+      })
+      .catch((nextError) => {
+        if (!active) return;
+        setItems([]);
+        setError(
+          friendlyCartMessage(nextError, "Couldn't load your cart yet.")
+        );
+        setLoading(false);
+      });
+
+    return () => {
+      active = false;
+      requestIdRef.current += 1;
+      subscription.unsubscribe();
+    };
+  }, [syncCartForSession]);
 
   useEffect(() => {
     const handleCartUpdated = () => {

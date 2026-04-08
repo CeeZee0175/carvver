@@ -21,7 +21,7 @@ const exploreLinks = [
   { label: "Categories", target: "home-categories" },
   { label: "How It Works", target: "home-how" },
   { label: "Stay Tuned", target: "home-updates" },
-  { label: "Community", target: null },
+  { label: "Community", routeKey: "community" },
 ];
 
 const platformLinks = [
@@ -179,11 +179,17 @@ export default function HomeFooter({ fullBleed = false }) {
     ? "/dashboard/customer/about-us"
     : "/about-us";
 
-  const resolvedExploreLinks = exploreLinks.map((item) =>
-    item.routeKey === "about-us"
-      ? { ...item, route: aboutUsRoute }
-      : item
-  );
+  const resolvedExploreLinks = exploreLinks.map((item) => {
+    if (item.routeKey === "about-us") {
+      return { ...item, route: aboutUsRoute };
+    }
+
+    if (item.routeKey === "community") {
+      return { ...item, route: "/community" };
+    }
+
+    return item;
+  });
 
   const scrollToTarget = (id) => {
     if (!id) return;
@@ -325,7 +331,7 @@ export default function HomeFooter({ fullBleed = false }) {
           <TypewriterMotto active={inView} text="Carve with what you love" />
 
           <p className="homeFooter__copy">
-            © {new Date().getFullYear()} Carvver. All rights reserved.
+            Copyright {new Date().getFullYear()} Carvver. All rights reserved.
           </p>
 
         </motion.div>

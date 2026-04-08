@@ -54,7 +54,7 @@ function formatOrderDate(value) {
 
 export default function CustomerOrders() {
   const navigate = useNavigate();
-  const { loading, orders, error } = useCustomerOrdersData();
+  const { loading, orders, savedCount, error } = useCustomerOrdersData();
   const [filter, setFilter] = useState("all");
 
   const filteredOrders = useMemo(() => {
@@ -110,8 +110,9 @@ export default function CustomerOrders() {
               </motion.svg>
             </div>
             <p className="profileHero__sub">
-              A lightweight order view that stays honest to your real customer activity,
-              with clean empty states and no fake jobs padded in.
+              Keep track of every service you have booked, check what is still in
+              progress, and come back here whenever you want a clear view of your
+              customer activity.
             </p>
           </div>
 
@@ -132,9 +133,9 @@ export default function CustomerOrders() {
               <span className="profileMiniStat__hint">Finished orders</span>
             </div>
             <div className="profileMiniStat">
-              <span className="profileMiniStat__label">Saved</span>
-              <strong className="profileMiniStat__value">{orders.length > 0 ? "Live" : "Ready"}</strong>
-              <span className="profileMiniStat__hint">This page uses real order data</span>
+              <span className="profileMiniStat__label">Bookmarked Items</span>
+              <strong className="profileMiniStat__value">{savedCount}</strong>
+              <span className="profileMiniStat__hint">Saved listings to revisit later</span>
             </div>
           </div>
         </section>
@@ -196,7 +197,7 @@ export default function CustomerOrders() {
           <div className="profileSection__head">
             <div>
               <p className="profileSection__eyebrow">Order List</p>
-              <h2 className="profileSection__title">Real customer order history</h2>
+              <h2 className="profileSection__title">Your order history</h2>
             </div>
             <div className="profileSection__sideNote">
               {filteredOrders.length} shown
