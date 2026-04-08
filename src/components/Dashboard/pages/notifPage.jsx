@@ -279,7 +279,7 @@ export default function NotifPage() {
       await markAllRead();
       toast.success("All notifications marked as read.");
     } catch {
-      toast.error("Couldn't update notifications. Check Supabase first.");
+      toast.error("Couldn't update notifications right now.");
     }
   };
 
@@ -287,7 +287,7 @@ export default function NotifPage() {
     try {
       await toggleRead(item.id);
     } catch {
-      toast.error("Couldn't update notifications. Check Supabase first.");
+      toast.error("Couldn't update notifications right now.");
     }
   };
 
@@ -295,7 +295,7 @@ export default function NotifPage() {
     try {
       await markRead(item.id);
     } catch {
-      toast.error("Couldn't update notifications. Check Supabase first.");
+      toast.error("Couldn't update notifications right now.");
     }
 
     navigate(item.path);

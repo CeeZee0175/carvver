@@ -29,22 +29,22 @@ function friendlyCartMessage(error, fallback) {
   const message = String(error?.message || "");
 
   if (/cart_items/i.test(message)) {
-    return "Run the cart SQL first so the cart tables and policies exist in Supabase.";
+    return "Your cart is unavailable right now.";
   }
 
   if (/customer_checkout_sessions|customer_checkout_items/i.test(message)) {
-    return "Run the cart checkout SQL first so checkout tracking tables exist.";
+    return "Checkout is unavailable right now.";
   }
 
   if (/FunctionsHttpError|function/i.test(message) && /paymongo/i.test(message)) {
-    return "Deploy the PayMongo edge functions first before starting checkout.";
+    return "PayMongo checkout is unavailable right now.";
   }
 
   if (/row-level security|permission denied/i.test(message)) {
-    return "Supabase blocked this cart action. Check the RLS policies for the cart tables.";
+    return "This cart action is unavailable right now.";
   }
 
-  return message || fallback;
+  return fallback;
 }
 
 async function parseFunctionError(error) {

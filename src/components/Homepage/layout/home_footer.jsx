@@ -22,6 +22,7 @@ const exploreLinks = [
   { label: "How It Works", target: "home-how" },
   { label: "Stay Tuned", target: "home-updates" },
   { label: "Community", routeKey: "community" },
+  { label: "Pricing", routeKey: "pricing" },
 ];
 
 const platformLinks = [
@@ -186,6 +187,10 @@ export default function HomeFooter({ fullBleed = false }) {
 
     if (item.routeKey === "community") {
       return { ...item, route: "/community" };
+    }
+
+    if (item.routeKey === "pricing") {
+      return { ...item, route: "/pricing" };
     }
 
     return item;

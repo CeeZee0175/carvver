@@ -1,38 +1,44 @@
-import HomeFooter from "../../Homepage/layout/home_footer";
-import React, { useEffect, useMemo, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
+  Bell,
   Bookmark,
   Camera,
-  Compass,
   GraduationCap,
   Heart,
   MapPin,
-  MessageCircle,
   Mic2,
+  PackageSearch,
   Palette,
   PenTool,
   PlusCircle,
   Share2,
   ShoppingBag,
-  Sparkles,
-  Star,
-  Video,
-  PackageSearch,
   Users,
+  Video,
 } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import "./profile.css";
 import "./dashboard_customer.css";
-import DashBar from "../layout/dashbar";
-import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
 import { getProfile } from "../../../lib/supabase/auth";
 import { createClient } from "../../../lib/supabase/client";
+import {
+  getCustomerDisplayName,
+  getCustomerInitials,
+} from "../shared/customerAchievements";
+import {
+  CustomerDashboardFrame,
+  EmptySurface,
+  Reveal,
+  TypewriterHeading,
+} from "../shared/customerProfileShared";
+import { useCustomerRequests } from "../hooks/useCustomerRequests";
 
 const supabase = createClient();
 
-const categories = [
+const categoryCards = [
   { label: "Art & Illustration", Icon: Palette },
   { label: "Photography", Icon: Camera },
   { label: "Video Editing", Icon: Video },
@@ -44,620 +50,737 @@ const categories = [
 ];
 
 const quickBoardItems = [
-  { label: "Saved listings", Icon: Bookmark },
-  { label: "Messages", Icon: MessageCircle },
-  { label: "Requests & orders", Icon: ShoppingBag },
-  { label: "Fresh recommendations", Icon: Sparkles },
+  {
+    label: "Post a Request",
+    sub: "Tell freelancers what you need",
+    Icon: PlusCircle,
+    action: (navigate) => navigate("/dashboard/customer/post-request"),
+  },
+  {
+    label: "Saved Listings",
+    sub: "Return to the work you shortlisted",
+    Icon: Bookmark,
+    action: (navigate) => navigate("/dashboard/customer/saved"),
+  },
+  {
+    label: "My Orders",
+    sub: "Track active and completed work",
+    Icon: ShoppingBag,
+    action: (navigate) => navigate("/dashboard/customer/orders"),
+  },
+  {
+    label: "Notifications",
+    sub: "Check updates that need attention",
+    Icon: Bell,
+    action: (navigate) => navigate("/dashboard/customer/notifications"),
+  },
 ];
 
-// Empty state component for sections with no data yet
-function EmptyState({ icon: Icon, title, desc }) {
-  return (
-    <div className="dashEmptyState">
-      <div className="dashEmptyState__iconWrap" aria-hidden="true">
-        <Icon className="dashEmptyState__icon" />
-      </div>
-      <p className="dashEmptyState__title">{title}</p>
-      <p className="dashEmptyState__desc">{desc}</p>
-    </div>
-  );
+const HERO_BUTTON_MOTION = {
+  whileHover: { y: -4, scale: 1.018 },
+  whileTap: { y: -1, scale: 0.985 },
+  transition: { type: "spring", stiffness: 320, damping: 18, mass: 0.72 },
+};
+
+const SURFACE_BUTTON_MOTION = {
+  whileHover: { y: -3, scale: 1.01 },
+  whileTap: { scale: 0.988 },
+  transition: { type: "spring", stiffness: 310, damping: 20, mass: 0.75 },
+};
+
+const LINK_BUTTON_MOTION = {
+  whileHover: { x: 3, y: -1 },
+  whileTap: { scale: 0.985 },
+  transition: { type: "spring", stiffness: 320, damping: 20, mass: 0.76 },
+};
+
+function normalizeRelation(value) {
+  if (Array.isArray(value)) return value[0] || null;
+  return value || null;
 }
 
-// Skeleton loader for stat cards while loading
-function StatCardSkeleton() {
+function formatPeso(value) {
+  return `PHP ${Number(value || 0).toLocaleString()}`;
+}
+
+function formatRequestDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+function EmptyState({ icon: Icon, title, desc, actionLabel, onAction }) {
   return (
-    <div className="dashStatCard dashStatCard--skeleton">
-      <div className="dashSkeleton dashSkeleton--value" />
-      <div className="dashSkeleton dashSkeleton--label" />
-      <div className="dashSkeleton dashSkeleton--hint" />
-    </div>
+    <EmptySurface
+      icon={Icon}
+      title={title}
+      description={desc}
+      actionLabel={actionLabel}
+      onAction={onAction}
+      className="dashLandingEmpty"
+    />
   );
 }
 
 export default function DashboardCustomer() {
   const navigate = useNavigate();
-  const reduceMotion = useReducedMotion();
-
+  const location = useLocation();
   const [profile, setProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
-
-  const [stats, setStats] = useState({
-    savedListings: null,
-    openRequests: null,
-    unreadMessages: null,
-  });
   const [statsLoading, setStatsLoading] = useState(true);
-
+  const [savedCount, setSavedCount] = useState(0);
+  const [activeOrdersCount, setActiveOrdersCount] = useState(0);
   const [services, setServices] = useState([]);
   const [servicesLoading, setServicesLoading] = useState(true);
+  const [favoriteFreelancers, setFavoriteFreelancers] = useState([]);
+  const [favoritesLoading, setFavoritesLoading] = useState(true);
+  const [favoritesError, setFavoritesError] = useState("");
+  const {
+    loading: requestsLoading,
+    requests,
+    openCount,
+    error: requestsError,
+    reload: reloadRequests,
+  } = useCustomerRequests({ limit: 4 });
 
-  const [creators, setCreators] = useState([]);
-  const [creatorsLoading, setCreatorsLoading] = useState(true);
-
-  // Load profile
   useEffect(() => {
     getProfile()
-      .then((p) => setProfile(p))
-      .catch(() => {})
+      .then((nextProfile) => setProfile(nextProfile))
+      .catch(() => setProfile(null))
       .finally(() => setProfileLoading(false));
   }, []);
 
-  // Load real stats from Supabase
   useEffect(() => {
-    async function loadStats() {
+    async function loadDashboardStats() {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-        const userId = session.user.id;
+        if (!session?.user?.id) {
+          setSavedCount(0);
+          setActiveOrdersCount(0);
+          return;
+        }
 
-        const [savedRes, ordersRes] = await Promise.all([
+        const [savedResult, ordersResult] = await Promise.all([
           supabase
             .from("saved_services")
             .select("id", { count: "exact", head: true })
-            .eq("user_id", userId),
+            .eq("user_id", session.user.id),
           supabase
             .from("orders")
             .select("id", { count: "exact", head: true })
-            .eq("customer_id", userId)
-            .eq("status", "pending"),
+            .eq("customer_id", session.user.id)
+            .in("status", ["pending", "active"]),
         ]);
 
-        setStats({
-          savedListings: savedRes.count ?? 0,
-          openRequests: ordersRes.count ?? 0,
-          unreadMessages: 0, // will wire up when Firebase chat is ready
-        });
+        setSavedCount(Number(savedResult.count || 0));
+        setActiveOrdersCount(Number(ordersResult.count || 0));
       } catch {
-        // Silently fail — stats just show 0
+        setSavedCount(0);
+        setActiveOrdersCount(0);
       } finally {
         setStatsLoading(false);
       }
     }
 
-    loadStats();
+    loadDashboardStats();
   }, []);
 
-  // Load published services for recommendations
   useEffect(() => {
-    supabase
-      .from("services")
-      .select("id, title, category, price, location, freelancer_id, profiles(first_name, last_name)")
-      .eq("is_published", true)
-      .limit(3)
-      .then(({ data }) => setServices(data || []))
-      .catch(() => setServices([]))
-      .finally(() => setServicesLoading(false));
+    async function loadRecommendedServices() {
+      try {
+        const { data } = await supabase
+          .from("services")
+          .select(
+            "id, title, category, price, location, freelancer_id, profiles(display_name, first_name, last_name)"
+          )
+          .eq("is_published", true)
+          .limit(4);
+
+        setServices(data || []);
+      } catch {
+        setServices([]);
+      } finally {
+        setServicesLoading(false);
+      }
+    }
+
+    loadRecommendedServices();
   }, []);
 
-  // Load freelancer profiles for nearby creators
   useEffect(() => {
-    supabase
-      .from("profiles")
-      .select("id, first_name, last_name, bio, country")
-      .eq("role", "freelancer")
-      .limit(4)
-      .then(({ data }) => setCreators(data || []))
-      .catch(() => setCreators([]))
-      .finally(() => setCreatorsLoading(false));
+    async function loadFavoriteFreelancers() {
+      setFavoritesLoading(true);
+      setFavoritesError("");
+
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session?.user?.id) {
+          setFavoriteFreelancers([]);
+          return;
+        }
+
+        const userId = session.user.id;
+        const relationshipMap = new Map();
+
+        const [savedResult, ordersResult] = await Promise.all([
+          supabase
+            .from("saved_services")
+            .select("services(freelancer_id)")
+            .eq("user_id", userId),
+          supabase
+            .from("orders")
+            .select("freelancer_id")
+            .eq("customer_id", userId),
+        ]);
+
+        (savedResult.data || []).forEach((row) => {
+          const service = normalizeRelation(row.services);
+          if (!service?.freelancer_id) return;
+
+          const current = relationshipMap.get(service.freelancer_id) || {
+            source: "saved",
+            score: 1,
+          };
+
+          relationshipMap.set(service.freelancer_id, {
+            source: current.source === "ordered" ? "ordered" : "saved",
+            score: current.score + 1,
+          });
+        });
+
+        (ordersResult.data || []).forEach((row) => {
+          if (!row.freelancer_id) return;
+
+          const current = relationshipMap.get(row.freelancer_id) || {
+            source: "ordered",
+            score: 0,
+          };
+
+          relationshipMap.set(row.freelancer_id, {
+            source: "ordered",
+            score: current.score + 3,
+          });
+        });
+
+        const prioritizedIds = Array.from(relationshipMap.entries())
+          .sort((a, b) => b[1].score - a[1].score)
+          .map(([id]) => id)
+          .slice(0, 8);
+
+        let profiles = [];
+
+        if (prioritizedIds.length > 0) {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("id, display_name, first_name, last_name, bio, country, avatar_url")
+            .in("id", prioritizedIds);
+
+          if (error) throw error;
+
+          profiles = (data || [])
+            .map((person) => ({
+              ...person,
+              relationship: relationshipMap.get(person.id)?.source || "saved",
+              score: relationshipMap.get(person.id)?.score || 0,
+            }))
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 4);
+        } else {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("id, display_name, first_name, last_name, bio, country, avatar_url")
+            .eq("role", "freelancer")
+            .limit(4);
+
+          if (error) throw error;
+
+          profiles = (data || []).map((person) => ({
+            ...person,
+            relationship: "discover",
+            score: 0,
+          }));
+        }
+
+        setFavoriteFreelancers(profiles);
+      } catch (error) {
+        setFavoriteFreelancers([]);
+        setFavoritesError(
+          String(error?.message || "We couldn't load your favorite freelancers right now.")
+        );
+      } finally {
+        setFavoritesLoading(false);
+      }
+    }
+
+    loadFavoriteFreelancers();
   }, []);
 
-  const firstName = profile?.first_name || "";
+  useEffect(() => {
+    if (!location.state?.requestCreated) return;
+
+    reloadRequests();
+    toast.success(
+      location.state.requestCreatedTitle
+        ? `"${location.state.requestCreatedTitle}" is now posted.`
+        : "Your request is now posted."
+    );
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate, reloadRequests]);
+
+  const displayName = getCustomerDisplayName(profile);
 
   const quickStats = [
     {
       label: "Saved Listings",
-      value: stats.savedListings,
-      hint: stats.savedListings === 0 ? "Browse and save services" : "Ready to revisit",
+      value: statsLoading ? "..." : savedCount,
+      hint: savedCount === 0 ? "Start shortlisting work you want to revisit." : "Ready when you want to compare again.",
     },
     {
       label: "Open Requests",
-      value: stats.openRequests,
-      hint: stats.openRequests === 0 ? "No active requests yet" : "Waiting for replies",
+      value: requestsLoading ? "..." : openCount,
+      hint: openCount === 0 ? "Post a request when you need something specific." : "Your active briefs are ready for later replies.",
     },
     {
-      label: "Unread Messages",
-      value: stats.unreadMessages,
-      hint: stats.unreadMessages === 0 ? "All caught up!" : "Replies from creators",
+      label: "Active Orders",
+      value: statsLoading ? "..." : activeOrdersCount,
+      hint: activeOrdersCount === 0 ? "Nothing is in progress right now." : "Work you are still waiting on.",
     },
     {
-      label: "Nearby Matches",
-      value: creators.length,
-      hint: creators.length === 0 ? "No creators found yet" : "Based on your area",
+      label: "Favorite Freelancers",
+      value: favoritesLoading ? "..." : favoriteFreelancers.length,
+      hint:
+        favoriteFreelancers.length === 0
+          ? "Your saved and booked creators will show up here."
+          : "People you have already saved or worked with.",
     },
-  ];
-
-  const actionTransition = useMemo(
-    () => ({ type: "spring", stiffness: 340, damping: 24 }),
-    []
-  );
-
-  const accentColors = [
-    { a: "rgba(124,58,237,0.20)", b: "rgba(242,193,78,0.14)" },
-    { a: "rgba(42,20,80,0.16)", b: "rgba(124,58,237,0.14)" },
-    { a: "rgba(242,193,78,0.18)", b: "rgba(42,20,80,0.14)" },
-  ];
-
-  const creatorAccents = [
-    "rgba(124,58,237,0.10)",
-    "rgba(242,193,78,0.12)",
-    "rgba(42,20,80,0.08)",
-    "rgba(124,58,237,0.08)",
   ];
 
   return (
-    <div className="dashboardCustomer">
-      <Toaster position="top-center" />
-      <div className="dashboardCustomer__base" />
-      <div className="dashboardCustomer__shadow" aria-hidden="true">
-        <EtheralShadow
-          sizing="fill"
-          color="rgba(0,0,0,0.55)"
-          animation={{ scale: 45, speed: 35 }}
-          noise={{ opacity: 0.1, scale: 1 }}
-          performanceMode="auto"
-        />
-      </div>
-      <div className="dashboardCustomer__bg" aria-hidden="true" />
+    <CustomerDashboardFrame mainClassName="profilePage dashLandingPage">
+      <Reveal>
+        <section className="profileHero dashLandingHero">
+          <div className="profileHero__heading">
+            <p className="profileHero__eyebrow">Customer Dashboard</p>
+            <div className="profileHero__titleWrap">
+              <h1 className="profileHero__title">
+                <TypewriterHeading text="Welcome Back!" />
+              </h1>
+              <motion.svg
+                className="profileHero__line"
+                viewBox="0 0 300 20"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <motion.path
+                  d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 1.05, ease: "easeInOut", delay: 0.2 }}
+                />
+              </motion.svg>
+            </div>
 
-      <DashBar />
+            <p className="dashLandingHero__name">
+              <TypewriterHeading
+                text={profileLoading ? "Customer" : displayName}
+                speed={46}
+                initialDelay={320}
+              />
+            </p>
+            <p className="profileHero__sub">
+              Explore creative services, keep track of saved work, or post a request
+              so freelancers can understand exactly what you need later on.
+            </p>
 
-      <main className="dashboardCustomer__main">
-
-        {/* ── Hero ── */}
-        <section className="dashHero">
-          <div className="dashHero__left">
-            <motion.div
-              initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.6, ease: [0.2, 0.95, 0.2, 1] }}
-            >
-              <div className="dashHero__titleWrap">
-                <h1 className="dashHero__title">
-                  {profileLoading
-                    ? "Welcome!"
-                    : `Welcome, ${firstName}`}
-                </h1>
-
-                <motion.svg
-                  className="dashHero__line"
-                  viewBox="0 0 300 20"
-                  preserveAspectRatio="none"
-                  aria-hidden="true"
-                >
-                  <motion.path
-                    d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1 }}
-                    transition={{ duration: 1.05, ease: "easeInOut", delay: 0.2 }}
-                  />
-                </motion.svg>
-              </div>
-
-              <p className="dashHero__sub">
-                Explore creative services, connect with trusted creators, or post a request and let
-                the right people find you.
-              </p>
-            </motion.div>
-
-            <motion.div
-              className="dashHero__actions"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.24, ease: [0.2, 0.95, 0.2, 1] }}
-            >
+            <div className="dashLandingHero__actions">
               <motion.button
                 type="button"
-                className="dashActionBtn dashActionBtn--primary"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                transition={actionTransition}
+                className="dashLandingAction dashLandingAction--primary"
+                {...HERO_BUTTON_MOTION}
                 onClick={() => navigate("/dashboard/customer/browse-services")}
               >
-                <span className="dashActionBtn__text">Browse Services</span>
-                <span className="dashActionBtn__arrowWrap" aria-hidden="true">
-                  <ArrowRight className="dashActionBtn__arrow" />
-                </span>
+                <span>Browse Services</span>
+                <ArrowRight className="dashLandingAction__icon" />
               </motion.button>
 
               <motion.button
                 type="button"
-                className="dashActionBtn dashActionBtn--secondary"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                transition={actionTransition}
-                onClick={() => toast("Post a Request coming soon!")}
+                className="dashLandingAction dashLandingAction--secondary"
+                {...HERO_BUTTON_MOTION}
+                onClick={() => navigate("/dashboard/customer/post-request")}
               >
-                <PlusCircle className="dashActionBtn__icon" />
+                <PlusCircle className="dashLandingAction__icon" />
                 <span>Post a Request</span>
               </motion.button>
-            </motion.div>
+            </div>
           </div>
 
-          <motion.div
-            className="dashHero__right"
-            initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 0.65, delay: 0.18, ease: [0.2, 0.95, 0.2, 1] }}
-          >
-            <div className="dashStats">
-              {statsLoading
-                ? Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
-                : quickStats.map((item) => (
-                    <motion.article
-                      key={item.label}
-                      className="dashStatCard"
-                      whileHover={reduceMotion ? undefined : { y: -3, scale: 1.01 }}
-                      whileTap={reduceMotion ? undefined : { scale: 0.985 }}
-                      transition={actionTransition}
-                    >
-                      <div className="dashStatCard__value">{item.value ?? "—"}</div>
-                      <div className="dashStatCard__label">{item.label}</div>
-                      <div className="dashStatCard__hint">{item.hint}</div>
-                    </motion.article>
-                  ))}
-            </div>
-          </motion.div>
+          <div className="profileHero__stats dashLandingStats">
+            {quickStats.map((item) => (
+              <motion.article
+                key={item.label}
+                className="profileMiniStat dashLandingStat"
+                {...SURFACE_BUTTON_MOTION}
+              >
+                <span className="profileMiniStat__label">{item.label}</span>
+                <strong className="profileMiniStat__value">{item.value}</strong>
+                <span className="profileMiniStat__hint">{item.hint}</span>
+              </motion.article>
+            ))}
+          </div>
         </section>
+      </Reveal>
 
-        {/* ── Categories ── */}
-        <section className="dashSection">
-          <div className="dashSection__head">
+      <Reveal delay={0.04}>
+        <section className="dashLandingSection dashLandingSection--quick">
+          <div className="dashLandingSection__head">
             <div>
-              <h2 className="dashSection__title">Popular Categories</h2>
-              <p className="dashSection__desc">
-                Jump into the services customers often explore first.
+              <p className="dashLandingSection__eyebrow">Quick board</p>
+              <h2 className="dashLandingSection__title">Keep the main actions close</h2>
+            </div>
+          </div>
+
+          <div className="dashLandingQuickBoard">
+            {quickBoardItems.map((item, index) => {
+              const Icon = item.Icon;
+              return (
+                <motion.button
+                  key={item.label}
+                  type="button"
+                  className="dashLandingQuickCard"
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  transition={{ duration: 0.42, delay: index * 0.05 }}
+                  {...SURFACE_BUTTON_MOTION}
+                  onClick={() => item.action(navigate)}
+                >
+                  <span className="dashLandingQuickCard__iconWrap" aria-hidden="true">
+                    <Icon className="dashLandingQuickCard__icon" />
+                  </span>
+                  <span className="dashLandingQuickCard__copy">
+                    <span className="dashLandingQuickCard__title">{item.label}</span>
+                    <span className="dashLandingQuickCard__sub">{item.sub}</span>
+                  </span>
+                </motion.button>
+              );
+            })}
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal delay={0.08}>
+        <section className="dashLandingSection">
+          <div className="dashLandingSection__head">
+            <div>
+              <p className="dashLandingSection__eyebrow">Recent requests</p>
+              <h2 className="dashLandingSection__title">The briefs you already posted</h2>
+              <p className="dashLandingSection__desc">
+                Post something specific once, then come back here to check the briefs you have opened.
               </p>
             </div>
 
             <motion.button
               type="button"
-              className="dashGhostLink"
-              whileHover={{ x: 2 }}
-              whileTap={{ scale: 0.98 }}
-              transition={actionTransition}
-              onClick={() => navigate("/dashboard/customer/browse-services")}
+              className="dashLandingGhostLink"
+              {...LINK_BUTTON_MOTION}
+              onClick={() => navigate("/dashboard/customer/post-request")}
             >
-              See all
+              <span>Post a request</span>
+              <ArrowRight className="dashLandingGhostLink__icon" />
             </motion.button>
           </div>
 
-          <div className="dashCategoryGrid">
-            {categories.map(({ label, Icon }) => (
-              <motion.button
-                key={label}
-                type="button"
-                className="dashCategoryCard"
-                whileHover={reduceMotion ? undefined : { y: -4, scale: 1.01 }}
-                whileTap={reduceMotion ? undefined : { scale: 0.97 }}
-                transition={actionTransition}
-                onClick={() => navigate("/dashboard/customer/browse-services")}
-              >
-                <span className="dashCategoryCard__iconWrap" aria-hidden="true">
-                  <Icon className="dashCategoryCard__icon" />
-                </span>
-                <span className="dashCategoryCard__label">{label}</span>
-              </motion.button>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Recommendations + Sidebar ── */}
-        <section className="dashSplit">
-          <div className="dashSplit__main">
-            <div className="dashSection dashSection--embedded">
-              <div className="dashSection__head">
-                <div>
-                  <h2 className="dashSection__title">Recommended For You</h2>
-                  <p className="dashSection__desc">
-                    {services.length > 0
-                      ? "Curated picks from published services on the platform."
-                      : "Services will appear here once creators start publishing."}
-                  </p>
-                </div>
-
-                {services.length > 0 && (
-                  <motion.button
-                    type="button"
-                    className="dashGhostLink"
-                    whileHover={{ x: 2 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={actionTransition}
-                    onClick={() => navigate("/dashboard/customer/browse-services")}
-                  >
-                    See all
-                  </motion.button>
-                )}
-              </div>
-
-              {servicesLoading ? (
-                <div className="dashListingGrid">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="dashListingCard dashListingCard--skeleton">
-                      <div className="dashSkeleton dashSkeleton--cover" />
-                      <div className="dashListingCard__body">
-                        <div className="dashSkeleton dashSkeleton--title" />
-                        <div className="dashSkeleton dashSkeleton--subtitle" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : services.length === 0 ? (
-                <EmptyState
-                  icon={PackageSearch}
-                  title="No services yet"
-                  desc="Once freelancers start publishing their services, they'll show up here for you to explore."
-                />
-              ) : (
-                <div className="dashListingGrid">
-                  {services.map((item, index) => {
-                    const colors = accentColors[index % accentColors.length];
-                    const creatorName = item.profiles
-                      ? `${item.profiles.first_name} ${item.profiles.last_name}`
-                      : "Unknown Creator";
-
-                    return (
-                      <motion.article
-                        key={item.id}
-                        className="dashListingCard"
-                        whileHover={reduceMotion ? undefined : { y: -4, scale: 1.01 }}
-                        transition={actionTransition}
-                        style={{
-                          "--listing-cover-a": colors.a,
-                          "--listing-cover-b": colors.b,
-                        }}
-                      >
-                        <div className="dashListingCard__cover">
-                          <span className="dashListingCard__badge">{item.category}</span>
-                          <span className="dashListingCard__coverIconWrap" aria-hidden="true">
-                            <PenTool className="dashListingCard__coverIcon" />
-                          </span>
-                        </div>
-
-                        <div className="dashListingCard__body">
-                          <div className="dashListingCard__top">
-                            <div>
-                              <h3 className="dashListingCard__title">{item.title}</h3>
-                              <p className="dashListingCard__creator">{creatorName}</p>
-                            </div>
-
-                            <button
-                              type="button"
-                              className="dashListingCard__save"
-                              onClick={() => toast("Save listings coming soon!")}
-                              aria-label="Save listing"
-                            >
-                              <Heart className="dashListingCard__saveIcon" />
-                            </button>
-                          </div>
-
-                          <div className="dashListingCard__meta">
-                            {item.location && (
-                              <span className="dashMetaPill">
-                                <MapPin className="dashMetaPill__icon" />
-                                {item.location}
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="dashListingCard__bottom">
-                            <div className="dashListingCard__price">
-                              ₱{Number(item.price).toLocaleString()}
-                            </div>
-
-                            <motion.button
-                              type="button"
-                              className="dashMiniBtn"
-                              whileHover={{ y: -1 }}
-                              whileTap={{ scale: 0.97 }}
-                              transition={actionTransition}
-                              onClick={() => toast("Service detail page coming soon!")}
-                            >
-                              View Listing
-                            </motion.button>
-                          </div>
-                        </div>
-                      </motion.article>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <aside className="dashSplit__side">
-            <motion.article
-              className="dashRequestCard"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.18 }}
-            >
-              <div className="dashRequestCard__iconWrap" aria-hidden="true">
-                <Compass className="dashRequestCard__icon" />
-              </div>
-
-              <h3 className="dashRequestCard__title">Need something specific?</h3>
-              <p className="dashRequestCard__desc">
-                Post a request and let creators respond with offers that match what you need.
-              </p>
-
-              <ul className="dashRequestCard__list">
-                <li>Receive interest from service providers</li>
-                <li>Compare replies in one place</li>
-                <li>Choose the best fit for your request</li>
-              </ul>
-
-              <motion.button
-                type="button"
-                className="dashRequestCard__btn"
-                whileHover={{ y: -1.5 }}
-                whileTap={{ scale: 0.98 }}
-                transition={actionTransition}
-                onClick={() => toast("Post a Request coming soon!")}
-              >
-                Post a Request
-              </motion.button>
-            </motion.article>
-
-            <motion.article
-              className="dashBoardCard"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.28 }}
-            >
-              <h3 className="dashBoardCard__title">Your Quick Board</h3>
-
-              <div className="dashQuickList">
-                {quickBoardItems.map(({ label, Icon }) => (
-                  <motion.button
-                    key={label}
-                    type="button"
-                    className="dashQuickList__item"
-                    whileHover={reduceMotion ? undefined : { y: -2, scale: 1.01, x: 2 }}
-                    whileTap={reduceMotion ? undefined : { scale: 0.97 }}
-                    transition={actionTransition}
-                    onClick={() => {
-                      if (label === "Saved listings") {
-                        navigate("/dashboard/customer/saved");
-                      } else {
-                        toast(`${label} coming soon!`);
-                      }
-                    }}
-                  >
-                    <Icon className="dashQuickList__icon" />
-                    <span>{label}</span>
-                  </motion.button>
-                ))}
-              </div>
-            </motion.article>
-          </aside>
-        </section>
-
-        {/* ── Nearby Creators ── */}
-        <section className="dashSection">
-          <div className="dashSection__head">
-            <div>
-              <h2 className="dashSection__title">Nearby & Trusted</h2>
-              <p className="dashSection__desc">
-                {creators.length > 0
-                  ? "Helpful creators around you, especially for location-based services."
-                  : "Freelancers who join the platform will appear here."}
-              </p>
-            </div>
-
-            {creators.length > 0 && (
-              <motion.button
-                type="button"
-                className="dashGhostLink"
-                whileHover={{ x: 2 }}
-                whileTap={{ scale: 0.98 }}
-                transition={actionTransition}
-                onClick={() => toast("Explore nearby coming soon!")}
-              >
-                Explore nearby
-              </motion.button>
-            )}
-          </div>
-
-          {creatorsLoading ? (
-            <div className="dashCreatorRow">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="dashCreatorCard dashCreatorCard--skeleton">
-                  <div className="dashSkeleton dashSkeleton--avatar" />
-                  <div className="dashSkeleton dashSkeleton--label" />
-                  <div className="dashSkeleton dashSkeleton--hint" />
-                </div>
+          {requestsLoading ? (
+            <div className="dashLandingRequestGrid">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="dashLandingRequestCard dashLandingRequestCard--skeleton" />
               ))}
             </div>
-          ) : creators.length === 0 ? (
+          ) : requestsError ? (
             <EmptyState
-              icon={Users}
-              title="No creators yet"
-              desc="Once freelancers sign up and complete their profiles, they'll appear here."
+              icon={PackageSearch}
+              title="Recent requests are unavailable right now"
+              desc={requestsError || "This section is unavailable right now."}
+              actionLabel="Open the request page"
+              onAction={() => navigate("/dashboard/customer/post-request")}
+            />
+          ) : requests.length === 0 ? (
+            <EmptyState
+              icon={PlusCircle}
+              title="You have not posted a request yet"
+              desc="Create your first request when you want freelancers to understand a specific need later on."
+              actionLabel="Post your first request"
+              onAction={() => navigate("/dashboard/customer/post-request")}
             />
           ) : (
-            <div className="dashCreatorRow">
-              {creators.map((creator, index) => {
-                const accent = creatorAccents[index % creatorAccents.length];
-                const name = `${creator.first_name} ${creator.last_name}`;
+            <div className="dashLandingRequestGrid">
+              {requests.map((request) => (
+                <motion.article
+                  key={request.id}
+                  className="dashLandingRequestCard"
+                  {...SURFACE_BUTTON_MOTION}
+                >
+                  <div className="dashLandingRequestCard__top">
+                    <div className="dashLandingRequestCard__meta">
+                      <span className="dashLandingRequestCard__chip">{request.category}</span>
+                      <span className="dashLandingRequestCard__chip dashLandingRequestCard__chip--soft">
+                        {request.timeline}
+                      </span>
+                    </div>
+                    <span className="dashLandingRequestCard__status">{request.status}</span>
+                  </div>
 
+                  <h3 className="dashLandingRequestCard__title">{request.title}</h3>
+                  <p className="dashLandingRequestCard__desc">{request.description}</p>
+
+                  <div className="dashLandingRequestCard__footer">
+                    <span className="dashLandingRequestCard__signal">
+                      {request.budget_amount ? formatPeso(request.budget_amount) : "Budget not set"}
+                    </span>
+                    <span className="dashLandingRequestCard__signal">
+                      {request.location || "Location not set"}
+                    </span>
+                    <span className="dashLandingRequestCard__signal">
+                      {formatRequestDate(request.created_at)}
+                    </span>
+                  </div>
+                </motion.article>
+              ))}
+            </div>
+          )}
+        </section>
+      </Reveal>
+
+      <Reveal delay={0.12}>
+        <section className="dashLandingSection">
+          <div className="dashLandingSection__head">
+            <div>
+              <p className="dashLandingSection__eyebrow">Recommended picks</p>
+              <h2 className="dashLandingSection__title">Published work worth checking first</h2>
+              <p className="dashLandingSection__desc">
+                These picks come from live service listings that are already published on the platform.
+              </p>
+            </div>
+
+            <motion.button
+              type="button"
+              className="dashLandingGhostLink"
+              {...LINK_BUTTON_MOTION}
+              onClick={() => navigate("/dashboard/customer/browse-services")}
+            >
+              <span>Browse all</span>
+              <ArrowRight className="dashLandingGhostLink__icon" />
+            </motion.button>
+          </div>
+
+          {servicesLoading ? (
+            <div className="dashLandingListingGrid">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="dashLandingListingCard dashLandingListingCard--skeleton" />
+              ))}
+            </div>
+          ) : services.length === 0 ? (
+            <EmptyState
+              icon={PackageSearch}
+              title="No published services yet"
+              desc="Once freelancers publish their work, recommended picks will show up here."
+              actionLabel="Browse services"
+              onAction={() => navigate("/dashboard/customer/browse-services")}
+            />
+          ) : (
+            <div className="dashLandingListingGrid">
+              {services.map((item) => {
+                const creator = normalizeRelation(item.profiles);
                 return (
                   <motion.article
-                    key={creator.id}
-                    className="dashCreatorCard"
-                    whileHover={reduceMotion ? undefined : { y: -4, scale: 1.01 }}
-                    whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-                    transition={actionTransition}
-                    style={{ "--creator-accent": accent }}
+                    key={item.id}
+                    className="dashLandingListingCard"
+                    {...SURFACE_BUTTON_MOTION}
                   >
-                    <div className="dashCreatorCard__avatar" aria-hidden="true">
-                      {creator.first_name?.charAt(0) || "?"}
+                    <div className="dashLandingListingCard__cover">
+                      <span className="dashLandingListingCard__badge">{item.category}</span>
                     </div>
 
-                    <div className="dashCreatorCard__body">
-                      <div className="dashCreatorCard__nameRow">
-                        <h3 className="dashCreatorCard__name">{name}</h3>
+                    <div className="dashLandingListingCard__body">
+                      <h3 className="dashLandingListingCard__title">{item.title}</h3>
+                      <p className="dashLandingListingCard__creator">
+                        {creator ? getCustomerDisplayName(creator) : "Freelancer"}
+                      </p>
+
+                      <div className="dashLandingListingCard__meta">
+                        {item.location && (
+                          <span className="dashLandingListingCard__metaItem">
+                            <MapPin className="dashLandingListingCard__metaIcon" />
+                            {item.location}
+                          </span>
+                        )}
                       </div>
 
-                      {creator.bio && (
-                        <p className="dashCreatorCard__specialty">{creator.bio}</p>
-                      )}
-
-                      {creator.country && (
-                        <div className="dashCreatorCard__meta">
-                          <span className="dashCreatorCard__location">
-                            <MapPin className="dashCreatorCard__metaIcon" />
-                            {creator.country}
-                          </span>
-                        </div>
-                      )}
+                      <div className="dashLandingListingCard__footer">
+                        <strong className="dashLandingListingCard__price">
+                          {formatPeso(item.price)}
+                        </strong>
+                        <motion.button
+                          type="button"
+                          className="dashLandingMiniBtn"
+                          {...LINK_BUTTON_MOTION}
+                          onClick={() => navigate("/dashboard/customer/browse-services")}
+                        >
+                          Browse similar
+                        </motion.button>
+                      </div>
                     </div>
-
-                    <motion.button
-                      type="button"
-                      className="dashCreatorCard__btn"
-                      whileHover={{ y: -1 }}
-                      whileTap={{ scale: 0.97 }}
-                      transition={actionTransition}
-                      onClick={() => toast("Creator profiles coming soon!")}
-                    >
-                      View Profile
-                    </motion.button>
                   </motion.article>
                 );
               })}
             </div>
           )}
         </section>
-      </main>
+      </Reveal>
 
-      <section className="dashboardCustomer__footerSection">
-        <HomeFooter fullBleed />
-      </section>
-    </div>
+      <Reveal delay={0.16}>
+        <section className="dashLandingSection">
+          <div className="dashLandingSection__head">
+            <div>
+              <p className="dashLandingSection__eyebrow">Categories</p>
+              <h2 className="dashLandingSection__title">Popular places to start</h2>
+              <p className="dashLandingSection__desc">
+                Jump into the service areas customers often explore first.
+              </p>
+            </div>
+          </div>
+
+          <div className="dashLandingCategoryGrid">
+            {categoryCards.map((item, index) => {
+              const Icon = item.Icon;
+              return (
+                <motion.button
+                  key={item.label}
+                  type="button"
+                  className="dashLandingCategoryCard"
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.35 }}
+                  transition={{ duration: 0.42, delay: index * 0.04 }}
+                  {...SURFACE_BUTTON_MOTION}
+                  onClick={() => navigate("/dashboard/customer/browse-services")}
+                >
+                  <span className="dashLandingCategoryCard__iconWrap" aria-hidden="true">
+                    <Icon className="dashLandingCategoryCard__icon" />
+                  </span>
+                  <span className="dashLandingCategoryCard__label">{item.label}</span>
+                </motion.button>
+              );
+            })}
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal delay={0.2}>
+        <section className="dashLandingSection">
+          <div className="dashLandingSection__head">
+            <div>
+              <p className="dashLandingSection__eyebrow">Favorite freelancers</p>
+              <h2 className="dashLandingSection__title">People your activity keeps pointing back to</h2>
+              <p className="dashLandingSection__desc">
+                This list is built from freelancers you saved work from or already booked before.
+              </p>
+            </div>
+          </div>
+
+          {favoritesLoading ? (
+            <div className="dashLandingFavoritesGrid">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="dashLandingFavoriteCard dashLandingFavoriteCard--skeleton" />
+              ))}
+            </div>
+          ) : favoritesError ? (
+            <EmptyState
+              icon={Users}
+              title="Favorite freelancers are unavailable right now"
+              desc={favoritesError || "This section is unavailable right now."}
+              actionLabel="Browse services"
+              onAction={() => navigate("/dashboard/customer/browse-services")}
+            />
+          ) : favoriteFreelancers.length === 0 ? (
+            <EmptyState
+              icon={Heart}
+              title="No favorite freelancers yet"
+              desc="Once you save listings or place orders, the freelancers tied to your activity will appear here."
+              actionLabel="Browse services"
+              onAction={() => navigate("/dashboard/customer/browse-services")}
+            />
+          ) : (
+            <div className="dashLandingFavoritesGrid">
+              {favoriteFreelancers.map((freelancer) => {
+                const reason =
+                  freelancer.relationship === "ordered"
+                    ? "Worked with before"
+                    : freelancer.relationship === "saved"
+                    ? "Saved from your listings"
+                    : "Good place to start";
+
+                return (
+                  <motion.article
+                    key={freelancer.id}
+                    className="dashLandingFavoriteCard"
+                    {...SURFACE_BUTTON_MOTION}
+                  >
+                    <div className="dashLandingFavoriteCard__top">
+                      <span className="dashLandingFavoriteCard__avatar" aria-hidden="true">
+                        {freelancer.avatar_url ? (
+                          <img
+                            src={freelancer.avatar_url}
+                            alt={getCustomerDisplayName(freelancer)}
+                            className="dashLandingFavoriteCard__avatarImage"
+                          />
+                        ) : (
+                          getCustomerInitials(freelancer)
+                        )}
+                      </span>
+
+                      <div className="dashLandingFavoriteCard__identity">
+                        <h3 className="dashLandingFavoriteCard__name">
+                          {getCustomerDisplayName(freelancer)}
+                        </h3>
+                        <p className="dashLandingFavoriteCard__reason">{reason}</p>
+                      </div>
+                    </div>
+
+                    <p className="dashLandingFavoriteCard__bio">
+                      {freelancer.bio || "This freelancer will feel more familiar once you save or book more work with them."}
+                    </p>
+
+                    <div className="dashLandingFavoriteCard__meta">
+                      <span className="dashLandingFavoriteCard__metaItem">
+                        <MapPin className="dashLandingFavoriteCard__metaIcon" />
+                        {freelancer.country || "Location not set"}
+                      </span>
+                    </div>
+                  </motion.article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </Reveal>
+    </CustomerDashboardFrame>
   );
 }

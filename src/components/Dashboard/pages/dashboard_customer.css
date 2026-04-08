@@ -1,924 +1,659 @@
 @import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap");
 
-.dashboardCustomer{
-  position: relative;
-  height: 100vh;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.dashboardCustomer::-webkit-scrollbar{
-  width: 0;
-  height: 0;
-  display: none;
-}
-
-.dashboardCustomer__base{
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background: #fff;
-}
-
-.dashboardCustomer__shadow{
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.92;
-  pointer-events: none;
-}
-
-.dashboardCustomer__bg{
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background:
-    radial-gradient(900px 520px at 30% 10%, rgba(124,58,237,0.10), transparent 60%),
-    radial-gradient(900px 520px at 80% 40%, rgba(242,193,78,0.12), transparent 62%),
-    radial-gradient(900px 520px at 30% 85%, rgba(42,20,80,0.08), transparent 65%);
-}
-
-.dashboardCustomer__main{
-  position: relative;
-  z-index: 2;
-  width: min(1220px, 94vw);
-  max-width: 1220px;
-  margin: 0 auto;
-  padding: 28px 0 40px;
-  display: grid;
-  gap: 28px;
-}
-
-.dashHero{
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.9fr);
-  gap: 22px;
-  align-items: stretch;
-}
-
-.dashHero__left,
-.dashHero__right,
-.dashSection,
-.dashRequestCard,
-.dashBoardCard{
-  border-radius: 28px;
-  border: 1px solid rgba(42,20,80,0.14);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,255,255,0.74));
-  backdrop-filter: blur(14px);
-  box-shadow:
-    0 24px 80px rgba(12,7,18,0.08),
-    inset 0 1px 0 rgba(255,255,255,0.70);
-}
-
-.dashHero__left{
-  padding: 28px 28px 26px;
-}
-
-.dashHero__right{
-  padding: 20px;
-}
-
-.dashHero__titleWrap{
-  position: relative;
-  display: inline-block;
-  padding-bottom: 18px;
-}
-
-.dashHero__title{
-  margin: 0;
-  font-family: "Dancing Script", cursive;
-  font-size: clamp(56px, 6vw, 82px);
-  line-height: 0.95;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: rgba(27,16,46,0.98);
-}
-
-.dashHero__line{
-  position: absolute;
-  left: -8px;
-  right: -8px;
-  bottom: 0;
-  width: calc(100% + 16px);
-  height: 18px;
-  color: rgba(242,193,78,0.96);
-}
-
-.dashHero__sub{
-  margin: 8px 0 0;
-  max-width: 56ch;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 15px;
-  line-height: 1.7;
-  color: rgba(27,16,46,0.74);
-}
-
-.dashHero__actions{
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.dashActionBtn{
-  height: 48px;
-  padding: 0 16px;
-  border-radius: 16px;
-  border: 1px solid rgba(42,20,80,0.16);
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  cursor: pointer;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 14px;
-  font-weight: 850;
-  transition:
-    border-color 220ms ease,
-    box-shadow 220ms ease,
-    background 220ms ease;
-}
-
-.dashActionBtn--primary{
-  background: linear-gradient(180deg, rgba(42,20,80,1), rgba(42,20,80,0.86));
-  color: #fff;
-  box-shadow: 0 18px 52px rgba(42,20,80,0.14);
-}
-
-.dashActionBtn--secondary{
-  background: rgba(255,255,255,0.78);
-  color: rgba(27,16,46,0.92);
-  backdrop-filter: blur(10px);
-}
-
-.dashActionBtn__text{
-  transition: transform 220ms ease;
-}
-
-.dashActionBtn__arrowWrap{
-  width: 0;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateX(6px);
-  transition: width 220ms ease, opacity 220ms ease, transform 220ms ease;
-}
-
-.dashActionBtn__arrow{
-  width: 18px;
-  height: 18px;
-}
-
-.dashActionBtn--primary:hover .dashActionBtn__text{
-  transform: translateX(-1px);
-}
-
-.dashActionBtn--primary:hover .dashActionBtn__arrowWrap{
-  width: 20px;
-  opacity: 1;
-  transform: translateX(4px);
-}
-
-.dashActionBtn__icon{
-  width: 17px;
-  height: 17px;
-}
-
-.dashStats{
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.dashStatCard{
-  min-height: 122px;
-  padding: 16px 16px 14px;
-  border-radius: 20px;
-  border: 1px solid rgba(42,20,80,0.12);
-  background: rgba(255,255,255,0.72);
-  box-shadow: 0 16px 44px rgba(12,7,18,0.04);
-  text-align: left;
-}
-
-.dashStatCard__value{
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 28px;
-  font-weight: 850;
-  letter-spacing: -0.03em;
-  color: rgba(27,16,46,0.96);
-}
-
-.dashStatCard__label{
-  margin-top: 6px;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 13px;
-  font-weight: 800;
-  color: rgba(27,16,46,0.76);
-}
-
-.dashStatCard__hint{
-  margin-top: 6px;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 12.5px;
-  line-height: 1.45;
-  color: rgba(27,16,46,0.54);
-}
-
-.dashSection{
-  padding: 22px;
-}
-
-.dashSection--embedded{
-  height: 100%;
-}
-
-.dashSection__head{
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.dashSection__title{
-  margin: 0;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 22px;
-  line-height: 1.1;
-  font-weight: 850;
-  letter-spacing: -0.03em;
-  color: rgba(27,16,46,0.96);
-}
-
-.dashSection__desc{
-  margin: 8px 0 0;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 14px;
-  line-height: 1.6;
-  color: rgba(27,16,46,0.64);
-}
-
-.dashGhostLink{
-  border: 0;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
-
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 13px;
-  font-weight: 850;
-  color: rgba(42,20,80,0.88);
-}
-
-.dashCategoryGrid{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.dashCategoryCard{
-  min-height: 118px;
-  padding: 16px 14px;
-  border-radius: 20px;
-  border: 1px solid rgba(42,20,80,0.12);
-  background: rgba(255,255,255,0.72);
-  box-shadow: 0 14px 40px rgba(12,7,18,0.04);
-
-  display: grid;
-  grid-template-rows: 44px 1fr;
-  align-items: center;
-  justify-items: center;
-  gap: 10px;
-
-  cursor: pointer;
-}
-
-.dashCategoryCard__iconWrap{
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  background: rgba(124,58,237,0.07);
-  border: 1px solid rgba(42,20,80,0.10);
-}
-
-.dashCategoryCard__icon{
-  width: 20px;
-  height: 20px;
-  color: rgba(42,20,80,0.92);
-}
-
-.dashCategoryCard__label{
-  text-align: center;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 13.5px;
-  line-height: 1.22;
-  font-weight: 850;
-  color: rgba(27,16,46,0.90);
-}
-
-.dashSplit{
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.8fr);
-  gap: 22px;
-}
-
-.dashSplit__main{
-  min-width: 0;
-}
-
-.dashSplit__side{
-  display: grid;
-  gap: 16px;
+.dashLandingPage {
   align-content: start;
 }
 
-.dashListingGrid{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.dashLandingHero {
+  align-items: start;
+  padding: 8px 0 2px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.dashLandingHero__name {
+  margin: 12px 0 0;
+  max-width: 18ch;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: clamp(28px, 3vw, 42px);
+  line-height: 1.04;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  color: rgba(27, 16, 46, 0.98);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.dashLandingHero .profileHero__sub {
+  margin-top: 14px;
+  max-width: 54ch;
+}
+
+.dashLandingHero__actions {
+  margin-top: 26px;
+  display: flex;
+  flex-wrap: wrap;
   gap: 14px;
 }
 
-.dashListingCard{
-  border-radius: 24px;
-  border: 1px solid rgba(42,20,80,0.12);
-  background: rgba(255,255,255,0.78);
-  box-shadow: 0 18px 54px rgba(12,7,18,0.05);
+.dashLandingAction {
+  position: relative;
   overflow: hidden;
-}
-
-.dashListingCard__cover{
-  height: 120px;
-  padding: 14px;
-  background:
-    radial-gradient(120px 90px at 15% 10%, var(--listing-cover-a), transparent 72%),
-    radial-gradient(120px 90px at 90% 100%, var(--listing-cover-b), transparent 74%),
-    linear-gradient(180deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44));
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-.dashListingCard__badge{
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.78);
-  border: 1px solid rgba(42,20,80,0.10);
+  min-height: 50px;
+  padding: 0 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(42, 20, 80, 0.14);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 11.5px;
-  font-weight: 850;
-  color: rgba(27,16,46,0.78);
-}
-
-.dashListingCard__coverIconWrap{
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  background: rgba(255,255,255,0.74);
-  border: 1px solid rgba(42,20,80,0.10);
-}
-
-.dashListingCard__coverIcon{
-  width: 20px;
-  height: 20px;
-  color: rgba(42,20,80,0.92);
-}
-
-.dashListingCard__body{
-  padding: 16px;
-}
-
-.dashListingCard__top{
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.dashListingCard__title{
-  margin: 0;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 17px;
-  line-height: 1.2;
-  font-weight: 850;
-  color: rgba(27,16,46,0.96);
-}
-
-.dashListingCard__creator{
-  margin: 6px 0 0;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  gap: 9px;
+  cursor: pointer;
+  font-family: Inter, system-ui, sans-serif;
   font-size: 13px;
-  font-weight: 700;
-  color: rgba(27,16,46,0.58);
-}
-
-.dashListingCard__save{
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  border: 1px solid rgba(42,20,80,0.10);
-  background: rgba(255,255,255,0.78);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  color: rgba(27,16,46,0.62);
-}
-
-.dashListingCard__saveIcon{
-  width: 16px;
-  height: 16px;
-}
-
-.dashListingCard__meta{
-  margin-top: 14px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.dashMetaPill{
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(42,20,80,0.10);
-  background: rgba(255,255,255,0.82);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 11.5px;
   font-weight: 850;
-  color: rgba(27,16,46,0.72);
-}
-
-.dashMetaPill__icon{
-  width: 13px;
-  height: 13px;
-}
-
-.dashListingCard__bottom{
-  margin-top: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.dashListingCard__price{
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 20px;
-  font-weight: 850;
-  letter-spacing: -0.03em;
-  color: rgba(27,16,46,0.96);
-}
-
-.dashMiniBtn{
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(42,20,80,0.12);
-  background: rgba(255,255,255,0.84);
-  cursor: pointer;
-
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 12px;
-  font-weight: 850;
-  color: rgba(27,16,46,0.88);
-}
-
-.dashRequestCard,
-.dashBoardCard{
-  padding: 20px;
-}
-
-.dashRequestCard__iconWrap{
-  width: 46px;
-  height: 46px;
-  border-radius: 16px;
-  display: grid;
-  place-items: center;
-  background: rgba(124,58,237,0.08);
-  border: 1px solid rgba(42,20,80,0.10);
-}
-
-.dashRequestCard__icon{
-  width: 22px;
-  height: 22px;
-  color: rgba(42,20,80,0.92);
-}
-
-.dashRequestCard__title,
-.dashBoardCard__title{
-  margin: 16px 0 0;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 20px;
-  line-height: 1.2;
-  font-weight: 850;
-  color: rgba(27,16,46,0.96);
-}
-
-.dashRequestCard__desc{
-  margin: 10px 0 0;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 14px;
-  line-height: 1.65;
-  color: rgba(27,16,46,0.68);
-}
-
-.dashRequestCard__list{
-  margin: 14px 0 0;
-  padding-left: 18px;
-  display: grid;
-  gap: 7px;
-  color: rgba(27,16,46,0.68);
-
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 13px;
-  line-height: 1.55;
-  font-weight: 700;
-}
-
-.dashRequestCard__btn{
-  margin-top: 18px;
-  width: 100%;
-  height: 46px;
-  border-radius: 16px;
-  border: 1px solid rgba(42,20,80,0.16);
-  background: linear-gradient(180deg, rgba(42,20,80,1), rgba(42,20,80,0.86));
-  color: #fff;
-  cursor: pointer;
-
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 14px;
-  font-weight: 850;
-  box-shadow: 0 18px 52px rgba(42,20,80,0.14);
-}
-
-.dashQuickList{
-  margin-top: 14px;
-  display: grid;
-  gap: 10px;
-}
-
-.dashQuickList__item{
-  height: 44px;
-  padding: 0 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(42,20,80,0.10);
-  background: rgba(255,255,255,0.74);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 13px;
-  font-weight: 800;
-  color: rgba(27,16,46,0.82);
-
   transition:
     border-color 220ms ease,
     background 220ms ease,
     box-shadow 220ms ease,
-    color 180ms ease;
+    color 180ms ease,
+    transform 220ms ease;
 }
 
-.dashQuickList__item:hover{
-  border-color: rgba(124,58,237,0.22);
-  background: rgba(124,58,237,0.05);
-  box-shadow: 0 16px 40px rgba(12,7,18,0.06);
-  color: rgba(27,16,46,0.96);
+.dashLandingAction::before,
+.dashLandingGhostLink::before,
+.dashLandingMiniBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.18) 30%,
+    rgba(255, 255, 255, 0.46) 50%,
+    rgba(255, 255, 255, 0.18) 70%,
+    transparent 100%
+  );
+  transform: translateX(-125%);
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
 }
 
-.dashQuickList__icon{
-  width: 16px;
-  height: 16px;
-  color: rgba(42,20,80,0.84);
+.dashLandingAction:hover::before,
+.dashLandingGhostLink:hover::before,
+.dashLandingMiniBtn:hover::before {
+  transform: translateX(125%);
 }
 
-.dashCreatorRow{
+.dashLandingAction--primary {
+  background: linear-gradient(180deg, rgba(42, 20, 80, 1), rgba(42, 20, 80, 0.86));
+  border-color: rgba(42, 20, 80, 0.18);
+  box-shadow: 0 18px 52px rgba(42, 20, 80, 0.16);
+  color: #fff;
+}
+
+.dashLandingAction--primary:hover {
+  border-color: rgba(242, 193, 78, 0.26);
+  box-shadow:
+    0 26px 70px rgba(42, 20, 80, 0.2),
+    0 0 0 1px rgba(242, 193, 78, 0.08);
+}
+
+.dashLandingAction--secondary {
+  background: rgba(255, 255, 255, 0.78);
+  color: rgba(27, 16, 46, 0.9);
+  box-shadow:
+    0 14px 34px rgba(12, 7, 18, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.dashLandingAction--secondary:hover {
+  border-color: rgba(124, 58, 237, 0.24);
+  background: rgba(124, 58, 237, 0.06);
+  box-shadow:
+    0 20px 48px rgba(12, 7, 18, 0.08),
+    0 0 0 1px rgba(124, 58, 237, 0.08);
+}
+
+.dashLandingAction__icon,
+.dashLandingGhostLink__icon {
+  width: 15px;
+  height: 15px;
+  transition: transform 220ms ease;
+}
+
+.dashLandingAction:hover .dashLandingAction__icon,
+.dashLandingGhostLink:hover .dashLandingGhostLink__icon {
+  transform: translateX(2px);
+}
+
+.dashLandingStats {
+  align-content: start;
+}
+
+.dashLandingStat {
+  min-height: 112px;
+}
+
+.dashLandingSection {
+  position: relative;
+  padding-top: 24px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.dashLandingSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(42, 20, 80, 0.02) 0%,
+    rgba(42, 20, 80, 0.12) 18%,
+    rgba(242, 193, 78, 0.22) 50%,
+    rgba(42, 20, 80, 0.12) 82%,
+    rgba(42, 20, 80, 0.02) 100%
+  );
+}
+
+.dashLandingSection--quick {
+  gap: 16px;
+}
+
+.dashLandingSection__head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.dashLandingSection__head > div {
+  min-width: 0;
+}
+
+.dashLandingSection__eyebrow {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: rgba(42, 20, 80, 0.56);
+}
+
+.dashLandingSection__title {
+  margin: 8px 0 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 24px;
+  line-height: 1.08;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: rgba(27, 16, 46, 0.96);
+}
+
+.dashLandingSection__desc {
+  margin: 10px 0 0;
+  max-width: 60ch;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.68;
+  color: rgba(27, 16, 46, 0.64);
+}
+
+.dashLandingGhostLink,
+.dashLandingMiniBtn {
+  position: relative;
+  overflow: hidden;
+  min-height: 42px;
+  padding: 0 15px;
+  border-radius: 14px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.78));
+  box-shadow:
+    0 12px 28px rgba(12, 7, 18, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.88);
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    color 180ms ease,
+    transform 220ms ease;
+}
+
+.dashLandingGhostLink:hover,
+.dashLandingMiniBtn:hover {
+  border-color: rgba(124, 58, 237, 0.22);
+  background: rgba(124, 58, 237, 0.05);
+  box-shadow:
+    0 20px 44px rgba(12, 7, 18, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+.dashLandingQuickBoard,
+.dashLandingCategoryGrid,
+.dashLandingListingGrid,
+.dashLandingRequestGrid,
+.dashLandingFavoritesGrid {
+  display: grid;
   gap: 14px;
 }
 
-.dashCreatorCard{
+.dashLandingQuickBoard {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.dashLandingQuickCard {
+  min-height: 98px;
   padding: 16px;
   border-radius: 22px;
-  border: 1px solid rgba(42,20,80,0.12);
-  background:
-    radial-gradient(100px 70px at 0% 0%, var(--creator-accent), transparent 72%),
-    rgba(255,255,255,0.78);
-  box-shadow: 0 16px 48px rgba(12,7,18,0.05);
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow:
+    0 16px 42px rgba(12, 7, 18, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease;
+}
+
+.dashLandingQuickCard:hover {
+  border-color: rgba(124, 58, 237, 0.18);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow:
+    0 22px 52px rgba(12, 7, 18, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.dashLandingQuickCard__iconWrap,
+.dashLandingCategoryCard__iconWrap,
+.dashLandingFavoriteCard__avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.dashLandingQuickCard__iconWrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(42, 20, 80, 0.08);
+  color: rgba(87, 34, 182, 0.92);
+}
+
+.dashLandingQuickCard__icon {
+  width: 18px;
+  height: 18px;
+  transition: transform 220ms ease;
+}
+
+.dashLandingQuickCard__copy,
+.dashLandingFavoriteCard__identity {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.dashLandingQuickCard__title,
+.dashLandingListingCard__title,
+.dashLandingRequestCard__title,
+.dashLandingFavoriteCard__name {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.2;
+  font-weight: 850;
+  color: rgba(27, 16, 46, 0.96);
+  overflow-wrap: anywhere;
+}
+
+.dashLandingQuickCard__sub,
+.dashLandingListingCard__creator,
+.dashLandingRequestCard__desc,
+.dashLandingFavoriteCard__reason,
+.dashLandingFavoriteCard__bio {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(27, 16, 46, 0.62);
+}
+
+.dashLandingRequestGrid,
+.dashLandingFavoritesGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dashLandingRequestCard,
+.dashLandingListingCard,
+.dashLandingFavoriteCard {
+  min-height: 100%;
+  border-radius: 24px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 18px 48px rgba(12, 7, 18, 0.05);
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease,
+    transform 220ms ease;
+}
+
+.dashLandingRequestCard:hover,
+.dashLandingListingCard:hover,
+.dashLandingFavoriteCard:hover {
+  border-color: rgba(124, 58, 237, 0.16);
+  box-shadow: 0 24px 60px rgba(12, 7, 18, 0.08);
+}
+
+.dashLandingRequestCard,
+.dashLandingFavoriteCard {
+  padding: 18px;
   display: grid;
   gap: 14px;
 }
 
-.dashCreatorCard__avatar{
-  width: 42px;
-  height: 42px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  background: rgba(255,255,255,0.88);
-  border: 1px solid rgba(42,20,80,0.10);
-
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 15px;
-  font-weight: 900;
-  color: rgba(42,20,80,0.92);
+.dashLandingRequestCard__top,
+.dashLandingFavoriteCard__top,
+.dashLandingListingCard__footer {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.dashCreatorCard__nameRow{
+.dashLandingRequestCard__meta,
+.dashLandingRequestCard__footer,
+.dashLandingFavoriteCard__meta,
+.dashLandingListingCard__meta {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.dashCreatorCard__name{
-  margin: 0;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 16px;
-  font-weight: 850;
-  color: rgba(27,16,46,0.94);
-}
-
-.dashCreatorCard__rating{
+.dashLandingRequestCard__chip,
+.dashLandingRequestCard__status,
+.dashLandingListingCard__badge,
+.dashLandingFavoriteCard__metaItem,
+.dashLandingRequestCard__signal,
+.dashLandingListingCard__metaItem {
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 11.5px;
-  font-weight: 850;
-  color: rgba(27,16,46,0.72);
+  gap: 6px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
 }
 
-.dashCreatorCard__ratingIcon,
-.dashCreatorCard__metaIcon{
+.dashLandingRequestCard__chip,
+.dashLandingListingCard__badge {
+  background: rgba(124, 58, 237, 0.08);
+  color: rgba(87, 34, 182, 0.9);
+}
+
+.dashLandingRequestCard__chip--soft,
+.dashLandingRequestCard__status,
+.dashLandingRequestCard__signal,
+.dashLandingListingCard__metaItem,
+.dashLandingFavoriteCard__metaItem {
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(42, 20, 80, 0.08);
+  color: rgba(27, 16, 46, 0.72);
+}
+
+.dashLandingRequestCard__status {
+  text-transform: capitalize;
+}
+
+.dashLandingRequestCard__footer {
+  margin-top: auto;
+}
+
+.dashLandingListingGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.dashLandingListingCard {
+  overflow: hidden;
+}
+
+.dashLandingListingCard__cover {
+  height: 92px;
+  padding: 14px;
+  background:
+    radial-gradient(140px 90px at 14% 0%, rgba(124, 58, 237, 0.12), transparent 74%),
+    radial-gradient(160px 100px at 100% 100%, rgba(242, 193, 78, 0.1), transparent 74%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.46));
+}
+
+.dashLandingListingCard__body {
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.dashLandingListingCard__price {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: rgba(27, 16, 46, 0.98);
+}
+
+.dashLandingListingCard__metaIcon,
+.dashLandingFavoriteCard__metaIcon {
   width: 13px;
   height: 13px;
 }
 
-.dashCreatorCard__specialty{
-  margin: 8px 0 0;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 13px;
-  line-height: 1.55;
-  font-weight: 700;
-  color: rgba(27,16,46,0.64);
+.dashLandingCategoryGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.dashCreatorCard__meta{
-  margin-top: 10px;
-}
-
-.dashCreatorCard__location{
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 12px;
-  font-weight: 800;
-  color: rgba(27,16,46,0.68);
-}
-
-.dashCreatorCard__btn{
-  margin-top: 2px;
-  height: 38px;
-  border-radius: 12px;
-  border: 1px solid rgba(42,20,80,0.12);
-  background: rgba(255,255,255,0.82);
+.dashLandingCategoryCard {
+  min-height: 110px;
+  padding: 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 14px 38px rgba(12, 7, 18, 0.04);
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 12px;
+  text-align: center;
   cursor: pointer;
-
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 12px;
-  font-weight: 850;
-  color: rgba(27,16,46,0.86);
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease;
 }
 
-@media (max-width: 1100px){
-  .dashHero{
-    grid-template-columns: 1fr;
-  }
+.dashLandingCategoryCard:hover {
+  border-color: rgba(124, 58, 237, 0.18);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow:
+    0 20px 46px rgba(12, 7, 18, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
 
-  .dashSplit{
-    grid-template-columns: 1fr;
-  }
+.dashLandingCategoryCard__iconWrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(42, 20, 80, 0.08);
+  color: rgba(42, 20, 80, 0.92);
+}
 
-  .dashListingGrid{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.dashLandingCategoryCard__icon {
+  width: 18px;
+  height: 18px;
+  transition: transform 220ms ease;
+}
 
-  .dashCreatorRow{
+.dashLandingQuickCard:hover .dashLandingQuickCard__icon,
+.dashLandingCategoryCard:hover .dashLandingCategoryCard__icon {
+  transform: translateY(-1px) scale(1.06);
+}
+
+.dashLandingCategoryCard__label {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.86);
+}
+
+.dashLandingFavoriteCard__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  overflow: hidden;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  color: rgba(42, 20, 80, 0.92);
+}
+
+.dashLandingFavoriteCard__avatarImage {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.dashLandingFavoriteCard__bio {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dashLandingEmpty {
+  padding: clamp(34px, 5vw, 52px) 0 6px;
+}
+
+.dashLandingEmpty .profileEmpty__desc {
+  max-width: 46ch;
+}
+
+.dashLandingEmpty .profileEmpty__btn {
+  margin-top: 8px;
+}
+
+.dashLandingRequestCard--skeleton,
+.dashLandingListingCard--skeleton,
+.dashLandingFavoriteCard--skeleton {
+  min-height: 200px;
+  border-radius: 24px;
+  border: 1px solid rgba(42, 20, 80, 0.08);
+  background: linear-gradient(
+    90deg,
+    rgba(42, 20, 80, 0.05) 25%,
+    rgba(42, 20, 80, 0.1) 50%,
+    rgba(42, 20, 80, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: dashLandingShimmer 1.4s ease infinite;
+}
+
+@keyframes dashLandingShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 1120px) {
+  .dashLandingQuickBoard,
+  .dashLandingListingGrid,
+  .dashLandingCategoryGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 760px){
-  .dashboardCustomer__main{
-    width: min(96vw, 96vw);
-    padding-top: 20px;
-  }
-
-  .dashHero__left,
-  .dashHero__right,
-  .dashSection,
-  .dashRequestCard,
-  .dashBoardCard{
-    border-radius: 22px;
-  }
-
-  .dashHero__left{
-    padding: 22px 18px 20px;
-  }
-
-  .dashHero__right,
-  .dashSection,
-  .dashRequestCard,
-  .dashBoardCard{
-    padding: 18px;
-  }
-
-  .dashHero__title{
-    font-size: clamp(46px, 12vw, 70px);
-  }
-
-  .dashStats{
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .dashCategoryGrid{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .dashListingGrid{
-    grid-template-columns: 1fr;
-  }
-
-  .dashCreatorRow{
+@media (max-width: 920px) {
+  .dashLandingRequestGrid,
+  .dashLandingFavoritesGrid {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 520px){
-  .dashboardCustomer__main{
-    gap: 20px;
-  }
-
-  .dashHero__actions{
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .dashStats{
-    grid-template-columns: 1fr;
-  }
-
-  .dashSection__head{
+@media (max-width: 760px) {
+  .dashLandingHero__actions,
+  .dashLandingSection__head {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .dashLandingHero {
+    gap: 22px;
+  }
+
+  .dashLandingQuickBoard,
+  .dashLandingListingGrid,
+  .dashLandingCategoryGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.dashboardCustomer__footerSection{
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  margin-top: 8px;
+@media (max-width: 540px) {
+  .dashLandingHero__name {
+    max-width: 100%;
+    font-size: 28px;
+  }
+
+  .dashLandingSection__title {
+    font-size: 20px;
+  }
+
+  .dashLandingQuickCard,
+  .dashLandingRequestCard,
+  .dashLandingFavoriteCard,
+  .dashLandingListingCard {
+    border-radius: 20px;
+  }
 }
 
-/* ── Empty States ── */
-.dashEmptyState{
-  display: grid;
-  justify-items: center;
-  text-align: center;
-  padding: clamp(28px, 4vw, 48px) 20px;
-  gap: 10px;
-}
-
-.dashEmptyState__iconWrap{
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
-  display: grid;
-  place-items: center;
-  background: rgba(124,58,237,0.07);
-  border: 1px solid rgba(42,20,80,0.10);
-}
-
-.dashEmptyState__icon{
-  width: 22px;
-  height: 22px;
-  color: rgba(42,20,80,0.60);
-}
-
-.dashEmptyState__title{
-  margin: 4px 0 0;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 15px;
-  font-weight: 850;
-  color: rgba(27,16,46,0.80);
-}
-
-.dashEmptyState__desc{
-  margin: 0;
-  max-width: 36ch;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: rgba(27,16,46,0.54);
-}
-
-/* ── Skeleton Loaders ── */
-.dashSkeleton{
-  border-radius: 8px;
-  background: linear-gradient(
-    90deg,
-    rgba(42,20,80,0.06) 25%,
-    rgba(42,20,80,0.10) 50%,
-    rgba(42,20,80,0.06) 75%
-  );
-  background-size: 200% 100%;
-  animation: dashSkeletonShimmer 1.4s ease infinite;
-}
-
-@keyframes dashSkeletonShimmer{
-  0%{ background-position: 200% 0; }
-  100%{ background-position: -200% 0; }
-}
-
-.dashSkeleton--value{
-  height: 34px;
-  width: 52px;
-  border-radius: 8px;
-}
-
-.dashSkeleton--label{
-  height: 14px;
-  width: 80%;
-  margin-top: 10px;
-  border-radius: 6px;
-}
-
-.dashSkeleton--hint{
-  height: 12px;
-  width: 60%;
-  margin-top: 8px;
-  border-radius: 6px;
-}
-
-.dashSkeleton--cover{
-  height: 120px;
-  width: 100%;
-  border-radius: 0;
-}
-
-.dashSkeleton--title{
-  height: 18px;
-  width: 75%;
-  margin-bottom: 8px;
-  border-radius: 6px;
-}
-
-.dashSkeleton--subtitle{
-  height: 14px;
-  width: 50%;
-  border-radius: 6px;
-}
-
-.dashSkeleton--avatar{
-  width: 42px;
-  height: 42px;
-  border-radius: 999px;
-}
-
-.dashStatCard--skeleton,
-.dashListingCard--skeleton,
-.dashCreatorCard--skeleton{
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce){
-  .dashSkeleton{
+@media (prefers-reduced-motion: reduce) {
+  .dashLandingAction,
+  .dashLandingGhostLink,
+  .dashLandingMiniBtn,
+  .dashLandingRequestCard--skeleton,
+  .dashLandingListingCard--skeleton,
+  .dashLandingFavoriteCard--skeleton {
+    transition: none !important;
     animation: none !important;
-    background: rgba(42,20,80,0.07);
   }
 }

@@ -1,0 +1,12 @@
+create table public.cart_items (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid not null,
+  service_id uuid not null,
+  created_at timestamp with time zone not null default timezone ('utc'::text, now()),
+  constraint cart_items_pkey primary key (id),
+  constraint cart_items_user_service_key unique (user_id, service_id),
+  constraint cart_items_service_id_fkey foreign KEY (service_id) references services (id) on delete CASCADE,
+  constraint cart_items_user_id_fkey foreign KEY (user_id) references auth.users (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists cart_items_user_created_at_idx on public.cart_items using btree (user_id, created_at desc) TABLESPACE pg_default;

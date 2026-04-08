@@ -23,6 +23,7 @@ import {
   SHOWCASE_SLOT_LIMIT,
   getCustomerDisplayName,
   getCustomerInitials,
+  getCustomerRealName,
 } from "../shared/customerAchievements";
 import {
   AVATAR_ACCEPTED_TYPES,
@@ -189,9 +190,13 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [showcaseSaving, setShowcaseSaving] = useState(false);
   const [formValues, setFormValues] = useState({
+    firstName: "",
+    lastName: "",
     displayName: "",
     bio: "",
     country: "",
+    address: "",
+    age: "",
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("");
@@ -200,9 +205,13 @@ export default function Profile() {
   useEffect(() => {
     if (!profile || editing) return;
     setFormValues({
+      firstName: profile.first_name || "",
+      lastName: profile.last_name || "",
       displayName: profile.display_name || "",
       bio: profile.bio || "",
       country: profile.country || "",
+      address: profile.address || "",
+      age: profile.age == null ? "" : String(profile.age),
     });
   }, [editing, profile]);
 
@@ -215,6 +224,7 @@ export default function Profile() {
   }, []);
 
   const displayName = getCustomerDisplayName(profile);
+  const realName = getCustomerRealName(profile);
   const initials = getCustomerInitials(profile);
   const profileCompletion = useMemo(() => {
     const completed = progressTasks.filter((task) => task.complete).length;
@@ -234,6 +244,8 @@ export default function Profile() {
   const avatarSrc = removeAvatar
     ? ""
     : avatarPreview || String(profile?.avatar_url || "").trim();
+  const locationLabel = String(profile?.address || profile?.country || "").trim();
+  const ageLabel = profile?.age == null ? "" : String(profile.age);
   const topAchievements = earnedAchievements.slice(0, 8);
 
   const resetEditor = () => {
@@ -245,9 +257,13 @@ export default function Profile() {
     setAvatarPreview("");
     setRemoveAvatar(false);
     setFormValues({
+      firstName: profile?.first_name || "",
+      lastName: profile?.last_name || "",
       displayName: profile?.display_name || "",
       bio: profile?.bio || "",
       country: profile?.country || "",
+      address: profile?.address || "",
+      age: profile?.age == null ? "" : String(profile.age),
     });
   };
 
@@ -299,9 +315,13 @@ export default function Profile() {
     try {
       setSaving(true);
       await saveProfile({
+        firstName: formValues.firstName,
+        lastName: formValues.lastName,
         displayName: formValues.displayName,
         bio: formValues.bio,
         country: formValues.country,
+        address: formValues.address,
+        age: formValues.age,
         avatarFile,
         removeAvatar,
       });
@@ -425,7 +445,7 @@ export default function Profile() {
             </div>
             <div className="profileNotice__copy">
               <h2 className="profileNotice__title">
-                A few profile systems still need Supabase support
+                Some profile features are unavailable right now
               </h2>
               <p className="profileNotice__desc">{warnings[0]}</p>
             </div>
@@ -481,11 +501,29 @@ export default function Profile() {
             </div>
 
             <div className="profileIdentity__copy">
-              <p className="profileIdentity__eyebrow">Customer-facing profile</p>
+              <p className="profileIdentity__eyebrow">Public display name</p>
               <h2 className="profileIdentity__name">{displayName}</h2>
               <p className="profileIdentity__email">
                 {profile?.email || "Signed-in customer"}
               </p>
+              <div className="profileIdentity__facts">
+                <div className="profileIdentity__fact">
+                  <span className="profileIdentity__factLabel">Real name</span>
+                  <span className="profileIdentity__factValue">{realName}</span>
+                </div>
+                <div className="profileIdentity__fact">
+                  <span className="profileIdentity__factLabel">Address / area</span>
+                  <span className="profileIdentity__factValue">
+                    {locationLabel || "No broad location added yet"}
+                  </span>
+                </div>
+                <div className="profileIdentity__fact">
+                  <span className="profileIdentity__factLabel">Age</span>
+                  <span className="profileIdentity__factValue">
+                    {ageLabel || "No age added yet"}
+                  </span>
+                </div>
+              </div>
               <div className="profileIdentity__chips">
                 <span className="profileIdentity__chip">
                   <BadgeCheck className="profileIdentity__chipIcon" />
@@ -548,6 +586,50 @@ export default function Profile() {
 
             <div className="profileEditor__grid">
               <label className="profileField">
+                <span className="profileField__label">First name</span>
+                {editing ? (
+                  <input
+                    className="profileField__control"
+                    type="text"
+                    value={formValues.firstName}
+                    onChange={(event) =>
+                      setFormValues((prev) => ({
+                        ...prev,
+                        firstName: event.target.value,
+                      }))
+                    }
+                    placeholder="Your first name"
+                  />
+                ) : (
+                  <div className="profileField__value">
+                    {formValues.firstName || "No first name added yet"}
+                  </div>
+                )}
+              </label>
+
+              <label className="profileField">
+                <span className="profileField__label">Last name</span>
+                {editing ? (
+                  <input
+                    className="profileField__control"
+                    type="text"
+                    value={formValues.lastName}
+                    onChange={(event) =>
+                      setFormValues((prev) => ({
+                        ...prev,
+                        lastName: event.target.value,
+                      }))
+                    }
+                    placeholder="Your last name"
+                  />
+                ) : (
+                  <div className="profileField__value">
+                    {formValues.lastName || "No last name added yet"}
+                  </div>
+                )}
+              </label>
+
+              <label className="profileField">
                 <span className="profileField__label">Display name</span>
                 {editing ? (
                   <input
@@ -570,7 +652,29 @@ export default function Profile() {
               </label>
 
               <label className="profileField">
-                <span className="profileField__label">Country / location</span>
+                <span className="profileField__label">Address / area</span>
+                {editing ? (
+                  <input
+                    className="profileField__control"
+                    type="text"
+                    value={formValues.address}
+                    onChange={(event) =>
+                      setFormValues((prev) => ({
+                        ...prev,
+                        address: event.target.value,
+                      }))
+                    }
+                    placeholder="City, barangay, district, or general area"
+                  />
+                ) : (
+                  <div className="profileField__value">
+                    {formValues.address || "No broad location added yet"}
+                  </div>
+                )}
+              </label>
+
+              <label className="profileField">
+                <span className="profileField__label">Country</span>
                 {editing ? (
                   <input
                     className="profileField__control"
@@ -586,7 +690,31 @@ export default function Profile() {
                   />
                 ) : (
                   <div className="profileField__value">
-                    {formValues.country || "No location added yet"}
+                    {formValues.country || "No country added yet"}
+                  </div>
+                )}
+              </label>
+
+              <label className="profileField">
+                <span className="profileField__label">Age</span>
+                {editing ? (
+                  <input
+                    className="profileField__control"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={formValues.age}
+                    onChange={(event) =>
+                      setFormValues((prev) => ({
+                        ...prev,
+                        age: event.target.value,
+                      }))
+                    }
+                    placeholder="Your age"
+                  />
+                ) : (
+                  <div className="profileField__value">
+                    {formValues.age || "No age added yet"}
                   </div>
                 )}
               </label>
@@ -819,7 +947,7 @@ export default function Profile() {
 
           {!capabilities.canPersistShowcase && (
             <p className="profileSection__footnote">
-              Run the Supabase SQL for the badge showcase table before these slots can persist.
+              Badge showcase changes are unavailable right now.
             </p>
           )}
         </section>

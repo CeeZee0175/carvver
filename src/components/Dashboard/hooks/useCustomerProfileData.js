@@ -18,23 +18,23 @@ export const AVATAR_ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 function friendlySupabaseMessage(error, fallback) {
   const message = String(error?.message || "");
 
-  if (/column .*display_name/i.test(message)) {
-    return "Run the customer profile SQL first so the new display_name field exists.";
+  if (/column .*(display_name|address|age|first_name|last_name)/i.test(message)) {
+    return "Some profile details are unavailable right now.";
   }
 
   if (/bucket/i.test(message) || /storage/i.test(message)) {
-    return "Create the profile-avatars bucket and its policies in Supabase before uploading a profile photo.";
+    return "Profile photo uploads are unavailable right now.";
   }
 
   if (/customer_achievement_unlocks|customer_badge_showcase/i.test(message)) {
-    return "Run the customer profile SQL first so achievement and badge tables exist.";
+    return "Some profile achievements are unavailable right now.";
   }
 
   if (/row-level security|permission denied/i.test(message)) {
-    return "Supabase blocked this action. Check the RLS policies for the new profile feature tables.";
+    return "This profile action is unavailable right now.";
   }
 
-  return message || fallback;
+  return fallback;
 }
 
 function toObjectMap(rows, keyName, valueName) {
@@ -420,7 +420,7 @@ export function useCustomerProfileData() {
       {
         id: "mfa",
         label: "Enable 2FA",
-        detail: "Carvver can already read your real MFA status from Supabase.",
+        detail: "Extra sign-in protection helps keep your account safer.",
         complete: metrics.mfaEnabled,
       },
       {
@@ -490,9 +490,41 @@ export function useCustomerProfileData() {
   }, [capabilities.canPersistAchievements, loading, pendingUnlockIds, userId]);
 
   const saveProfile = useCallback(
-    async ({ displayName, bio, country, avatarFile, removeAvatar = false }) => {
+    async ({
+      firstName,
+      lastName,
+      displayName,
+      bio,
+      country,
+      address,
+      age,
+      avatarFile,
+      removeAvatar = false,
+    }) => {
       if (!userId) {
         throw new Error("You need to be signed in to update your profile.");
+      }
+
+      const normalizedFirstName = String(firstName || "").trim();
+      const normalizedLastName = String(lastName || "").trim();
+
+      if (!normalizedFirstName) {
+        throw new Error("Please add your first name.");
+      }
+
+      if (!normalizedLastName) {
+        throw new Error("Please add your last name.");
+      }
+
+      let normalizedAge = null;
+      if (age !== "" && age != null) {
+        const numericAge = Number(age);
+
+        if (!Number.isInteger(numericAge) || numericAge <= 0) {
+          throw new Error("Please enter a valid age.");
+        }
+
+        normalizedAge = numericAge;
       }
 
       let nextAvatarUrl = removeAvatar ? null : profile?.avatar_url || null;
@@ -502,9 +534,13 @@ export function useCustomerProfileData() {
       }
 
       const payload = {
+        first_name: normalizedFirstName,
+        last_name: normalizedLastName,
         display_name: String(displayName || "").trim() || null,
         bio: String(bio || "").trim() || null,
         country: String(country || "").trim() || null,
+        address: String(address || "").trim() || null,
+        age: normalizedAge,
         avatar_url: nextAvatarUrl,
       };
 
@@ -540,9 +576,7 @@ export function useCustomerProfileData() {
       }
 
       if (!capabilities.canPersistShowcase) {
-        throw new Error(
-          "Run the customer profile SQL first so the badge showcase table exists."
-        );
+        throw new Error("Badge showcase changes are unavailable right now.");
       }
 
       const uniqueIds = Array.from(

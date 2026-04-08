@@ -9,6 +9,7 @@ import PublicOnlyRoute from "./components/Backend/PublicOnlyRoute";
 
 const HomeAboutUs = lazy(() => import("./components/Homepage/pages/home_aboutUs"));
 const HomeCommunity = lazy(() => import("./components/Homepage/pages/home_community"));
+const PricingPageContent = lazy(() => import("./components/Homepage/pages/pricing_page"));
 const AuthCallback = lazy(() => import("./components/Auth/pages/auth_callback"));
 const SignIn = lazy(() => import("./components/Auth/pages/sign-in"));
 const SignUp = lazy(() => import("./components/Auth/pages/sign-up"));
@@ -17,6 +18,7 @@ const DashboardAboutUs = lazy(() => import("./components/Dashboard/pages/dashboa
 const BrowseCategories = lazy(() => import("./components/Dashboard/pages/browse_categories"));
 const FavBook = lazy(() => import("./components/Dashboard/pages/favBook"));
 const CartPage = lazy(() => import("./components/Dashboard/pages/cart_page"));
+const PostRequest = lazy(() => import("./components/Dashboard/pages/post_request"));
 const NotifPage = lazy(() => import("./components/Dashboard/pages/notifPage"));
 const Profile = lazy(() => import("./components/Dashboard/pages/profile"));
 const ProfileAchievements = lazy(() => import("./components/Dashboard/pages/profileAchievements"));
@@ -67,6 +69,16 @@ function CommunityPage() {
   );
 }
 
+function PricingPage() {
+  return (
+    <>
+      <NavBar />
+      <PricingPageContent />
+      <HomeFooter />
+    </>
+  );
+}
+
 function AppRoutes() {
   const location = useLocation();
 
@@ -110,6 +122,14 @@ function AppRoutes() {
         element={
           <Suspense fallback={<RouteFallback withNav />}>
             <CommunityPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/pricing"
+        element={
+          <Suspense fallback={<RouteFallback withNav />}>
+            <PricingPage />
           </Suspense>
         }
       />
@@ -191,6 +211,16 @@ function AppRoutes() {
           <Suspense fallback={<RouteFallback />}>
             <ProtectedRoute>
               <CartPage />
+            </ProtectedRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/customer/post-request"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <ProtectedRoute>
+              <PostRequest />
             </ProtectedRoute>
           </Suspense>
         }

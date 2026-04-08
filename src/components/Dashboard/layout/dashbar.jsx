@@ -6,7 +6,6 @@ import {
   Bell,
   CheckCheck,
   LogOut,
-  LoaderCircle,
   MessageCircle,
   Search,
   Settings,
@@ -19,33 +18,12 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import "./dashbar.css";
 import { signOut, getProfile } from "../../../lib/supabase/auth";
-import { createClient } from "../../../lib/supabase/client";
 import { PROFILE_UPDATED_EVENT } from "../../../lib/profileSync";
 import { formatNotificationTime, useNotifications } from "../hooks/useNotifications";
 import { getCustomerDisplayName, getCustomerInitials } from "../shared/customerAchievements";
 import { useCart } from "../hooks/useCart";
 
 const SPRING = { type: "spring", stiffness: 340, damping: 24 };
-const WAITLIST_SOURCE = "dashbar_pro_waitlist";
-const supabase = createClient();
-
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
-}
-
-function getWaitlistErrorMessage(error) {
-  if (!error) return "Couldn't join the Carvver Pro waitlist right now.";
-
-  if (error.code === "42P01") {
-    return "The newsletter_signups table is missing. Run the Supabase SQL first.";
-  }
-
-  if (error.code === "42501") {
-    return "Supabase blocked the waitlist insert. Check the newsletter policies first.";
-  }
-
-  return "Couldn't join the Carvver Pro waitlist right now.";
-}
 
 function NotificationPreviewItem({ item, index, onOpen }) {
   const Icon = item.Icon;
@@ -104,13 +82,8 @@ export default function DashBar() {
 
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState("");
-  const [openPro, setOpenPro] = useState(false);
   const [openProfile, setOpenProfile] = useState(false);
   const [openNotifications, setOpenNotifications] = useState(false);
-  const [proEmail, setProEmail] = useState("");
-  const [proSubmitting, setProSubmitting] = useState(false);
-  const [proStatus, setProStatus] = useState("idle");
-  const [proMessage, setProMessage] = useState("");
   const [user, setUser] = useState({
     fullName: "",
     email: "",
@@ -158,7 +131,6 @@ export default function DashBar() {
     const onDown = (e) => {
       if (!rootRef.current) return;
       if (!rootRef.current.contains(e.target)) {
-        setOpenPro(false);
         setOpenProfile(false);
         setOpenNotifications(false);
       }
@@ -166,7 +138,6 @@ export default function DashBar() {
 
     const onKey = (e) => {
       if (e.key === "Escape") {
-        setOpenPro(false);
         setOpenProfile(false);
         setOpenNotifications(false);
       }
@@ -182,41 +153,19 @@ export default function DashBar() {
   }, []);
 
   useEffect(() => {
-    setOpenPro(false);
     setOpenProfile(false);
     setOpenNotifications(false);
   }, [location.pathname]);
-
-  useEffect(() => {
-    if (!openPro) return;
-    if (proEmail || !user.email) return;
-
-    setProEmail(user.email);
-  }, [openPro, proEmail, user.email]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     toast("Search coming soon!");
   };
 
-  const togglePro = () => {
-    setOpenPro((prev) => {
-      const next = !prev;
-      if (next) {
-        setOpenProfile(false);
-        setOpenNotifications(false);
-        setProStatus("idle");
-        setProMessage("");
-      }
-      return next;
-    });
-  };
-
   const toggleProfile = () => {
     setOpenProfile((prev) => {
       const next = !prev;
       if (next) {
-        setOpenPro(false);
         setOpenNotifications(false);
       }
       return next;
@@ -227,7 +176,6 @@ export default function DashBar() {
     setOpenNotifications((prev) => {
       const next = !prev;
       if (next) {
-        setOpenPro(false);
         setOpenProfile(false);
       }
       return next;
@@ -251,7 +199,6 @@ export default function DashBar() {
   };
 
   const handleSignOut = async () => {
-    setOpenPro(false);
     setOpenProfile(false);
     try {
       await signOut();
@@ -268,7 +215,7 @@ export default function DashBar() {
       await markAllRead();
       toast.success("All notifications marked as read.");
     } catch {
-      toast.error("Couldn't update notifications. Check Supabase first.");
+      toast.error("Couldn't update notifications right now.");
     }
   };
 
@@ -276,7 +223,7 @@ export default function DashBar() {
     try {
       await markRead(item.id);
     } catch {
-      toast.error("Couldn't update notifications. Check Supabase first.");
+      toast.error("Couldn't update notifications right now.");
     }
 
     setOpenNotifications(false);
@@ -286,51 +233,6 @@ export default function DashBar() {
   const handleOpenNotificationsPage = () => {
     setOpenNotifications(false);
     navigate("/dashboard/customer/notifications");
-  };
-
-  const handleSubmitProWaitlist = async (e) => {
-    e.preventDefault();
-
-    const normalizedEmail = proEmail.trim().toLowerCase();
-
-    if (!normalizedEmail) {
-      setProStatus("error");
-      setProMessage("Please enter your email first.");
-      return;
-    }
-
-    if (!isValidEmail(normalizedEmail)) {
-      setProStatus("error");
-      setProMessage("Please use a valid email address.");
-      return;
-    }
-
-    try {
-      setProSubmitting(true);
-      setProStatus("idle");
-      setProMessage("");
-
-      const { error } = await supabase.from("newsletter_signups").insert({
-        email: normalizedEmail,
-        source: WAITLIST_SOURCE,
-      });
-
-      if (error?.code === "23505") {
-        setProStatus("success");
-        setProMessage("You're already on the Carvver Pro waitlist.");
-        return;
-      }
-
-      if (error) throw error;
-
-      setProStatus("success");
-      setProMessage("You're in. We'll send Carvver Pro updates here.");
-    } catch (error) {
-      setProStatus("error");
-      setProMessage(getWaitlistErrorMessage(error));
-    } finally {
-      setProSubmitting(false);
-    }
   };
 
   const previewNotifications = unreadNotifications.slice(0, 4);
@@ -381,15 +283,12 @@ export default function DashBar() {
           <div className="dashbar__right dashbarEnter dashbarEnter--3">
             <motion.button
               type="button"
-              className={`dashbarPill dashbarPill--pro ${
-                openPro ? "dashbarPill--open" : ""
-              }`}
+              className="dashbarPill dashbarPill--pro"
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.96 }}
               transition={SPRING}
-              onClick={togglePro}
-              aria-expanded={openPro}
-              aria-haspopup="dialog"
+              onClick={() => navigate("/pricing")}
+              aria-label="View Carvver Pro pricing"
             >
               <span className="dashbarPill__glow" aria-hidden="true" />
               <Sparkles className="dashbarPill__icon" />
@@ -663,119 +562,6 @@ export default function DashBar() {
           </div>
         </div>
       </div>
-
-      <AnimatePresence>
-        {openPro && (
-          <>
-            <motion.button
-              type="button"
-              className="dashbarProModal__backdrop"
-              aria-label="Close Carvver Pro waitlist"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              onClick={() => setOpenPro(false)}
-            />
-
-            <motion.div
-              className="dashbarProModal"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="dashbar-pro-title"
-              initial={{ opacity: 0, y: 24, scale: 0.96, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: 18, scale: 0.96, filter: "blur(10px)" }}
-              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="dashbarProModal__shine" aria-hidden="true" />
-
-              <div className="dashbarProModal__header">
-                <p className="dashbarProModal__eyebrow">Waitlist</p>
-                <h2 className="dashbarProModal__title" id="dashbar-pro-title">
-                  Join Carvver Pro
-                </h2>
-                <p className="dashbarProModal__desc">
-                  Get first access to Pro trust signals, stronger creator
-                  placement, and future buyer perks before the wider rollout.
-                </p>
-              </div>
-
-              <form className="dashbarProModal__form" onSubmit={handleSubmitProWaitlist}>
-                <label className="dashbarProModal__label" htmlFor="dashbar-pro-email">
-                  Email
-                </label>
-                <div
-                  className={`dashbarProModal__inputWrap ${
-                    proStatus === "error" ? "dashbarProModal__inputWrap--error" : ""
-                  }`}
-                >
-                  <input
-                    id="dashbar-pro-email"
-                    className="dashbarProModal__input"
-                    type="email"
-                    autoComplete="email"
-                    value={proEmail}
-                    onChange={(e) => {
-                      setProEmail(e.target.value);
-                      if (proStatus !== "idle" || proMessage) {
-                        setProStatus("idle");
-                        setProMessage("");
-                      }
-                    }}
-                    placeholder="you@example.com"
-                    disabled={proSubmitting}
-                  />
-                </div>
-
-                <div className="dashbarProModal__actions">
-                  <motion.button
-                    type="submit"
-                    className="dashbarProModal__submit"
-                    whileHover={proSubmitting ? {} : { y: -1 }}
-                    whileTap={proSubmitting ? {} : { scale: 0.98 }}
-                    transition={SPRING}
-                    disabled={proSubmitting}
-                  >
-                    {proSubmitting ? (
-                      <>
-                        <LoaderCircle className="dashbarProModal__submitIcon dashbarProModal__submitIcon--spin" />
-                        <span>Joining...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="dashbarProModal__submitIcon" />
-                        <span>Join the waitlist</span>
-                      </>
-                    )}
-                  </motion.button>
-
-                  <motion.button
-                    type="button"
-                    className="dashbarProModal__cancel"
-                    whileHover={{ y: -1 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={SPRING}
-                    onClick={() => setOpenPro(false)}
-                  >
-                    Maybe later
-                  </motion.button>
-                </div>
-              </form>
-
-              <div className="dashbarProModal__footer">
-                <p
-                  className={`dashbarProModal__message ${
-                    proStatus === "success" ? "dashbarProModal__message--success" : ""
-                  } ${proStatus === "error" ? "dashbarProModal__message--error" : ""}`}
-                >
-                  {proMessage || "No spam. Just Pro updates when the next step is ready."}
-                </p>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </header>
   );
 }

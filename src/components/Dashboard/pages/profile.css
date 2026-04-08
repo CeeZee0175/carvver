@@ -406,6 +406,39 @@
   gap: 10px;
 }
 
+.profileIdentity__facts {
+  display: grid;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.profileIdentity__fact {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.profileIdentity__factLabel {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(87, 34, 182, 0.7);
+}
+
+.profileIdentity__factValue {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.58;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.9);
+  overflow-wrap: anywhere;
+}
+
 .profileIdentity__chip,
 .profileOrderStatus,
 .profileAchievement__tier,

@@ -126,6 +126,16 @@ export function getCustomerDisplayName(profile) {
   return fallback || "Customer";
 }
 
+export function getCustomerRealName(profile) {
+  if (!profile) return "No real name added yet";
+
+  const first = String(profile.first_name || "").trim();
+  const last = String(profile.last_name || "").trim();
+  const fullName = `${first} ${last}`.trim();
+
+  return fullName || "No real name added yet";
+}
+
 export function getCustomerInitials(profile) {
   const displayName = getCustomerDisplayName(profile);
   const parts = displayName.split(/\s+/).filter(Boolean);
@@ -225,11 +235,13 @@ export function buildCustomerAchievementMetrics({
   const displayName = String(profile?.display_name || "").trim();
   const bio = String(profile?.bio || "").trim();
   const country = String(profile?.country || "").trim();
+  const address = String(profile?.address || "").trim();
   const avatarUrl = String(profile?.avatar_url || "").trim();
   const createdAt = profile?.created_at ? new Date(profile.created_at) : null;
   const now = Date.now();
+  const locationSignal = address || country;
 
-  const profileSignals = [displayName, avatarUrl, bio, country].filter(Boolean).length;
+  const profileSignals = [displayName, avatarUrl, bio, locationSignal].filter(Boolean).length;
   const ageDays =
     createdAt && !Number.isNaN(createdAt.getTime())
       ? Math.floor((now - createdAt.getTime()) / (1000 * 60 * 60 * 24))
@@ -239,7 +251,8 @@ export function buildCustomerAchievementMetrics({
     hasDisplayName: Boolean(displayName),
     hasAvatar: Boolean(avatarUrl),
     hasBio: Boolean(bio),
-    hasCountry: Boolean(country),
+    hasCountry: Boolean(locationSignal),
+    hasAddress: Boolean(address),
     profileSignalCount: profileSignals,
     mfaEnabled,
     showcasedBadgeCount: showcaseIds.filter(Boolean).length,
@@ -780,4 +793,3 @@ export function resolveCustomerAchievementStates({
 export function getAchievementById(achievementId) {
   return CUSTOMER_ACHIEVEMENTS.find((item) => item.id === achievementId) || null;
 }
-

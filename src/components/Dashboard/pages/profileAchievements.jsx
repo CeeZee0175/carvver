@@ -165,7 +165,7 @@ export default function ProfileAchievements() {
             </div>
             <div className="profileNotice__copy">
               <h2 className="profileNotice__title">
-                A few achievement systems still need Supabase support
+                Some achievement features are unavailable right now
               </h2>
               <p className="profileNotice__desc">{warnings[0]}</p>
             </div>
@@ -352,8 +352,8 @@ export default function ProfileAchievements() {
           <section className="profileSection">
             <EmptySurface
               icon={BadgeCheck}
-              title="Badge featuring needs the Supabase SQL"
-              description="The catalog still works, but the featured badge wall cannot persist until the customer_badge_showcase table is created."
+              title="Badge featuring is unavailable right now"
+              description="The catalog still works, but featured badge changes cannot be saved at the moment."
             />
           </section>
         </Reveal>
