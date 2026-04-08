@@ -308,7 +308,7 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
   user-select: none;
   line-height: 1;
@@ -323,32 +323,78 @@
 }
 
 .signCheckbox__box{
-  width: 16px;
-  height: 16px;
-  flex: 0 0 16px;
-  display: block;
-  border-radius: 5px;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
   border: 1px solid rgba(42,20,80,0.20);
   background: rgba(255,255,255,0.84);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
   position: relative;
+  overflow: hidden;
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 260ms ease,
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.signCheckbox__box::before{
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(124,58,237,0.95), rgba(42,20,80,0.98));
+  opacity: 0;
+  transform: scale(0.5);
+  transition:
+    opacity 220ms ease,
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .signCheckbox__input:checked + .signCheckbox__box{
-  background: rgba(42,20,80,0.92);
-  border-color: rgba(42,20,80,0.92);
+  border-color: rgba(74,35,133,0.94);
+  background: rgba(42,20,80,0.98);
+  box-shadow:
+    0 10px 22px rgba(42,20,80,0.22),
+    0 0 0 4px rgba(124,58,237,0.10);
+  transform: scale(1.05);
 }
 
-.signCheckbox__input:checked + .signCheckbox__box::after{
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 1.5px;
-  width: 4px;
-  height: 8px;
-  border: solid #fff;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+.signCheckbox__input:checked + .signCheckbox__box::before{
+  opacity: 1;
+  transform: scale(1);
+}
+
+.signCheckbox__input:focus-visible + .signCheckbox__box{
+  box-shadow:
+    0 0 0 4px rgba(124,58,237,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.75);
+}
+
+.signCheckbox__mark{
+  position: relative;
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
+.signCheckbox__markPath{
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 16;
+  stroke-dashoffset: 16;
+  transition: stroke-dashoffset 280ms cubic-bezier(0.22, 1, 0.36, 1) 60ms;
+}
+
+.signCheckbox__input:checked + .signCheckbox__box .signCheckbox__markPath{
+  stroke-dashoffset: 0;
 }
 
 .signCheckbox__text,

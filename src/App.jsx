@@ -14,6 +14,7 @@ const DashboardCustomer = lazy(() => import("./components/Dashboard/dashboard_cu
 const DashboardAboutUs = lazy(() => import("./components/Dashboard/dashboard_aboutUs"));
 const BrowseCategories = lazy(() => import("./components/Dashboard/browse_categories"));
 const FavBook = lazy(() => import("./components/Dashboard/favBook"));
+const CartPage = lazy(() => import("./components/Dashboard/cart_page"));
 const NotifPage = lazy(() => import("./components/Dashboard/notifPage"));
 const Profile = lazy(() => import("./components/Dashboard/profile"));
 const ProfileAchievements = lazy(() => import("./components/Dashboard/profileAchievements"));
@@ -160,6 +161,16 @@ function AppRoutes() {
           <Suspense fallback={<RouteFallback />}>
             <ProtectedRoute>
               <FavBook />
+            </ProtectedRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/customer/cart"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <ProtectedRoute>
+              <CartPage />
             </ProtectedRoute>
           </Suspense>
         }

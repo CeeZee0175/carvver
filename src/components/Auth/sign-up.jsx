@@ -581,7 +581,18 @@ export default function SignUp() {
                 <input type="checkbox" className="signUpCheck__input" name="agreeTerms"
                   checked={formValues.agreeTerms}
                   onChange={handleFieldChange} />
-                <span className="signUpCheck__box" aria-hidden="true" />
+                <span className="signUpCheck__box" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 16 16"
+                    className="signUpCheck__mark"
+                    focusable="false"
+                  >
+                    <path
+                      d="M3.3 8.35 6.45 11.4 12.7 4.95"
+                      className="signUpCheck__markPath"
+                    />
+                  </svg>
+                </span>
                 <span className="signUpCheck__text">
                   I agree to the{" "}
                   <button type="button" className="signUpCheck__linkBtn">Terms and Conditions</button>
@@ -594,7 +605,18 @@ export default function SignUp() {
                 <input type="checkbox" className="signUpCheck__input" name="subscribe"
                   checked={formValues.subscribe}
                   onChange={handleFieldChange} />
-                <span className="signUpCheck__box" aria-hidden="true" />
+                <span className="signUpCheck__box" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 16 16"
+                    className="signUpCheck__mark"
+                    focusable="false"
+                  >
+                    <path
+                      d="M3.3 8.35 6.45 11.4 12.7 4.95"
+                      className="signUpCheck__markPath"
+                    />
+                  </svg>
+                </span>
                 <span className="signUpCheck__text">
                   Subscribe to our newsletter to never miss out on anything.
                 </span>

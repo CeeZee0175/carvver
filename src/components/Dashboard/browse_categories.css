@@ -1406,12 +1406,20 @@
   color: rgba(27,16,46,0.96);
 }
 
+.browseServiceCard__actions{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.browseServiceCard__cartBtn,
 .browseServiceCard__btn{
   height: 34px;
   padding: 0 12px;
   border-radius: 10px;
   border: 1px solid rgba(42,20,80,0.14);
-  background: linear-gradient(180deg, rgba(42,20,80,0.96), rgba(42,20,80,0.82));
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1420,9 +1428,38 @@
   font-family: Inter, system-ui, sans-serif;
   font-size: 12px;
   font-weight: 850;
-  color: #fff;
   white-space: nowrap;
-  transition: box-shadow 200ms ease;
+  transition:
+    box-shadow 200ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    color 160ms ease;
+}
+
+.browseServiceCard__cartBtn{
+  background: rgba(255,255,255,0.86);
+  color: rgba(27,16,46,0.88);
+}
+
+.browseServiceCard__cartBtn:hover{
+  border-color: rgba(124,58,237,0.22);
+  background: rgba(124,58,237,0.06);
+}
+
+.browseServiceCard__cartBtn--active{
+  border-color: rgba(124,58,237,0.26);
+  background: rgba(124,58,237,0.12);
+  color: rgba(87,34,182,0.96);
+}
+
+.browseServiceCard__cartIcon{
+  width: 13px;
+  height: 13px;
+}
+
+.browseServiceCard__btn{
+  background: linear-gradient(180deg, rgba(42,20,80,0.96), rgba(42,20,80,0.82));
+  color: #fff;
 }
 
 .browseServiceCard__btn:hover{
@@ -1692,6 +1729,7 @@
   .browseFilterTrigger__chevron,
   .browseServiceCard,
   .browseServiceCard__save,
+  .browseServiceCard__cartBtn,
   .browseLocationModal__allBtn,
   .browseRegionCard__chevron,
   .browseCategoryModal__apply,

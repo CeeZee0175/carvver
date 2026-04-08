@@ -31,6 +31,7 @@ import {
   Search,
   Share2,
   ShoppingBag,
+  ShoppingCart,
   Star,
   Video,
   X,
@@ -41,6 +42,7 @@ import DashBar from "./dashbar";
 import HomeFooter from "../Homepage/home_footer";
 import { Component as EtheralShadow } from "../StartUp/etheral-shadow";
 import { createClient } from "../../lib/supabase/client";
+import { useCart } from "./useCart";
 
 const supabase = createClient();
 
@@ -165,13 +167,14 @@ function TypewriterHeading({ text = "Saved Services" }) {
 
 /* ─── Fav Card ─── */
 
-function FavCard({ item, index, onRemove }) {
+function FavCard({ item, index, cartServiceIds, onAddToCart, onOpenCart, onRemove }) {
   const reduceMotion = useReducedMotion();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.1 });
 
   const service = item.services;
   if (!service) return null;
+  const inCart = cartServiceIds.includes(service.id);
 
   const colors = ACCENT_COLORS[index % ACCENT_COLORS.length];
   const Icon = getCategoryIcon(service.category);
@@ -268,17 +271,38 @@ function FavCard({ item, index, onRemove }) {
             </span>
           </div>
 
-          <motion.button
-            type="button"
-            className="favCard__viewBtn"
-            whileHover={{ x: 2 }}
-            whileTap={{ scale: 0.96 }}
-            transition={SPRING}
-            onClick={() => toast("Service detail page coming soon!")}
-          >
-            View
-            <ArrowRight className="favCard__viewIcon" />
-          </motion.button>
+          <div className="favCard__actions">
+            <motion.button
+              type="button"
+              className={`favCard__cartBtn ${inCart ? "favCard__cartBtn--active" : ""}`}
+              whileHover={{ x: 1 }}
+              whileTap={{ scale: 0.96 }}
+              transition={SPRING}
+              onClick={() => {
+                if (inCart) {
+                  onOpenCart();
+                  return;
+                }
+
+                onAddToCart(service);
+              }}
+            >
+              <ShoppingCart className="favCard__cartIcon" />
+              <span>{inCart ? "In cart" : "Add"}</span>
+            </motion.button>
+
+            <motion.button
+              type="button"
+              className="favCard__viewBtn"
+              whileHover={{ x: 2 }}
+              whileTap={{ scale: 0.96 }}
+              transition={SPRING}
+              onClick={() => toast("Service detail page coming soon!")}
+            >
+              View
+              <ArrowRight className="favCard__viewIcon" />
+            </motion.button>
+          </div>
         </div>
       </div>
     </motion.article>
@@ -368,6 +392,7 @@ function EmptyState({ hasSearch, onClearSearch, onBrowse }) {
 export default function FavBook() {
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
+  const { addItem, serviceIds: cartServiceIds } = useCart();
 
   const [savedItems, setSavedItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -403,6 +428,7 @@ export default function FavBook() {
               category,
               price,
               location,
+              is_published,
               is_pro,
               freelancer_id,
               profiles (
@@ -554,6 +580,29 @@ export default function FavBook() {
     },
     [savedItems]
   );
+
+  const handleAddToCart = useCallback(
+    async (service) => {
+      try {
+        const result = await addItem(service);
+        if (result?.duplicate) {
+          toast("Already in cart", {
+            duration: 1800,
+          });
+          return;
+        }
+
+        toast.success("Added to cart.");
+      } catch (error) {
+        toast.error(error.message || "Couldn't add this listing to your cart.");
+      }
+    },
+    [addItem]
+  );
+
+  const handleOpenCart = useCallback(() => {
+    navigate("/dashboard/customer/cart");
+  }, [navigate]);
 
   /* ── Clear search / filters ── */
 
@@ -805,6 +854,9 @@ export default function FavBook() {
                     key={item.id}
                     item={item}
                     index={index}
+                    cartServiceIds={cartServiceIds}
+                    onAddToCart={handleAddToCart}
+                    onOpenCart={handleOpenCart}
                     onRemove={handleRemove}
                   />
                 ))}

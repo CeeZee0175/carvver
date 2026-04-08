@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getProfile } from "../../lib/supabase/auth";
 import { createClient } from "../../lib/supabase/client";
+import { emitProfileUpdated } from "../../lib/profileSync";
 import {
   SHOWCASE_SLOT_LIMIT,
   buildCustomerAchievementMetrics,
@@ -516,6 +517,7 @@ export function useCustomerProfileData() {
       };
 
       setProfile(nextProfile);
+      emitProfileUpdated(nextProfile);
       return nextProfile;
     },
     [profile?.avatar_url, profile?.email, userId]
@@ -643,4 +645,3 @@ export function useCustomerOrdersData() {
     error,
   };
 }
-

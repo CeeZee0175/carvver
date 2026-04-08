@@ -214,7 +214,6 @@
   gap: 10px;
 }
 
-.dashbarExplore,
 .dashbarProfileWrap,
 .dashbarNotifyWrap{
   position: relative;
@@ -269,17 +268,41 @@
   line-height: 1;
 }
 
-.dashbarPill__chevron{
-  width: 15px;
-  height: 15px;
-  transition: transform 200ms ease;
+.dashbarPill--pro{
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(42,20,80,0.95), rgba(74,35,133,0.92));
+  border-color: rgba(87,34,182,0.26);
+  color: #fff;
+  box-shadow:
+    0 16px 44px rgba(42,20,80,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.16);
 }
 
-.dashbarPill__chevron--open{
-  transform: rotate(180deg);
+.dashbarPill--pro:hover,
+.dashbarPill--pro.dashbarPill--open{
+  background: linear-gradient(180deg, rgba(42,20,80,1), rgba(87,34,182,0.94));
+  border-color: rgba(242,193,78,0.28);
+  color: #fff;
+  box-shadow:
+    0 20px 52px rgba(42,20,80,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.18);
 }
 
-.dashbarMenu,
+.dashbarPill__text--pro{
+  position: relative;
+  z-index: 1;
+}
+
+.dashbarPill__glow{
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 24%, rgba(255,255,255,0.24) 46%, transparent 68%);
+  transform: translateX(-130%) skewX(-18deg);
+  animation: dashbarProSweep 4.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
 .dashbarProfileMenu{
   position: absolute;
   top: calc(100% + 12px);
@@ -297,36 +320,10 @@
   transition: opacity 160ms ease, transform 180ms ease;
 }
 
-.dashbarMenu{
-  right: 0;
-  min-width: 220px;
-  padding: 10px;
-}
-
-.dashbarMenu--open,
 .dashbarProfileMenu--open{
   opacity: 1;
   transform: translateY(0) scale(1);
   pointer-events: auto;
-}
-
-.dashbarMenu__item{
-  width: 100%;
-  border: 0;
-  background: transparent;
-  text-align: left;
-  padding: 11px 10px;
-  border-radius: 12px;
-  color: rgba(27,16,46,0.88);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
-  transition: background 160ms ease, transform 160ms ease;
-}
-
-.dashbarMenu__item:hover{
-  background: rgba(124,58,237,0.06);
-  transform: translateX(1px);
 }
 
 .dashbarIconBtn{
@@ -381,6 +378,28 @@
   background: #f2c14e;
   box-shadow: 0 0 0 2px rgba(255,255,255,0.96);
   animation: dashbarNotifyPulse 1.8s ease-in-out infinite;
+}
+
+.dashbarIconBtn__count{
+  position: absolute;
+  top: 6px;
+  right: 5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(87,34,182,0.98), rgba(42,20,80,0.94));
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,0.96),
+    0 8px 18px rgba(42,20,80,0.18);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1;
+  color: #fff;
 }
 
 .dashbarNotifyMenu{
@@ -708,6 +727,15 @@
   font-size: 11px;
   font-weight: 900;
   color: rgba(42,20,80,0.92);
+  overflow: hidden;
+}
+
+.dashbarProfile__avatarImage{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
 }
 
 .dashbarProfile__icon{
@@ -745,6 +773,15 @@
   font-size: 15px;
   font-weight: 900;
   color: rgba(42,20,80,0.92);
+  overflow: hidden;
+}
+
+.dashbarProfileMenu__avatarImage{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
 }
 
 .dashbarProfileMenu__identity{
@@ -823,9 +860,242 @@
   color: rgba(153,27,27,0.96);
 }
 
+.dashbarProModal__backdrop{
+  position: fixed;
+  inset: 0;
+  z-index: 79;
+  border: 0;
+  background: rgba(14, 7, 24, 0.42);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+
+.dashbarProModal{
+  position: fixed;
+  top: calc(var(--dashbar-h) + 18px);
+  right: clamp(12px, 3vw, 36px);
+  z-index: 80;
+  width: min(420px, calc(100vw - 24px));
+  border-radius: 28px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background:
+    radial-gradient(240px 180px at 0% 0%, rgba(124,58,237,0.14), transparent 74%),
+    radial-gradient(220px 140px at 100% 100%, rgba(242,193,78,0.12), transparent 76%),
+    linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,244,255,0.96));
+  box-shadow:
+    0 28px 90px rgba(12,7,18,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.78);
+  overflow: hidden;
+}
+
+.dashbarProModal__shine{
+  position: absolute;
+  top: 0;
+  left: -18%;
+  width: 34%;
+  height: 100%;
+  transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.32), transparent);
+  opacity: 0.62;
+  pointer-events: none;
+  animation: dashbarProPanelSweep 7.8s ease-in-out infinite;
+}
+
+.dashbarProModal__header,
+.dashbarProModal__form,
+.dashbarProModal__footer{
+  position: relative;
+  z-index: 1;
+}
+
+.dashbarProModal__header{
+  padding: 22px 22px 12px;
+}
+
+.dashbarProModal__eyebrow{
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(87,34,182,0.66);
+}
+
+.dashbarProModal__title{
+  margin: 10px 0 0;
+  font-family: "Dancing Script", cursive;
+  font-size: clamp(42px, 8vw, 56px);
+  line-height: 0.96;
+  font-weight: 700;
+  color: rgba(27,16,46,0.98);
+}
+
+.dashbarProModal__desc{
+  margin: 12px 0 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(27,16,46,0.68);
+}
+
+.dashbarProModal__form{
+  padding: 0 22px 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.dashbarProModal__label{
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(27,16,46,0.84);
+}
+
+.dashbarProModal__inputWrap{
+  height: 52px;
+  border-radius: 18px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background: rgba(255,255,255,0.88);
+  box-shadow:
+    0 14px 36px rgba(12,7,18,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.7);
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+.dashbarProModal__inputWrap:focus-within{
+  border-color: rgba(124,58,237,0.26);
+  background: rgba(255,255,255,0.96);
+  box-shadow:
+    0 18px 46px rgba(12,7,18,0.08),
+    0 0 0 4px rgba(124,58,237,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.74);
+}
+
+.dashbarProModal__inputWrap--error{
+  border-color: rgba(210,77,105,0.42);
+  box-shadow:
+    0 18px 46px rgba(12,7,18,0.08),
+    0 0 0 4px rgba(210,77,105,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.74);
+}
+
+.dashbarProModal__input{
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  padding: 0 16px;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(27,16,46,0.94);
+}
+
+.dashbarProModal__input::placeholder{
+  color: rgba(27,16,46,0.38);
+}
+
+.dashbarProModal__actions{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dashbarProModal__submit,
+.dashbarProModal__cancel{
+  min-height: 46px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 850;
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    color 180ms ease;
+}
+
+.dashbarProModal__submit{
+  flex: 1 1 220px;
+  border: 1px solid rgba(42,20,80,0.16);
+  background: linear-gradient(180deg, rgba(42,20,80,1), rgba(87,34,182,0.92));
+  color: #fff;
+  box-shadow: 0 18px 52px rgba(42,20,80,0.16);
+}
+
+.dashbarProModal__submit:disabled,
+.dashbarProModal__cancel:disabled{
+  cursor: wait;
+  opacity: 0.76;
+}
+
+.dashbarProModal__cancel{
+  flex: 0 0 auto;
+  padding: 0 16px;
+  border: 1px solid rgba(42,20,80,0.12);
+  background: rgba(255,255,255,0.82);
+  color: rgba(27,16,46,0.88);
+}
+
+.dashbarProModal__submitIcon{
+  width: 15px;
+  height: 15px;
+}
+
+.dashbarProModal__submitIcon--spin{
+  animation: dashbarProSpin 1s linear infinite;
+}
+
+.dashbarProModal__footer{
+  padding: 0 22px 20px;
+}
+
+.dashbarProModal__message{
+  margin: 0;
+  min-height: 1.5em;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 12.8px;
+  line-height: 1.6;
+  font-weight: 700;
+  color: rgba(27,16,46,0.56);
+}
+
+.dashbarProModal__message--success{
+  color: rgba(21,128,61,0.96);
+}
+
+.dashbarProModal__message--error{
+  color: rgba(184,52,81,0.92);
+}
+
 @keyframes dashbarGoldSweep{
   0%{ background-position: 0% 50%; }
   100%{ background-position: 260% 50%; }
+}
+
+@keyframes dashbarProSweep{
+  0%,
+  100%{
+    transform: translateX(-130%) skewX(-18deg);
+    opacity: 0;
+  }
+  16%{
+    opacity: 1;
+  }
+  42%{
+    transform: translateX(160%) skewX(-18deg);
+    opacity: 0;
+  }
 }
 
 @keyframes dashbarNotifyPulse{
@@ -846,6 +1116,28 @@
 @keyframes dashbarNotifyShimmer{
   0%{ background-position: 200% 0; }
   100%{ background-position: -200% 0; }
+}
+
+@keyframes dashbarProPanelSweep{
+  0%{
+    left: -18%;
+    opacity: 0;
+  }
+  16%{
+    opacity: 0.62;
+  }
+  42%{
+    opacity: 0;
+  }
+  100%{
+    left: 124%;
+    opacity: 0;
+  }
+}
+
+@keyframes dashbarProSpin{
+  from{ transform: rotate(0deg); }
+  to{ transform: rotate(360deg); }
 }
 
 @keyframes dashbarBlobsA{
@@ -876,16 +1168,17 @@
     gap: 12px;
   }
 
-  .dashbarPill__text{
-    display: none;
-  }
-
   .dashbarProfileMenu{
     min-width: 265px;
   }
 
   .dashbarNotifyMenu{
     width: min(340px, calc(100vw - 24px));
+  }
+
+  .dashbarProModal{
+    top: calc(var(--dashbar-h) + 12px);
+    right: 12px;
   }
 }
 
@@ -912,7 +1205,12 @@
     justify-content: center;
   }
 
-  .dashbarPill__chevron{
+  .dashbarPill--pro{
+    width: 42px;
+    padding: 0;
+  }
+
+  .dashbarPill__text{
     display: none;
   }
 
@@ -924,6 +1222,13 @@
   .dashbarNotifyMenu{
     right: 0;
     width: min(340px, calc(100vw - 18px));
+  }
+
+  .dashbarProModal{
+    top: calc(var(--dashbar-h) + 10px);
+    right: 10px;
+    left: 10px;
+    width: auto;
   }
 }
 
@@ -963,11 +1268,6 @@
     border-radius: 13px;
   }
 
-  .dashbarMenu{
-    right: 0;
-    min-width: 200px;
-  }
-
   .dashbarProfileMenu{
     right: 0;
     min-width: min(280px, calc(100vw - 20px));
@@ -976,6 +1276,15 @@
   .dashbarNotifyMenu{
     right: 0;
     width: min(340px, calc(100vw - 20px));
+  }
+
+  .dashbarProModal__actions{
+    flex-direction: column;
+  }
+
+  .dashbarProModal__submit,
+  .dashbarProModal__cancel{
+    width: 100%;
   }
 }
 
@@ -992,14 +1301,17 @@
   .dashbarIconBtn,
   .dashbarProfile,
   .dashbarSearch,
-  .dashbarMenu,
   .dashbarProfileMenu,
   .dashbarNotifyMenu,
   .dashbarNotifyItem,
   .dashbarNotifyMenu__markAll,
   .dashbarNotifyMenu__seeMore,
-  .dashbarPill__chevron,
-  .dashbarIconBtn__dot{
+  .dashbarIconBtn__dot,
+  .dashbarPill__glow,
+  .dashbarProModal,
+  .dashbarProModal__backdrop,
+  .dashbarProModal__submit,
+  .dashbarProModal__cancel{
     transition: none !important;
   }
 
@@ -1008,7 +1320,10 @@
   .dashbar__bg::after,
   .dashbarNotifySkeleton__icon,
   .dashbarNotifySkeleton__line,
-  .dashbarIconBtn__dot{
+  .dashbarIconBtn__dot,
+  .dashbarPill__glow,
+  .dashbarProModal__shine,
+  .dashbarProModal__submitIcon--spin{
     animation: none !important;
   }
 }

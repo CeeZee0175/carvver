@@ -385,7 +385,18 @@ export default function SignIn() {
                   checked={formValues.remember}
                   onChange={handleFieldChange}
                 />
-                <span className="signCheckbox__box" aria-hidden="true" />
+                <span className="signCheckbox__box" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 16 16"
+                    className="signCheckbox__mark"
+                    focusable="false"
+                  >
+                    <path
+                      d="M3.3 8.35 6.45 11.4 12.7 4.95"
+                      className="signCheckbox__markPath"
+                    />
+                  </svg>
+                </span>
                 <span className="signCheckbox__text">Remember me</span>
               </label>
 

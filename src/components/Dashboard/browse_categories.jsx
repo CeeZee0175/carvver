@@ -27,6 +27,7 @@ import {
   PenTool,
   Share2,
   ShoppingBag,
+  ShoppingCart,
   SlidersHorizontal,
   Sparkles,
   Star,
@@ -59,6 +60,7 @@ import {
   clearFeaturedCategoryIntent,
   resolveFeaturedCategoryIntent,
 } from "../../lib/featuredCategoryIntent";
+import { useCart } from "./useCart";
 
 const supabase = createClient();
 
@@ -962,11 +964,21 @@ function LocationMapModal({
 /* Service Card                                                              */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-function ServiceCard({ service, index, savedIds, onToggleSave, cardTransition }) {
+function ServiceCard({
+  service,
+  index,
+  savedIds,
+  cartServiceIds,
+  onToggleSave,
+  onAddToCart,
+  onOpenCart,
+  cardTransition,
+}) {
   const reduceMotion = useReducedMotion();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.1 });
   const saved = savedIds.includes(service.id);
+  const inCart = cartServiceIds.includes(service.id);
   const colors = ACCENT_COLORS[index % ACCENT_COLORS.length];
   const Icon = getCategoryIcon(service.category);
 
@@ -1053,17 +1065,40 @@ function ServiceCard({ service, index, savedIds, onToggleSave, cardTransition })
             </span>
           </div>
 
-          <motion.button
-            type="button"
-            className="browseServiceCard__btn"
-            whileHover={{ x: 2 }}
-            whileTap={{ scale: 0.96 }}
-            transition={cardTransition}
-            onClick={() => toast("Service detail page coming soon!")}
-          >
-            View
-            <ArrowRight style={{ width: 13, height: 13 }} />
-          </motion.button>
+          <div className="browseServiceCard__actions">
+            <motion.button
+              type="button"
+              className={`browseServiceCard__cartBtn ${
+                inCart ? "browseServiceCard__cartBtn--active" : ""
+              }`}
+              whileHover={{ x: 1 }}
+              whileTap={{ scale: 0.96 }}
+              transition={cardTransition}
+              onClick={() => {
+                if (inCart) {
+                  onOpenCart();
+                  return;
+                }
+
+                onAddToCart(service);
+              }}
+            >
+              <ShoppingCart className="browseServiceCard__cartIcon" />
+              <span>{inCart ? "In cart" : "Add"}</span>
+            </motion.button>
+
+            <motion.button
+              type="button"
+              className="browseServiceCard__btn"
+              whileHover={{ x: 2 }}
+              whileTap={{ scale: 0.96 }}
+              transition={cardTransition}
+              onClick={() => toast("Service detail page coming soon!")}
+            >
+              View
+              <ArrowRight style={{ width: 13, height: 13 }} />
+            </motion.button>
+          </div>
         </div>
       </div>
     </motion.article>
@@ -1208,6 +1243,7 @@ export default function BrowseCategories() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [savedIds, setSavedIds] = useState([]);
+  const { addItem, serviceIds: cartServiceIds } = useCart();
 
   const filterRef = useRef(null);
 
@@ -1413,6 +1449,27 @@ export default function BrowseCategories() {
       toast.error("Something went wrong. Please try again.");
     }
   }, [savedIds]);
+
+  const handleAddToCart = useCallback(
+    async (service) => {
+      try {
+        const result = await addItem(service);
+        if (result?.duplicate) {
+          toast("Already in cart.", { duration: 1800 });
+          return;
+        }
+
+        toast.success("Added to cart.");
+      } catch (error) {
+        toast.error(error.message || "Couldn't add this listing to your cart.");
+      }
+    },
+    [addItem]
+  );
+
+  const handleOpenCart = useCallback(() => {
+    navigate("/dashboard/customer/cart");
+  }, [navigate]);
 
   const categoriesLabel =
     selectedCategories.length === 0 && !includeOthers
@@ -1763,7 +1820,10 @@ export default function BrowseCategories() {
                 service={service}
                 index={index}
                 savedIds={savedIds}
+                cartServiceIds={cartServiceIds}
                 onToggleSave={handleToggleSave}
+                onAddToCart={handleAddToCart}
+                onOpenCart={handleOpenCart}
                 cardTransition={cardTransition}
               />
             ))
