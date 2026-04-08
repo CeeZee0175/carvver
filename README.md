@@ -6,8 +6,9 @@
   <p><strong>Carve With What You Love</strong></p>
 
   <p>
-    A product-first web platform for Filipino hobbyists, handmade-product makers,
-    and casual freelancers who need a clearer way to get discovered and booked.
+    Carvver is a platform we created for Filipino hobbyists who offer handmade
+    products, casual freelancers, and consumers who want to find their services
+    more easily.
   </p>
 
   <p>
@@ -20,95 +21,89 @@
   </p>
 </div>
 
-> Carvver began as a concept paper for STI College Las Pinas and is represented here as a working React + Supabase product build with a strong customer-facing experience, public brand pages, and escrow-oriented checkout flows.
+> Our goal is simple: to give them a dedicated platform where customers can easily
+> find their services without having the need to go through multiple social media
+> platforms.
 
 ## Table of Contents
 
-- [What Carvver Is](#what-carvver-is)
-- [Why It Exists](#why-it-exists)
-- [Core Features](#core-features)
-- [User Experience Split](#user-experience-split)
-- [Tech Stack](#tech-stack)
-- [App Structure and Main Routes](#app-structure-and-main-routes)
+- [Product Description](#product-description)
+- [Product Features](#product-features)
+- [Customer Benefits](#customer-benefits)
+- [Unique Selling Proposition](#unique-selling-proposition)
+- [App Routes](#app-routes)
 - [Local Setup](#local-setup)
-- [Supabase and PayMongo Notes](#supabase-and-paymongo-notes)
+- [Supabase and PayMongo Setup Notes](#supabase-and-paymongo-setup-notes)
 - [Founding Team](#founding-team)
 - [Project Background](#project-background)
 
-## What Carvver Is
+## Product Description
 
-Carvver is a discovery and transaction platform designed around people who are often underserved by larger, more competitive marketplaces:
+Carvver is a platform we created to help Filipino hobbyists who offer handmade
+products or creative services, together with independent freelancers who take
+small service requests, get discovered by consumers more easily.
 
-- Filipino hobbyists offering handmade products
-- casual freelancers taking small, occasional service requests
-- customers who want a calmer, more trustworthy way to discover and book them
+Our goal is simple, which is to give them a dedicated platform where customers
+can easily find their services without having the need to go through multiple
+social media platforms.
 
-The product direction comes from a simple idea: people should not need to jump across multiple social platforms just to find a creator, compare trust signals, and complete a service transaction safely.
+Since we mostly cater to independent hobbyists and casual freelancers, our
+platform avoids competitive features such as leaderboards. Because of that, we
+grant badges and achievements instead to commemorate completed work and
+milestones. This makes the experience feel rewarding without turning it into a
+constant competition.
 
-## Why It Exists
+Carvver also has dedicated sections for customers looking for services and
+individuals offering services. In this repository, the customer side is the one
+that is more complete right now, while some service-provider ideas from the
+concept paper are still shown through the product direction, the public pages,
+and the platform language.
 
-Carvver is shaped by a few core beliefs from the concept paper:
+## Product Features
 
-- discovery should feel clearer than scattered social-media searching
-- trust should come from visible signals such as profiles, reviews, badges, and verification
-- growth should feel rewarding without forcing people into leaderboard-style competition
-- creators should have better visibility, while customers should get safer and more understandable transactions
+These are the main features we added around the concept of Carvver.
 
-That is why the product language centers on:
+| Feature | Description | Current repo state |
+| --- | --- | --- |
+| Location Services | Consumers have the option to look for service providers near them. This helps customers find nearby providers more quickly. | Reflected through browse and discovery flows with location-aware UI and filtering ideas. |
+| Achievements and Badges | Instead of using leaderboards, we added achievements and badges to recognize progress and milestones. | Implemented strongly on the customer profile side, with achievements, badges, and showcase slots. |
+| Verified Badges | Verified signals help customers feel more at ease when choosing a provider. | Reflected in trust filters, profile language, and product direction in the app. |
+| Few-Click Posting | We wanted service providers to have a simpler way to share their listings across platforms. | Still mainly represented as a product direction and brand idea, not yet a full posting workflow in this repo. |
+| Escrow / Secured Transactions | We added an escrow-style payment idea so payments are held first before the order is pushed through completely. | Implemented through the cart, checkout flow, Supabase Edge Functions, and PayMongo webhook handling. |
 
-- achievements and badges over public ranking pressure
-- verified and trust-oriented signals
-- location-aware service discovery
-- few-click promotion ideas for creator visibility
-- escrow-backed payment handling to reduce scam risk
+## Customer Benefits
 
-## Core Features
+### Benefits for Service Providers
 
-The repository currently represents these product surfaces:
+- Build credibility over time through badges, achievements, and verified signals.
+- Gain a clearer place to show services instead of handling everything across many platforms.
+- Promote services more easily through the few-click posting direction of the platform.
+- Communicate more clearly with customers inside a platform built for that relationship.
 
-| Area | What is currently in the repo |
-| --- | --- |
-| Public brand site | Homepage, About Us, and Community pages with motion-heavy marketing sections |
-| Authentication | Sign in, sign up, social auth callback flow, and public-only route guards |
-| Customer dashboard | Dedicated customer landing page and protected dashboard shell |
-| Service discovery | Browse services, category filtering, trust-related filters, and location-aware UI |
-| Saved flow | Saved listings page for bookmarked services |
-| Cart and checkout | Shared cart state, PayMongo checkout initiation, and escrow-oriented flow |
-| Orders | Customer orders page with real order-status views |
-| Notifications | Notification center plus bell popup state |
-| Profile system | Customer profile editing, achievements, badges, and showcase slots |
-| Community capture | Newsletter/waitlist style email capture on public and dashboard surfaces |
+### Benefits for Customers
 
-### Product themes reflected in the app
+- Find services more quickly without going through multiple social media platforms.
+- Use clearer trust signals such as reviews, profiles, saved listings, and badge-based progress.
+- Manage saved listings, cart items, notifications, orders, and profile activity in one place.
+- Benefit from an escrow-oriented payment flow that is meant to make transactions safer and refunds easier to handle when needed.
 
-- **Escrow-oriented checkout**: customer payments are modeled to be held first, then reconciled through Supabase + PayMongo functions.
-- **Trust-first discovery**: the UX leans on reviews, badges, saved items, profile depth, and cleaner browsing patterns.
-- **Reward without forced competition**: achievements and badges are used as progress markers instead of leaderboard pressure.
+## Unique Selling Proposition
 
-## User Experience Split
+What makes Carvver different is how we simplify discovery for customers while
+also trying to make visibility better for hobbyists and casual freelancers.
 
-Carvver is meant to serve both customers and service providers, but the current repo is strongest on the customer-facing side.
+For service providers, the platform direction focuses on giving them a space
+where they can build credibility, get discovered more easily, and eventually
+share their listings with fewer steps. For customers, the platform focuses on
+safer transactions, easier browsing, and clearer trust signals when choosing
+who to book.
 
-| Audience | Current emphasis in this repo |
-| --- | --- |
-| Customers | Browse services, save listings, add to cart, check out, review orders, manage notifications, and maintain a richer customer profile |
-| Service providers | Reflected in the product narrative and concept direction through badges, visibility, verification, and few-click posting ideas, but not yet represented as a full provider dashboard path in this build |
+Instead of building the platform around leaderboards and pressure, we focused on
+badges, achievements, verified signals, and an escrow-oriented payment flow.
 
-That split is intentional to document honestly: the concept paper is broader, while the implemented app currently leans into the customer journey and shared brand/product storytelling.
+## App Routes
 
-## Tech Stack
-
-| Layer | Tools |
-| --- | --- |
-| Frontend | React 19, Vite 7 |
-| Routing | React Router 7 |
-| Motion and UI feel | Framer Motion, Lucide React, React Hot Toast |
-| Backend and auth | Supabase |
-| Mapping | Leaflet, React Leaflet |
-| Payment flow | PayMongo via Supabase Edge Functions |
-| Utilities | `clsx`, `class-variance-authority`, `tailwind-merge` |
-
-## App Structure and Main Routes
+These are the main routes currently present in the application.
 
 ### Main routes
 
@@ -116,45 +111,19 @@ That split is intentional to document honestly: the concept paper is broader, wh
 | --- | --- |
 | `/` | Public homepage |
 | `/about-us` | Public About Us page |
-| `/community` | Public community/waitlist page |
+| `/community` | Public community page |
 | `/sign-in` | Public sign-in page |
 | `/sign-up` | Public sign-up page |
 | `/auth/callback` | Social auth callback handler |
 | `/dashboard/customer` | Customer dashboard home |
-| `/dashboard/customer/about-us` | Dashboard-accessible About Us view |
-| `/dashboard/customer/browse-services` | Service browsing page |
-| `/dashboard/customer/saved` | Saved/bookmarked listings |
-| `/dashboard/customer/cart` | Customer cart and checkout summary |
-| `/dashboard/customer/notifications` | Notification center |
-| `/dashboard/customer/profile` | Customer profile |
-| `/dashboard/customer/profile/achievements` | Achievement and badge browser |
+| `/dashboard/customer/about-us` | Dashboard-accessible About Us page |
+| `/dashboard/customer/browse-services` | Browse services page |
+| `/dashboard/customer/saved` | Saved listings page |
+| `/dashboard/customer/cart` | Customer cart and checkout page |
+| `/dashboard/customer/notifications` | Notifications page |
+| `/dashboard/customer/profile` | Customer profile page |
+| `/dashboard/customer/profile/achievements` | Achievement and badge page |
 | `/dashboard/customer/orders` | Customer orders page |
-
-### Component organization
-
-```text
-src/
-  components/
-    Auth/
-      pages/
-    Backend/
-    Dashboard/
-      hooks/
-      layout/
-      pages/
-      shared/
-    Homepage/
-      layout/
-      pages/
-      sections/
-    StartUp/
-      pages/
-      shared/
-  lib/
-  assets/
-supabase/
-  functions/
-```
 
 ## Local Setup
 
@@ -163,73 +132,55 @@ npm install
 npm run dev
 ```
 
-To build for production:
+To build the project:
 
 ```bash
 npm run build
 ```
 
 <details>
-  <summary><strong>Environment variables</strong></summary>
+  <summary><strong>Before running locally</strong></summary>
 
-Create a local `.env.local` with the frontend Supabase values:
+This project depends on Supabase configuration in your local environment. It
+also expects the needed tables, policies, and product features to already be
+set up on the Supabase side before the full experience can work properly.
 
-```bash
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
-```
+</details>
 
-These are used by the React app for auth, profile data, cart state, notifications, and public waitlist forms.
+## Supabase and PayMongo Setup Notes
+
+Carvver uses Supabase for authentication, profile data, saved listings, cart
+data, orders, notifications, achievements, and other platform features.
+
+For payments, the project uses Supabase Edge Functions together with PayMongo.
+The current checkout flow is modeled as escrow-oriented, where payment is held
+first and then reconciled through the checkout and webhook flow.
+
+The current implementation also applies a 5% platform fee internally.
+
+<details>
+  <summary><strong>What still needs to be configured outside the repo</strong></summary>
+
+- Supabase project setup
+- required tables and policies
+- social auth provider setup if OAuth is needed
+- deployed Edge Functions for checkout and webhook handling
+- deployment-side payment configuration for PayMongo
 
 </details>
 
 <details>
-  <summary><strong>What you need enabled for the app to feel complete</strong></summary>
+  <summary><strong>Why this README mentions Supabase</strong></summary>
 
-- Supabase project with the required tables and policies already applied
-- `newsletter_signups` table for homepage, community, and Carvver Pro waitlist capture
-- customer profile and achievement tables for the profile system
-- cart and checkout tables for the PayMongo flow
-- optional social auth providers configured in Supabase if you want OAuth sign-in/sign-up
-
-</details>
-
-## Supabase and PayMongo Notes
-
-Carvver uses Supabase both as application backend and as the execution layer for payment functions.
-
-### Current payment architecture
-
-- checkout initiation is handled through `supabase/functions/create-paymongo-checkout`
-- webhook reconciliation is handled through `supabase/functions/paymongo-webhook`
-- the current implementation uses a **5% platform fee** internally
-- the customer-facing flow is presented as **escrow-oriented**, with payment held first and order records created from confirmed checkout events
-
-<details>
-  <summary><strong>Edge Function secrets</strong></summary>
-
-The payment functions expect secrets like:
-
-```bash
-PAYMONGO_SECRET_KEY
-PAYMONGO_WEBHOOK_SECRET
-APP_BASE_URL
-```
-
-Supabase also provides the standard service-role and project environment values required by the functions at deploy/runtime.
-
-</details>
-
-<details>
-  <summary><strong>Why the README says Supabase instead of Firebase</strong></summary>
-
-The concept paper originally described Firebase in the backend discussion, but the live repo is built around Supabase and Supabase Edge Functions. This README follows the actual codebase, not the older draft implementation language.
+The concept paper mentioned Firebase in part of the backend discussion, but the
+current repository uses Supabase. This README follows what is actually present
+in the codebase now.
 
 </details>
 
 ## Founding Team
 
-The About Us and founder presentation in the app align with the concept-paper team:
+The founder section in the app follows the same team from the concept paper.
 
 | Name | Role |
 | --- | --- |
@@ -242,23 +193,22 @@ The About Us and founder presentation in the app align with the concept-paper te
 
 ## Project Background
 
-Carvver was developed from a concept paper presented to the faculty of **STI College Las Pinas** in partial fulfillment of the course **Entrepreneurial Mind** for:
+Carvver started as a concept paper presented to the faculty of **STI College
+Las Pinas** in partial fulfillment of the course **Entrepreneurial Mind**.
 
-- **BSIT - 221**
-- **2nd Year - 2nd Term**
-- **February 2026**
+The idea behind it was to create a platform for:
 
-The concept paper positioned Carvver as a startup-focused platform for:
-
-- skilled hobbyists with handmade products
+- Filipino hobbyists with handmade products
 - casual freelancers with small-scale service offerings
-- local Filipino customers looking for a safer, more discoverable service marketplace
+- consumers who want a safer and easier way to find these services
 
-This repository reflects that concept as an evolving product build rather than just a static academic submission.
+This repository shows that idea as an actual web application with public brand
+pages, customer flows, profile systems, community pages, and checkout-related
+logic already in place.
 
 ---
 
 <div align="center">
   <strong>Carvver</strong><br />
-  Built around trust, visibility, and safer creator-to-customer transactions.
+  A platform we created so creators and customers can connect more easily.
 </div>
