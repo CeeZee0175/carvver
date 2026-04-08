@@ -52,15 +52,15 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import toast, { Toaster } from "react-hot-toast";
 import "./browse_categories.css";
-import DashBar from "./dashbar";
-import HomeFooter from "../Homepage/home_footer";
-import { Component as EtheralShadow } from "../StartUp/etheral-shadow";
-import { createClient } from "../../lib/supabase/client";
+import DashBar from "../layout/dashbar";
+import HomeFooter from "../../Homepage/layout/home_footer";
+import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
+import { createClient } from "../../../lib/supabase/client";
 import {
   clearFeaturedCategoryIntent,
   resolveFeaturedCategoryIntent,
-} from "../../lib/featuredCategoryIntent";
-import { useCart } from "./useCart";
+} from "../../../lib/featuredCategoryIntent";
+import { useCart } from "../hooks/useCart";
 
 const supabase = createClient();
 

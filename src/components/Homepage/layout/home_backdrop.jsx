@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./home_backdrop.css";
-import { Component as EtheralShadow } from "../StartUp/etheral-shadow";
+import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
 import { useReducedMotion } from "framer-motion";
 
 function addMediaListener(mq, handler) {

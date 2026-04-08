@@ -13,15 +13,15 @@ import {
   Trash2,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { getCustomerDisplayName } from "./customerAchievements";
+import { getCustomerDisplayName } from "../shared/customerAchievements";
 import {
   CustomerDashboardFrame,
   DashboardBreadcrumbs,
   EmptySurface,
   Reveal,
   TypewriterHeading,
-} from "./customerProfileShared";
-import { formatPeso, useCart } from "./useCart";
+} from "../shared/customerProfileShared";
+import { formatPeso, useCart } from "../hooks/useCart";
 import "./cart_page.css";
 
 const CART_ACTION_SPRING = {

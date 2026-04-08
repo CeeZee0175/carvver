@@ -12,12 +12,12 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import founderCarl from "../../assets/Carl Cardinal.jpg";
-import founderShaira from "../../assets/Shaira Brillantes.jpg";
-import founderGeoff from "../../assets/Geoff Montua.jpg";
-import founderAngelo from "../../assets/Angelo Nollano.jpg";
-import founderJhoanis from "../../assets/Jhoanis Zuniga.jpg";
-import founderMark from "../../assets/Mark Caraballe.jpg";
+import founderCarl from "../../../assets/Carl Cardinal.jpg";
+import founderShaira from "../../../assets/Shaira Brillantes.jpg";
+import founderGeoff from "../../../assets/Geoff Montua.jpg";
+import founderAngelo from "../../../assets/Angelo Nollano.jpg";
+import founderJhoanis from "../../../assets/Jhoanis Zuniga.jpg";
+import founderMark from "../../../assets/Mark Caraballe.jpg";
 import "./home_aboutUs.css";
 
 const SCRAMBLE_CHARS =

@@ -13,16 +13,16 @@ import toast from "react-hot-toast";
 import {
   ACHIEVEMENT_CATEGORIES,
   SHOWCASE_SLOT_LIMIT,
-} from "./customerAchievements";
-import { useCustomerProfileData } from "./useCustomerProfileData";
+} from "../shared/customerAchievements";
+import { useCustomerProfileData } from "../hooks/useCustomerProfileData";
 import {
   CustomerDashboardFrame,
   DashboardBreadcrumbs,
   EmptySurface,
   Reveal,
   TypewriterHeading,
-} from "./customerProfileShared";
-import { PROFILE_SPRING } from "./customerProfileConfig";
+} from "../shared/customerProfileShared";
+import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import "./profile.css";
 
 const FILTER_OPTIONS = [

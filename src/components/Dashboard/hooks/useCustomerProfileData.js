@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getProfile } from "../../lib/supabase/auth";
-import { createClient } from "../../lib/supabase/client";
-import { emitProfileUpdated } from "../../lib/profileSync";
+import { getProfile } from "../../../lib/supabase/auth";
+import { createClient } from "../../../lib/supabase/client";
+import { emitProfileUpdated } from "../../../lib/profileSync";
 import {
   SHOWCASE_SLOT_LIMIT,
   buildCustomerAchievementMetrics,
   getAchievementById,
   resolveCustomerAchievementStates,
-} from "./customerAchievements";
+} from "../shared/customerAchievements";
 
 const supabase = createClient();
 

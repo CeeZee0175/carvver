@@ -4,18 +4,18 @@ import { Eye, EyeOff, Lock, Mail, ArrowRight } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import "./sign-in.css";
-import { Component as EtheralShadow } from "../StartUp/etheral-shadow";
-import { getProfile, signIn, signInWithOAuth } from "../../lib/supabase/auth";
+import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
+import { getProfile, signIn, signInWithOAuth } from "../../../lib/supabase/auth";
 import {
   buildOAuthCallbackUrl,
   setAuthFlowIntent,
-} from "../../lib/authFlowIntent";
+} from "../../../lib/authFlowIntent";
 import {
   buildCategoryPath,
   clearFeaturedCategoryIntent,
   persistFeaturedCategoryFromSearch,
   resolveFeaturedCategoryIntent,
-} from "../../lib/featuredCategoryIntent";
+} from "../../../lib/featuredCategoryIntent";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

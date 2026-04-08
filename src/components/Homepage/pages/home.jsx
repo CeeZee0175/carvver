@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import "./home.css";
-import HomeBackdrop from "./home_backdrop";
-import HomeOne from "./home_one";
-import HomeTwo from "./home_two";
-import HomeThree from "./home_three";
-import HomeFour from "./home_four";
-import HomeFooter from "./home_footer";
+import HomeBackdrop from "../layout/home_backdrop";
+import HomeOne from "../sections/home_one";
+import HomeTwo from "../sections/home_two";
+import HomeThree from "../sections/home_three";
+import HomeFour from "../sections/home_four";
+import HomeFooter from "../layout/home_footer";
 
 export default function Home() {
   const scrollRef = useRef(null);

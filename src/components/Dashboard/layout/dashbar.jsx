@@ -18,12 +18,12 @@ import {
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import "./dashbar.css";
-import { signOut, getProfile } from "../../lib/supabase/auth";
-import { createClient } from "../../lib/supabase/client";
-import { PROFILE_UPDATED_EVENT } from "../../lib/profileSync";
-import { formatNotificationTime, useNotifications } from "./useNotifications";
-import { getCustomerDisplayName, getCustomerInitials } from "./customerAchievements";
-import { useCart } from "./useCart";
+import { signOut, getProfile } from "../../../lib/supabase/auth";
+import { createClient } from "../../../lib/supabase/client";
+import { PROFILE_UPDATED_EVENT } from "../../../lib/profileSync";
+import { formatNotificationTime, useNotifications } from "../hooks/useNotifications";
+import { getCustomerDisplayName, getCustomerInitials } from "../shared/customerAchievements";
+import { useCart } from "../hooks/useCart";
 
 const SPRING = { type: "spring", stiffness: 340, damping: 24 };
 const WAITLIST_SOURCE = "dashbar_pro_waitlist";

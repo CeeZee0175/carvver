@@ -8,16 +8,16 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import { getCustomerDisplayName } from "./customerAchievements";
-import { useCustomerOrdersData } from "./useCustomerProfileData";
+import { getCustomerDisplayName } from "../shared/customerAchievements";
+import { useCustomerOrdersData } from "../hooks/useCustomerProfileData";
 import {
   CustomerDashboardFrame,
   DashboardBreadcrumbs,
   EmptySurface,
   Reveal,
   TypewriterHeading,
-} from "./customerProfileShared";
-import { PROFILE_SPRING } from "./customerProfileConfig";
+} from "../shared/customerProfileShared";
+import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import "./profile.css";
 
 const ORDER_FILTERS = [

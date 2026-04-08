@@ -1,4 +1,4 @@
-import HomeFooter from "../Homepage/home_footer";
+import HomeFooter from "../../Homepage/layout/home_footer";
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -25,10 +25,10 @@ import {
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import "./dashboard_customer.css";
-import DashBar from "./dashbar";
-import { Component as EtheralShadow } from "../StartUp/etheral-shadow";
-import { getProfile } from "../../lib/supabase/auth";
-import { createClient } from "../../lib/supabase/client";
+import DashBar from "../layout/dashbar";
+import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
+import { getProfile } from "../../../lib/supabase/auth";
+import { createClient } from "../../../lib/supabase/client";
 
 const supabase = createClient();
 

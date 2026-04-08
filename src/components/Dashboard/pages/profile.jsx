@@ -23,20 +23,20 @@ import {
   SHOWCASE_SLOT_LIMIT,
   getCustomerDisplayName,
   getCustomerInitials,
-} from "./customerAchievements";
+} from "../shared/customerAchievements";
 import {
   AVATAR_ACCEPTED_TYPES,
   AVATAR_MAX_BYTES,
   useCustomerProfileData,
-} from "./useCustomerProfileData";
+} from "../hooks/useCustomerProfileData";
 import {
   CustomerDashboardFrame,
   DashboardBreadcrumbs,
   EmptySurface,
   Reveal,
   TypewriterHeading,
-} from "./customerProfileShared";
-import { PROFILE_SPRING } from "./customerProfileConfig";
+} from "../shared/customerProfileShared";
+import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import "./profile.css";
 
 function formatCompactDate(value) {

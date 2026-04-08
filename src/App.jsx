@@ -1,26 +1,26 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
-import SplashScreen from "./components/StartUp/splash_screen";
-import NavBar from "./components/Homepage/navbar";
-import Home from "./components/Homepage/home";
-import HomeFooter from "./components/Homepage/home_footer";
+import SplashScreen from "./components/StartUp/pages/splash_screen";
+import NavBar from "./components/Homepage/layout/navbar";
+import Home from "./components/Homepage/pages/home";
+import HomeFooter from "./components/Homepage/layout/home_footer";
 import ProtectedRoute from "./components/Backend/ProtectedRoute";
 import PublicOnlyRoute from "./components/Backend/PublicOnlyRoute";
 
-const HomeAboutUs = lazy(() => import("./components/Homepage/home_aboutUs"));
-const HomeCommunity = lazy(() => import("./components/Homepage/home_community"));
-const AuthCallback = lazy(() => import("./components/Auth/auth_callback"));
-const SignIn = lazy(() => import("./components/Auth/sign-in"));
-const SignUp = lazy(() => import("./components/Auth/sign-up"));
-const DashboardCustomer = lazy(() => import("./components/Dashboard/dashboard_customer"));
-const DashboardAboutUs = lazy(() => import("./components/Dashboard/dashboard_aboutUs"));
-const BrowseCategories = lazy(() => import("./components/Dashboard/browse_categories"));
-const FavBook = lazy(() => import("./components/Dashboard/favBook"));
-const CartPage = lazy(() => import("./components/Dashboard/cart_page"));
-const NotifPage = lazy(() => import("./components/Dashboard/notifPage"));
-const Profile = lazy(() => import("./components/Dashboard/profile"));
-const ProfileAchievements = lazy(() => import("./components/Dashboard/profileAchievements"));
-const CustomerOrders = lazy(() => import("./components/Dashboard/customerOrders"));
+const HomeAboutUs = lazy(() => import("./components/Homepage/pages/home_aboutUs"));
+const HomeCommunity = lazy(() => import("./components/Homepage/pages/home_community"));
+const AuthCallback = lazy(() => import("./components/Auth/pages/auth_callback"));
+const SignIn = lazy(() => import("./components/Auth/pages/sign-in"));
+const SignUp = lazy(() => import("./components/Auth/pages/sign-up"));
+const DashboardCustomer = lazy(() => import("./components/Dashboard/pages/dashboard_customer"));
+const DashboardAboutUs = lazy(() => import("./components/Dashboard/pages/dashboard_aboutUs"));
+const BrowseCategories = lazy(() => import("./components/Dashboard/pages/browse_categories"));
+const FavBook = lazy(() => import("./components/Dashboard/pages/favBook"));
+const CartPage = lazy(() => import("./components/Dashboard/pages/cart_page"));
+const NotifPage = lazy(() => import("./components/Dashboard/pages/notifPage"));
+const Profile = lazy(() => import("./components/Dashboard/pages/profile"));
+const ProfileAchievements = lazy(() => import("./components/Dashboard/pages/profileAchievements"));
+const CustomerOrders = lazy(() => import("./components/Dashboard/pages/customerOrders"));
 
 function RouteFallback({ withNav = false }) {
   return (

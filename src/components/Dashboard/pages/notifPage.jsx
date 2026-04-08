@@ -16,15 +16,15 @@ import {
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import "./notifPage.css";
-import DashBar from "./dashbar";
-import HomeFooter from "../Homepage/home_footer";
-import { Component as EtheralShadow } from "../StartUp/etheral-shadow";
+import DashBar from "../layout/dashbar";
+import HomeFooter from "../../Homepage/layout/home_footer";
+import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
 import {
   formatNotificationTime,
   NOTIFICATION_FILTERS,
   NOTIFICATIONS_PER_PAGE,
   useNotifications,
-} from "./useNotifications";
+} from "../hooks/useNotifications";
 
 const SPRING = { type: "spring", stiffness: 340, damping: 26 };
 

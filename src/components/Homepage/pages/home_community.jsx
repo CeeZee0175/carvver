@@ -15,7 +15,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
-import { createClient } from "../../lib/supabase/client";
+import { createClient } from "../../../lib/supabase/client";
 import "./home_community.css";
 
 const supabase = createClient();

@@ -2,9 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { ChevronRight, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { cn } from "../../lib/utils";
-import DashBar from "./dashbar";
-import HomeFooter from "../Homepage/home_footer";
+import { cn } from "../../../lib/utils";
+import DashBar from "../layout/dashbar";
+import HomeFooter from "../../Homepage/layout/home_footer";
 import { PROFILE_SPRING } from "./customerProfileConfig";
 
 export function CustomerDashboardFrame({ children, mainClassName = "" }) {

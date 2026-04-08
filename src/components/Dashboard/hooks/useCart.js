@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createClient } from "../../lib/supabase/client";
-import { emitCartUpdated, CART_UPDATED_EVENT } from "../../lib/cartSync";
+import { createClient } from "../../../lib/supabase/client";
+import { emitCartUpdated, CART_UPDATED_EVENT } from "../../../lib/cartSync";
 
 const supabase = createClient();
 

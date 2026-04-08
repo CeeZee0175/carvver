@@ -1,7 +1,7 @@
 import React from "react";
-import DashBar from "./dashbar";
-import HomeAboutUs from "../Homepage/home_aboutUs";
-import HomeFooter from "../Homepage/home_footer";
+import DashBar from "../layout/dashbar";
+import HomeAboutUs from "../../Homepage/pages/home_aboutUs";
+import HomeFooter from "../../Homepage/layout/home_footer";
 
 export default function DashboardAboutUs() {
   return (

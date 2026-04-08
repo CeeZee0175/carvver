@@ -7,11 +7,11 @@ import {
 } from "framer-motion";
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { createClient } from "../../lib/supabase/client";
+import { createClient } from "../../../lib/supabase/client";
 import {
   buildCategoryPath,
   setFeaturedCategoryIntent,
-} from "../../lib/featuredCategoryIntent";
+} from "../../../lib/featuredCategoryIntent";
 import "./home_two.css";
 
 const supabase = createClient();

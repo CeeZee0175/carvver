@@ -7,8 +7,8 @@ import {
   ShoppingBag,
   UserRound,
 } from "lucide-react";
-import { createClient } from "../../lib/supabase/client";
-import { getProfile } from "../../lib/supabase/auth";
+import { createClient } from "../../../lib/supabase/client";
+import { getProfile } from "../../../lib/supabase/auth";
 
 const supabase = createClient();
 

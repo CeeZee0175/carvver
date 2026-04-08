@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./splash_screen.css";
-import { Component as EtheralShadow } from "./etheral-shadow";
+import { Component as EtheralShadow } from "../shared/etheral-shadow";
 
 export default function SplashScreen({ onFinish, duration = 9000 }) {
   const [exitMode, setExitMode] = useState("none");

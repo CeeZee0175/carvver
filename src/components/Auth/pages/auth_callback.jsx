@@ -2,21 +2,21 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./auth-callback.css";
-import { Component as EtheralShadow } from "../StartUp/etheral-shadow";
+import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
 import {
   exchangeCodeForSession,
   getProfileById,
   getSession,
   upsertProfile,
-} from "../../lib/supabase/auth";
+} from "../../../lib/supabase/auth";
 import {
   buildCategoryPath,
   clearFeaturedCategoryIntent,
-} from "../../lib/featuredCategoryIntent";
+} from "../../../lib/featuredCategoryIntent";
 import {
   clearAuthFlowIntent,
   getAuthFlowIntent,
-} from "../../lib/authFlowIntent";
+} from "../../../lib/authFlowIntent";
 
 function toTitleCase(value) {
   return value
