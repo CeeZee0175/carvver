@@ -4,7 +4,8 @@ import SplashScreen from "./components/StartUp/pages/splash_screen";
 import NavBar from "./components/Homepage/layout/navbar";
 import Home from "./components/Homepage/pages/home";
 import HomeFooter from "./components/Homepage/layout/home_footer";
-import ProtectedRoute from "./components/Backend/ProtectedRoute";
+import CustomerRoute from "./components/Backend/CustomerRoute";
+import CustomerWelcomeRoute from "./components/Backend/CustomerWelcomeRoute";
 import PublicOnlyRoute from "./components/Backend/PublicOnlyRoute";
 
 const HomeAboutUs = lazy(() => import("./components/Homepage/pages/home_aboutUs"));
@@ -13,6 +14,7 @@ const PricingPageContent = lazy(() => import("./components/Homepage/pages/pricin
 const AuthCallback = lazy(() => import("./components/Auth/pages/auth_callback"));
 const SignIn = lazy(() => import("./components/Auth/pages/sign-in"));
 const SignUp = lazy(() => import("./components/Auth/pages/sign-up"));
+const CustomerWelcome = lazy(() => import("./components/Dashboard/pages/customer_welcome"));
 const DashboardCustomer = lazy(() => import("./components/Dashboard/pages/dashboard_customer"));
 const DashboardAboutUs = lazy(() => import("./components/Dashboard/pages/dashboard_aboutUs"));
 const BrowseCategories = lazy(() => import("./components/Dashboard/pages/browse_categories"));
@@ -163,15 +165,25 @@ function AppRoutes() {
           </Suspense>
         }
       />
+      <Route
+        path="/welcome/customer"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <CustomerWelcomeRoute>
+              <CustomerWelcome />
+            </CustomerWelcomeRoute>
+          </Suspense>
+        }
+      />
 
       {/* Protected routes - redirects to /sign-in if not logged in */}
       <Route
         path="/dashboard/customer"
         element={
           <Suspense fallback={<RouteFallback />}>
-            <ProtectedRoute>
+            <CustomerRoute>
               <DashboardCustomer />
-            </ProtectedRoute>
+            </CustomerRoute>
           </Suspense>
         }
       />
@@ -179,9 +191,9 @@ function AppRoutes() {
         path="/dashboard/customer/about-us"
         element={
           <Suspense fallback={<RouteFallback />}>
-            <ProtectedRoute>
+            <CustomerRoute>
               <DashboardAboutUs />
-            </ProtectedRoute>
+            </CustomerRoute>
           </Suspense>
         }
       />
@@ -189,9 +201,9 @@ function AppRoutes() {
         path="/dashboard/customer/browse-services"
         element={
           <Suspense fallback={<RouteFallback />}>
-            <ProtectedRoute>
+            <CustomerRoute>
               <BrowseCategories />
-            </ProtectedRoute>
+            </CustomerRoute>
           </Suspense>
         }
       />
@@ -199,9 +211,9 @@ function AppRoutes() {
         path="/dashboard/customer/saved"
         element={
           <Suspense fallback={<RouteFallback />}>
-            <ProtectedRoute>
+            <CustomerRoute>
               <FavBook />
-            </ProtectedRoute>
+            </CustomerRoute>
           </Suspense>
         }
       />
@@ -209,9 +221,9 @@ function AppRoutes() {
         path="/dashboard/customer/cart"
         element={
           <Suspense fallback={<RouteFallback />}>
-            <ProtectedRoute>
+            <CustomerRoute>
               <CartPage />
-            </ProtectedRoute>
+            </CustomerRoute>
           </Suspense>
         }
       />
@@ -219,9 +231,9 @@ function AppRoutes() {
         path="/dashboard/customer/post-request"
         element={
           <Suspense fallback={<RouteFallback />}>
-            <ProtectedRoute>
+            <CustomerRoute>
               <PostRequest />
-            </ProtectedRoute>
+            </CustomerRoute>
           </Suspense>
         }
       />
@@ -229,9 +241,9 @@ function AppRoutes() {
         path="/dashboard/customer/notifications"
         element={
           <Suspense fallback={<RouteFallback />}>
-            <ProtectedRoute>
+            <CustomerRoute>
               <NotifPage />
-            </ProtectedRoute>
+            </CustomerRoute>
           </Suspense>
         }
       />
@@ -239,9 +251,9 @@ function AppRoutes() {
         path="/dashboard/customer/profile"
         element={
           <Suspense fallback={<RouteFallback />}>
-            <ProtectedRoute>
+            <CustomerRoute>
               <Profile />
-            </ProtectedRoute>
+            </CustomerRoute>
           </Suspense>
         }
       />
@@ -249,9 +261,9 @@ function AppRoutes() {
         path="/dashboard/customer/profile/achievements"
         element={
           <Suspense fallback={<RouteFallback />}>
-            <ProtectedRoute>
+            <CustomerRoute>
               <ProfileAchievements />
-            </ProtectedRoute>
+            </CustomerRoute>
           </Suspense>
         }
       />
@@ -259,9 +271,9 @@ function AppRoutes() {
         path="/dashboard/customer/orders"
         element={
           <Suspense fallback={<RouteFallback />}>
-            <ProtectedRoute>
+            <CustomerRoute>
               <CustomerOrders />
-            </ProtectedRoute>
+            </CustomerRoute>
           </Suspense>
         }
       />

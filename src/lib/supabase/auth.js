@@ -2,6 +2,64 @@ import { createClient } from "./client";
 
 const supabase = createClient();
 
+function toTitleCase(value) {
+  return String(value || "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function deriveProfileNames(user, intent = {}) {
+  const intentFirstName = String(intent.firstName || "").trim();
+  const intentLastName = String(intent.lastName || "").trim();
+
+  if (intentFirstName || intentLastName) {
+    return {
+      firstName: intentFirstName || "Carvver",
+      lastName: intentLastName || "User",
+    };
+  }
+
+  const metadata = user?.user_metadata || {};
+  const directFirstName = String(
+    metadata.first_name || metadata.given_name || metadata.preferred_username || ""
+  ).trim();
+  const directLastName = String(metadata.last_name || metadata.family_name || "").trim();
+  const fullName = String(metadata.full_name || metadata.name || "").trim();
+
+  if (directFirstName || directLastName) {
+    return {
+      firstName: directFirstName || "Carvver",
+      lastName: directLastName || "User",
+    };
+  }
+
+  if (fullName) {
+    const parts = fullName.split(/\s+/).filter(Boolean);
+    return {
+      firstName: toTitleCase(parts[0] || "Carvver"),
+      lastName: toTitleCase(parts.slice(1).join(" ") || "User"),
+    };
+  }
+
+  const emailStem = String(user?.email || "carvver user")
+    .split("@")[0]
+    .replace(/[._-]+/g, " ")
+    .trim();
+  const emailParts = emailStem.split(/\s+/).filter(Boolean);
+
+  return {
+    firstName: toTitleCase(emailParts[0] || "Carvver"),
+    lastName: toTitleCase(emailParts.slice(1).join(" ") || "User"),
+  };
+}
+
+function getAvatarUrl(user) {
+  const metadata = user?.user_metadata || {};
+  return metadata.avatar_url || metadata.picture || metadata.avatar || null;
+}
+
 export async function signUp({ firstName, lastName, email, password, role, country }) {
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -102,4 +160,71 @@ export async function upsertProfile(profile) {
 
   if (error) throw error;
   return profile;
+}
+
+export async function ensureProfileForSession(session, intent = {}) {
+  if (!session?.user?.id) return null;
+
+  const user = session.user;
+  let profile = await getProfileById(user.id);
+
+  if (!profile) {
+    const names = deriveProfileNames(user, intent);
+    const nextProfile = {
+      id: user.id,
+      first_name: names.firstName,
+      last_name: names.lastName,
+      role: intent.role || user.user_metadata?.role || "customer",
+      country: intent.country || user.user_metadata?.country || null,
+      avatar_url: getAvatarUrl(user),
+    };
+
+    await upsertProfile(nextProfile);
+    profile = nextProfile;
+  } else {
+    const updates = { id: profile.id };
+    let shouldUpdate = false;
+
+    if (!profile.first_name || !profile.last_name) {
+      const names = deriveProfileNames(user, intent);
+
+      if (!profile.first_name) {
+        updates.first_name = names.firstName;
+        shouldUpdate = true;
+      }
+
+      if (!profile.last_name) {
+        updates.last_name = names.lastName;
+        shouldUpdate = true;
+      }
+    }
+
+    if (!profile.country && intent.country) {
+      updates.country = intent.country;
+      shouldUpdate = true;
+    }
+
+    if (!profile.avatar_url) {
+      const avatarUrl = getAvatarUrl(user);
+      if (avatarUrl) {
+        updates.avatar_url = avatarUrl;
+        shouldUpdate = true;
+      }
+    }
+
+    if (!profile.role && intent.role) {
+      updates.role = intent.role;
+      shouldUpdate = true;
+    }
+
+    if (shouldUpdate) {
+      profile = { ...profile, ...updates };
+      await upsertProfile(profile);
+    }
+  }
+
+  return {
+    ...profile,
+    email: user.email || "",
+  };
 }

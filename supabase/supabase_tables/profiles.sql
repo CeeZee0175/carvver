@@ -10,6 +10,7 @@ create table public.profiles (
   display_name text null,
   address text null,
   age integer null,
+  customer_onboarding_completed_at timestamp with time zone null,
   constraint profiles_pkey primary key (id),
   constraint profiles_id_fkey foreign KEY (id) references auth.users (id) on delete CASCADE,
   constraint profiles_age_check check (

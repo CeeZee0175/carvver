@@ -5,11 +5,21 @@ import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import "./sign-in.css";
 import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
-import { getProfile, signIn, signInWithOAuth } from "../../../lib/supabase/auth";
+import {
+  ensureProfileForSession,
+  signIn,
+  signInWithOAuth,
+} from "../../../lib/supabase/auth";
 import {
   buildOAuthCallbackUrl,
   setAuthFlowIntent,
 } from "../../../lib/authFlowIntent";
+import {
+  CUSTOMER_WELCOME_PATH,
+  DEFAULT_CUSTOMER_DESTINATION,
+  isCustomerOnboardingComplete,
+  setCustomerWelcomeDestination,
+} from "../../../lib/customerOnboarding";
 import {
   buildCategoryPath,
   clearFeaturedCategoryIntent,
@@ -222,25 +232,35 @@ export default function SignIn() {
       setFormError("");
       setSocialError("");
       setIsLoading(true);
-      await signIn({
+      const authResult = await signIn({
         email: formValues.email.trim(),
         password: formValues.password,
         remember: formValues.remember,
       });
 
-      const profile = await getProfile();
+      const profile = await ensureProfileForSession(authResult.session);
+      const customerDestination = categoryIntent
+        ? buildCategoryPath("/dashboard/customer/browse-services", categoryIntent)
+        : DEFAULT_CUSTOMER_DESTINATION;
+
+      if (profile?.role === "customer" && !isCustomerOnboardingComplete(profile)) {
+        setCustomerWelcomeDestination(customerDestination);
+        if (categoryIntent) clearFeaturedCategoryIntent();
+        navigate(CUSTOMER_WELCOME_PATH, { replace: true });
+        return;
+      }
 
       toast.success(`Welcome back, ${profile.first_name}!`);
 
       if (categoryIntent) {
         clearFeaturedCategoryIntent();
-        navigate(buildCategoryPath("/dashboard/customer/browse-services", categoryIntent));
+        navigate(customerDestination);
       } else if (profile.role === "customer") {
-        navigate("/dashboard/customer");
+        navigate(DEFAULT_CUSTOMER_DESTINATION);
       } else if (profile.role === "freelancer") {
         navigate("/dashboard/freelancer");
       } else {
-        navigate("/dashboard/customer");
+        navigate(DEFAULT_CUSTOMER_DESTINATION);
       }
     } catch (err) {
       setFormError(err.message || "Invalid email or password.");

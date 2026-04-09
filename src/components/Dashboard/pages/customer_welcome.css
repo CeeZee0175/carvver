@@ -1,0 +1,579 @@
+.customerWelcomePage {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(176, 145, 255, 0.16), transparent 34%),
+    radial-gradient(circle at 88% 20%, rgba(255, 209, 130, 0.16), transparent 28%),
+    linear-gradient(180deg, #f7f1e7 0%, #f5ecd8 52%, #f2e8d7 100%);
+  color: #241630;
+}
+
+.customerWelcomePage--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.customerWelcomePage__bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.52), transparent 55%),
+    radial-gradient(circle at 50% 0%, rgba(90, 45, 155, 0.08), transparent 55%);
+  pointer-events: none;
+}
+
+.customerWelcomePage__orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(22px);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.customerWelcomePage__orb--violet {
+  top: 9%;
+  left: -7%;
+  width: 18rem;
+  height: 18rem;
+  background: radial-gradient(circle, rgba(138, 92, 214, 0.2), transparent 72%);
+}
+
+.customerWelcomePage__orb--gold {
+  right: -6%;
+  bottom: 9%;
+  width: 20rem;
+  height: 20rem;
+  background: radial-gradient(circle, rgba(241, 187, 92, 0.2), transparent 72%);
+}
+
+.customerWelcomeShell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.25rem 1.25rem;
+}
+
+.customerWelcomeCard {
+  width: min(1100px, 100%);
+  padding: clamp(1.1rem, 1rem + 1vw, 2rem);
+}
+
+.customerWelcomeCard__head {
+  margin-bottom: 1rem;
+}
+
+.customerWelcomeCard__eyebrow,
+.customerWelcomeLoading__eyebrow,
+.customerWelcomeForm__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.76rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(83, 58, 120, 0.7);
+}
+
+.customerWelcome__panel {
+  min-height: 30rem;
+}
+
+.customerWelcomeIntro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+  gap: clamp(1.4rem, 1rem + 1.6vw, 3rem);
+  align-items: center;
+}
+
+.customerWelcomeIntro__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.customerWelcomeIntro__title,
+.customerWelcomeForm__title,
+.customerWelcomeComplete__title,
+.customerWelcomeLoading__title,
+.customerWelcomeError__title {
+  margin: 0;
+  font-size: clamp(2rem, 1.75rem + 1vw, 3.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: #28163a;
+}
+
+.customerWelcomeIntro__text,
+.customerWelcomeForm__text,
+.customerWelcomeComplete__text,
+.customerWelcomeError__text {
+  max-width: 38rem;
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.72;
+  color: rgba(46, 31, 66, 0.72);
+}
+
+.customerWelcomeIntro__list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.45rem;
+}
+
+.customerWelcomeIntro__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+}
+
+.customerWelcomeIntro__number {
+  min-width: 2.25rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(96, 56, 160, 0.94);
+}
+
+.customerWelcomeIntro__item strong {
+  display: block;
+  font-size: 1rem;
+  color: #2d193f;
+}
+
+.customerWelcomeIntro__item span:last-child {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.94rem;
+  line-height: 1.68;
+  color: rgba(51, 35, 72, 0.72);
+}
+
+.customerWelcomeIntro__visual {
+  display: flex;
+  justify-content: center;
+}
+
+.customerWelcomeLottie {
+  width: min(100%, 30rem);
+  min-height: 23rem;
+  padding: 0.6rem;
+}
+
+.customerWelcomeLottie__canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.customerWelcomeFormSection {
+  max-width: 48rem;
+}
+
+.customerWelcomeForm__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 1.4rem;
+}
+
+.customerWelcomeFieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.95rem;
+}
+
+.customerWelcomeField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.customerWelcomeField--wide {
+  grid-column: 1 / -1;
+}
+
+.customerWelcomeField__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #341d49;
+}
+
+.customerWelcomeField__control,
+.customerWelcomeCountry__controlWrap {
+  width: 100%;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(102, 71, 146, 0.14);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 28px rgba(76, 48, 116, 0.06);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.customerWelcomeField__control {
+  padding: 0.9rem 0.95rem;
+  color: #29163b;
+  font: inherit;
+  outline: none;
+}
+
+.customerWelcomeField__control:focus,
+.customerWelcomeCountry__controlWrap:focus-within {
+  border-color: rgba(114, 74, 181, 0.3);
+  box-shadow:
+    0 0 0 4px rgba(114, 74, 181, 0.08),
+    0 14px 32px rgba(76, 48, 116, 0.08);
+  transform: translateY(-1px);
+}
+
+.customerWelcomeField__control--textarea {
+  min-height: 8.5rem;
+  resize: vertical;
+}
+
+.customerWelcomeField__control--error,
+.customerWelcomeCountry__controlWrap--error {
+  border-color: rgba(190, 59, 73, 0.32);
+  box-shadow:
+    0 0 0 4px rgba(190, 59, 73, 0.07),
+    0 12px 28px rgba(76, 48, 116, 0.06);
+}
+
+.customerWelcomeField__error,
+.customerWelcomeInlineError {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #a0273f;
+}
+
+.customerWelcomeCountry {
+  position: relative;
+}
+
+.customerWelcomeCountry__controlWrap {
+  display: flex;
+  align-items: center;
+  padding-right: 0.2rem;
+}
+
+.customerWelcomeCountry__control {
+  flex: 1;
+  min-width: 0;
+  padding: 0.9rem 0.95rem;
+  border: none;
+  background: transparent;
+  color: #29163b;
+  font: inherit;
+  outline: none;
+}
+
+.customerWelcomeCountry__toggle {
+  width: 2.6rem;
+  height: 2.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: rgba(64, 44, 94, 0.74);
+  cursor: pointer;
+}
+
+.customerWelcomeCountry__toggleIcon {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.customerWelcomeCountry__toggleIcon--open {
+  transform: rotate(180deg);
+}
+
+.customerWelcomeCountry__menu {
+  position: absolute;
+  top: calc(100% + 0.55rem);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(96, 69, 138, 0.14);
+  background: rgba(255, 253, 248, 0.98);
+  box-shadow: 0 20px 46px rgba(72, 43, 112, 0.16);
+  backdrop-filter: blur(18px);
+}
+
+.customerWelcomeCountry__searchLabel {
+  margin-bottom: 0.45rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(83, 58, 120, 0.66);
+}
+
+.customerWelcomeCountry__options {
+  max-height: 15rem;
+  overflow-y: auto;
+  display: grid;
+  gap: 0.24rem;
+  padding-right: 0.1rem;
+}
+
+.customerWelcomeCountry__option,
+.customerWelcomeCountry__empty {
+  padding: 0.7rem 0.78rem;
+  border-radius: 0.85rem;
+  font: inherit;
+}
+
+.customerWelcomeCountry__option {
+  border: none;
+  background: transparent;
+  color: #2b1a3c;
+  text-align: left;
+  cursor: pointer;
+}
+
+.customerWelcomeCountry__option--highlighted {
+  background: rgba(112, 72, 179, 0.08);
+}
+
+.customerWelcomeCountry__option--selected {
+  color: #5b3396;
+  font-weight: 600;
+}
+
+.customerWelcomeCountry__empty {
+  color: rgba(57, 41, 79, 0.62);
+}
+
+.customerWelcomeActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+
+.customerWelcomeButton {
+  min-height: 2.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.72rem 1rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.customerWelcomeButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.customerWelcomeButton--primary {
+  color: #fffaf2;
+  background: linear-gradient(135deg, #7447bd 0%, #5a2f99 100%);
+  box-shadow: 0 16px 34px rgba(95, 57, 157, 0.2);
+}
+
+.customerWelcomeButton--ghost {
+  color: #4b2a72;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(88, 59, 128, 0.1);
+  box-shadow: 0 12px 28px rgba(75, 49, 113, 0.06);
+}
+
+.customerWelcomePager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  padding-top: 1.6rem;
+}
+
+.customerWelcomePager__arrow {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: rgba(61, 42, 90, 0.68);
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.customerWelcomePager__arrow:hover:not(:disabled) {
+  color: #2d173f;
+  transform: translateY(-1px);
+}
+
+.customerWelcomePager__arrow:disabled {
+  opacity: 0.28;
+  pointer-events: none;
+}
+
+.customerWelcomePager__arrowIcon {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.customerWelcomePager__dots {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.customerWelcomePager__dot {
+  position: relative;
+  border: none;
+  background: rgba(78, 57, 115, 0.26);
+  cursor: pointer;
+}
+
+.customerWelcomePager__dot--active {
+  background: #6a3faf;
+}
+
+.customerWelcomePager__dotRipple {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: rgba(106, 63, 175, 0.26);
+}
+
+.customerWelcomeComplete,
+.customerWelcomeError,
+.customerWelcomeLoading {
+  min-height: 30rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.customerWelcomeComplete {
+  gap: 0.9rem;
+}
+
+.customerWelcomeComplete__icon {
+  width: 2.2rem;
+  height: 2.2rem;
+  color: #22623c;
+}
+
+.customerWelcomeComplete__progress {
+  width: min(16rem, 100%);
+  height: 0.48rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(110, 75, 168, 0.14);
+  position: relative;
+}
+
+.customerWelcomeComplete__progress::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #6b3dac, #f0be67);
+  transform-origin: left center;
+  animation: customerWelcomeProgress 0.9s ease forwards;
+}
+
+.customerWelcomeLoading__dots {
+  display: inline-flex;
+  gap: 0.48rem;
+  margin-top: 1rem;
+}
+
+.customerWelcomeLoading__dots span {
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 999px;
+  background: rgba(106, 68, 170, 0.52);
+  animation: customerWelcomePulse 1s ease-in-out infinite;
+}
+
+.customerWelcomeLoading__dots span:nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+.customerWelcomeLoading__dots span:nth-child(3) {
+  animation-delay: 0.28s;
+}
+
+@keyframes customerWelcomePulse {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+@keyframes customerWelcomeProgress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (max-width: 960px) {
+  .customerWelcomeIntro {
+    grid-template-columns: 1fr;
+  }
+
+  .customerWelcomeLottie {
+    min-height: 18rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .customerWelcomeShell {
+    padding: 1rem;
+  }
+
+  .customerWelcomeCard {
+    padding: 0.9rem 0.2rem 1.4rem;
+  }
+
+  .customerWelcomeFieldGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .customerWelcomeActions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .customerWelcomeButton {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .customerWelcomeComplete__progress::after,
+  .customerWelcomeLoading__dots span {
+    animation: none;
+  }
+}
