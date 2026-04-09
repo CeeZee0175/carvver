@@ -1,0 +1,348 @@
+.freelancerPage {
+  gap: 24px;
+}
+
+.freelancerPage .profileHero__sub {
+  max-width: 58ch;
+}
+
+.freelancerHero__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.freelancerHero__signal {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.freelancerHero__signalValue {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 0.92;
+  font-weight: 850;
+  letter-spacing: -0.05em;
+  color: rgba(27, 16, 46, 0.96);
+}
+
+.freelancerHero__signalHint,
+.freelancerQuickAction__desc,
+.freelancerDataValue,
+.freelancerTeaserCard__desc,
+.freelancerExploreCard__desc,
+.freelancerSettingsCard__desc,
+.freelancerInfoNote,
+.freelancerMessageEmpty__desc,
+.freelancerFormMeta {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+  color: rgba(27, 16, 46, 0.62);
+}
+
+.freelancerHero__signalHint,
+.freelancerInfoNote {
+  margin: 0;
+}
+
+.freelancerPill,
+.freelancerTeaserBadge,
+.freelancerStatusChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  width: fit-content;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.82);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.74);
+}
+
+.freelancerPill--gold,
+.freelancerTeaserBadge {
+  border-color: rgba(242, 193, 78, 0.2);
+  background: rgba(242, 193, 78, 0.12);
+  color: rgba(127, 80, 10, 0.94);
+}
+
+.freelancerQuickGrid,
+.freelancerTeaserGrid,
+.freelancerExploreGrid,
+.freelancerDataGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.freelancerQuickGrid,
+.freelancerExploreGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.freelancerTeaserGrid,
+.freelancerDataGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.freelancerQuickAction,
+.freelancerTeaserCard,
+.freelancerExploreCard,
+.freelancerDataItem,
+.freelancerSettingsCard,
+.freelancerMessageEmpty {
+  position: relative;
+  min-width: 0;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 16px 44px rgba(12, 7, 18, 0.05);
+}
+
+.freelancerQuickAction,
+.freelancerTeaserCard,
+.freelancerExploreCard,
+.freelancerSettingsCard {
+  text-align: left;
+  padding: 18px;
+}
+
+.freelancerQuickAction {
+  display: grid;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.freelancerQuickAction__iconWrap,
+.freelancerTeaserCard__iconWrap,
+.freelancerExploreCard__iconWrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(124, 58, 237, 0.08);
+  color: rgba(87, 34, 182, 0.92);
+}
+
+.freelancerQuickAction__icon,
+.freelancerTeaserCard__icon,
+.freelancerExploreCard__icon {
+  width: 18px;
+  height: 18px;
+}
+
+.freelancerQuickAction__label,
+.freelancerTeaserCard__title,
+.freelancerExploreCard__title,
+.freelancerSettingsCard__title,
+.freelancerDataValue--strong {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 850;
+  color: rgba(27, 16, 46, 0.96);
+}
+
+.freelancerQuickAction__copy,
+.freelancerTeaserCard__copy,
+.freelancerExploreCard__copy,
+.freelancerSettingsCard__copy {
+  display: grid;
+  gap: 8px;
+}
+
+.freelancerTeaserCard {
+  display: grid;
+  gap: 14px;
+}
+
+.freelancerTeaserCard__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.freelancerExploreCard {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  cursor: pointer;
+}
+
+.freelancerExploreCard__arrow {
+  width: 18px;
+  height: 18px;
+  color: rgba(42, 20, 80, 0.62);
+}
+
+.freelancerDataItem {
+  padding: 16px;
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.freelancerDataLabel,
+.freelancerFormMeta__label {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: rgba(87, 34, 182, 0.72);
+}
+
+.freelancerDataValue {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.freelancerDataValue--link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(66, 29, 133, 0.96);
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.freelancerDataValue--link:hover {
+  text-decoration: underline;
+}
+
+.freelancerChipRow,
+.freelancerSpecialtyGrid,
+.freelancerChoiceGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.freelancerChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.84);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.8);
+}
+
+.freelancerChoice,
+.freelancerSpecialty {
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  color: rgba(27, 16, 46, 0.82);
+  border-radius: 14px;
+  min-height: 40px;
+  padding: 0 14px;
+  cursor: pointer;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease,
+    box-shadow 220ms ease,
+    transform 180ms ease;
+}
+
+.freelancerChoice:hover,
+.freelancerSpecialty:hover {
+  border-color: rgba(124, 58, 237, 0.18);
+  background: rgba(124, 58, 237, 0.06);
+}
+
+.freelancerChoice--active,
+.freelancerSpecialty--active {
+  border-color: rgba(42, 20, 80, 0.92);
+  background: rgba(42, 20, 80, 0.92);
+  color: #fff;
+  box-shadow: 0 16px 40px rgba(42, 20, 80, 0.14);
+}
+
+.freelancerFormMeta {
+  display: grid;
+  gap: 4px;
+}
+
+.freelancerFormMeta__label {
+  color: rgba(42, 20, 80, 0.5);
+}
+
+.freelancerSettingsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.freelancerSettingsCard {
+  display: grid;
+  gap: 10px;
+}
+
+.freelancerMessageEmpty {
+  padding: clamp(48px, 7vw, 82px) 24px;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.freelancerMessageEmpty__title {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 24px;
+  line-height: 1.08;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: rgba(27, 16, 46, 0.96);
+}
+
+.freelancerMessageEmpty__desc {
+  margin: 0;
+  max-width: 44ch;
+}
+
+.freelancerMessageEmpty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+@media (max-width: 1024px) {
+  .freelancerQuickGrid,
+  .freelancerTeaserGrid,
+  .freelancerExploreGrid,
+  .freelancerDataGrid,
+  .freelancerSettingsGrid,
+  .freelancerHero__stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .freelancerQuickAction,
+  .freelancerTeaserCard,
+  .freelancerExploreCard,
+  .freelancerDataItem,
+  .freelancerSettingsCard,
+  .freelancerMessageEmpty {
+    border-radius: 18px;
+  }
+}

@@ -333,10 +333,14 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.dashLandingFavoritesGrid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 260px));
+  justify-content: start;
+}
+
 .dashLandingRequestCard,
 .dashLandingListingCard,
 .dashLandingFavoriteCard {
-  min-height: 100%;
   border-radius: 24px;
   border: 1px solid rgba(42, 20, 80, 0.1);
   background: rgba(255, 255, 255, 0.78);
@@ -438,6 +442,13 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.46));
 }
 
+.dashLandingListingCard__coverTop {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .dashLandingListingCard__body {
   padding: 16px;
   display: grid;
@@ -519,9 +530,9 @@
 }
 
 .dashLandingFavoriteCard__avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
   background: rgba(124, 58, 237, 0.08);
   border: 1px solid rgba(42, 20, 80, 0.1);
   overflow: hidden;
@@ -540,9 +551,67 @@
 
 .dashLandingFavoriteCard__bio {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.dashLandingFavoriteCard {
+  cursor: pointer;
+  padding: 16px;
+  gap: 12px;
+  max-width: 260px;
+  width: 100%;
+}
+
+.dashLandingFavoriteCard__profile {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashLandingFavoriteCard__reason {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dashLandingFavoriteToggle {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.88);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(27, 16, 46, 0.58);
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 220ms ease,
+    color 180ms ease;
+}
+
+.dashLandingFavoriteToggle:hover {
+  border-color: rgba(124, 58, 237, 0.22);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 26px rgba(12, 7, 18, 0.08);
+  color: rgba(27, 16, 46, 0.88);
+}
+
+.dashLandingFavoriteToggle--active {
+  border-color: rgba(124, 58, 237, 0.24);
+  background: rgba(124, 58, 237, 0.08);
+  color: rgba(87, 34, 182, 0.92);
+}
+
+.dashLandingFavoriteToggle__icon {
+  width: 15px;
+  height: 15px;
 }
 
 .dashLandingEmpty {
@@ -599,6 +668,10 @@
   .dashLandingRequestGrid,
   .dashLandingFavoritesGrid {
     grid-template-columns: 1fr;
+  }
+
+  .dashLandingFavoriteCard {
+    max-width: none;
   }
 }
 

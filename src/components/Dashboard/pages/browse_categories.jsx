@@ -17,6 +17,7 @@ import {
   Bookmark,
   Check,
   ChevronDown,
+  Heart,
   ShieldCheck,
   MapPin,
   Package,
@@ -57,6 +58,7 @@ import {
   resolveFeaturedCategoryIntent,
 } from "../../../lib/featuredCategoryIntent";
 import { useCart } from "../hooks/useCart";
+import { useCustomerFavoriteFreelancers } from "../hooks/useCustomerFavoriteFreelancers";
 
 const supabase = createClient();
 
@@ -912,16 +914,20 @@ function ServiceCard({
   service,
   index,
   savedIds,
+  favoriteFreelancerIds,
   cartServiceIds,
   onToggleSave,
+  onToggleFavoriteFreelancer,
   onAddToCart,
   onOpenCart,
+  onViewFreelancer,
   cardTransition,
 }) {
   const reduceMotion = useReducedMotion();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.1 });
   const saved = savedIds.includes(service.id);
+  const favoriteFreelancer = favoriteFreelancerIds.includes(service.freelancer_id);
   const inCart = cartServiceIds.includes(service.id);
   const colors = ACCENT_COLORS[index % ACCENT_COLORS.length];
   const Icon = getCategoryIcon(service.category);
@@ -989,8 +995,37 @@ function ServiceCard({
 
       <div className="browseServiceCard__body">
         <div className="browseServiceCard__creatorRow">
-          <div className="browseServiceCard__avatar">{initials}</div>
-          <span className="browseServiceCard__creator">{creatorName}</span>
+          <div className="browseServiceCard__creatorMain">
+            <div className="browseServiceCard__avatar">{initials}</div>
+            <span className="browseServiceCard__creator">{creatorName}</span>
+          </div>
+
+          {service.freelancer_id ? (
+            <motion.button
+              type="button"
+              className={`browseServiceCard__favorite ${
+                favoriteFreelancer ? "browseServiceCard__favorite--active" : ""
+              }`}
+              aria-label={
+                favoriteFreelancer
+                  ? "Remove freelancer from favorites"
+                  : "Add freelancer to favorites"
+              }
+              whileTap={{ scale: 0.82 }}
+              onClick={(event) => {
+                event.stopPropagation();
+                onToggleFavoriteFreelancer(service.freelancer_id, {
+                  id: service.freelancer_id,
+                  ...service.profiles,
+                });
+              }}
+            >
+              <Heart
+                style={{ width: 15, height: 15 }}
+                fill={favoriteFreelancer ? "currentColor" : "none"}
+              />
+            </motion.button>
+          ) : null}
         </div>
 
         <h3 className="browseServiceCard__title">{service.title}</h3>
@@ -1037,7 +1072,7 @@ function ServiceCard({
               whileHover={{ x: 2 }}
               whileTap={{ scale: 0.96 }}
               transition={cardTransition}
-              onClick={() => toast("Service details aren't available yet.")}
+              onClick={() => onViewFreelancer(service.freelancer_id)}
             >
               View
               <ArrowRight style={{ width: 13, height: 13 }} />
@@ -1188,6 +1223,9 @@ export default function BrowseCategories() {
   const [currentPage, setCurrentPage] = useState(1);
   const [savedIds, setSavedIds] = useState([]);
   const { addItem, serviceIds: cartServiceIds } = useCart();
+  const { favoriteIds, toggleFavoriteFreelancer } = useCustomerFavoriteFreelancers({
+    includeProfiles: false,
+  });
 
   const filterRef = useRef(null);
 
@@ -1209,7 +1247,7 @@ export default function BrowseCategories() {
       try {
         const { data, error } = await supabase
           .from("services")
-          .select("id, title, category, price, location, description, created_at, is_published, is_pro, is_verified, profiles(first_name, last_name)")
+          .select("id, title, category, price, location, description, created_at, freelancer_id, is_published, is_pro, is_verified, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline)")
           .eq("is_published", true)
           .order("created_at", { ascending: false });
 
@@ -1414,6 +1452,33 @@ export default function BrowseCategories() {
   const handleOpenCart = useCallback(() => {
     navigate("/dashboard/customer/cart");
   }, [navigate]);
+
+  const handleToggleFavoriteFreelancer = useCallback(
+    async (freelancerId, snapshot) => {
+      try {
+        const result = await toggleFavoriteFreelancer(freelancerId, snapshot);
+        toast.success(
+          result.favorite
+            ? `${snapshot?.display_name || snapshot?.first_name || "This freelancer"} is now in your favorites.`
+            : `${snapshot?.display_name || snapshot?.first_name || "This freelancer"} was removed from your favorites.`
+        );
+      } catch (error) {
+        toast.error(error.message || "We couldn't update your favorites.");
+      }
+    },
+    [toggleFavoriteFreelancer]
+  );
+
+  const handleViewFreelancer = useCallback(
+    (freelancerId) => {
+      if (!freelancerId) {
+        toast.error("We couldn't open this freelancer right now.");
+        return;
+      }
+      navigate(`/dashboard/customer/freelancers/${freelancerId}`);
+    },
+    [navigate]
+  );
 
   const categoriesLabel =
     selectedCategories.length === 0 && !includeOthers
@@ -1764,10 +1829,13 @@ export default function BrowseCategories() {
                 service={service}
                 index={index}
                 savedIds={savedIds}
+                favoriteFreelancerIds={favoriteIds}
                 cartServiceIds={cartServiceIds}
                 onToggleSave={handleToggleSave}
+                onToggleFavoriteFreelancer={handleToggleFavoriteFreelancer}
                 onAddToCart={handleAddToCart}
                 onOpenCart={handleOpenCart}
+                onViewFreelancer={handleViewFreelancer}
                 cardTransition={cardTransition}
               />
             ))

@@ -5,6 +5,7 @@ import {
   ArrowRight,
   Bell,
   Bookmark,
+  Heart,
   MapPin,
   PackageSearch,
   PlusCircle,
@@ -16,6 +17,7 @@ import "./profile.css";
 import "./dashboard_customer.css";
 import { createClient } from "../../../lib/supabase/client";
 import { buildCategoryPath } from "../../../lib/featuredCategoryIntent";
+import { buildPhilippinesLocationLabel } from "../../../lib/phLocations";
 import {
   DASHBOARD_CATEGORY_HIGHLIGHTS,
   getCategoryIcon,
@@ -31,6 +33,7 @@ import {
   TypewriterHeading,
 } from "../shared/customerProfileShared";
 import { useCustomerRequests } from "../hooks/useCustomerRequests";
+import { useCustomerFavoriteFreelancers } from "../hooks/useCustomerFavoriteFreelancers";
 
 const supabase = createClient();
 
@@ -133,9 +136,6 @@ export default function DashboardCustomer() {
   const [activeOrdersCount, setActiveOrdersCount] = useState(0);
   const [services, setServices] = useState([]);
   const [servicesLoading, setServicesLoading] = useState(true);
-  const [favoriteFreelancers, setFavoriteFreelancers] = useState([]);
-  const [favoritesLoading, setFavoritesLoading] = useState(true);
-  const [favoritesError, setFavoritesError] = useState("");
   const {
     loading: requestsLoading,
     requests,
@@ -143,6 +143,13 @@ export default function DashboardCustomer() {
     error: requestsError,
     reload: reloadRequests,
   } = useCustomerRequests({ limit: 4 });
+  const {
+    loading: favoritesLoading,
+    error: favoritesError,
+    favoriteIds,
+    favoriteFreelancers,
+    toggleFavoriteFreelancer,
+  } = useCustomerFavoriteFreelancers({ includeProfiles: true, limit: 4 });
 
   useEffect(() => {
     async function loadDashboardStats() {
@@ -188,7 +195,7 @@ export default function DashboardCustomer() {
         const { data } = await supabase
           .from("services")
           .select(
-            "id, title, category, price, location, freelancer_id, profiles(display_name, first_name, last_name)"
+            "id, title, category, price, location, freelancer_id, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline)"
           )
           .eq("is_published", true)
           .limit(4);
@@ -202,115 +209,6 @@ export default function DashboardCustomer() {
     }
 
     loadRecommendedServices();
-  }, []);
-
-  useEffect(() => {
-    async function loadFavoriteFreelancers() {
-      setFavoritesLoading(true);
-      setFavoritesError("");
-
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (!session?.user?.id) {
-          setFavoriteFreelancers([]);
-          return;
-        }
-
-        const userId = session.user.id;
-        const relationshipMap = new Map();
-
-        const [savedResult, ordersResult] = await Promise.all([
-          supabase
-            .from("saved_services")
-            .select("services(freelancer_id)")
-            .eq("user_id", userId),
-          supabase
-            .from("orders")
-            .select("freelancer_id")
-            .eq("customer_id", userId),
-        ]);
-
-        (savedResult.data || []).forEach((row) => {
-          const service = normalizeRelation(row.services);
-          if (!service?.freelancer_id) return;
-
-          const current = relationshipMap.get(service.freelancer_id) || {
-            source: "saved",
-            score: 1,
-          };
-
-          relationshipMap.set(service.freelancer_id, {
-            source: current.source === "ordered" ? "ordered" : "saved",
-            score: current.score + 1,
-          });
-        });
-
-        (ordersResult.data || []).forEach((row) => {
-          if (!row.freelancer_id) return;
-
-          const current = relationshipMap.get(row.freelancer_id) || {
-            source: "ordered",
-            score: 0,
-          };
-
-          relationshipMap.set(row.freelancer_id, {
-            source: "ordered",
-            score: current.score + 3,
-          });
-        });
-
-        const prioritizedIds = Array.from(relationshipMap.entries())
-          .sort((a, b) => b[1].score - a[1].score)
-          .map(([id]) => id)
-          .slice(0, 8);
-
-        let profiles = [];
-
-        if (prioritizedIds.length > 0) {
-          const { data, error } = await supabase
-            .from("profiles")
-            .select("id, display_name, first_name, last_name, bio, country, avatar_url")
-            .in("id", prioritizedIds);
-
-          if (error) throw error;
-
-          profiles = (data || [])
-            .map((person) => ({
-              ...person,
-              relationship: relationshipMap.get(person.id)?.source || "saved",
-              score: relationshipMap.get(person.id)?.score || 0,
-            }))
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 4);
-        } else {
-          const { data, error } = await supabase
-            .from("profiles")
-            .select("id, display_name, first_name, last_name, bio, country, avatar_url")
-            .eq("role", "freelancer")
-            .limit(4);
-
-          if (error) throw error;
-
-          profiles = (data || []).map((person) => ({
-            ...person,
-            relationship: "discover",
-            score: 0,
-          }));
-        }
-
-        setFavoriteFreelancers(profiles);
-      } catch (error) {
-        setFavoriteFreelancers([]);
-        setFavoritesError("We couldn't load your favorite freelancers.");
-      } finally {
-        setFavoritesLoading(false);
-      }
-    }
-
-    loadFavoriteFreelancers();
   }, []);
 
   useEffect(() => {
@@ -353,10 +251,23 @@ export default function DashboardCustomer() {
       value: favoritesLoading ? "..." : favoriteFreelancers.length,
       hint:
         favoriteFreelancers.length === 0
-          ? "Your saved and booked creators will show up here."
-          : "People you have already saved or worked with.",
+          ? "Freelancers you favorite will show up here."
+          : "The freelancers you chose to keep close.",
     },
   ];
+
+  const handleFavoriteToggle = async (freelancerId, snapshot) => {
+    try {
+      const result = await toggleFavoriteFreelancer(freelancerId, snapshot);
+      toast.success(
+        result.favorite
+          ? `${getCustomerDisplayName(snapshot)} is now in your favorites.`
+          : `${getCustomerDisplayName(snapshot)} was removed from your favorites.`
+      );
+    } catch (error) {
+      toast.error(error.message || "We couldn't update your favorites.");
+    }
+  };
 
   return (
     <CustomerDashboardFrame mainClassName="profilePage dashLandingPage">
@@ -589,6 +500,7 @@ export default function DashboardCustomer() {
             <div className="dashLandingListingGrid">
               {services.map((item) => {
                 const creator = normalizeRelation(item.profiles);
+                const isFavoriteFreelancer = favoriteIds.includes(item.freelancer_id);
                 return (
                   <motion.article
                     key={item.id}
@@ -596,7 +508,36 @@ export default function DashboardCustomer() {
                     {...SURFACE_BUTTON_MOTION}
                   >
                     <div className="dashLandingListingCard__cover">
-                      <span className="dashLandingListingCard__badge">{item.category}</span>
+                      <div className="dashLandingListingCard__coverTop">
+                        <span className="dashLandingListingCard__badge">{item.category}</span>
+                        {item.freelancer_id ? (
+                          <motion.button
+                            type="button"
+                            className={`dashLandingFavoriteToggle ${
+                              isFavoriteFreelancer ? "dashLandingFavoriteToggle--active" : ""
+                            }`}
+                            whileHover={{ y: -1 }}
+                            whileTap={{ scale: 0.94 }}
+                            transition={LINK_BUTTON_MOTION.transition}
+                            onClick={() =>
+                              handleFavoriteToggle(item.freelancer_id, {
+                                id: item.freelancer_id,
+                                ...creator,
+                              })
+                            }
+                            aria-label={
+                              isFavoriteFreelancer
+                                ? "Remove freelancer from favorites"
+                                : "Add freelancer to favorites"
+                            }
+                          >
+                            <Heart
+                              className="dashLandingFavoriteToggle__icon"
+                              fill={isFavoriteFreelancer ? "currentColor" : "none"}
+                            />
+                          </motion.button>
+                        ) : null}
+                      </div>
                     </div>
 
                     <div className="dashLandingListingCard__body">
@@ -622,9 +563,11 @@ export default function DashboardCustomer() {
                           type="button"
                           className="dashLandingMiniBtn"
                           {...LINK_BUTTON_MOTION}
-                          onClick={() => navigate("/dashboard/customer/browse-services")}
+                          onClick={() =>
+                            navigate(`/dashboard/customer/freelancers/${item.freelancer_id}`)
+                          }
                         >
-                          Browse similar
+                          View freelancer
                         </motion.button>
                       </div>
                     </div>
@@ -683,9 +626,9 @@ export default function DashboardCustomer() {
           <div className="dashLandingSection__head">
             <div>
               <p className="dashLandingSection__eyebrow">Favorite freelancers</p>
-              <h2 className="dashLandingSection__title">People your activity keeps pointing back to</h2>
+              <h2 className="dashLandingSection__title">Freelancers you chose to keep close</h2>
               <p className="dashLandingSection__desc">
-                This list is built from freelancers you saved work from or already booked before.
+                Only freelancers you explicitly favorite will appear here.
               </p>
             </div>
           </div>
@@ -707,55 +650,80 @@ export default function DashboardCustomer() {
           ) : favoriteFreelancers.length === 0 ? (
             <QuietEmptyState
               title="No favorite freelancers yet"
-              desc="Once you save listings or place orders, the freelancers tied to your activity will appear here."
+              desc="Mark a freelancer as favorite from a listing or from their profile to keep them here."
               actionLabel="Browse services"
               onAction={() => navigate("/dashboard/customer/browse-services")}
             />
           ) : (
             <div className="dashLandingFavoritesGrid">
               {favoriteFreelancers.map((freelancer) => {
-                const reason =
-                  freelancer.relationship === "ordered"
-                    ? "Worked with before"
-                    : freelancer.relationship === "saved"
-                    ? "Saved from your listings"
-                    : "Good place to start";
+                const locationLabel =
+                  buildPhilippinesLocationLabel({
+                    region: freelancer.region,
+                    city: freelancer.city,
+                    barangay: freelancer.barangay,
+                  }) || "Location not set";
 
                 return (
                   <motion.article
                     key={freelancer.id}
                     className="dashLandingFavoriteCard"
                     {...SURFACE_BUTTON_MOTION}
+                    onClick={() =>
+                      navigate(`/dashboard/customer/freelancers/${freelancer.id}`)
+                    }
                   >
                     <div className="dashLandingFavoriteCard__top">
-                      <span className="dashLandingFavoriteCard__avatar" aria-hidden="true">
-                        {freelancer.avatar_url ? (
-                          <img
-                            src={freelancer.avatar_url}
-                            alt={getCustomerDisplayName(freelancer)}
-                            className="dashLandingFavoriteCard__avatarImage"
-                          />
-                        ) : (
-                          getCustomerInitials(freelancer)
-                        )}
-                      </span>
+                      <div className="dashLandingFavoriteCard__profile">
+                        <span className="dashLandingFavoriteCard__avatar" aria-hidden="true">
+                          {freelancer.avatar_url ? (
+                            <img
+                              src={freelancer.avatar_url}
+                              alt={getCustomerDisplayName(freelancer)}
+                              className="dashLandingFavoriteCard__avatarImage"
+                            />
+                          ) : (
+                            getCustomerInitials(freelancer)
+                          )}
+                        </span>
 
-                      <div className="dashLandingFavoriteCard__identity">
-                        <h3 className="dashLandingFavoriteCard__name">
-                          {getCustomerDisplayName(freelancer)}
-                        </h3>
-                        <p className="dashLandingFavoriteCard__reason">{reason}</p>
+                        <div className="dashLandingFavoriteCard__identity">
+                          <h3 className="dashLandingFavoriteCard__name">
+                            {getCustomerDisplayName(freelancer)}
+                          </h3>
+                          <p className="dashLandingFavoriteCard__reason">
+                            {freelancer.freelancer_headline || "Favorited freelancer"}
+                          </p>
+                        </div>
                       </div>
+
+                      <motion.button
+                        type="button"
+                        className="dashLandingFavoriteToggle dashLandingFavoriteToggle--active"
+                        whileHover={{ y: -1 }}
+                        whileTap={{ scale: 0.94 }}
+                        transition={LINK_BUTTON_MOTION.transition}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleFavoriteToggle(freelancer.id, freelancer);
+                        }}
+                        aria-label="Remove freelancer from favorites"
+                      >
+                        <Heart
+                          className="dashLandingFavoriteToggle__icon"
+                          fill="currentColor"
+                        />
+                      </motion.button>
                     </div>
 
                     <p className="dashLandingFavoriteCard__bio">
-                      {freelancer.bio || "This freelancer will feel more familiar once you save or book more work with them."}
+                      {freelancer.bio || "Open this profile to look through their details and published work."}
                     </p>
 
                     <div className="dashLandingFavoriteCard__meta">
                       <span className="dashLandingFavoriteCard__metaItem">
                         <MapPin className="dashLandingFavoriteCard__metaIcon" />
-                        {freelancer.country || "Location not set"}
+                        {locationLabel}
                       </span>
                     </div>
                   </motion.article>

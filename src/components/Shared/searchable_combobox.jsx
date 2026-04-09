@@ -9,7 +9,10 @@ import React, {
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { filterLocationOptions } from "../../lib/phLocations";
+import {
+  filterLocationOptions,
+  normalizeLocationText,
+} from "../../lib/phLocations";
 import "./searchable_combobox.css";
 
 const SPRING = { type: "spring", stiffness: 300, damping: 24 };
@@ -44,8 +47,9 @@ export default function SearchableCombobox({
   );
 
   const trimmedQuery = String(query || "").trim();
+  const normalizedQuery = normalizeLocationText(trimmedQuery);
   const exactMatch = filteredOptions.some(
-    (option) => option.toLowerCase() === trimmedQuery.toLowerCase()
+    (option) => normalizeLocationText(option) === normalizedQuery
   );
   const showCustomOption = allowCustomValue && trimmedQuery && !exactMatch;
   const totalOptions = filteredOptions.length + (showCustomOption ? 1 : 0);

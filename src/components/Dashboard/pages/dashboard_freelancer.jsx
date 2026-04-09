@@ -1,127 +1,47 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import React from "react";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
-  Briefcase,
-  Compass,
   Link as LinkIcon,
-  LogOut,
-  MapPin,
+  MessageCircle,
   Search,
+  Settings,
   Share2,
   Sparkles,
-  Star,
+  UserRound,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import HomeFooter from "../../Homepage/layout/home_footer";
-import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
-import { getProfile, signOut } from "../../../lib/supabase/auth";
-import { buildPhilippinesLocationLabel } from "../../../lib/phLocations";
+import { useNavigate } from "react-router-dom";
+import "./profile.css";
+import "./freelancer_pages.css";
 import "./dashboard_freelancer.css";
+import {
+  DashboardBreadcrumbs,
+  EmptySurface,
+  FreelancerDashboardFrame,
+  Reveal,
+  TypewriterHeading,
+} from "../shared/customerProfileShared";
+import { useFreelancerProfileData } from "../hooks/useFreelancerProfileData";
 
-const SPRING = { type: "spring", stiffness: 320, damping: 26 };
-
-function TypewriterHeading({ text }) {
-  const reduceMotion = useReducedMotion();
-  const [displayText, setDisplayText] = useState(reduceMotion ? text : "");
-
-  useEffect(() => {
-    if (reduceMotion) {
-      setDisplayText(text);
-      return;
-    }
-
-    let timeoutId;
-    let index = 0;
-
-    setDisplayText("");
-
-    const tick = () => {
-      index += 1;
-      setDisplayText(text.slice(0, index));
-      if (index < text.length) timeoutId = setTimeout(tick, 58);
-    };
-
-    timeoutId = setTimeout(tick, 90);
-    return () => clearTimeout(timeoutId);
-  }, [reduceMotion, text]);
-
-  return (
-    <span>
-      {displayText}
-      {!reduceMotion && displayText.length < text.length ? (
-        <motion.span
-          className="freelancerDash__cursor"
-          aria-hidden="true"
-          animate={{ opacity: [1, 0, 1] }}
-          transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
-        >
-          |
-        </motion.span>
-      ) : null}
-    </span>
-  );
-}
-
-function SummaryCard({ label, value, hint }) {
-  return (
-    <article className="freelancerDash__summaryCard">
-      <span className="freelancerDash__summaryLabel">{label}</span>
-      <strong className="freelancerDash__summaryValue">{value}</strong>
-      <span className="freelancerDash__summaryHint">{hint}</span>
-    </article>
-  );
-}
-
-function DetailItem({ label, value, wide = false, children }) {
-  return (
-    <article
-      className={`freelancerDash__detailItem ${
-        wide ? "freelancerDash__detailItem--wide" : ""
-      }`}
-    >
-      <span className="freelancerDash__detailLabel">{label}</span>
-      {children || <p className="freelancerDash__detailValue">{value}</p>}
-    </article>
-  );
-}
+const SURFACE_MOTION = {
+  whileHover: { y: -4, scale: 1.012 },
+  whileTap: { scale: 0.986 },
+  transition: { type: "spring", stiffness: 320, damping: 19, mass: 0.74 },
+};
 
 export default function DashboardFreelancer() {
   const navigate = useNavigate();
-  const reduceMotion = useReducedMotion();
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState(null);
-  const [error, setError] = useState("");
+  const {
+    loading,
+    profile,
+    warning,
+    displayName,
+    locationLabel,
+    tasks,
+    completion,
+    reload,
+  } = useFreelancerProfileData();
 
-  useEffect(() => {
-    let active = true;
-
-    async function loadProfile() {
-      setLoading(true);
-      setError("");
-
-      try {
-        const nextProfile = await getProfile();
-        if (!active) return;
-        setProfile(nextProfile);
-      } catch {
-        if (!active) return;
-        setError("We couldn't load your freelancer dashboard.");
-      } finally {
-        if (active) setLoading(false);
-      }
-    }
-
-    loadProfile();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const rawDisplayName = String(profile?.display_name || "").trim();
-  const displayName =
-    rawDisplayName || String(profile?.first_name || "").trim() || "Freelancer";
   const headline = String(profile?.freelancer_headline || "").trim();
   const primaryCategory = String(profile?.freelancer_primary_category || "").trim();
   const specialties = Array.isArray(profile?.freelancer_specialties)
@@ -131,94 +51,80 @@ export default function DashboardFreelancer() {
     profile?.freelancer_experience_level || ""
   ).trim();
   const portfolioUrl = String(profile?.freelancer_portfolio_url || "").trim();
-  const locationLabel =
-    buildPhilippinesLocationLabel({
-      region: String(profile?.region || "").trim(),
-      city: String(profile?.city || "").trim(),
-      barangay: String(profile?.barangay || "").trim(),
-    }) ||
-    String(profile?.address || "").trim() ||
-    "No location added yet";
 
-  const readinessItems = useMemo(
-    () => [
-      { label: "Display name", complete: Boolean(rawDisplayName) },
-      { label: "Headline", complete: Boolean(headline) },
-      { label: "Main category", complete: Boolean(primaryCategory) },
-      { label: "Specialties", complete: specialties.length > 0 },
-      { label: "Experience level", complete: Boolean(experienceLevel) },
-      { label: "Portfolio link", complete: Boolean(portfolioUrl) },
-      { label: "Location", complete: locationLabel !== "No location added yet" },
-    ],
-    [
-      experienceLevel,
-      headline,
-      locationLabel,
-      portfolioUrl,
-      primaryCategory,
-      rawDisplayName,
-      specialties.length,
-    ]
-  );
-
-  const readinessCompleted = readinessItems.filter((item) => item.complete).length;
-  const readinessPercent = Math.round(
-    (readinessCompleted / readinessItems.length) * 100
-  );
   const readinessLabel =
-    readinessPercent >= 100
-      ? "Profile ready"
-      : readinessPercent >= 60
-      ? "Strong start"
-      : "Getting started";
+    completion.percent >= 100
+      ? "Ready to share"
+      : completion.percent >= 70
+      ? "Looking strong"
+      : "Still building";
 
-  const summary = useMemo(
-    () => [
-      {
-        label: "Profile readiness",
-        value: `${readinessPercent}%`,
-        hint: `${readinessCompleted} of ${readinessItems.length} profile details saved`,
-      },
-      {
-        label: "Main category",
-        value: primaryCategory || "Not set yet",
-        hint: "Your main service category",
-      },
-      {
-        label: "Specialties",
-        value: specialties.length > 0 ? String(specialties.length) : "0",
-        hint:
-          specialties.length > 0
-            ? specialties.slice(0, 2).join(" / ")
-            : "Choose up to five specialties",
-      },
-      {
-        label: "Experience",
-        value: experienceLevel || "Not set yet",
-        hint: "How you present your current level",
-      },
-    ],
-    [
-      experienceLevel,
-      primaryCategory,
-      readinessCompleted,
-      readinessItems.length,
-      readinessPercent,
-      specialties,
-    ]
-  );
+  const summaryCards = [
+    {
+      label: "Profile readiness",
+      value: loading ? "..." : `${completion.percent}%`,
+      hint: `${completion.completed} of ${completion.total} key details saved`,
+    },
+    {
+      label: "Main category",
+      value: loading ? "..." : primaryCategory || "Not set yet",
+      hint: primaryCategory
+        ? "How people place your work quickly"
+        : "Choose your main service area",
+    },
+    {
+      label: "Specialties",
+      value: loading ? "..." : specialties.length ? String(specialties.length) : "0",
+      hint:
+        specialties.length > 0
+          ? specialties.slice(0, 2).join(" / ")
+          : "Add up to five specialties",
+    },
+    {
+      label: "Location",
+      value:
+        loading || locationLabel === "No location added yet"
+          ? loading
+            ? "..."
+            : "Missing"
+          : "Set",
+      hint:
+        locationLabel === "No location added yet"
+          ? "Add your region, city, and barangay"
+          : locationLabel,
+    },
+  ];
 
-  const freelancerTools = [
+  const quickActions = [
+    {
+      label: "Profile",
+      desc: "Update the details people will see first.",
+      Icon: UserRound,
+      action: () => navigate("/dashboard/freelancer/profile"),
+    },
+    {
+      label: "Settings",
+      desc: "Review account details and session actions.",
+      Icon: Settings,
+      action: () => navigate("/dashboard/freelancer/settings"),
+    },
+    {
+      label: "Messages",
+      desc: "Keep your inbox close once conversations begin.",
+      Icon: MessageCircle,
+      action: () => navigate("/dashboard/freelancer/messages"),
+    },
+  ];
+
+  const toolTeasers = [
     {
       title: "Browse customer requests",
-      description:
-        "A dedicated place to review customer briefs when request browsing opens for freelancers.",
+      description: "A dedicated place to review customer briefs.",
       Icon: Search,
     },
     {
       title: "Social media posting",
-      description:
-        "A faster way to share your service across platforms from one organized place.",
+      description: "A simpler place to prepare your service posts and promotions.",
       Icon: Share2,
     },
   ];
@@ -226,383 +132,336 @@ export default function DashboardFreelancer() {
   const exploreCards = [
     {
       title: "Community",
-      description:
-        "See highlights, updates, and the people helping shape Carvver.",
+      description: "See updates, stories, and the people around Carvver.",
       to: "/community",
     },
     {
       title: "Pricing",
-      description:
-        "Review Carvver Pro and see how added visibility tools fit your work.",
+      description: "Review Carvver Pro and what comes with it.",
       to: "/pricing",
     },
     {
       title: "About Us",
-      description:
-        "Learn more about the people and ideas behind the platform.",
+      description: "Learn more about the team and the platform itself.",
       to: "/about-us",
     },
   ];
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate("/sign-in", { replace: true });
-    } catch {
-      navigate("/sign-in", { replace: true });
-    }
-  };
-
   return (
-    <div className="freelancerDash">
-      <div className="freelancerDash__base" />
-      <div className="freelancerDash__shadow" aria-hidden="true">
-        <EtheralShadow
-          sizing="fill"
-          color="rgba(0,0,0,0.55)"
-          animation={{ scale: 45, speed: 35 }}
-          noise={{ opacity: 0.1, scale: 1 }}
-          performanceMode="auto"
+    <FreelancerDashboardFrame mainClassName="profilePage profilePage--details freelancerPage">
+      <Reveal>
+        <DashboardBreadcrumbs
+          items={[{ label: "Freelancer Dashboard" }]}
+          homePath="/dashboard/freelancer"
         />
-      </div>
-      <div className="freelancerDash__bg" aria-hidden="true" />
+      </Reveal>
 
-      <header className="freelancerDash__bar">
-        <div className="freelancerDash__barInner">
-          <Link to="/" className="freelancerDash__brand">
-            Carvver
-          </Link>
-
-          <nav className="freelancerDash__nav">
-            <Link to="/about-us">About Us</Link>
-            <Link to="/community">Community</Link>
-            <Link to="/pricing">Pricing</Link>
-          </nav>
-
-          <motion.button
-            type="button"
-            className="freelancerDash__signOut"
-            whileHover={{ y: -1.5 }}
-            whileTap={{ scale: 0.98 }}
-            transition={SPRING}
-            onClick={handleSignOut}
-          >
-            <LogOut className="freelancerDash__signOutIcon" />
-            <span>Sign out</span>
-          </motion.button>
-        </div>
-      </header>
-
-      <main className="freelancerDash__main">
-        <section className="freelancerDash__hero">
-          <div className="freelancerDash__heroGrid">
-            <div className="freelancerDash__heroCopy">
-              <span className="freelancerDash__eyebrow">Freelancer Dashboard</span>
-              <h1 className="freelancerDash__title">
-                <TypewriterHeading text={`Welcome, ${displayName}`} />
+      <Reveal delay={0.04}>
+        <section className="profileHero">
+          <div className="profileHero__heading">
+            <p className="profileHero__eyebrow">Freelancer Dashboard</p>
+            <div className="profileHero__titleWrap">
+              <h1 className="profileHero__title">
+                <TypewriterHeading text="Welcome Back!" />
               </h1>
-              <p className="freelancerDash__sub">
-                Keep your freelancer details in one place, review how your work
-                is presented, and stay ready for the tools built around your
-                profile.
-              </p>
-
-              <div className="freelancerDash__heroActions">
-                <motion.button
-                  type="button"
-                  className="freelancerDash__action freelancerDash__action--primary"
-                  whileHover={reduceMotion ? undefined : { y: -2, scale: 1.01 }}
-                  whileTap={{ scale: 0.985 }}
-                  transition={SPRING}
-                  onClick={() => navigate("/community")}
-                >
-                  <span>View community</span>
-                  <ArrowRight className="freelancerDash__actionIcon" />
-                </motion.button>
-
-                <motion.button
-                  type="button"
-                  className="freelancerDash__action freelancerDash__action--ghost"
-                  whileHover={reduceMotion ? undefined : { y: -2, scale: 1.01 }}
-                  whileTap={{ scale: 0.985 }}
-                  transition={SPRING}
-                  onClick={() => navigate("/pricing")}
-                >
-                  See Carvver Pro
-                </motion.button>
-              </div>
+              <motion.svg
+                className="profileHero__line"
+                viewBox="0 0 300 20"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <motion.path
+                  d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 1.05, ease: "easeInOut", delay: 0.18 }}
+                />
+              </motion.svg>
             </div>
-
-            <div className="freelancerDash__heroSignal">
-              <span className="freelancerDash__heroBadge">
-                <Sparkles className="freelancerDash__heroBadgeIcon" />
-                {readinessLabel}
-              </span>
-              <strong className="freelancerDash__heroSignalValue">
-                {readinessPercent}%
-              </strong>
-              <p className="freelancerDash__heroSignalText">
-                {readinessCompleted} of {readinessItems.length} profile details
-                are already saved from your welcome flow.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="freelancerDash__band">
-          <div className="freelancerDash__sectionHead">
-            <div>
-              <span className="freelancerDash__sectionEyebrow">Overview</span>
-              <h2 className="freelancerDash__sectionTitle">
-                Your freelancer snapshot
-              </h2>
-            </div>
-          </div>
-
-          {loading ? (
-            <p className="freelancerDash__sectionText">
-              Loading your dashboard...
+            <p className="profileHero__sub">
+              Review your profile, keep your details updated, and keep the main
+              freelancer pages close.
             </p>
-          ) : error ? (
-            <div className="freelancerDash__messageBlock">
-              <h3 className="freelancerDash__messageTitle">
-                We couldn&apos;t load this page
-              </h3>
-              <p className="freelancerDash__sectionText">{error}</p>
+
+            <div className="profileEditor__actions freelancerDashboard__heroActions">
               <motion.button
                 type="button"
-                className="freelancerDash__retry"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.985 }}
-                transition={SPRING}
-                onClick={() => window.location.reload()}
+                className="profileEditor__btn profileEditor__btn--primary"
+                {...SURFACE_MOTION}
+                onClick={() => navigate("/dashboard/freelancer/profile")}
               >
-                Try again
+                <UserRound className="profileEditor__btnIcon" />
+                <span>View profile</span>
+              </motion.button>
+
+              <motion.button
+                type="button"
+                className="profileEditor__btn profileEditor__btn--ghost"
+                {...SURFACE_MOTION}
+                onClick={() => navigate("/dashboard/freelancer/messages")}
+              >
+                <MessageCircle className="profileEditor__btnIcon" />
+                <span>Open messages</span>
               </motion.button>
             </div>
-          ) : (
-            <div className="freelancerDash__summaryGrid">
-              {summary.map((item) => (
-                <SummaryCard key={item.label} {...item} />
-              ))}
-            </div>
-          )}
-        </section>
+          </div>
 
-        {!loading && !error ? (
-          <>
-            <section className="freelancerDash__band">
-              <div className="freelancerDash__sectionHead">
+          <div className="freelancerHero__stats">
+            {summaryCards.map((card) => (
+              <motion.article
+                key={card.label}
+                className="profileMiniStat"
+                {...SURFACE_MOTION}
+              >
+                <span className="profileMiniStat__label">{card.label}</span>
+                <strong className="profileMiniStat__value">{card.value}</strong>
+                <span className="profileMiniStat__hint">{card.hint}</span>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+      </Reveal>
+
+      {warning && !profile ? (
+        <Reveal delay={0.08}>
+          <section className="profileSection">
+            <EmptySurface
+              title="We couldn't load your freelancer dashboard"
+              description={warning}
+              actionLabel="Try again"
+              onAction={reload}
+              className="profileEmpty--iconless"
+              hideIcon
+            />
+          </section>
+        </Reveal>
+      ) : null}
+
+      {profile ? (
+        <>
+          <Reveal delay={0.08}>
+            <section className="profileNavBand">
+              {quickActions.map((item) => {
+                const Icon = item.Icon;
+
+                return (
+                  <motion.button
+                    key={item.label}
+                    type="button"
+                    className="profileNavBand__item"
+                    {...SURFACE_MOTION}
+                    onClick={item.action}
+                  >
+                    <Icon className="profileNavBand__icon" />
+                    <span className="profileNavBand__label">{item.label}</span>
+                    <span className="profileNavBand__desc">{item.desc}</span>
+                  </motion.button>
+                );
+              })}
+            </section>
+          </Reveal>
+
+          <Reveal delay={0.12}>
+            <section className="profileSection">
+              <div className="profileSection__head">
                 <div>
-                  <span className="freelancerDash__sectionEyebrow">
-                    What you offer
-                  </span>
-                  <h2 className="freelancerDash__sectionTitle">
-                    The details saved on your profile
-                  </h2>
-                  <p className="freelancerDash__sectionText">
-                    This view brings together the headline, specialties, and
-                    location people will use to understand your work.
-                  </p>
+                  <p className="profileSection__eyebrow">At a glance</p>
+                  <h2 className="profileSection__title">What people will see first</h2>
                 </div>
+                <span className="freelancerPill freelancerPill--gold">
+                  <Sparkles className="profileIdentity__chipIcon" />
+                  {readinessLabel}
+                </span>
               </div>
 
-              <div className="freelancerDash__detailGrid">
-                <DetailItem
-                  label="Display name"
-                  value={rawDisplayName || "No display name added yet."}
-                />
-                <DetailItem
-                  label="Professional headline"
-                  value={headline || "No headline added yet."}
-                />
-                <DetailItem
-                  label="Main category"
-                  value={primaryCategory || "No main category added yet."}
-                />
-                <DetailItem
-                  label="Experience level"
-                  value={experienceLevel || "No experience level added yet."}
-                />
-                <DetailItem label="Portfolio link">
+              <div className="freelancerDataGrid">
+                <article className="freelancerDataItem">
+                  <span className="freelancerDataLabel">Display name</span>
+                  <p className="freelancerDataValue freelancerDataValue--strong">
+                    {displayName}
+                  </p>
+                </article>
+
+                <article className="freelancerDataItem">
+                  <span className="freelancerDataLabel">Professional headline</span>
+                  <p className="freelancerDataValue">
+                    {headline || "No headline added yet"}
+                  </p>
+                </article>
+
+                <article className="freelancerDataItem">
+                  <span className="freelancerDataLabel">Main category</span>
+                  <p className="freelancerDataValue">
+                    {primaryCategory || "No main category added yet"}
+                  </p>
+                </article>
+
+                <article className="freelancerDataItem">
+                  <span className="freelancerDataLabel">Experience level</span>
+                  <p className="freelancerDataValue">
+                    {experienceLevel || "No experience level added yet"}
+                  </p>
+                </article>
+
+                <article className="freelancerDataItem">
+                  <span className="freelancerDataLabel">Portfolio</span>
                   {portfolioUrl ? (
                     <a
                       href={portfolioUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="freelancerDash__detailLink"
+                      className="freelancerDataValue freelancerDataValue--link"
                     >
-                      <LinkIcon className="freelancerDash__detailLinkIcon" />
+                      <LinkIcon className="profileEditor__btnIcon" />
                       <span>Open portfolio</span>
                     </a>
                   ) : (
-                    <p className="freelancerDash__detailValue">
-                      No portfolio link added yet.
-                    </p>
+                    <p className="freelancerDataValue">No portfolio link added yet</p>
                   )}
-                </DetailItem>
-                <DetailItem label="Location" value={locationLabel} />
-                <DetailItem label="Specialties" wide>
+                </article>
+
+                <article className="freelancerDataItem">
+                  <span className="freelancerDataLabel">Location</span>
+                  <p className="freelancerDataValue">{locationLabel}</p>
+                </article>
+
+                <article className="freelancerDataItem" style={{ gridColumn: "1 / -1" }}>
+                  <span className="freelancerDataLabel">Specialties</span>
                   {specialties.length > 0 ? (
-                    <div className="freelancerDash__chips">
+                    <div className="freelancerChipRow">
                       {specialties.map((specialty) => (
-                        <span key={specialty} className="freelancerDash__chip">
+                        <span key={specialty} className="freelancerChip">
                           {specialty}
                         </span>
                       ))}
                     </div>
                   ) : (
-                    <p className="freelancerDash__detailValue">
-                      No specialties added yet.
-                    </p>
+                    <p className="freelancerDataValue">No specialties added yet</p>
                   )}
-                </DetailItem>
+                </article>
               </div>
             </section>
+          </Reveal>
 
-            <section className="freelancerDash__band">
-              <div className="freelancerDash__sectionHead">
+          <Reveal delay={0.16}>
+            <section className="profileSection">
+              <div className="profileSection__head">
                 <div>
-                  <span className="freelancerDash__sectionEyebrow">
-                    Freelancer tools
-                  </span>
-                  <h2 className="freelancerDash__sectionTitle">
-                    A quick look at what is being prepared
-                  </h2>
-                  <p className="freelancerDash__sectionText">
-                    These tools belong here, but they are not available to open
-                    yet.
-                  </p>
+                  <p className="profileSection__eyebrow">Profile readiness</p>
+                  <h2 className="profileSection__title">What still strengthens your page</h2>
+                </div>
+                <div className="profileProgress__meta">
+                  <strong>{completion.completed}</strong>
+                  <span>/ {completion.total} complete</span>
                 </div>
               </div>
 
-              <div className="freelancerDash__toolGrid">
-                {freelancerTools.map((tool) => {
-                  const Icon = tool.Icon;
-                  return (
-                    <article key={tool.title} className="freelancerDash__toolCard">
-                      <div className="freelancerDash__toolTop">
-                        <span
-                          className="freelancerDash__toolIconWrap"
-                          aria-hidden="true"
-                        >
-                          <Icon className="freelancerDash__toolIcon" />
-                        </span>
-                        <span className="freelancerDash__toolBadge">
-                          Not available yet
-                        </span>
-                      </div>
-                      <h3 className="freelancerDash__toolTitle">{tool.title}</h3>
-                      <p className="freelancerDash__sectionText">
-                        {tool.description}
-                      </p>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="freelancerDash__band">
-              <div className="freelancerDash__sectionHead">
-                <div>
-                  <span className="freelancerDash__sectionEyebrow">
-                    Profile readiness
-                  </span>
-                  <h2 className="freelancerDash__sectionTitle">
-                    A simple view of what is already in place
-                  </h2>
-                </div>
-              </div>
-
-              <div className="freelancerDash__readiness">
-                <div className="freelancerDash__readinessTop">
-                  <div>
-                    <strong className="freelancerDash__readinessValue">
-                      {readinessPercent}%
-                    </strong>
-                    <p className="freelancerDash__sectionText">
-                      {readinessLabel} based on the profile details already
-                      saved.
-                    </p>
-                  </div>
-
-                  <span className="freelancerDash__readinessPill">
-                    <Star className="freelancerDash__readinessPillIcon" />
-                    {readinessCompleted} complete
-                  </span>
-                </div>
-
-                <div className="freelancerDash__progressTrack" aria-hidden="true">
-                  <motion.span
-                    className="freelancerDash__progressFill"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${readinessPercent}%` }}
-                    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              <div className="profileProgress">
+                <div className="profileProgress__bar">
+                  <span
+                    className="profileProgress__barFill"
+                    style={{ width: `${completion.percent}%` }}
                   />
                 </div>
 
-                <div className="freelancerDash__readinessGrid">
-                  {readinessItems.map((item) => (
+                <div className="profileProgress__grid">
+                  {tasks.map((task) => (
                     <div
-                      key={item.label}
-                      className={`freelancerDash__readinessItem ${
-                        item.complete ? "freelancerDash__readinessItem--done" : ""
-                      }`}
+                      key={task.id}
+                      className={`profileTask ${task.complete ? "profileTask--complete" : ""}`}
                     >
-                      <span className="freelancerDash__readinessDot" />
-                      <span>{item.label}</span>
+                      <span className="profileTask__status" aria-hidden="true" />
+                      <div className="profileTask__copy">
+                        <strong className="profileTask__label">{task.label}</strong>
+                        <p className="profileTask__detail">{task.detail}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             </section>
+          </Reveal>
 
-            <section className="freelancerDash__band">
-              <div className="freelancerDash__sectionHead">
+          <Reveal delay={0.2}>
+            <section className="profileSection">
+              <div className="profileSection__head">
                 <div>
-                  <span className="freelancerDash__sectionEyebrow">Explore</span>
-                  <h2 className="freelancerDash__sectionTitle">
-                    More pages around Carvver
-                  </h2>
+                  <p className="profileSection__eyebrow">Freelancer tools</p>
+                  <h2 className="profileSection__title">Tools that will live here</h2>
+                  <p className="freelancerInfoNote">
+                    These tools are listed here, but they are not open yet.
+                  </p>
                 </div>
               </div>
 
-              <div className="freelancerDash__exploreGrid">
-                {exploreCards.map((card, index) => (
+              <div className="freelancerTeaserGrid">
+                {toolTeasers.map((tool) => {
+                  const Icon = tool.Icon;
+
+                  return (
+                    <article key={tool.title} className="freelancerTeaserCard">
+                      <div className="freelancerTeaserCard__top">
+                        <span className="freelancerTeaserCard__iconWrap" aria-hidden="true">
+                          <Icon className="freelancerTeaserCard__icon" />
+                        </span>
+                        <span className="freelancerTeaserBadge">Not available yet</span>
+                      </div>
+
+                      <div className="freelancerTeaserCard__copy">
+                        <strong className="freelancerTeaserCard__title">
+                          {tool.title}
+                        </strong>
+                        <p className="freelancerTeaserCard__desc">
+                          {tool.description}
+                        </p>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          </Reveal>
+
+          <Reveal delay={0.24}>
+            <section className="profileSection">
+              <div className="profileSection__head">
+                <div>
+                  <p className="profileSection__eyebrow">Around Carvver</p>
+                  <h2 className="profileSection__title">More pages worth checking</h2>
+                </div>
+              </div>
+
+              <div className="freelancerExploreGrid">
+                {exploreCards.map((card) => (
                   <motion.button
                     key={card.title}
                     type="button"
-                    className="freelancerDash__exploreCard"
-                    whileHover={reduceMotion ? undefined : { y: -3, x: 1 }}
-                    whileTap={{ scale: 0.985 }}
-                    transition={{ ...SPRING, delay: index * 0.04 }}
+                    className="freelancerExploreCard"
+                    {...SURFACE_MOTION}
                     onClick={() => navigate(card.to)}
                   >
-                    <div className="freelancerDash__exploreCopy">
-                      <span className="freelancerDash__sectionEyebrow">
-                        Explore
-                      </span>
-                      <strong className="freelancerDash__exploreTitle">
+                    <div className="freelancerExploreCard__copy">
+                      <strong className="freelancerExploreCard__title">
                         {card.title}
                       </strong>
-                      <p className="freelancerDash__sectionText">
+                      <p className="freelancerExploreCard__desc">
                         {card.description}
                       </p>
                     </div>
-                    <span className="freelancerDash__exploreArrowWrap">
-                      <ArrowRight className="freelancerDash__exploreArrow" />
+                    <span className="freelancerExploreCard__iconWrap" aria-hidden="true">
+                      <ArrowRight className="freelancerExploreCard__arrow" />
                     </span>
                   </motion.button>
                 ))}
               </div>
             </section>
-          </>
-        ) : null}
-      </main>
-
-      <section className="freelancerDash__footer">
-        <HomeFooter fullBleed />
-      </section>
-    </div>
+          </Reveal>
+        </>
+      ) : null}
+    </FreelancerDashboardFrame>
   );
 }

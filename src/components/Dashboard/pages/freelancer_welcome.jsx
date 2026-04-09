@@ -8,11 +8,19 @@ import SearchableCombobox from "../../Shared/searchable_combobox";
 import { ALL_SERVICE_CATEGORIES } from "../../../lib/serviceCategories";
 import {
   buildPhilippinesLocationLabel,
+  coercePhilippinesLocation,
   getBarangaysByRegionCity,
   getCitiesByRegion,
   PHILIPPINES_COUNTRY,
   PH_REGION_OPTIONS,
 } from "../../../lib/phLocations";
+import {
+  FREELANCER_EXPERIENCE_OPTIONS,
+  FREELANCER_SPECIALTY_OPTIONS,
+  validateFreelancerIdentity,
+  validateFreelancerLocation,
+  validateFreelancerWork,
+} from "../shared/freelancerProfileFields";
 import {
   clearFreelancerWelcomeDestination,
   getFreelancerWelcomeDestination,
@@ -27,30 +35,6 @@ import "./freelancer_welcome.css";
 
 const TOTAL_STEPS = 4;
 const SPRING = { type: "spring", stiffness: 300, damping: 24 };
-const EXPERIENCE_OPTIONS = [
-  "Starting out",
-  "Building momentum",
-  "Experienced",
-  "Expert",
-];
-const SPECIALTY_OPTIONS = [
-  "Brand Identity",
-  "Logo Design",
-  "Social Media Content",
-  "Product Photography",
-  "Portrait Photography",
-  "Video Reels",
-  "Motion Graphics",
-  "Voice Acting",
-  "Copywriting",
-  "Web UI",
-  "Front-end Build",
-  "Tutoring",
-  "Virtual Assistance",
-  "Custom Gifts",
-  "Crochet",
-  "Event Styling",
-];
 
 function TypewriterText({
   text,
@@ -205,76 +189,6 @@ function getFriendlyErrorMessage(error, fallback) {
   return fallback;
 }
 
-function validateIdentity(values) {
-  const errors = {};
-
-  if (!String(values.firstName || "").trim()) {
-    errors.firstName = "Please add your first name.";
-  }
-
-  if (!String(values.lastName || "").trim()) {
-    errors.lastName = "Please add your last name.";
-  }
-
-  if (!String(values.displayName || "").trim()) {
-    errors.displayName = "Please choose a display name.";
-  }
-
-  return errors;
-}
-
-function validateWork(values) {
-  const errors = {};
-
-  if (!String(values.headline || "").trim()) {
-    errors.headline = "Please add a professional headline.";
-  }
-
-  if (!String(values.primaryCategory || "").trim()) {
-    errors.primaryCategory = "Please choose a primary category.";
-  }
-
-  if (!Array.isArray(values.specialties) || values.specialties.length === 0) {
-    errors.specialties = "Please choose at least one specialty.";
-  }
-
-  if (Array.isArray(values.specialties) && values.specialties.length > 5) {
-    errors.specialties = "Choose up to five specialties only.";
-  }
-
-  if (!String(values.experienceLevel || "").trim()) {
-    errors.experienceLevel = "Please choose your experience level.";
-  }
-
-  if (String(values.portfolioUrl || "").trim()) {
-    try {
-      new URL(String(values.portfolioUrl || "").trim());
-    } catch {
-      errors.portfolioUrl = "Please enter a valid portfolio link.";
-    }
-  }
-
-  return errors;
-}
-
-function validateLocation(values) {
-  const errors = {};
-
-  if (!String(values.region || "").trim()) {
-    errors.region = "Please choose your region.";
-  }
-
-  if (!String(values.city || "").trim()) {
-    errors.city = "Please choose your city.";
-  }
-
-  if (!String(values.barangay || "").trim()) {
-    errors.barangay = "Please add your barangay or area.";
-  }
-
-  return errors;
-}
-
 function deriveInitialValues(profile, user) {
   const metadata = user?.user_metadata || {};
   const firstName = String(
@@ -300,9 +214,11 @@ function deriveInitialValues(profile, user) {
       : [],
     experienceLevel: String(profile?.freelancer_experience_level || "").trim(),
     portfolioUrl: String(profile?.freelancer_portfolio_url || "").trim(),
-    region: String(profile?.region || metadata.region || "").trim(),
-    city: String(profile?.city || "").trim(),
-    barangay: String(profile?.barangay || "").trim(),
+    ...coercePhilippinesLocation({
+      region: String(profile?.region || metadata.region || "").trim(),
+      city: String(profile?.city || "").trim(),
+      barangay: String(profile?.barangay || "").trim(),
+    }),
   };
 }
 
@@ -467,7 +383,7 @@ export default function FreelancerWelcome() {
   };
 
   const handleIdentityContinue = () => {
-    const errors = validateIdentity(formValues);
+    const errors = validateFreelancerIdentity(formValues);
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -484,7 +400,7 @@ export default function FreelancerWelcome() {
   };
 
   const handleWorkContinue = () => {
-    const errors = validateWork(formValues);
+    const errors = validateFreelancerWork(formValues);
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors((prev) => ({ ...prev, ...errors }));
@@ -504,9 +420,9 @@ export default function FreelancerWelcome() {
 
   const handleFinish = async () => {
     const nextErrors = {
-      ...validateIdentity(formValues),
-      ...validateWork(formValues),
-      ...validateLocation(formValues),
+      ...validateFreelancerIdentity(formValues),
+      ...validateFreelancerWork(formValues),
+      ...validateFreelancerLocation(formValues),
     };
 
     if (Object.keys(nextErrors).length > 0) {
@@ -541,6 +457,11 @@ export default function FreelancerWelcome() {
       setSaveError("");
       setFieldErrors({});
       setSaving(true);
+      const normalizedLocation = coercePhilippinesLocation({
+        region: String(formValues.region || "").trim(),
+        city: String(formValues.city || "").trim(),
+        barangay: String(formValues.barangay || "").trim(),
+      });
 
       await upsertProfile({
         id: sessionUser.id,
@@ -550,10 +471,10 @@ export default function FreelancerWelcome() {
         display_name: String(formValues.displayName || "").trim(),
         bio: String(formValues.bio || "").trim() || null,
         country: PHILIPPINES_COUNTRY,
-        region: String(formValues.region || "").trim(),
-        city: String(formValues.city || "").trim(),
-        barangay: String(formValues.barangay || "").trim(),
-        address: buildPhilippinesLocationLabel(formValues),
+        region: normalizedLocation.region,
+        city: normalizedLocation.city,
+        barangay: normalizedLocation.barangay,
+        address: buildPhilippinesLocationLabel(normalizedLocation),
         freelancer_headline: String(formValues.headline || "").trim(),
         freelancer_primary_category: String(formValues.primaryCategory || "").trim(),
         freelancer_specialties: formValues.specialties,
@@ -899,7 +820,7 @@ export default function FreelancerWelcome() {
                         Experience level
                       </span>
                       <div className="freelancerWelcomeChoices">
-                        {EXPERIENCE_OPTIONS.map((option) => (
+                        {FREELANCER_EXPERIENCE_OPTIONS.map((option) => (
                           <button
                             key={option}
                             type="button"
@@ -929,7 +850,7 @@ export default function FreelancerWelcome() {
                         </span>
                       </span>
                       <div className="freelancerWelcomeSpecialties">
-                        {SPECIALTY_OPTIONS.map((specialty) => (
+                        {FREELANCER_SPECIALTY_OPTIONS.map((specialty) => (
                           <button
                             key={specialty}
                             type="button"

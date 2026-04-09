@@ -7,6 +7,7 @@ import welcomeAnimation from "../../../assets/welcome_lottie_animation.lottie?ur
 import SearchableCombobox from "../../Shared/searchable_combobox";
 import {
   buildPhilippinesLocationLabel,
+  coercePhilippinesLocation,
   getBarangaysByRegionCity,
   getCitiesByRegion,
   PHILIPPINES_COUNTRY,
@@ -175,9 +176,11 @@ function deriveInitialValues(profile, user) {
     lastName,
     displayName: fallbackDisplayName,
     bio: String(profile?.bio || "").trim(),
-    region: String(profile?.region || metadata.region || "").trim(),
-    city: String(profile?.city || "").trim(),
-    barangay: String(profile?.barangay || "").trim(),
+    ...coercePhilippinesLocation({
+      region: String(profile?.region || metadata.region || "").trim(),
+      city: String(profile?.city || "").trim(),
+      barangay: String(profile?.barangay || "").trim(),
+    }),
   };
 }
 
@@ -399,6 +402,11 @@ export default function CustomerWelcome() {
       setSaveError("");
       setFieldErrors({});
       setSaving(true);
+      const normalizedLocation = coercePhilippinesLocation({
+        region: String(formValues.region || "").trim(),
+        city: String(formValues.city || "").trim(),
+        barangay: String(formValues.barangay || "").trim(),
+      });
 
       await upsertProfile({
         id: sessionUser.id,
@@ -408,14 +416,10 @@ export default function CustomerWelcome() {
         display_name: String(formValues.displayName || "").trim(),
         bio: String(formValues.bio || "").trim() || null,
         country: PHILIPPINES_COUNTRY,
-        region: String(formValues.region || "").trim(),
-        city: String(formValues.city || "").trim(),
-        barangay: String(formValues.barangay || "").trim(),
-        address: buildPhilippinesLocationLabel({
-          region: String(formValues.region || "").trim(),
-          city: String(formValues.city || "").trim(),
-          barangay: String(formValues.barangay || "").trim(),
-        }),
+        region: normalizedLocation.region,
+        city: normalizedLocation.city,
+        barangay: normalizedLocation.barangay,
+        address: buildPhilippinesLocationLabel(normalizedLocation),
         customer_onboarding_completed_at: new Date().toISOString(),
       });
 

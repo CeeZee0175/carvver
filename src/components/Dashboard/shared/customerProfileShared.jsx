@@ -4,16 +4,21 @@ import { ChevronRight, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "../../../lib/utils";
 import DashBar from "../layout/dashbar";
+import FreelancerDashBar from "../layout/freelancer_dashbar";
 import HomeFooter from "../../Homepage/layout/home_footer";
 import { PROFILE_SPRING } from "./customerProfileConfig";
 
-export function CustomerDashboardFrame({ children, mainClassName = "" }) {
+export function DashboardFrame({
+  children,
+  mainClassName = "",
+  topBar = <DashBar />,
+}) {
   return (
     <div className="profileHubShell">
       <div className="profileHubShell__base" />
       <div className="profileHubShell__bg" aria-hidden="true" />
 
-      <DashBar />
+      {topBar}
 
       <main className={cn("profileHubMain", mainClassName)}>{children}</main>
 
@@ -21,6 +26,25 @@ export function CustomerDashboardFrame({ children, mainClassName = "" }) {
         <HomeFooter fullBleed />
       </section>
     </div>
+  );
+}
+
+export function CustomerDashboardFrame({ children, mainClassName = "" }) {
+  return (
+    <DashboardFrame mainClassName={mainClassName} topBar={<DashBar />}>
+      {children}
+    </DashboardFrame>
+  );
+}
+
+export function FreelancerDashboardFrame({ children, mainClassName = "" }) {
+  return (
+    <DashboardFrame
+      mainClassName={mainClassName}
+      topBar={<FreelancerDashBar />}
+    >
+      {children}
+    </DashboardFrame>
   );
 }
 
@@ -110,7 +134,7 @@ export function TypewriterHeading({
   );
 }
 
-export function DashboardBreadcrumbs({ items }) {
+export function DashboardBreadcrumbs({ items, homePath = "/dashboard/customer" }) {
   const navigate = useNavigate();
 
   return (
@@ -118,7 +142,7 @@ export function DashboardBreadcrumbs({ items }) {
       <button
         type="button"
         className="profileCrumbs__home"
-        onClick={() => navigate("/dashboard/customer")}
+        onClick={() => navigate(homePath)}
       >
         <Home className="profileCrumbs__icon" />
         <span>Home</span>

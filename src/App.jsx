@@ -26,6 +26,9 @@ const CustomerWelcome = lazy(() => import("./components/Dashboard/pages/customer
 const FreelancerWelcome = lazy(() => import("./components/Dashboard/pages/freelancer_welcome"));
 const DashboardCustomer = lazy(() => import("./components/Dashboard/pages/dashboard_customer"));
 const DashboardFreelancer = lazy(() => import("./components/Dashboard/pages/dashboard_freelancer"));
+const FreelancerProfile = lazy(() => import("./components/Dashboard/pages/freelancer_profile"));
+const FreelancerSettings = lazy(() => import("./components/Dashboard/pages/freelancer_settings"));
+const FreelancerMessages = lazy(() => import("./components/Dashboard/pages/freelancer_messages"));
 const DashboardAboutUs = lazy(() => import("./components/Dashboard/pages/dashboard_aboutUs"));
 const BrowseCategories = lazy(() => import("./components/Dashboard/pages/browse_categories"));
 const FavBook = lazy(() => import("./components/Dashboard/pages/favBook"));
@@ -35,6 +38,9 @@ const NotifPage = lazy(() => import("./components/Dashboard/pages/notifPage"));
 const Profile = lazy(() => import("./components/Dashboard/pages/profile"));
 const ProfileAchievements = lazy(() => import("./components/Dashboard/pages/profileAchievements"));
 const CustomerOrders = lazy(() => import("./components/Dashboard/pages/customerOrders"));
+const CustomerFreelancerProfile = lazy(() =>
+  import("./components/Dashboard/pages/customer_freelancer_profile")
+);
 const supabase = createClient();
 
 function RouteFallback({ withNav = false }) {
@@ -293,6 +299,36 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/dashboard/freelancer/profile"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerProfile />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer/settings"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerSettings />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer/messages"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerMessages />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
         path="/dashboard/customer/about-us"
         element={
           <Suspense fallback={<RouteFallback />}>
@@ -378,6 +414,16 @@ function AppRoutes() {
           <Suspense fallback={<RouteFallback />}>
             <CustomerRoute>
               <CustomerOrders />
+            </CustomerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/customer/freelancers/:freelancerId"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <CustomerRoute>
+              <CustomerFreelancerProfile />
             </CustomerRoute>
           </Suspense>
         }

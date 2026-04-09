@@ -1,0 +1,369 @@
+.customerFreelancerPage {
+  gap: 26px;
+}
+
+.customerFreelancerHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: end;
+}
+
+.customerFreelancerHero__identity {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.customerFreelancerHero__eyebrow,
+.customerFreelancerSection__eyebrow,
+.customerFreelancerSummaryCard__label,
+.customerFreelancerInfoCard__label {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: rgba(87, 34, 182, 0.72);
+}
+
+.customerFreelancerHero__titleWrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.customerFreelancerHero__avatar {
+  width: 74px;
+  height: 74px;
+  border-radius: 24px;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: rgba(42, 20, 80, 0.88);
+}
+
+.customerFreelancerHero__avatarImage {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.customerFreelancerHero__titleBlock {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.customerFreelancerHero__title {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: clamp(34px, 5vw, 52px);
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+  color: rgba(27, 16, 46, 0.96);
+}
+
+.customerFreelancerHero__realName,
+.customerFreelancerHero__sub,
+.customerFreelancerInfoCard__value,
+.customerFreelancerServiceCard__desc {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.68;
+  color: rgba(27, 16, 46, 0.64);
+}
+
+.customerFreelancerHero__chips,
+.customerFreelancerTagRow,
+.customerFreelancerServiceCard__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.customerFreelancerHero__chip,
+.customerFreelancerTag,
+.customerFreelancerServiceCard__chip,
+.customerFreelancerServiceCard__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.82);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.76);
+  text-decoration: none;
+}
+
+.customerFreelancerHero__chip--link {
+  color: rgba(66, 29, 133, 0.96);
+}
+
+.customerFreelancerHero__chipIcon,
+.customerFreelancerServiceCard__metaIcon,
+.customerFreelancerServiceCard__linkIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.customerFreelancerHero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.customerFreelancerHero__favoriteBtn,
+.customerFreelancerHero__ghostBtn,
+.customerFreelancerServiceCard__link {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  cursor: pointer;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.88);
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    box-shadow 220ms ease,
+    color 180ms ease;
+}
+
+.customerFreelancerHero__favoriteBtn {
+  background: rgba(42, 20, 80, 0.92);
+  color: #fff;
+  box-shadow: 0 16px 40px rgba(42, 20, 80, 0.16);
+}
+
+.customerFreelancerHero__favoriteBtn--active {
+  background: rgba(124, 58, 237, 0.92);
+  border-color: rgba(124, 58, 237, 0.24);
+}
+
+.customerFreelancerHero__favoriteIcon {
+  width: 15px;
+  height: 15px;
+}
+
+.customerFreelancerSection {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  padding-top: 28px;
+}
+
+.customerFreelancerSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(42, 20, 80, 0.02) 0%,
+    rgba(42, 20, 80, 0.12) 18%,
+    rgba(242, 193, 78, 0.22) 50%,
+    rgba(42, 20, 80, 0.12) 82%,
+    rgba(42, 20, 80, 0.02) 100%
+  );
+}
+
+.customerFreelancerSection__head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.customerFreelancerSection__title {
+  margin: 8px 0 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 24px;
+  line-height: 1.08;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: rgba(27, 16, 46, 0.96);
+}
+
+.customerFreelancerSummaryGrid,
+.customerFreelancerInfoGrid,
+.customerFreelancerServiceGrid,
+.customerFreelancerSkeletonGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.customerFreelancerSummaryGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.customerFreelancerInfoGrid,
+.customerFreelancerServiceGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.customerFreelancerSummaryCard,
+.customerFreelancerInfoCard,
+.customerFreelancerServiceCard,
+.customerFreelancerSkeletonCard {
+  min-width: 0;
+  border-radius: 22px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 16px 42px rgba(12, 7, 18, 0.05);
+}
+
+.customerFreelancerSummaryCard,
+.customerFreelancerInfoCard,
+.customerFreelancerServiceCard {
+  padding: 18px;
+}
+
+.customerFreelancerSummaryCard {
+  display: grid;
+  gap: 8px;
+}
+
+.customerFreelancerSummaryCard__value,
+.customerFreelancerServiceCard__title {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 850;
+  color: rgba(27, 16, 46, 0.96);
+  overflow-wrap: anywhere;
+}
+
+.customerFreelancerInfoCard {
+  display: grid;
+  gap: 12px;
+}
+
+.customerFreelancerServiceCard {
+  display: grid;
+  gap: 14px;
+}
+
+.customerFreelancerServiceCard__top,
+.customerFreelancerServiceCard__footer {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.customerFreelancerServiceCard__meta--gold {
+  border-color: rgba(242, 193, 78, 0.2);
+  background: rgba(242, 193, 78, 0.12);
+  color: rgba(127, 80, 10, 0.94);
+}
+
+.customerFreelancerServiceCard__price {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: rgba(27, 16, 46, 0.98);
+}
+
+.customerFreelancerServiceCard__link {
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.customerFreelancerEmpty {
+  padding-top: 44px;
+}
+
+.customerFreelancerSkeletonGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.customerFreelancerSkeletonCard {
+  min-height: 120px;
+  background: linear-gradient(
+    90deg,
+    rgba(42, 20, 80, 0.05) 25%,
+    rgba(42, 20, 80, 0.1) 50%,
+    rgba(42, 20, 80, 0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: customerFreelancerShimmer 1.4s ease infinite;
+}
+
+@keyframes customerFreelancerShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 1080px) {
+  .customerFreelancerSummaryGrid,
+  .customerFreelancerSkeletonGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .customerFreelancerHero,
+  .customerFreelancerInfoGrid,
+  .customerFreelancerServiceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .customerFreelancerHero__actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .customerFreelancerSummaryGrid,
+  .customerFreelancerSkeletonGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .customerFreelancerHero__titleWrap {
+    align-items: flex-start;
+  }
+
+  .customerFreelancerHero__avatar {
+    width: 62px;
+    height: 62px;
+    border-radius: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .customerFreelancerSkeletonCard {
+    animation: none !important;
+  }
+}

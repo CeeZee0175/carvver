@@ -4,6 +4,7 @@ import { createClient } from "../../../lib/supabase/client";
 import { emitProfileUpdated } from "../../../lib/profileSync";
 import {
   buildPhilippinesLocationLabel,
+  coercePhilippinesLocation,
   PHILIPPINES_COUNTRY,
 } from "../../../lib/phLocations";
 import {
@@ -536,9 +537,14 @@ export function useCustomerProfileData() {
         normalizedAge = numericAge;
       }
 
-      const normalizedRegion = String(region || "").trim();
-      const normalizedCity = String(city || "").trim();
-      const normalizedBarangay = String(barangay || "").trim();
+      const normalizedLocationParts = coercePhilippinesLocation({
+        region: String(region || "").trim(),
+        city: String(city || "").trim(),
+        barangay: String(barangay || "").trim(),
+      });
+      const normalizedRegion = normalizedLocationParts.region;
+      const normalizedCity = normalizedLocationParts.city;
+      const normalizedBarangay = normalizedLocationParts.barangay;
       const normalizedLocation = buildPhilippinesLocationLabel({
         region: normalizedRegion,
         city: normalizedCity,

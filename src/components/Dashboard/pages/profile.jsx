@@ -22,6 +22,7 @@ import toast from "react-hot-toast";
 import SearchableCombobox from "../../Shared/searchable_combobox";
 import {
   buildPhilippinesLocationLabel,
+  coercePhilippinesLocation,
   getBarangaysByRegionCity,
   getCitiesByRegion,
   PH_REGION_OPTIONS,
@@ -220,16 +221,22 @@ export default function Profile() {
 
   useEffect(() => {
     if (!profile || editing) return;
-      setFormValues({
-        firstName: profile.first_name || "",
-        lastName: profile.last_name || "",
-        displayName: profile.display_name || "",
-        bio: profile.bio || "",
-        region: profile.region || "",
-        city: profile.city || "",
-        barangay: profile.barangay || "",
-        age: profile.age == null ? "" : String(profile.age),
-      });
+    const normalizedLocation = coercePhilippinesLocation({
+      region: profile.region || "",
+      city: profile.city || "",
+      barangay: profile.barangay || "",
+    });
+
+    setFormValues({
+      firstName: profile.first_name || "",
+      lastName: profile.last_name || "",
+      displayName: profile.display_name || "",
+      bio: profile.bio || "",
+      region: normalizedLocation.region,
+      city: normalizedLocation.city,
+      barangay: normalizedLocation.barangay,
+      age: profile.age == null ? "" : String(profile.age),
+    });
   }, [editing, profile]);
 
   useEffect(() => {
@@ -272,6 +279,11 @@ export default function Profile() {
   const topAchievements = earnedAchievements.slice(0, 8);
 
   const resetEditor = () => {
+    const normalizedLocation = coercePhilippinesLocation({
+      region: profile?.region || "",
+      city: profile?.city || "",
+      barangay: profile?.barangay || "",
+    });
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
       previewUrlRef.current = "";
@@ -284,9 +296,9 @@ export default function Profile() {
       lastName: profile?.last_name || "",
       displayName: profile?.display_name || "",
       bio: profile?.bio || "",
-      region: profile?.region || "",
-      city: profile?.city || "",
-      barangay: profile?.barangay || "",
+      region: normalizedLocation.region,
+      city: normalizedLocation.city,
+      barangay: normalizedLocation.barangay,
       age: profile?.age == null ? "" : String(profile.age),
     });
   };
