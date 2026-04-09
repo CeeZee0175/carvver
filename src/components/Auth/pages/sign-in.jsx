@@ -17,8 +17,11 @@ import {
 import {
   CUSTOMER_WELCOME_PATH,
   DEFAULT_CUSTOMER_DESTINATION,
+  FREELANCER_WELCOME_PATH,
   isCustomerOnboardingComplete,
+  isFreelancerOnboardingComplete,
   setCustomerWelcomeDestination,
+  setFreelancerWelcomeDestination,
 } from "../../../lib/customerOnboarding";
 import {
   buildCategoryPath,
@@ -250,6 +253,13 @@ export default function SignIn() {
         return;
       }
 
+      if (profile?.role === "freelancer" && !isFreelancerOnboardingComplete(profile)) {
+        setFreelancerWelcomeDestination("/dashboard/freelancer");
+        if (categoryIntent) clearFeaturedCategoryIntent();
+        navigate(FREELANCER_WELCOME_PATH, { replace: true });
+        return;
+      }
+
       toast.success(`Welcome back, ${profile.first_name}!`);
 
       if (categoryIntent) {
@@ -421,7 +431,7 @@ export default function SignIn() {
               </label>
 
               <button type="button" className="signInForm__linkBtn"
-                onClick={() => toast("Password reset coming soon!")}>
+                onClick={() => toast("Password reset isn't available yet.")}>
                 Forgot password?
               </button>
             </div>

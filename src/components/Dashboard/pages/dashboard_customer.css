@@ -6,7 +6,7 @@
 
 .dashLandingHero {
   align-items: start;
-  padding: 8px 0 2px;
+  padding: 8px 0 8px;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -14,22 +14,9 @@
   backdrop-filter: none;
 }
 
-.dashLandingHero__name {
-  margin: 12px 0 0;
-  max-width: 18ch;
-  font-family: Inter, system-ui, sans-serif;
-  font-size: clamp(28px, 3vw, 42px);
-  line-height: 1.04;
-  font-weight: 850;
-  letter-spacing: -0.04em;
-  color: rgba(27, 16, 46, 0.98);
-  text-wrap: balance;
-  overflow-wrap: anywhere;
-}
-
 .dashLandingHero .profileHero__sub {
-  margin-top: 14px;
-  max-width: 54ch;
+  margin-top: 18px;
+  max-width: 58ch;
 }
 
 .dashLandingHero__actions {
@@ -126,7 +113,7 @@
 
 .dashLandingAction:hover .dashLandingAction__icon,
 .dashLandingGhostLink:hover .dashLandingGhostLink__icon {
-  transform: translateX(2px);
+  transform: translateX(3px) scale(1.04);
 }
 
 .dashLandingStats {
@@ -139,9 +126,9 @@
 
 .dashLandingSection {
   position: relative;
-  padding-top: 24px;
+  padding-top: 30px;
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
 
 .dashLandingSection::before {
@@ -169,7 +156,7 @@
   display: flex;
   align-items: end;
   justify-content: space-between;
-  gap: 18px;
+  gap: 24px;
 }
 
 .dashLandingSection__head > div {
@@ -197,7 +184,7 @@
 }
 
 .dashLandingSection__desc {
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   max-width: 60ch;
   font-family: Inter, system-ui, sans-serif;
   font-size: 14px;
@@ -559,15 +546,20 @@
 }
 
 .dashLandingEmpty {
-  padding: clamp(34px, 5vw, 52px) 0 6px;
+  padding: clamp(42px, 6vw, 64px) 0 14px;
+  gap: 16px;
+}
+
+.dashLandingEmpty--quiet {
+  padding-top: clamp(48px, 6vw, 72px);
 }
 
 .dashLandingEmpty .profileEmpty__desc {
-  max-width: 46ch;
+  max-width: 50ch;
 }
 
 .dashLandingEmpty .profileEmpty__btn {
-  margin-top: 8px;
+  margin-top: 14px;
 }
 
 .dashLandingRequestCard--skeleton,
@@ -629,11 +621,6 @@
 }
 
 @media (max-width: 540px) {
-  .dashLandingHero__name {
-    max-width: 100%;
-    font-size: 28px;
-  }
-
   .dashLandingSection__title {
     font-size: 20px;
   }

@@ -159,7 +159,7 @@ export default function DashBar() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    toast("Search coming soon!");
+    toast("Search isn't available yet.");
   };
 
   const toggleProfile = () => {
@@ -195,7 +195,7 @@ export default function DashBar() {
       return;
     }
 
-    toast(`${label} coming soon!`);
+    toast(`${label} isn't available yet.`);
   };
 
   const handleSignOut = async () => {
@@ -215,7 +215,7 @@ export default function DashBar() {
       await markAllRead();
       toast.success("All notifications marked as read.");
     } catch {
-      toast.error("Couldn't update notifications right now.");
+      toast.error("We couldn't update notifications. Please try again.");
     }
   };
 
@@ -223,7 +223,7 @@ export default function DashBar() {
     try {
       await markRead(item.id);
     } catch {
-      toast.error("Couldn't update notifications right now.");
+      toast.error("We couldn't update notifications. Please try again.");
     }
 
     setOpenNotifications(false);
@@ -304,7 +304,7 @@ export default function DashBar() {
               whileTap={{ scale: 0.95 }}
               transition={SPRING}
               aria-label="Messages"
-              onClick={() => toast("Messages coming soon!")}
+              onClick={() => toast("Messages aren't available yet.")}
             >
               <MessageCircle className="dashbarIconBtn__icon" />
             </motion.button>
@@ -426,7 +426,7 @@ export default function DashBar() {
                             <Sparkles className="dashbarNotifyEmpty__icon" />
                           </div>
                           <p className="dashbarNotifyEmpty__title">
-                            Nothing unread right now.
+                            Nothing unread.
                           </p>
                           <p className="dashbarNotifyEmpty__desc">
                             New activity will appear here the moment something needs your attention.

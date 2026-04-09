@@ -5,25 +5,21 @@ import {
   ArrowRight,
   Bell,
   Bookmark,
-  Camera,
-  GraduationCap,
-  Heart,
   MapPin,
-  Mic2,
   PackageSearch,
-  Palette,
-  PenTool,
   PlusCircle,
-  Share2,
   ShoppingBag,
   Users,
-  Video,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import "./profile.css";
 import "./dashboard_customer.css";
-import { getProfile } from "../../../lib/supabase/auth";
 import { createClient } from "../../../lib/supabase/client";
+import { buildCategoryPath } from "../../../lib/featuredCategoryIntent";
+import {
+  DASHBOARD_CATEGORY_HIGHLIGHTS,
+  getCategoryIcon,
+} from "../../../lib/serviceCategories";
 import {
   getCustomerDisplayName,
   getCustomerInitials,
@@ -37,17 +33,6 @@ import {
 import { useCustomerRequests } from "../hooks/useCustomerRequests";
 
 const supabase = createClient();
-
-const categoryCards = [
-  { label: "Art & Illustration", Icon: Palette },
-  { label: "Photography", Icon: Camera },
-  { label: "Video Editing", Icon: Video },
-  { label: "Graphic Design", Icon: PenTool },
-  { label: "Voice Over", Icon: Mic2 },
-  { label: "Social Media", Icon: Share2 },
-  { label: "Tutoring", Icon: GraduationCap },
-  { label: "Handmade Products", Icon: ShoppingBag },
-];
 
 const quickBoardItems = [
   {
@@ -77,21 +62,21 @@ const quickBoardItems = [
 ];
 
 const HERO_BUTTON_MOTION = {
-  whileHover: { y: -4, scale: 1.018 },
-  whileTap: { y: -1, scale: 0.985 },
-  transition: { type: "spring", stiffness: 320, damping: 18, mass: 0.72 },
+  whileHover: { y: -5, scale: 1.02 },
+  whileTap: { y: -1, scale: 0.982 },
+  transition: { type: "spring", stiffness: 330, damping: 18, mass: 0.7 },
 };
 
 const SURFACE_BUTTON_MOTION = {
-  whileHover: { y: -3, scale: 1.01 },
-  whileTap: { scale: 0.988 },
-  transition: { type: "spring", stiffness: 310, damping: 20, mass: 0.75 },
+  whileHover: { y: -4, scale: 1.012 },
+  whileTap: { scale: 0.986 },
+  transition: { type: "spring", stiffness: 320, damping: 19, mass: 0.74 },
 };
 
 const LINK_BUTTON_MOTION = {
-  whileHover: { x: 3, y: -1 },
-  whileTap: { scale: 0.985 },
-  transition: { type: "spring", stiffness: 320, damping: 20, mass: 0.76 },
+  whileHover: { x: 4, y: -1.5 },
+  whileTap: { scale: 0.984 },
+  transition: { type: "spring", stiffness: 330, damping: 19, mass: 0.76 },
 };
 
 function normalizeRelation(value) {
@@ -127,11 +112,22 @@ function EmptyState({ icon: Icon, title, desc, actionLabel, onAction }) {
   );
 }
 
+function QuietEmptyState({ title, desc, actionLabel, onAction }) {
+  return (
+    <EmptySurface
+      title={title}
+      description={desc}
+      actionLabel={actionLabel}
+      onAction={onAction}
+      className="dashLandingEmpty dashLandingEmpty--quiet"
+      hideIcon
+    />
+  );
+}
+
 export default function DashboardCustomer() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [profile, setProfile] = useState(null);
-  const [profileLoading, setProfileLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
   const [savedCount, setSavedCount] = useState(0);
   const [activeOrdersCount, setActiveOrdersCount] = useState(0);
@@ -147,13 +143,6 @@ export default function DashboardCustomer() {
     error: requestsError,
     reload: reloadRequests,
   } = useCustomerRequests({ limit: 4 });
-
-  useEffect(() => {
-    getProfile()
-      .then((nextProfile) => setProfile(nextProfile))
-      .catch(() => setProfile(null))
-      .finally(() => setProfileLoading(false));
-  }, []);
 
   useEffect(() => {
     async function loadDashboardStats() {
@@ -315,9 +304,7 @@ export default function DashboardCustomer() {
         setFavoriteFreelancers(profiles);
       } catch (error) {
         setFavoriteFreelancers([]);
-        setFavoritesError(
-          String(error?.message || "We couldn't load your favorite freelancers right now.")
-        );
+        setFavoritesError("We couldn't load your favorite freelancers.");
       } finally {
         setFavoritesLoading(false);
       }
@@ -339,8 +326,6 @@ export default function DashboardCustomer() {
     navigate(location.pathname, { replace: true, state: null });
   }, [location.pathname, location.state, navigate, reloadRequests]);
 
-  const displayName = getCustomerDisplayName(profile);
-
   const quickStats = [
     {
       label: "Saved Listings",
@@ -350,12 +335,18 @@ export default function DashboardCustomer() {
     {
       label: "Open Requests",
       value: requestsLoading ? "..." : openCount,
-      hint: openCount === 0 ? "Post a request when you need something specific." : "Your active briefs are ready for later replies.",
+      hint:
+        openCount === 0
+          ? "Post a request when you need something specific."
+          : "Your active briefs are ready to review.",
     },
     {
       label: "Active Orders",
       value: statsLoading ? "..." : activeOrdersCount,
-      hint: activeOrdersCount === 0 ? "Nothing is in progress right now." : "Work you are still waiting on.",
+      hint:
+        activeOrdersCount === 0
+          ? "Nothing is in progress."
+          : "Work you are still waiting on.",
     },
     {
       label: "Favorite Freelancers",
@@ -383,7 +374,7 @@ export default function DashboardCustomer() {
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
+              <motion.path
                   d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                   fill="none"
                   stroke="currentColor"
@@ -395,17 +386,9 @@ export default function DashboardCustomer() {
                 />
               </motion.svg>
             </div>
-
-            <p className="dashLandingHero__name">
-              <TypewriterHeading
-                text={profileLoading ? "Customer" : displayName}
-                speed={46}
-                initialDelay={320}
-              />
-            </p>
             <p className="profileHero__sub">
               Explore creative services, keep track of saved work, or post a request
-              so freelancers can understand exactly what you need later on.
+              so freelancers can understand exactly what you need.
             </p>
 
             <div className="dashLandingHero__actions">
@@ -516,16 +499,15 @@ export default function DashboardCustomer() {
           ) : requestsError ? (
             <EmptyState
               icon={PackageSearch}
-              title="Recent requests are unavailable right now"
-              desc={requestsError || "This section is unavailable right now."}
+              title="We couldn't load your recent requests"
+              desc={requestsError || "Please try again."}
               actionLabel="Open the request page"
               onAction={() => navigate("/dashboard/customer/post-request")}
             />
           ) : requests.length === 0 ? (
-            <EmptyState
-              icon={PlusCircle}
+            <QuietEmptyState
               title="You have not posted a request yet"
-              desc="Create your first request when you want freelancers to understand a specific need later on."
+              desc="Create your first request when you want freelancers to understand a specific need."
               actionLabel="Post your first request"
               onAction={() => navigate("/dashboard/customer/post-request")}
             />
@@ -597,8 +579,7 @@ export default function DashboardCustomer() {
               ))}
             </div>
           ) : services.length === 0 ? (
-            <EmptyState
-              icon={PackageSearch}
+            <QuietEmptyState
               title="No published services yet"
               desc="Once freelancers publish their work, recommended picks will show up here."
               actionLabel="Browse services"
@@ -668,11 +649,11 @@ export default function DashboardCustomer() {
           </div>
 
           <div className="dashLandingCategoryGrid">
-            {categoryCards.map((item, index) => {
-              const Icon = item.Icon;
+            {DASHBOARD_CATEGORY_HIGHLIGHTS.map((label, index) => {
+              const Icon = getCategoryIcon(label);
               return (
                 <motion.button
-                  key={item.label}
+                  key={label}
                   type="button"
                   className="dashLandingCategoryCard"
                   initial={{ opacity: 0, y: 10 }}
@@ -680,12 +661,16 @@ export default function DashboardCustomer() {
                   viewport={{ once: true, amount: 0.35 }}
                   transition={{ duration: 0.42, delay: index * 0.04 }}
                   {...SURFACE_BUTTON_MOTION}
-                  onClick={() => navigate("/dashboard/customer/browse-services")}
+                  onClick={() =>
+                    navigate(
+                      buildCategoryPath("/dashboard/customer/browse-services", label)
+                    )
+                  }
                 >
                   <span className="dashLandingCategoryCard__iconWrap" aria-hidden="true">
                     <Icon className="dashLandingCategoryCard__icon" />
                   </span>
-                  <span className="dashLandingCategoryCard__label">{item.label}</span>
+                  <span className="dashLandingCategoryCard__label">{label}</span>
                 </motion.button>
               );
             })}
@@ -714,14 +699,13 @@ export default function DashboardCustomer() {
           ) : favoritesError ? (
             <EmptyState
               icon={Users}
-              title="Favorite freelancers are unavailable right now"
-              desc={favoritesError || "This section is unavailable right now."}
+              title="We couldn't load your favorite freelancers"
+              desc={favoritesError || "Please try again."}
               actionLabel="Browse services"
               onAction={() => navigate("/dashboard/customer/browse-services")}
             />
           ) : favoriteFreelancers.length === 0 ? (
-            <EmptyState
-              icon={Heart}
+            <QuietEmptyState
               title="No favorite freelancers yet"
               desc="Once you save listings or place orders, the freelancers tied to your activity will appear here."
               actionLabel="Browse services"

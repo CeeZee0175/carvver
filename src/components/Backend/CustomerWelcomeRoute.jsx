@@ -3,7 +3,9 @@ import { Navigate } from "react-router-dom";
 import { createClient } from "../../lib/supabase/client";
 import {
   DEFAULT_CUSTOMER_DESTINATION,
+  FREELANCER_WELCOME_PATH,
   isCustomerOnboardingComplete,
+  isFreelancerOnboardingComplete,
   resolveProfileRole,
 } from "../../lib/customerOnboarding";
 
@@ -55,7 +57,9 @@ export default function CustomerWelcomeRoute({ children }) {
       if (role === "freelancer") {
         setState({
           loading: false,
-          redirectTo: "/dashboard/freelancer",
+          redirectTo: isFreelancerOnboardingComplete(profile)
+            ? "/dashboard/freelancer"
+            : FREELANCER_WELCOME_PATH,
         });
         return;
       }

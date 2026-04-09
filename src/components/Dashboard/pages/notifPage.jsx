@@ -12,7 +12,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Home,
-  Sparkles,
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import "./notifPage.css";
@@ -185,14 +184,10 @@ function EmptyState({ activeFilter, onShowAll }) {
         }
       />
 
-      <div className="notifEmpty__iconWrap" aria-hidden="true">
-        <Sparkles className="notifEmpty__icon" />
-      </div>
-
       <h3 className="notifEmpty__title">You&apos;re all caught up.</h3>
       <p className="notifEmpty__desc">
         {activeFilter === "unread"
-          ? "There are no unread notifications right now."
+          ? "There are no unread notifications."
           : "New activity will appear here once creators, orders, or saved services give you something new to check."}
       </p>
 
@@ -279,7 +274,7 @@ export default function NotifPage() {
       await markAllRead();
       toast.success("All notifications marked as read.");
     } catch {
-      toast.error("Couldn't update notifications right now.");
+      toast.error("We couldn't update notifications. Please try again.");
     }
   };
 
@@ -287,7 +282,7 @@ export default function NotifPage() {
     try {
       await toggleRead(item.id);
     } catch {
-      toast.error("Couldn't update notifications right now.");
+      toast.error("We couldn't update notifications. Please try again.");
     }
   };
 
@@ -295,7 +290,7 @@ export default function NotifPage() {
     try {
       await markRead(item.id);
     } catch {
-      toast.error("Couldn't update notifications right now.");
+      toast.error("We couldn't update notifications. Please try again.");
     }
 
     navigate(item.path);
@@ -371,9 +366,8 @@ export default function NotifPage() {
               </div>
 
               <p className="notifPage__sub">
-                Everything stays in one stream now. Read state persists, unread
-                items stay synced with the bell menu, and the page stays light
-                enough to let the background breathe through.
+                See your latest updates in one place, keep track of what you
+                have already read, and jump straight to what needs your attention.
               </p>
             </div>
 
@@ -389,7 +383,7 @@ export default function NotifPage() {
                 >
                   {hasUnread
                     ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}`
-                    : "No unread notifications right now"}
+                    : "No unread notifications"}
                 </motion.p>
               </AnimatePresence>
             </div>

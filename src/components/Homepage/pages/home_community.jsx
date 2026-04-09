@@ -138,17 +138,17 @@ function isValidEmail(email) {
 }
 
 function getSubscribeErrorMessage(error) {
-  if (!error) return "Couldn't save your email yet. Please try again.";
+  if (!error) return "We couldn't save your email. Please try again.";
 
   if (error.code === "42P01") {
-    return "The signup table is missing. Run the Supabase SQL first.";
+    return "We couldn't save your email. Please try again in a moment.";
   }
 
   if (error.code === "42501") {
-    return "Supabase blocked the signup. Add the insert policy and try again.";
+    return "We couldn't save your email. Please try again in a moment.";
   }
 
-  return "Couldn't save your email yet. Please try again.";
+  return "We couldn't save your email. Please try again.";
 }
 
 function Reveal({ children, className = "", delay = 0, amount = 0.24 }) {
@@ -467,8 +467,8 @@ export default function HomeCommunity() {
                       Achievements over leaderboard pressure
                     </h3>
                     <p className="communityMeaning__text">
-                      The platform direction favors badges, milestones, and
-                      credibility signals that feel rewarding without turning
+                      Carvver favors badges, milestones, and credibility
+                      signals that feel rewarding without turning
                       growth into a constant public ranking contest.
                     </p>
                   </div>

@@ -297,7 +297,7 @@ function FavCard({ item, index, cartServiceIds, onAddToCart, onOpenCart, onRemov
               whileHover={{ x: 2 }}
               whileTap={{ scale: 0.96 }}
               transition={SPRING}
-              onClick={() => toast("Service detail page coming soon!")}
+              onClick={() => toast("Service details aren't available yet.")}
             >
               View
               <ArrowRight className="favCard__viewIcon" />

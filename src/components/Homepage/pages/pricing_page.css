@@ -260,8 +260,14 @@
 .pricingBtn--freeAction {
   width: auto;
   min-width: 0;
-  justify-self: start;
-  padding-inline: 16px;
+  min-height: 42px;
+  justify-self: center;
+  align-self: start;
+  padding-inline: 14px;
+  font-size: 12px;
+  box-shadow:
+    0 12px 28px rgba(12, 7, 18, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.84);
 }
 
 .pricingBtn__icon {
@@ -343,32 +349,32 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+  align-items: start;
 }
 
 .pricingPlan {
   position: relative;
   overflow: hidden;
-  min-height: 100%;
   padding: 24px;
   display: grid;
   gap: 22px;
 }
 
 .pricingPlan--free {
-  gap: 18px;
+  gap: 16px;
 }
 
 .pricingPlan--free .pricingPlan__priceRow {
-  gap: 14px;
-  padding-top: 14px;
+  gap: 12px;
+  padding-top: 12px;
 }
 
 .pricingPlan--free .pricingPlan__featureList {
-  gap: 10px;
+  gap: 8px;
 }
 
 .pricingPlan--free .pricingPlan__feature {
-  padding: 12px 14px;
+  padding: 11px 13px;
 }
 
 .pricingPlan::after,

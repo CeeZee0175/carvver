@@ -19,6 +19,13 @@ import {
   X,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import SearchableCombobox from "../../Shared/searchable_combobox";
+import {
+  buildPhilippinesLocationLabel,
+  getBarangaysByRegionCity,
+  getCitiesByRegion,
+  PH_REGION_OPTIONS,
+} from "../../../lib/phLocations";
 import {
   SHOWCASE_SLOT_LIMIT,
   getCustomerDisplayName,
@@ -194,25 +201,35 @@ export default function Profile() {
     lastName: "",
     displayName: "",
     bio: "",
-    country: "",
-    address: "",
+    region: "",
+    city: "",
+    barangay: "",
     age: "",
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("");
   const [removeAvatar, setRemoveAvatar] = useState(false);
+  const cityOptions = useMemo(
+    () => getCitiesByRegion(formValues.region),
+    [formValues.region]
+  );
+  const barangayOptions = useMemo(
+    () => getBarangaysByRegionCity(formValues.region, formValues.city),
+    [formValues.city, formValues.region]
+  );
 
   useEffect(() => {
     if (!profile || editing) return;
-    setFormValues({
-      firstName: profile.first_name || "",
-      lastName: profile.last_name || "",
-      displayName: profile.display_name || "",
-      bio: profile.bio || "",
-      country: profile.country || "",
-      address: profile.address || "",
-      age: profile.age == null ? "" : String(profile.age),
-    });
+      setFormValues({
+        firstName: profile.first_name || "",
+        lastName: profile.last_name || "",
+        displayName: profile.display_name || "",
+        bio: profile.bio || "",
+        region: profile.region || "",
+        city: profile.city || "",
+        barangay: profile.barangay || "",
+        age: profile.age == null ? "" : String(profile.age),
+      });
   }, [editing, profile]);
 
   useEffect(() => {
@@ -239,12 +256,18 @@ export default function Profile() {
   const earnedLegendaryCount = earnedAchievements.filter(
     (achievement) => achievement.legendary
   ).length;
-  const averageRating =
-    metrics.reviewCount > 0 ? metrics.averageRating.toFixed(1) : "—";
+  const averageRatingLabel =
+    metrics.reviewCount > 0 ? metrics.averageRating.toFixed(1) : "--";
   const avatarSrc = removeAvatar
     ? ""
     : avatarPreview || String(profile?.avatar_url || "").trim();
-  const locationLabel = String(profile?.address || profile?.country || "").trim();
+  const locationLabel =
+    buildPhilippinesLocationLabel({
+      region: String(profile?.region || "").trim(),
+      city: String(profile?.city || "").trim(),
+      barangay: String(profile?.barangay || "").trim(),
+    }) ||
+    String(profile?.address || profile?.country || "").trim();
   const ageLabel = profile?.age == null ? "" : String(profile.age);
   const topAchievements = earnedAchievements.slice(0, 8);
 
@@ -261,8 +284,9 @@ export default function Profile() {
       lastName: profile?.last_name || "",
       displayName: profile?.display_name || "",
       bio: profile?.bio || "",
-      country: profile?.country || "",
-      address: profile?.address || "",
+      region: profile?.region || "",
+      city: profile?.city || "",
+      barangay: profile?.barangay || "",
       age: profile?.age == null ? "" : String(profile.age),
     });
   };
@@ -319,8 +343,9 @@ export default function Profile() {
         lastName: formValues.lastName,
         displayName: formValues.displayName,
         bio: formValues.bio,
-        country: formValues.country,
-        address: formValues.address,
+        region: formValues.region,
+        city: formValues.city,
+        barangay: formValues.barangay,
         age: formValues.age,
         avatarFile,
         removeAvatar,
@@ -329,7 +354,7 @@ export default function Profile() {
       setEditing(false);
       resetEditor();
     } catch (error) {
-      toast.error(error.message || "Couldn't save your profile just yet.");
+      toast.error(error.message || "We couldn't save your profile. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -375,7 +400,7 @@ export default function Profile() {
   };
 
   return (
-    <CustomerDashboardFrame mainClassName="profilePage">
+    <CustomerDashboardFrame mainClassName="profilePage profilePage--details">
       <Reveal>
         <DashboardBreadcrumbs items={[{ label: "Profile" }]} />
       </Reveal>
@@ -426,7 +451,7 @@ export default function Profile() {
             <StatMiniCard
               label="Reviews"
               value={loading ? "—" : metrics.reviewCount}
-              hint={metrics.reviewCount > 0 ? `${averageRating} average` : "No reviews yet"}
+               hint={metrics.reviewCount > 0 ? `${averageRatingLabel} average` : "No reviews yet"}
             />
             <StatMiniCard
               label="Earned"
@@ -445,7 +470,7 @@ export default function Profile() {
             </div>
             <div className="profileNotice__copy">
               <h2 className="profileNotice__title">
-                Some profile features are unavailable right now
+                Some profile details couldn't be loaded
               </h2>
               <p className="profileNotice__desc">{warnings[0]}</p>
             </div>
@@ -512,9 +537,9 @@ export default function Profile() {
                   <span className="profileIdentity__factValue">{realName}</span>
                 </div>
                 <div className="profileIdentity__fact">
-                  <span className="profileIdentity__factLabel">Address / area</span>
+                  <span className="profileIdentity__factLabel">Location</span>
                   <span className="profileIdentity__factValue">
-                    {locationLabel || "No broad location added yet"}
+                    {locationLabel || "No location added yet"}
                   </span>
                 </div>
                 <div className="profileIdentity__fact">
@@ -601,7 +626,7 @@ export default function Profile() {
                     placeholder="Your first name"
                   />
                 ) : (
-                  <div className="profileField__value">
+                  <div className="profileField__display">
                     {formValues.firstName || "No first name added yet"}
                   </div>
                 )}
@@ -623,7 +648,7 @@ export default function Profile() {
                     placeholder="Your last name"
                   />
                 ) : (
-                  <div className="profileField__value">
+                  <div className="profileField__display">
                     {formValues.lastName || "No last name added yet"}
                   </div>
                 )}
@@ -645,52 +670,82 @@ export default function Profile() {
                     placeholder="How you want creators to know you"
                   />
                 ) : (
-                  <div className="profileField__value">
+                  <div className="profileField__display">
                     {formValues.displayName || "No display name yet"}
                   </div>
                 )}
               </label>
 
               <label className="profileField">
-                <span className="profileField__label">Address / area</span>
+                <span className="profileField__label">Region</span>
                 {editing ? (
-                  <input
-                    className="profileField__control"
-                    type="text"
-                    value={formValues.address}
-                    onChange={(event) =>
+                  <SearchableCombobox
+                    value={formValues.region}
+                    onSelect={(nextValue) =>
                       setFormValues((prev) => ({
                         ...prev,
-                        address: event.target.value,
+                        region: nextValue,
+                        city: "",
+                        barangay: "",
                       }))
                     }
-                    placeholder="City, barangay, district, or general area"
+                    options={PH_REGION_OPTIONS}
+                    placeholder="Choose your region"
+                    ariaLabel="Choose your region"
                   />
                 ) : (
-                  <div className="profileField__value">
-                    {formValues.address || "No broad location added yet"}
+                  <div className="profileField__display">
+                    {formValues.region || "No region added yet"}
                   </div>
                 )}
               </label>
 
               <label className="profileField">
-                <span className="profileField__label">Country</span>
+                <span className="profileField__label">City</span>
                 {editing ? (
-                  <input
-                    className="profileField__control"
-                    type="text"
-                    value={formValues.country}
-                    onChange={(event) =>
+                  <SearchableCombobox
+                    value={formValues.city}
+                    onSelect={(nextValue) =>
                       setFormValues((prev) => ({
                         ...prev,
-                        country: event.target.value,
+                        city: nextValue,
+                        barangay: "",
                       }))
                     }
-                    placeholder="Philippines"
+                    options={cityOptions}
+                    placeholder={formValues.region ? "Choose your city" : "Choose a region first"}
+                    ariaLabel="Choose your city"
+                    disabled={!formValues.region}
                   />
                 ) : (
-                  <div className="profileField__value">
-                    {formValues.country || "No country added yet"}
+                  <div className="profileField__display">
+                    {formValues.city || "No city added yet"}
+                  </div>
+                )}
+              </label>
+
+              <label className="profileField">
+                <span className="profileField__label">Barangay / area</span>
+                {editing ? (
+                  <SearchableCombobox
+                    value={formValues.barangay}
+                    onSelect={(nextValue) =>
+                      setFormValues((prev) => ({
+                        ...prev,
+                        barangay: nextValue,
+                      }))
+                    }
+                    options={barangayOptions}
+                    placeholder={formValues.city ? "Choose your barangay or type your area" : "Choose a city first"}
+                    ariaLabel="Choose your barangay or area"
+                    disabled={!formValues.city}
+                    allowCustomValue
+                    customValueLabel="Use"
+                    noResultsText="No barangays found. Type your area and press Enter."
+                  />
+                ) : (
+                  <div className="profileField__display">
+                    {formValues.barangay || "No barangay or area added yet"}
                   </div>
                 )}
               </label>
@@ -713,7 +768,7 @@ export default function Profile() {
                     placeholder="Your age"
                   />
                 ) : (
-                  <div className="profileField__value">
+                  <div className="profileField__display">
                     {formValues.age || "No age added yet"}
                   </div>
                 )}
@@ -734,7 +789,7 @@ export default function Profile() {
                     placeholder="Tell creators the kind of customer you are, how you like to collaborate, or what you usually need."
                   />
                 ) : (
-                  <div className="profileField__value profileField__value--textarea">
+                  <div className="profileField__display profileField__display--textarea">
                     {formValues.bio ||
                       "No bio yet. A short note here helps creators understand your tone and expectations before they reply."}
                   </div>
@@ -838,7 +893,7 @@ export default function Profile() {
             </div>
             {metrics.reviewCount > 0 && (
               <div className="profileReviewSummary">
-                <span className="profileReviewSummary__score">{averageRating}</span>
+                <span className="profileReviewSummary__score">{averageRatingLabel}</span>
                 <span className="profileReviewSummary__meta">
                   from {metrics.reviewCount} review{metrics.reviewCount === 1 ? "" : "s"}
                 </span>
@@ -947,7 +1002,7 @@ export default function Profile() {
 
           {!capabilities.canPersistShowcase && (
             <p className="profileSection__footnote">
-              Badge showcase changes are unavailable right now.
+              Badge showcase changes are unavailable at the moment.
             </p>
           )}
         </section>

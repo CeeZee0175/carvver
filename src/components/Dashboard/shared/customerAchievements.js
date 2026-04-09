@@ -17,6 +17,7 @@ import {
   Star,
   Users,
 } from "lucide-react";
+import { buildPhilippinesLocationLabel } from "../../../lib/phLocations";
 
 export const SHOWCASE_SLOT_LIMIT = 6;
 
@@ -234,12 +235,16 @@ export function buildCustomerAchievementMetrics({
 }) {
   const displayName = String(profile?.display_name || "").trim();
   const bio = String(profile?.bio || "").trim();
+  const region = String(profile?.region || "").trim();
+  const city = String(profile?.city || "").trim();
+  const barangay = String(profile?.barangay || "").trim();
   const country = String(profile?.country || "").trim();
   const address = String(profile?.address || "").trim();
   const avatarUrl = String(profile?.avatar_url || "").trim();
   const createdAt = profile?.created_at ? new Date(profile.created_at) : null;
   const now = Date.now();
-  const locationSignal = address || country;
+  const locationSignal =
+    buildPhilippinesLocationLabel({ region, city, barangay }) || address || country;
 
   const profileSignals = [displayName, avatarUrl, bio, locationSignal].filter(Boolean).length;
   const ageDays =
@@ -251,8 +256,9 @@ export function buildCustomerAchievementMetrics({
     hasDisplayName: Boolean(displayName),
     hasAvatar: Boolean(avatarUrl),
     hasBio: Boolean(bio),
+    hasLocation: Boolean(locationSignal),
     hasCountry: Boolean(locationSignal),
-    hasAddress: Boolean(address),
+    hasAddress: Boolean(barangay || address),
     profileSignalCount: profileSignals,
     mfaEnabled,
     showcasedBadgeCount: showcaseIds.filter(Boolean).length,

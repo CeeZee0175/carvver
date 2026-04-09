@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { createClient } from "../../../lib/supabase/client";
 import { getProfile } from "../../../lib/supabase/auth";
+import { buildPhilippinesLocationLabel } from "../../../lib/phLocations";
 
 const supabase = createClient();
 
@@ -57,6 +58,14 @@ export function formatNotificationTime(date) {
 function buildNotifications({ profile, savedCount, pendingOrders, recentServices }) {
   const now = Date.now();
   const firstName = profile?.first_name || "there";
+  const locationLabel =
+    buildPhilippinesLocationLabel({
+      region: String(profile?.region || "").trim(),
+      city: String(profile?.city || "").trim(),
+      barangay: String(profile?.barangay || "").trim(),
+    }) ||
+    String(profile?.address || "").trim() ||
+    String(profile?.country || "").trim();
   const notifications = [
     {
       id: "welcome",
@@ -126,7 +135,7 @@ function buildNotifications({ profile, savedCount, pendingOrders, recentServices
     });
   }
 
-  if (!profile?.bio || !profile?.country) {
+  if (!profile?.bio || !locationLabel) {
     notifications.push({
       id: "profile-reminder",
       group: "system",

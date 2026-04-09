@@ -18,6 +18,8 @@
   top: 0;
   z-index: 50;
   width: 100%;
+  isolation: isolate;
+  overflow: visible;
 }
 
 .navEnter{

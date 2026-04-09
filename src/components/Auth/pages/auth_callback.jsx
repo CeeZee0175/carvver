@@ -11,8 +11,11 @@ import {
 import {
   CUSTOMER_WELCOME_PATH,
   DEFAULT_CUSTOMER_DESTINATION,
+  FREELANCER_WELCOME_PATH,
   isCustomerOnboardingComplete,
+  isFreelancerOnboardingComplete,
   setCustomerWelcomeDestination,
+  setFreelancerWelcomeDestination,
 } from "../../../lib/customerOnboarding";
 import {
   buildCategoryPath,
@@ -27,10 +30,10 @@ function getFriendlyErrorMessage(error) {
   const message = String(error?.message || "");
 
   if (/row-level security|permission denied|violates row-level security/i.test(message)) {
-    return "Authentication finished, but we could not finish setting up your account just yet.";
+    return "Authentication finished, but we couldn't finish setting up your account.";
   }
 
-  return message || "We couldn't finish authentication. Please try again.";
+  return message || "We couldn't finish signing you in. Please try again.";
 }
 
 export default function AuthCallback() {
@@ -82,6 +85,15 @@ export default function AuthCallback() {
         if (profile?.role === "customer" && !isCustomerOnboardingComplete(profile)) {
           setCustomerWelcomeDestination(customerDestination);
           navigate(CUSTOMER_WELCOME_PATH, { replace: true });
+          return;
+        }
+
+        if (
+          profile?.role === "freelancer" &&
+          !isFreelancerOnboardingComplete(profile)
+        ) {
+          setFreelancerWelcomeDestination("/dashboard/freelancer");
+          navigate(FREELANCER_WELCOME_PATH, { replace: true });
           return;
         }
 

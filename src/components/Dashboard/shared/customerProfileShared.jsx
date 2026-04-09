@@ -157,12 +157,15 @@ export function EmptySurface({
   className = "",
   actionButtonClassName = "",
   actionMotion = null,
+  hideIcon = false,
 }) {
   return (
-    <div className={cn("profileEmpty", className)}>
-      <div className="profileEmpty__iconWrap" aria-hidden="true">
-        <Icon className="profileEmpty__icon" />
-      </div>
+    <div className={cn("profileEmpty", hideIcon && "profileEmpty--iconless", className)}>
+      {!hideIcon && Icon ? (
+        <div className="profileEmpty__iconWrap" aria-hidden="true">
+          <Icon className="profileEmpty__icon" />
+        </div>
+      ) : null}
       <h3 className="profileEmpty__title">{title}</h3>
       <p className="profileEmpty__desc">{description}</p>
       {actionLabel && onAction && (

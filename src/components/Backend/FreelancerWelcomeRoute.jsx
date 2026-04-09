@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { createClient } from "../../lib/supabase/client";
 import {
   CUSTOMER_WELCOME_PATH,
-  FREELANCER_WELCOME_PATH,
+  DEFAULT_CUSTOMER_DESTINATION,
+  DEFAULT_FREELANCER_DESTINATION,
   isCustomerOnboardingComplete,
   isFreelancerOnboardingComplete,
   resolveProfileRole,
-  setCustomerWelcomeDestination,
-  setFreelancerWelcomeDestination,
 } from "../../lib/customerOnboarding";
 
 const supabase = createClient();
@@ -24,8 +23,7 @@ async function fetchProfile(userId) {
   return data;
 }
 
-export default function CustomerRoute({ children }) {
-  const location = useLocation();
+export default function FreelancerWelcomeRoute({ children }) {
   const [state, setState] = useState({
     loading: true,
     redirectTo: "",
@@ -38,10 +36,7 @@ export default function CustomerRoute({ children }) {
       if (!active) return;
 
       if (!session?.user) {
-        setState({
-          loading: false,
-          redirectTo: "/sign-in",
-        });
+        setState({ loading: false, redirectTo: "/sign-in" });
         return;
       }
 
@@ -57,34 +52,20 @@ export default function CustomerRoute({ children }) {
 
       const role = resolveProfileRole(profile, session);
 
-      if (role === "freelancer") {
-        if (!isFreelancerOnboardingComplete(profile)) {
-          setFreelancerWelcomeDestination(
-            `${location.pathname}${location.search}${location.hash}`
-          );
-
-          setState({
-            loading: false,
-            redirectTo: FREELANCER_WELCOME_PATH,
-          });
-          return;
-        }
-
+      if (role !== "freelancer") {
         setState({
           loading: false,
-          redirectTo: "/dashboard/freelancer",
+          redirectTo: isCustomerOnboardingComplete(profile)
+            ? DEFAULT_CUSTOMER_DESTINATION
+            : CUSTOMER_WELCOME_PATH,
         });
         return;
       }
 
-      if (!isCustomerOnboardingComplete(profile)) {
-        setCustomerWelcomeDestination(
-          `${location.pathname}${location.search}${location.hash}`
-        );
-
+      if (isFreelancerOnboardingComplete(profile)) {
         setState({
           loading: false,
-          redirectTo: CUSTOMER_WELCOME_PATH,
+          redirectTo: DEFAULT_FREELANCER_DESTINATION,
         });
         return;
       }
@@ -109,7 +90,7 @@ export default function CustomerRoute({ children }) {
       active = false;
       subscription.unsubscribe();
     };
-  }, [location.hash, location.pathname, location.search]);
+  }, []);
 
   if (state.loading) return null;
   if (state.redirectTo) return <Navigate to={state.redirectTo} replace />;

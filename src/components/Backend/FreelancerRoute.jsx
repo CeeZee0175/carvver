@@ -3,11 +3,11 @@ import { Navigate, useLocation } from "react-router-dom";
 import { createClient } from "../../lib/supabase/client";
 import {
   CUSTOMER_WELCOME_PATH,
+  DEFAULT_CUSTOMER_DESTINATION,
   FREELANCER_WELCOME_PATH,
   isCustomerOnboardingComplete,
   isFreelancerOnboardingComplete,
   resolveProfileRole,
-  setCustomerWelcomeDestination,
   setFreelancerWelcomeDestination,
 } from "../../lib/customerOnboarding";
 
@@ -24,7 +24,7 @@ async function fetchProfile(userId) {
   return data;
 }
 
-export default function CustomerRoute({ children }) {
+export default function FreelancerRoute({ children }) {
   const location = useLocation();
   const [state, setState] = useState({
     loading: true,
@@ -38,10 +38,7 @@ export default function CustomerRoute({ children }) {
       if (!active) return;
 
       if (!session?.user) {
-        setState({
-          loading: false,
-          redirectTo: "/sign-in",
-        });
+        setState({ loading: false, redirectTo: "/sign-in" });
         return;
       }
 
@@ -57,34 +54,24 @@ export default function CustomerRoute({ children }) {
 
       const role = resolveProfileRole(profile, session);
 
-      if (role === "freelancer") {
-        if (!isFreelancerOnboardingComplete(profile)) {
-          setFreelancerWelcomeDestination(
-            `${location.pathname}${location.search}${location.hash}`
-          );
-
-          setState({
-            loading: false,
-            redirectTo: FREELANCER_WELCOME_PATH,
-          });
-          return;
-        }
-
+      if (role !== "freelancer") {
         setState({
           loading: false,
-          redirectTo: "/dashboard/freelancer",
+          redirectTo: isCustomerOnboardingComplete(profile)
+            ? DEFAULT_CUSTOMER_DESTINATION
+            : CUSTOMER_WELCOME_PATH,
         });
         return;
       }
 
-      if (!isCustomerOnboardingComplete(profile)) {
-        setCustomerWelcomeDestination(
+      if (!isFreelancerOnboardingComplete(profile)) {
+        setFreelancerWelcomeDestination(
           `${location.pathname}${location.search}${location.hash}`
         );
 
         setState({
           loading: false,
-          redirectTo: CUSTOMER_WELCOME_PATH,
+          redirectTo: FREELANCER_WELCOME_PATH,
         });
         return;
       }

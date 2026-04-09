@@ -158,6 +158,31 @@ body {
   min-height: 100vh;
 }
 
+.brandPageShell {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.brandPageShell > .dashbarShell,
+.brandPageShell > .navShell {
+  position: sticky;
+  top: 0;
+  z-index: 70;
+}
+
+.brandPageShell__barPlaceholder {
+  min-height: 74px;
+  width: 100%;
+}
+
+.brandPageShell__content {
+  position: relative;
+  z-index: 1;
+}
+
 body {
   overflow-x: hidden;
 }

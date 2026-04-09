@@ -1,7 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "../../../lib/supabase/client";
+import { ALL_SERVICE_CATEGORIES } from "../../../lib/serviceCategories";
 
 const supabase = createClient();
+export const REQUEST_MEDIA_BUCKET = "customer-request-media";
+export const REQUEST_MEDIA_ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
+export const REQUEST_MEDIA_ACCEPTED_VIDEO_TYPES = [
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+];
+export const REQUEST_MEDIA_MAX_IMAGES = 8;
+export const REQUEST_MEDIA_MAX_VIDEOS = 1;
+export const REQUEST_MEDIA_MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+export const REQUEST_MEDIA_MAX_VIDEO_BYTES = 40 * 1024 * 1024;
 
 const REQUEST_COLUMNS = `
   id,
@@ -17,16 +33,7 @@ const REQUEST_COLUMNS = `
   updated_at
 `;
 
-export const REQUEST_CATEGORY_OPTIONS = [
-  "Art & Illustration",
-  "Photography",
-  "Video Editing",
-  "Graphic Design",
-  "Voice Over",
-  "Social Media",
-  "Tutoring",
-  "Handmade Products",
-];
+export const REQUEST_CATEGORY_OPTIONS = ALL_SERVICE_CATEGORIES;
 
 export const REQUEST_TIMELINE_OPTIONS = [
   "ASAP",
@@ -39,11 +46,11 @@ function getCustomerRequestErrorMessage(error, fallback) {
   const message = String(error?.message || "");
 
   if (/customer_requests/i.test(message) || error?.code === "42P01") {
-    return "Customer requests are unavailable right now.";
+    return "We couldn't load your requests. Please try again.";
   }
 
   if (/row-level security|permission denied/i.test(message) || error?.code === "42501") {
-    return "This request action is unavailable right now.";
+    return "That request action isn't available at the moment.";
   }
 
   return fallback;
@@ -55,6 +62,63 @@ function normalizeBudgetAmount(value) {
   return Number.isFinite(numeric) ? numeric : null;
 }
 
+function sanitizeRequestMediaName(name) {
+  return String(name || "attachment")
+    .toLowerCase()
+    .replace(/[^a-z0-9.-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function getRequestMediaKind(file) {
+  return String(file?.type || "").startsWith("video/") ? "video" : "image";
+}
+
+async function uploadRequestAttachments({ userId, requestId, attachments }) {
+  const uploadedPaths = [];
+
+  try {
+    for (let index = 0; index < attachments.length; index += 1) {
+      const file = attachments[index];
+      const safeName = sanitizeRequestMediaName(file.name);
+      const bucketPath = `${userId}/${requestId}/${index + 1}-${Date.now()}-${safeName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from(REQUEST_MEDIA_BUCKET)
+        .upload(bucketPath, file, {
+          upsert: false,
+          cacheControl: "3600",
+        });
+
+      if (uploadError) throw uploadError;
+      uploadedPaths.push(bucketPath);
+    }
+
+    const rows = attachments.map((file, index) => ({
+      request_id: requestId,
+      customer_id: userId,
+      bucket_path: uploadedPaths[index],
+      media_kind: getRequestMediaKind(file),
+      mime_type: String(file.type || "").trim() || "application/octet-stream",
+      original_name: String(file.name || "").trim() || `attachment-${index + 1}`,
+      sort_order: index + 1,
+    }));
+
+    if (rows.length > 0) {
+      const { error: insertError } = await supabase
+        .from("customer_request_media")
+        .insert(rows);
+
+      if (insertError) throw insertError;
+    }
+  } catch (error) {
+    if (uploadedPaths.length > 0) {
+      await supabase.storage.from(REQUEST_MEDIA_BUCKET).remove(uploadedPaths);
+    }
+    throw error;
+  }
+}
+
 export async function createCustomerRequest({
   title,
   category,
@@ -62,6 +126,7 @@ export async function createCustomerRequest({
   budgetAmount,
   location,
   timeline,
+  attachments = [],
 }) {
   const {
     data: { session },
@@ -92,12 +157,29 @@ export async function createCustomerRequest({
     throw new Error(
       getCustomerRequestErrorMessage(
         error,
-        "We couldn't post your request just yet. Please try again."
+        "We couldn't post your request. Please try again."
       )
     );
   }
 
-  return data;
+  try {
+    if (attachments.length > 0) {
+      await uploadRequestAttachments({
+        userId: session.user.id,
+        requestId: data.id,
+        attachments,
+      });
+    }
+    return data;
+  } catch (error) {
+    await supabase.from("customer_requests").delete().eq("id", data.id);
+    throw new Error(
+      getCustomerRequestErrorMessage(
+        error,
+        "We couldn't save your attachments. Please try again."
+      )
+    );
+  }
 }
 
 export function useCustomerRequests({ limit = 4 } = {}) {
@@ -151,7 +233,7 @@ export function useCustomerRequests({ limit = 4 } = {}) {
       setError(
         getCustomerRequestErrorMessage(
           nextError,
-          "We couldn't load your requests right now."
+          "We couldn't load your requests."
         )
       );
     } finally {

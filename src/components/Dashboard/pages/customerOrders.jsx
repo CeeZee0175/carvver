@@ -37,10 +37,6 @@ const STATUS_META = {
   disputed: { label: "Disputed", tone: "rose" },
 };
 
-function formatPeso(value) {
-  return `₱${Number(value || 0).toLocaleString()}`;
-}
-
 function formatOrderDate(value) {
   if (!value) return "";
   const date = new Date(value);
@@ -50,6 +46,10 @@ function formatOrderDate(value) {
     day: "numeric",
     year: "numeric",
   }).format(date);
+}
+
+function formatOrderPrice(value) {
+  return `PHP ${Number(value || 0).toLocaleString()}`;
 }
 
 export default function CustomerOrders() {
@@ -135,7 +135,7 @@ export default function CustomerOrders() {
             <div className="profileMiniStat">
               <span className="profileMiniStat__label">Bookmarked Items</span>
               <strong className="profileMiniStat__value">{savedCount}</strong>
-              <span className="profileMiniStat__hint">Saved listings to revisit later</span>
+              <span className="profileMiniStat__hint">Saved listings to revisit</span>
             </div>
           </div>
         </section>
@@ -148,7 +148,7 @@ export default function CustomerOrders() {
               <ShieldCheck className="profileNotice__icon" />
             </div>
             <div className="profileNotice__copy">
-              <h2 className="profileNotice__title">Orders could not load cleanly</h2>
+              <h2 className="profileNotice__title">We couldn't load your orders</h2>
               <p className="profileNotice__desc">{error}</p>
             </div>
           </section>
@@ -244,7 +244,7 @@ export default function CustomerOrders() {
                         </h3>
                       </div>
                       <strong className="profileOrderCard__price">
-                        {formatPeso(order.total_price)}
+                        {formatOrderPrice(order.total_price)}
                       </strong>
                     </div>
 

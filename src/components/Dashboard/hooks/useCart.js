@@ -29,19 +29,19 @@ function friendlyCartMessage(error, fallback) {
   const message = String(error?.message || "");
 
   if (/cart_items/i.test(message)) {
-    return "Your cart is unavailable right now.";
+    return "We couldn't load your cart. Please try again.";
   }
 
   if (/customer_checkout_sessions|customer_checkout_items/i.test(message)) {
-    return "Checkout is unavailable right now.";
+    return "Checkout is unavailable. Please try again.";
   }
 
   if (/FunctionsHttpError|function/i.test(message) && /paymongo/i.test(message)) {
-    return "PayMongo checkout is unavailable right now.";
+    return "Payment is unavailable at the moment.";
   }
 
   if (/row-level security|permission denied/i.test(message)) {
-    return "This cart action is unavailable right now.";
+    return "That cart action isn't available at the moment.";
   }
 
   return fallback;
@@ -132,7 +132,7 @@ export function useCart() {
 
       setItems([]);
       setError(
-        friendlyCartMessage(nextError, "Couldn't load your cart yet.")
+        friendlyCartMessage(nextError, "We couldn't load your cart.")
       );
     } finally {
       if (requestIdRef.current === requestId) {
@@ -153,7 +153,7 @@ export function useCart() {
     } catch (nextError) {
       setItems([]);
       setError(
-        friendlyCartMessage(nextError, "Couldn't load your cart yet.")
+        friendlyCartMessage(nextError, "We couldn't load your cart.")
       );
       setLoading(false);
     }
@@ -325,14 +325,14 @@ export function useCart() {
       }
 
       if (!data?.checkoutUrl) {
-        throw new Error("PayMongo didn't return a checkout URL.");
+        throw new Error("We couldn't open checkout.");
       }
 
       window.location.assign(data.checkoutUrl);
       return data;
     } catch (nextError) {
       throw new Error(
-        friendlyCartMessage(nextError, "Couldn't start checkout right now.")
+        friendlyCartMessage(nextError, "We couldn't start checkout. Please try again.")
       );
     } finally {
       setCheckoutLoading(false);

@@ -37,7 +37,7 @@ const heroSignals = [
   {
     label: "Where Pro helps most",
     value: "Growth for freelancers",
-    note: "Featured visibility, few-click posting, and profile upgrades reflect the wider Carvver direction.",
+    note: "Featured visibility, few-click posting, and profile upgrades are part of the Carvver Pro plan.",
   },
 ];
 
@@ -48,7 +48,7 @@ const freeFeatures = [
   { label: "Save listings and build a cart", audience: "Customers", Icon: ShieldCheck },
   { label: "Orders, notifications, and customer profile tools", audience: "Customers", Icon: BadgeCheck },
   { label: "Achievements and badge display", audience: "Customers", Icon: Sparkles },
-  { label: "Public trust direction around verified and pro signals", audience: "Both", Icon: ShieldCheck },
+  { label: "Verified and Pro signals across the platform", audience: "Both", Icon: ShieldCheck },
 ];
 
 const proFeatures = [
@@ -56,13 +56,13 @@ const proFeatures = [
     label: "Service listing advertisement or featured placement",
     audience: "Freelancers",
     Icon: Megaphone,
-    note: "For stronger visibility once more freelancer-side tools are rolled out.",
+    note: "For stronger visibility inside Carvver Pro.",
   },
   {
     label: "Few-click posting to social platforms",
     audience: "Freelancers",
     Icon: Share2,
-    note: "Based on the concept paper direction for easier promotion.",
+    note: "Included in the Carvver Pro plan for easier promotion.",
   },
   {
     label: "More theme customization",
@@ -74,7 +74,7 @@ const proFeatures = [
     label: "No commission fee",
     audience: "Freelancers",
     Icon: Crown,
-    note: "Presented here as a Carvver Pro value direction, not enforced billing logic yet.",
+    note: "Included in the Carvver Pro plan.",
   },
   {
     label: "Advanced location-based discovery tools",
@@ -83,10 +83,10 @@ const proFeatures = [
     note: "A stronger local-search layer for finding nearby work and providers.",
   },
   {
-    label: "Ad-free experience if ads roll out later",
+    label: "Ad-free experience if ad placements are added",
     audience: "Both",
     Icon: ShieldCheck,
-    note: "Reserved as a cleaner premium experience if ad placements are added later on.",
+    note: "A cleaner premium experience if ad placements are added.",
   },
   {
     label: "Stronger profile presentation and personalization",
@@ -115,13 +115,13 @@ const comparisonRows = [
     feature: "Featured listing promotion",
     audience: "Freelancers",
     free: "Not part of Free",
-    pro: "Carvver Pro direction",
+    pro: "Planned for Carvver Pro",
   },
   {
     feature: "Few-click posting to social platforms",
     audience: "Freelancers",
     free: "Not part of Free",
-    pro: "Carvver Pro direction",
+    pro: "Planned for Carvver Pro",
   },
   {
     feature: "Theme and profile customization",
@@ -133,13 +133,13 @@ const comparisonRows = [
     feature: "Advanced location-based discovery",
     audience: "Customers",
     free: "Core discovery first",
-    pro: "Carvver Pro direction",
+    pro: "Planned for Carvver Pro",
   },
   {
     feature: "Commission-free freelancer tier",
     audience: "Freelancers",
     free: "Standard platform rules",
-    pro: "Carvver Pro direction",
+    pro: "Planned for Carvver Pro",
   },
 ];
 
@@ -150,14 +150,14 @@ const rolloutNotes = [
       "The current build is already strongest on customer-side browsing, saved listings, cart flow, orders, notifications, and profile progress.",
   },
   {
-    title: "What Carvver Pro is pointing to",
+    title: "What Carvver Pro includes",
     text:
-      "Some freelancer-heavy Pro tools come from the wider concept paper direction, so they are shown here as the intended premium layer rather than a fully shipped membership system.",
+      "Some freelancer-heavy tools are part of the Carvver Pro plan, so this page shows them clearly while the full membership experience is still being rolled out.",
   },
   {
-    title: "What this page is doing right now",
+    title: "How this page works",
     text:
-      "This page explains the plan clearly and lets people join the Carvver Pro waitlist. It does not switch billing rules or unlock subscriptions yet.",
+      "You can compare the plans here and join the Carvver Pro waitlist for updates.",
   },
 ];
 
@@ -166,12 +166,12 @@ function isValidEmail(email) {
 }
 
 function getWaitlistErrorMessage(error) {
-  if (!error) return "We couldn't save your email yet. Please try again.";
-  if (error.code === "42P01") return "The signup table is missing right now. Please set up Supabase first.";
+  if (!error) return "We couldn't save your email. Please try again.";
+  if (error.code === "42P01") return "We couldn't save your email. Please try again in a moment.";
   if (error.code === "42501") {
-    return "The signup is blocked by Supabase permissions. Please check the insert policy.";
+    return "We couldn't save your email. Please try again in a moment.";
   }
-  return "We couldn't save your email yet. Please try again.";
+  return "We couldn't save your email. Please try again.";
 }
 
 function Reveal({ children, className = "", delay = 0, amount = 0.24 }) {
@@ -377,14 +377,14 @@ export default function PricingPage() {
                   </div>
 
                   <p className="pricingHero__sub">
-                    Carvver follows a freemium setup. The free tier already lets people use the core parts
+                    Carvver follows a freemium plan. The free tier already lets people use the core parts
                     of the platform, while Carvver Pro is where we place extra visibility, customization,
                     and convenience tools.
                   </p>
                   <p className="pricingHero__support">
-                    Since the current build is stronger on customer-side flows, the page keeps that honest.
-                    Free shows what people can already use now, while some freelancer-side Pro perks show
-                    where the platform is heading next.
+                    Since the current build is stronger on customer-side flows, this page keeps that
+                    honest. Free shows what people can already use today, while some freelancer-side
+                    Pro perks are part of the Carvver Pro plan.
                   </p>
 
                   <div className="pricingHero__actions">
@@ -563,8 +563,8 @@ export default function PricingPage() {
             <Reveal delay={0.04}>
               <div className="pricingCompare">
                 <div className="pricingCompare__note">
-                  The current build is already stronger on customer flows. Some Pro items below reflect
-                  the broader Carvver direction from the concept paper, especially for freelancer growth.
+                  The current build is already stronger on customer flows. Some Pro items below are
+                  part of the Carvver Pro plan, especially for freelancer growth.
                 </div>
 
                 <div className="pricingCompare__header">

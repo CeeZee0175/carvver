@@ -1,20 +1,18 @@
-import React, { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import {
-  ArrowRight,
-  Clock3,
-  Coins,
-  LoaderCircle,
-  MapPin,
-  Send,
-  Sparkles,
-} from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import "./profile.css";
 import "./post_request.css";
 import {
   createCustomerRequest,
   REQUEST_CATEGORY_OPTIONS,
+  REQUEST_MEDIA_ACCEPTED_IMAGE_TYPES,
+  REQUEST_MEDIA_ACCEPTED_VIDEO_TYPES,
+  REQUEST_MEDIA_MAX_IMAGES,
+  REQUEST_MEDIA_MAX_IMAGE_BYTES,
+  REQUEST_MEDIA_MAX_VIDEO_BYTES,
+  REQUEST_MEDIA_MAX_VIDEOS,
   REQUEST_TIMELINE_OPTIONS,
   useCustomerRequests,
 } from "../hooks/useCustomerRequests";
@@ -26,14 +24,6 @@ import {
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 
-function formatPeso(value) {
-  if (value === "" || value == null) return "Set your budget";
-  const numeric = Number(value);
-  return Number.isFinite(numeric)
-    ? `PHP ${numeric.toLocaleString()}`
-    : "Set your budget";
-}
-
 const INITIAL_FORM = {
   title: "",
   category: "",
@@ -43,33 +33,111 @@ const INITIAL_FORM = {
   timeline: "Flexible",
 };
 
+function buildAttachmentErrorMessage(file) {
+  const isVideo = String(file?.type || "").startsWith("video/");
+  const tooLarge = file.size > (isVideo ? REQUEST_MEDIA_MAX_VIDEO_BYTES : REQUEST_MEDIA_MAX_IMAGE_BYTES);
+  if (tooLarge) {
+    return isVideo
+      ? "Videos must be 40 MB or smaller."
+      : "Images must be 8 MB or smaller.";
+  }
+  return "Only JPG, PNG, WEBP, MP4, WEBM, and MOV files are supported.";
+}
+
 export default function PostRequest() {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+  const attachmentsRef = useRef([]);
   const { openCount } = useCustomerRequests({ limit: 2 });
-
   const [formValues, setFormValues] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [attachments, setAttachments] = useState([]);
 
-  const previewTitle = formValues.title.trim() || "Your request title";
-  const previewCategory = formValues.category || "Choose a category";
-  const previewDescription =
-    formValues.description.trim() ||
-    "Write a short but clear brief so freelancers understand what you need.";
-  const previewLocation = formValues.location.trim() || "Add a location if it helps";
+  useEffect(() => {
+    attachmentsRef.current = attachments;
+  }, [attachments]);
 
-  const tips = useMemo(
-    () => [
-      "Be specific about the outcome you want, not just the service name.",
-      "Add a budget if you want freelancers to judge fit faster.",
-      "Use location when the request depends on where you are based.",
-    ],
+  useEffect(
+    () => () => {
+      attachmentsRef.current.forEach((item) => {
+        if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      });
+    },
     []
   );
+
+  const attachmentStats = useMemo(() => {
+    const images = attachments.filter((item) => item.kind === "image").length;
+    const videos = attachments.filter((item) => item.kind === "video").length;
+    return { images, videos };
+  }, [attachments]);
 
   const updateField = (field, value) => {
     setFormValues((prev) => ({ ...prev, [field]: value }));
     if (error) setError("");
+  };
+
+  const removeAttachment = (id) => {
+    setAttachments((prev) => {
+      const target = prev.find((item) => item.id === id);
+      if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
+      return prev.filter((item) => item.id !== id);
+    });
+  };
+
+  const handleFilesPicked = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+
+    const nextItems = [];
+    let nextImages = attachmentStats.images;
+    let nextVideos = attachmentStats.videos;
+
+    for (const file of files) {
+      const isImage = REQUEST_MEDIA_ACCEPTED_IMAGE_TYPES.includes(file.type);
+      const isVideo = REQUEST_MEDIA_ACCEPTED_VIDEO_TYPES.includes(file.type);
+
+      if (!isImage && !isVideo) {
+        setError(buildAttachmentErrorMessage(file));
+        continue;
+      }
+
+      if (isImage && nextImages >= REQUEST_MEDIA_MAX_IMAGES) {
+        setError("You can upload up to 8 images only.");
+        continue;
+      }
+
+      if (isVideo && nextVideos >= REQUEST_MEDIA_MAX_VIDEOS) {
+        setError("You can upload only 1 video.");
+        continue;
+      }
+
+      if (
+        (isImage && file.size > REQUEST_MEDIA_MAX_IMAGE_BYTES) ||
+        (isVideo && file.size > REQUEST_MEDIA_MAX_VIDEO_BYTES)
+      ) {
+        setError(buildAttachmentErrorMessage(file));
+        continue;
+      }
+
+      nextItems.push({
+        id: `${Date.now()}-${file.name}-${Math.random().toString(36).slice(2, 8)}`,
+        file,
+        kind: isVideo ? "video" : "image",
+        previewUrl: URL.createObjectURL(file),
+      });
+
+      if (isImage) nextImages += 1;
+      if (isVideo) nextVideos += 1;
+    }
+
+    if (nextItems.length > 0) {
+      setAttachments((prev) => [...prev, ...nextItems]);
+      setError("");
+    }
+
+    event.target.value = "";
   };
 
   const handleSubmit = async (event) => {
@@ -82,39 +150,30 @@ export default function PostRequest() {
     const timeline = formValues.timeline.trim();
     const budgetAmount = formValues.budgetAmount;
 
-    if (!title) {
-      setError("Please add a short title for your request.");
-      return;
-    }
-
-    if (!category) {
-      setError("Please choose a category.");
-      return;
-    }
-
-    if (!description) {
-      setError("Please describe what you want clearly.");
-      return;
-    }
-
-    if (!timeline) {
-      setError("Please choose a timeline.");
-      return;
-    }
+    if (!title) return void setError("Please add a short title for your request.");
+    if (!category) return void setError("Please choose a category.");
+    if (!description) return void setError("Please describe what you want clearly.");
+    if (!timeline) return void setError("Please choose a timeline.");
 
     if (budgetAmount !== "") {
       const numericBudget = Number(budgetAmount);
       if (!Number.isFinite(numericBudget) || numericBudget <= 0) {
-        setError("Please enter a valid budget amount.");
-        return;
+        return void setError("Please enter a valid budget amount.");
       }
     }
 
     try {
       setSubmitting(true);
       setError("");
+      const created = await createCustomerRequest({
+        ...formValues,
+        attachments: attachments.map((item) => item.file),
+      });
 
-      const created = await createCustomerRequest(formValues);
+      attachments.forEach((item) => {
+        if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      });
+      setAttachments([]);
 
       navigate("/dashboard/customer", {
         state: {
@@ -123,7 +182,9 @@ export default function PostRequest() {
         },
       });
     } catch (nextError) {
-      setError(String(nextError?.message || "We couldn't post your request yet."));
+      setError(
+        String(nextError?.message || "We couldn't post your request. Please try again.")
+      );
     } finally {
       setSubmitting(false);
     }
@@ -136,269 +197,268 @@ export default function PostRequest() {
       </Reveal>
 
       <Reveal delay={0.04}>
-        <section className="profileHero requestHero">
-          <div className="profileHero__heading">
-            <p className="profileHero__eyebrow">Customer Requests</p>
-            <div className="profileHero__titleWrap">
-              <h1 className="profileHero__title">
+        <section className="requestPage__hero">
+          <div className="requestPage__heroCopy">
+            <p className="requestPage__eyebrow">Customer Requests</p>
+            <div className="requestPage__titleWrap">
+              <h1 className="requestPage__title">
                 <TypewriterHeading text="Post a Request" />
               </h1>
-              <motion.svg
-                className="profileHero__line"
-                viewBox="0 0 300 20"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                <motion.path
-                  d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 1.05, ease: "easeInOut", delay: 0.2 }}
-                />
-              </motion.svg>
             </div>
-            <p className="profileHero__sub">
-              Write a clear brief, share your budget and timeline, and let the right
-              freelancers see what you need later on.
+            <p className="requestPage__sub">
+              Write a clear brief, add optional photos or video if they help,
+              and make it easy for freelancers to understand what you need.
             </p>
           </div>
 
-          <div className="profileHero__stats requestHero__stats">
-            <div className="profileMiniStat">
-              <span className="profileMiniStat__label">Open Requests</span>
-              <strong className="profileMiniStat__value">{openCount}</strong>
-              <span className="profileMiniStat__hint">Active briefs you have already posted</span>
+          <div className="requestPage__stats">
+            <div className="requestPage__stat">
+              <span className="requestPage__statLabel">Open requests</span>
+              <strong className="requestPage__statValue">{openCount}</strong>
             </div>
-            <div className="profileMiniStat">
-              <span className="profileMiniStat__label">Current Timeline</span>
-              <strong className="profileMiniStat__value requestHero__miniValue">
-                {formValues.timeline}
+            <div className="requestPage__stat">
+              <span className="requestPage__statLabel">Attachments</span>
+              <strong className="requestPage__statValue">
+                {attachmentStats.images + attachmentStats.videos}
               </strong>
-              <span className="profileMiniStat__hint">You can adjust this before posting</span>
+              <span className="requestPage__statHint">
+                {attachmentStats.images} image{attachmentStats.images === 1 ? "" : "s"} / {attachmentStats.videos} video
+              </span>
             </div>
           </div>
         </section>
       </Reveal>
 
-      <section className="requestComposer">
-        <Reveal delay={0.08}>
-          <form className="profileSection requestComposer__form" onSubmit={handleSubmit} noValidate>
-            <div className="profileSection__head">
-              <div>
-                <p className="profileSection__eyebrow">Request brief</p>
-                <h2 className="profileSection__title">Tell freelancers what you need</h2>
-              </div>
-              <motion.button
-                type="button"
-                className="profileSection__linkBtn"
-                whileHover={{ x: 1.5 }}
-                whileTap={{ scale: 0.98 }}
-                transition={PROFILE_SPRING}
-                onClick={() => navigate("/dashboard/customer")}
-              >
-                <span>Back to dashboard</span>
-                <ArrowRight className="profileSection__linkIcon" />
-              </motion.button>
-            </div>
-
-            <div className="requestGrid">
-              <label className="requestField requestField--full">
-                <span className="requestField__label">Request title</span>
-                <input
-                  className="requestField__input"
-                  type="text"
-                  maxLength={120}
-                  placeholder="Example: Need a logo for a handmade soap shop"
-                  value={formValues.title}
-                  onChange={(event) => updateField("title", event.target.value)}
-                  disabled={submitting}
-                />
-              </label>
-
-              <label className="requestField">
-                <span className="requestField__label">Category</span>
-                <select
-                  className="requestField__input requestField__select"
-                  value={formValues.category}
-                  onChange={(event) => updateField("category", event.target.value)}
-                  disabled={submitting}
-                >
-                  <option value="">Choose a category</option>
-                  {REQUEST_CATEGORY_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="requestField">
-                <span className="requestField__label">Timeline</span>
-                <select
-                  className="requestField__input requestField__select"
-                  value={formValues.timeline}
-                  onChange={(event) => updateField("timeline", event.target.value)}
-                  disabled={submitting}
-                >
-                  {REQUEST_TIMELINE_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="requestField">
-                <span className="requestField__label">Budget amount</span>
-                <input
-                  className="requestField__input"
-                  type="number"
-                  min="0"
-                  step="1"
-                  placeholder="Optional"
-                  value={formValues.budgetAmount}
-                  onChange={(event) => updateField("budgetAmount", event.target.value)}
-                  disabled={submitting}
-                />
-              </label>
-
-              <label className="requestField">
-                <span className="requestField__label">Location</span>
-                <input
-                  className="requestField__input"
-                  type="text"
-                  placeholder="Optional"
-                  value={formValues.location}
-                  onChange={(event) => updateField("location", event.target.value)}
-                  disabled={submitting}
-                />
-              </label>
-
-              <label className="requestField requestField--full">
-                <span className="requestField__label">Description</span>
-                <textarea
-                  className="requestField__input requestField__textarea"
-                  placeholder="Describe what you need, what style you prefer, and any details a freelancer should know first."
-                  value={formValues.description}
-                  onChange={(event) => updateField("description", event.target.value)}
-                  disabled={submitting}
-                />
-              </label>
-            </div>
-
-            <div className="requestComposer__footer">
-              <p
-                className={`requestComposer__feedback ${
-                  error ? "requestComposer__feedback--error" : ""
-                }`}
-                aria-live="polite"
-              >
-                {error || "Your request will be saved for freelancer-facing features later on."}
+      <Reveal delay={0.08}>
+        <form className="requestComposer" onSubmit={handleSubmit} noValidate>
+          <div className="requestComposer__head">
+            <div>
+              <p className="requestComposer__eyebrow">Request brief</p>
+              <h2 className="requestComposer__title">Tell freelancers what you need</h2>
+              <p className="requestComposer__desc">
+                Keep the details clear and direct so the right freelancer can understand the work quickly.
               </p>
+            </div>
+            <motion.button
+              type="button"
+              className="requestComposer__backLink"
+              whileHover={{ y: -1.5 }}
+              whileTap={{ scale: 0.985 }}
+              transition={PROFILE_SPRING}
+              onClick={() => navigate("/dashboard/customer")}
+            >
+              Back to dashboard
+            </motion.button>
+          </div>
 
-              <motion.button
-                type="submit"
-                className="requestSubmitBtn"
-                whileHover={submitting ? {} : { y: -1.5, scale: 1.01 }}
-                whileTap={submitting ? {} : { scale: 0.985 }}
-                transition={PROFILE_SPRING}
+          <div className="requestGrid">
+            <label className="requestField requestField--full">
+              <span className="requestField__label">Request title</span>
+              <input
+                className="requestField__input"
+                type="text"
+                maxLength={120}
+                placeholder="Example: Need a logo for a handmade soap shop"
+                value={formValues.title}
+                onChange={(event) => updateField("title", event.target.value)}
+                disabled={submitting}
+              />
+            </label>
+
+            <label className="requestField">
+              <span className="requestField__label">Category</span>
+              <select
+                className="requestField__input requestField__select"
+                value={formValues.category}
+                onChange={(event) => updateField("category", event.target.value)}
                 disabled={submitting}
               >
-                <span className="requestSubmitBtn__copy">
-                  <span className="requestSubmitBtn__eyebrow">Customer request</span>
-                  <span className="requestSubmitBtn__title">
-                    {submitting ? "Posting..." : "Post this request"}
-                  </span>
-                </span>
-
-                <span className="requestSubmitBtn__iconWrap" aria-hidden="true">
-                  {submitting ? (
-                    <LoaderCircle className="requestSubmitBtn__icon requestSubmitBtn__icon--spin" />
-                  ) : (
-                    <Send className="requestSubmitBtn__icon" />
-                  )}
-                </span>
-              </motion.button>
-            </div>
-          </form>
-        </Reveal>
-
-        <Reveal delay={0.12}>
-          <div className="requestComposer__side">
-            <section className="profileSection requestPreview">
-              <div className="profileSection__head">
-                <div>
-                  <p className="profileSection__eyebrow">Live preview</p>
-                  <h2 className="profileSection__title">How your brief reads</h2>
-                </div>
-              </div>
-
-              <motion.article
-                className="requestPreviewCard"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <div className="requestPreviewCard__meta">
-                  <span className="requestPreviewCard__chip">{previewCategory}</span>
-                  <span className="requestPreviewCard__chip requestPreviewCard__chip--soft">
-                    {formValues.timeline}
-                  </span>
-                </div>
-
-                <h3 className="requestPreviewCard__title">{previewTitle}</h3>
-                <p className="requestPreviewCard__desc">{previewDescription}</p>
-
-                <div className="requestPreviewCard__signals">
-                  <span className="requestPreviewCard__signal">
-                    <Coins className="requestPreviewCard__signalIcon" />
-                    {formatPeso(formValues.budgetAmount)}
-                  </span>
-                  <span className="requestPreviewCard__signal">
-                    <MapPin className="requestPreviewCard__signalIcon" />
-                    {previewLocation}
-                  </span>
-                  <span className="requestPreviewCard__signal">
-                    <Clock3 className="requestPreviewCard__signalIcon" />
-                    {formValues.timeline}
-                  </span>
-                </div>
-              </motion.article>
-            </section>
-
-            <section className="profileSection requestTips">
-              <div className="profileSection__head">
-                <div>
-                  <p className="profileSection__eyebrow">Helpful notes</p>
-                  <h2 className="profileSection__title">A stronger brief gets clearer replies later</h2>
-                </div>
-              </div>
-
-              <div className="requestTips__list">
-                {tips.map((tip, index) => (
-                  <motion.article
-                    key={tip}
-                    className="requestTip"
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.4 }}
-                    transition={{ duration: 0.42, delay: index * 0.06 }}
-                  >
-                    <span className="requestTip__iconWrap" aria-hidden="true">
-                      <Sparkles className="requestTip__icon" />
-                    </span>
-                    <p className="requestTip__text">{tip}</p>
-                  </motion.article>
+                <option value="">Choose a category</option>
+                {REQUEST_CATEGORY_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
                 ))}
+              </select>
+            </label>
+
+            <label className="requestField">
+              <span className="requestField__label">Timeline</span>
+              <select
+                className="requestField__input requestField__select"
+                value={formValues.timeline}
+                onChange={(event) => updateField("timeline", event.target.value)}
+                disabled={submitting}
+              >
+                {REQUEST_TIMELINE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="requestField">
+              <span className="requestField__label">Budget amount</span>
+              <input
+                className="requestField__input"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="Optional"
+                value={formValues.budgetAmount}
+                onChange={(event) => updateField("budgetAmount", event.target.value)}
+                disabled={submitting}
+              />
+            </label>
+
+            <label className="requestField">
+              <span className="requestField__label">Location</span>
+              <input
+                className="requestField__input"
+                type="text"
+                placeholder="Optional"
+                value={formValues.location}
+                onChange={(event) => updateField("location", event.target.value)}
+                disabled={submitting}
+              />
+            </label>
+
+            <label className="requestField requestField--full">
+              <span className="requestField__label">Description</span>
+              <textarea
+                className="requestField__input requestField__textarea"
+                placeholder="Describe what you need, what style you prefer, and any details a freelancer should know first."
+                value={formValues.description}
+                onChange={(event) => updateField("description", event.target.value)}
+                disabled={submitting}
+              />
+            </label>
+
+            <div className="requestField requestField--full">
+              <div className="requestField__labelRow">
+                <span className="requestField__label">Photos or video (optional)</span>
+                <span className="requestField__hint">
+                  Up to 8 images and 1 video
+                </span>
               </div>
-            </section>
+
+              <div className="requestUpload">
+                <input
+                  ref={fileInputRef}
+                  className="requestUpload__input"
+                  type="file"
+                  accept={[...REQUEST_MEDIA_ACCEPTED_IMAGE_TYPES, ...REQUEST_MEDIA_ACCEPTED_VIDEO_TYPES].join(",")}
+                  multiple
+                  onChange={handleFilesPicked}
+                  disabled={submitting}
+                />
+
+                <motion.button
+                  type="button"
+                  className="requestUpload__button"
+                  whileHover={{ y: -1.5 }}
+                  whileTap={{ scale: 0.985 }}
+                  transition={PROFILE_SPRING}
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={submitting}
+                >
+                  Add photos or video
+                </motion.button>
+
+                <p className="requestUpload__copy">
+                  Images can help with references, and a short video can help show movement or pacing.
+                </p>
+              </div>
+
+              <AnimatePresence>
+                {attachments.length > 0 ? (
+                  <motion.div
+                    className="requestMediaGrid"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    {attachments.map((item) => (
+                      <motion.article
+                        key={item.id}
+                        className="requestMediaCard"
+                        initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                        exit={{ opacity: 0, y: -8, filter: "blur(8px)" }}
+                        transition={{ duration: 0.22 }}
+                      >
+                        <div className="requestMediaCard__preview">
+                          {item.kind === "video" ? (
+                            <video
+                              src={item.previewUrl}
+                              className="requestMediaCard__video"
+                              muted
+                              playsInline
+                            />
+                          ) : (
+                            <img
+                              src={item.previewUrl}
+                              alt={item.file.name}
+                              className="requestMediaCard__image"
+                            />
+                          )}
+                        </div>
+
+                        <div className="requestMediaCard__copy">
+                          <strong className="requestMediaCard__name">{item.file.name}</strong>
+                          <span className="requestMediaCard__meta">
+                            {item.kind === "video" ? "Video" : "Image"}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="requestMediaCard__remove"
+                          onClick={() => removeAttachment(item.id)}
+                          disabled={submitting}
+                        >
+                          Remove
+                        </button>
+                      </motion.article>
+                    ))}
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </div>
           </div>
-        </Reveal>
-      </section>
+
+          <div className="requestComposer__footer">
+            <p
+              className={`requestComposer__feedback ${
+                error ? "requestComposer__feedback--error" : ""
+              }`}
+              aria-live="polite"
+            >
+              {error || "Your request will appear on your dashboard after you post it."}
+            </p>
+
+            <motion.button
+              type="submit"
+              className="requestSubmitBtn"
+              whileHover={submitting ? {} : { y: -1.5 }}
+              whileTap={submitting ? {} : { scale: 0.985 }}
+              transition={PROFILE_SPRING}
+              disabled={submitting}
+            >
+              {submitting ? (
+                <>
+                  <LoaderCircle className="requestSubmitBtn__spinner" />
+                  <span>Posting...</span>
+                </>
+              ) : (
+                <span>Post request</span>
+              )}
+            </motion.button>
+          </div>
+        </form>
+      </Reveal>
     </CustomerDashboardFrame>
   );
 }

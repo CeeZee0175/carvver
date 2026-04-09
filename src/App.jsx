@@ -4,9 +4,17 @@ import SplashScreen from "./components/StartUp/pages/splash_screen";
 import NavBar from "./components/Homepage/layout/navbar";
 import Home from "./components/Homepage/pages/home";
 import HomeFooter from "./components/Homepage/layout/home_footer";
+import DashBar from "./components/Dashboard/layout/dashbar";
 import CustomerRoute from "./components/Backend/CustomerRoute";
 import CustomerWelcomeRoute from "./components/Backend/CustomerWelcomeRoute";
+import FreelancerRoute from "./components/Backend/FreelancerRoute";
+import FreelancerWelcomeRoute from "./components/Backend/FreelancerWelcomeRoute";
 import PublicOnlyRoute from "./components/Backend/PublicOnlyRoute";
+import { createClient } from "./lib/supabase/client";
+import {
+  isCustomerOnboardingComplete,
+  resolveProfileRole,
+} from "./lib/customerOnboarding";
 
 const HomeAboutUs = lazy(() => import("./components/Homepage/pages/home_aboutUs"));
 const HomeCommunity = lazy(() => import("./components/Homepage/pages/home_community"));
@@ -15,7 +23,9 @@ const AuthCallback = lazy(() => import("./components/Auth/pages/auth_callback"))
 const SignIn = lazy(() => import("./components/Auth/pages/sign-in"));
 const SignUp = lazy(() => import("./components/Auth/pages/sign-up"));
 const CustomerWelcome = lazy(() => import("./components/Dashboard/pages/customer_welcome"));
+const FreelancerWelcome = lazy(() => import("./components/Dashboard/pages/freelancer_welcome"));
 const DashboardCustomer = lazy(() => import("./components/Dashboard/pages/dashboard_customer"));
+const DashboardFreelancer = lazy(() => import("./components/Dashboard/pages/dashboard_freelancer"));
 const DashboardAboutUs = lazy(() => import("./components/Dashboard/pages/dashboard_aboutUs"));
 const BrowseCategories = lazy(() => import("./components/Dashboard/pages/browse_categories"));
 const FavBook = lazy(() => import("./components/Dashboard/pages/favBook"));
@@ -25,6 +35,7 @@ const NotifPage = lazy(() => import("./components/Dashboard/pages/notifPage"));
 const Profile = lazy(() => import("./components/Dashboard/pages/profile"));
 const ProfileAchievements = lazy(() => import("./components/Dashboard/pages/profileAchievements"));
 const CustomerOrders = lazy(() => import("./components/Dashboard/pages/customerOrders"));
+const supabase = createClient();
 
 function RouteFallback({ withNav = false }) {
   return (
@@ -51,33 +62,107 @@ function HomePage() {
   );
 }
 
+function BrandPageShell({ children }) {
+  const [shellState, setShellState] = useState({
+    resolved: false,
+    useDashboardShell: false,
+  });
+
+  useEffect(() => {
+    let active = true;
+
+    async function resolveShell(session) {
+      if (!active) return;
+
+      if (!session?.user) {
+        setShellState({
+          resolved: true,
+          useDashboardShell: false,
+        });
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (!active) return;
+
+        const role = resolveProfileRole(data, session);
+
+        setShellState({
+          resolved: true,
+          useDashboardShell:
+            role === "customer" && isCustomerOnboardingComplete(data),
+        });
+      } catch {
+        if (!active) return;
+
+        setShellState({
+          resolved: true,
+          useDashboardShell: false,
+        });
+      }
+    }
+
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => resolveShell(session));
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      resolveShell(session);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  return (
+    <div className="brandPageShell">
+      {shellState.resolved ? (
+        shellState.useDashboardShell ? (
+          <DashBar />
+        ) : (
+          <NavBar />
+        )
+      ) : (
+        <div className="brandPageShell__barPlaceholder" aria-hidden="true" />
+      )}
+      <div className="brandPageShell__content">{children}</div>
+      <HomeFooter />
+    </div>
+  );
+}
+
 function AboutUsPage() {
   return (
-    <>
-      <NavBar />
+    <BrandPageShell>
       <HomeAboutUs />
-      <HomeFooter />
-    </>
+    </BrandPageShell>
   );
 }
 
 function CommunityPage() {
   return (
-    <>
-      <NavBar />
+    <BrandPageShell>
       <HomeCommunity />
-      <HomeFooter />
-    </>
+    </BrandPageShell>
   );
 }
 
 function PricingPage() {
   return (
-    <>
-      <NavBar />
+    <BrandPageShell>
       <PricingPageContent />
-      <HomeFooter />
-    </>
+    </BrandPageShell>
   );
 }
 
@@ -114,7 +199,7 @@ function AppRoutes() {
       <Route
         path="/about-us"
         element={
-          <Suspense fallback={<RouteFallback withNav />}>
+          <Suspense fallback={<RouteFallback />}>
             <AboutUsPage />
           </Suspense>
         }
@@ -122,7 +207,7 @@ function AppRoutes() {
       <Route
         path="/community"
         element={
-          <Suspense fallback={<RouteFallback withNav />}>
+          <Suspense fallback={<RouteFallback />}>
             <CommunityPage />
           </Suspense>
         }
@@ -130,7 +215,7 @@ function AppRoutes() {
       <Route
         path="/pricing"
         element={
-          <Suspense fallback={<RouteFallback withNav />}>
+          <Suspense fallback={<RouteFallback />}>
             <PricingPage />
           </Suspense>
         }
@@ -175,6 +260,16 @@ function AppRoutes() {
           </Suspense>
         }
       />
+      <Route
+        path="/welcome/freelancer"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerWelcomeRoute>
+              <FreelancerWelcome />
+            </FreelancerWelcomeRoute>
+          </Suspense>
+        }
+      />
 
       {/* Protected routes - redirects to /sign-in if not logged in */}
       <Route
@@ -184,6 +279,16 @@ function AppRoutes() {
             <CustomerRoute>
               <DashboardCustomer />
             </CustomerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <DashboardFreelancer />
+            </FreelancerRoute>
           </Suspense>
         }
       />

@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import welcomeAnimation from "../../../assets/welcome_lottie_animation.lottie?url";
 import SearchableCombobox from "../../Shared/searchable_combobox";
+import { ALL_SERVICE_CATEGORIES } from "../../../lib/serviceCategories";
 import {
   buildPhilippinesLocationLabel,
   getBarangaysByRegionCity,
@@ -13,14 +14,43 @@ import {
   PH_REGION_OPTIONS,
 } from "../../../lib/phLocations";
 import {
-  clearCustomerWelcomeDestination,
-  getCustomerWelcomeDestination,
+  clearFreelancerWelcomeDestination,
+  getFreelancerWelcomeDestination,
 } from "../../../lib/customerOnboarding";
-import { getProfileById, getSession, upsertProfile } from "../../../lib/supabase/auth";
+import {
+  getProfileById,
+  getSession,
+  upsertProfile,
+} from "../../../lib/supabase/auth";
 import "./customer_welcome.css";
+import "./freelancer_welcome.css";
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 const SPRING = { type: "spring", stiffness: 300, damping: 24 };
+const EXPERIENCE_OPTIONS = [
+  "Starting out",
+  "Building momentum",
+  "Experienced",
+  "Expert",
+];
+const SPECIALTY_OPTIONS = [
+  "Brand Identity",
+  "Logo Design",
+  "Social Media Content",
+  "Product Photography",
+  "Portrait Photography",
+  "Video Reels",
+  "Motion Graphics",
+  "Voice Acting",
+  "Copywriting",
+  "Web UI",
+  "Front-end Build",
+  "Tutoring",
+  "Virtual Assistance",
+  "Custom Gifts",
+  "Crochet",
+  "Event Styling",
+];
 
 function TypewriterText({
   text,
@@ -144,6 +174,23 @@ function WelcomePager({ page, total, onChange }) {
   );
 }
 
+function Panel({ children, panelKey }) {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.section
+      key={panelKey}
+      className="customerWelcome__panel"
+      initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 14, filter: "blur(8px)" }}
+      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, filter: "blur(8px)" }}
+      transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.section>
+  );
+}
+
 function getFriendlyErrorMessage(error, fallback) {
   const message = String(error?.message || "");
 
@@ -151,34 +198,11 @@ function getFriendlyErrorMessage(error, fallback) {
     return "We couldn't save your details. Please try again.";
   }
 
-  if (/customer_onboarding_completed_at|region|city|barangay/i.test(message)) {
+  if (/freelancer_|region|city|barangay/i.test(message)) {
     return "A few details could not be saved. Please try again.";
   }
 
   return fallback;
-}
-
-function deriveInitialValues(profile, user) {
-  const metadata = user?.user_metadata || {};
-  const firstName =
-    String(profile?.first_name || metadata.first_name || metadata.given_name || "").trim();
-  const lastName =
-    String(profile?.last_name || metadata.last_name || metadata.family_name || "").trim();
-  const fallbackDisplayName = String(
-    profile?.display_name ||
-      metadata.preferred_username ||
-      `${firstName} ${lastName}`.trim()
-  ).trim();
-
-  return {
-    firstName,
-    lastName,
-    displayName: fallbackDisplayName,
-    bio: String(profile?.bio || "").trim(),
-    region: String(profile?.region || metadata.region || "").trim(),
-    city: String(profile?.city || "").trim(),
-    barangay: String(profile?.barangay || "").trim(),
-  };
 }
 
 function validateIdentity(values) {
@@ -194,6 +218,40 @@ function validateIdentity(values) {
 
   if (!String(values.displayName || "").trim()) {
     errors.displayName = "Please choose a display name.";
+  }
+
+  return errors;
+}
+
+function validateWork(values) {
+  const errors = {};
+
+  if (!String(values.headline || "").trim()) {
+    errors.headline = "Please add a professional headline.";
+  }
+
+  if (!String(values.primaryCategory || "").trim()) {
+    errors.primaryCategory = "Please choose a primary category.";
+  }
+
+  if (!Array.isArray(values.specialties) || values.specialties.length === 0) {
+    errors.specialties = "Please choose at least one specialty.";
+  }
+
+  if (Array.isArray(values.specialties) && values.specialties.length > 5) {
+    errors.specialties = "Choose up to five specialties only.";
+  }
+
+  if (!String(values.experienceLevel || "").trim()) {
+    errors.experienceLevel = "Please choose your experience level.";
+  }
+
+  if (String(values.portfolioUrl || "").trim()) {
+    try {
+      new URL(String(values.portfolioUrl || "").trim());
+    } catch {
+      errors.portfolioUrl = "Please enter a valid portfolio link.";
+    }
   }
 
   return errors;
@@ -217,24 +275,38 @@ function validateLocation(values) {
   return errors;
 }
 
-function Panel({ children, panelKey }) {
-  const reduceMotion = useReducedMotion();
+function deriveInitialValues(profile, user) {
+  const metadata = user?.user_metadata || {};
+  const firstName = String(
+    profile?.first_name || metadata.first_name || metadata.given_name || ""
+  ).trim();
+  const lastName = String(
+    profile?.last_name || metadata.last_name || metadata.family_name || ""
+  ).trim();
 
-  return (
-    <motion.section
-      key={panelKey}
-      className="customerWelcome__panel"
-      initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 14, filter: "blur(8px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, filter: "blur(8px)" }}
-      transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.section>
-  );
+  return {
+    firstName,
+    lastName,
+    displayName: String(
+      profile?.display_name ||
+        metadata.preferred_username ||
+        `${firstName} ${lastName}`.trim()
+    ).trim(),
+    bio: String(profile?.bio || "").trim(),
+    headline: String(profile?.freelancer_headline || "").trim(),
+    primaryCategory: String(profile?.freelancer_primary_category || "").trim(),
+    specialties: Array.isArray(profile?.freelancer_specialties)
+      ? profile.freelancer_specialties.filter(Boolean)
+      : [],
+    experienceLevel: String(profile?.freelancer_experience_level || "").trim(),
+    portfolioUrl: String(profile?.freelancer_portfolio_url || "").trim(),
+    region: String(profile?.region || metadata.region || "").trim(),
+    city: String(profile?.city || "").trim(),
+    barangay: String(profile?.barangay || "").trim(),
+  };
 }
 
-export default function CustomerWelcome() {
+export default function FreelancerWelcome() {
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
   const [loading, setLoading] = useState(true);
@@ -244,16 +316,21 @@ export default function CustomerWelcome() {
   const [currentStep, setCurrentStep] = useState(0);
   const [sessionUser, setSessionUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [formValues, setFormValues] = useState({
     firstName: "",
     lastName: "",
     displayName: "",
     bio: "",
+    headline: "",
+    primaryCategory: "",
+    specialties: [],
+    experienceLevel: "",
+    portfolioUrl: "",
     region: "",
     city: "",
     barangay: "",
   });
-  const [fieldErrors, setFieldErrors] = useState({});
 
   const cityOptions = useMemo(
     () => getCitiesByRegion(formValues.region),
@@ -273,6 +350,7 @@ export default function CustomerWelcome() {
 
       try {
         const session = await getSession();
+
         if (!session?.user) {
           navigate("/sign-in", { replace: true });
           return;
@@ -305,11 +383,11 @@ export default function CustomerWelcome() {
   }, [navigate]);
 
   useEffect(() => {
-    if (!saving || currentStep !== 3) return undefined;
+    if (!saving || currentStep !== 4) return undefined;
 
-    const destination = getCustomerWelcomeDestination();
     const timeoutId = window.setTimeout(() => {
-      clearCustomerWelcomeDestination();
+      const destination = getFreelancerWelcomeDestination();
+      clearFreelancerWelcomeDestination();
       navigate(destination, { replace: true });
     }, reduceMotion ? 260 : 850);
 
@@ -362,11 +440,37 @@ export default function CustomerWelcome() {
     setCurrentStep(nextStep);
   };
 
-  const handleIdentityContinue = () => {
-    const identityErrors = validateIdentity(formValues);
+  const toggleSpecialty = (specialty) => {
+    setFormValues((prev) => {
+      if (prev.specialties.includes(specialty)) {
+        return {
+          ...prev,
+          specialties: prev.specialties.filter((item) => item !== specialty),
+        };
+      }
 
-    if (Object.keys(identityErrors).length > 0) {
-      setFieldErrors(identityErrors);
+      if (prev.specialties.length >= 5) {
+        setFieldErrors((errors) => ({
+          ...errors,
+          specialties: "Choose up to five specialties only.",
+        }));
+        return prev;
+      }
+
+      return {
+        ...prev,
+        specialties: [...prev.specialties, specialty],
+      };
+    });
+
+    if (saveError) setSaveError("");
+  };
+
+  const handleIdentityContinue = () => {
+    const errors = validateIdentity(formValues);
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
@@ -379,14 +483,52 @@ export default function CustomerWelcome() {
     setCurrentStep(2);
   };
 
+  const handleWorkContinue = () => {
+    const errors = validateWork(formValues);
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors((prev) => ({ ...prev, ...errors }));
+      return;
+    }
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      headline: "",
+      primaryCategory: "",
+      specialties: "",
+      experienceLevel: "",
+      portfolioUrl: "",
+    }));
+    setCurrentStep(3);
+  };
+
   const handleFinish = async () => {
-    const identityErrors = validateIdentity(formValues);
-    const locationErrors = validateLocation(formValues);
-    const nextErrors = { ...identityErrors, ...locationErrors };
+    const nextErrors = {
+      ...validateIdentity(formValues),
+      ...validateWork(formValues),
+      ...validateLocation(formValues),
+    };
 
     if (Object.keys(nextErrors).length > 0) {
       setFieldErrors(nextErrors);
-      setCurrentStep(Object.keys(identityErrors).length > 0 ? 1 : 2);
+
+      if (nextErrors.firstName || nextErrors.lastName || nextErrors.displayName) {
+        setCurrentStep(1);
+        return;
+      }
+
+      if (
+        nextErrors.headline ||
+        nextErrors.primaryCategory ||
+        nextErrors.specialties ||
+        nextErrors.experienceLevel ||
+        nextErrors.portfolioUrl
+      ) {
+        setCurrentStep(2);
+        return;
+      }
+
+      setCurrentStep(3);
       return;
     }
 
@@ -402,7 +544,7 @@ export default function CustomerWelcome() {
 
       await upsertProfile({
         id: sessionUser.id,
-        role: profile?.role || sessionUser.user_metadata?.role || "customer",
+        role: profile?.role || sessionUser.user_metadata?.role || "freelancer",
         first_name: String(formValues.firstName || "").trim(),
         last_name: String(formValues.lastName || "").trim(),
         display_name: String(formValues.displayName || "").trim(),
@@ -411,15 +553,17 @@ export default function CustomerWelcome() {
         region: String(formValues.region || "").trim(),
         city: String(formValues.city || "").trim(),
         barangay: String(formValues.barangay || "").trim(),
-        address: buildPhilippinesLocationLabel({
-          region: String(formValues.region || "").trim(),
-          city: String(formValues.city || "").trim(),
-          barangay: String(formValues.barangay || "").trim(),
-        }),
-        customer_onboarding_completed_at: new Date().toISOString(),
+        address: buildPhilippinesLocationLabel(formValues),
+        freelancer_headline: String(formValues.headline || "").trim(),
+        freelancer_primary_category: String(formValues.primaryCategory || "").trim(),
+        freelancer_specialties: formValues.specialties,
+        freelancer_experience_level: String(formValues.experienceLevel || "").trim(),
+        freelancer_portfolio_url:
+          String(formValues.portfolioUrl || "").trim() || null,
+        freelancer_onboarding_completed_at: new Date().toISOString(),
       });
 
-      setCurrentStep(3);
+      setCurrentStep(4);
     } catch (error) {
       setSaving(false);
       setSaveError(
@@ -433,11 +577,13 @@ export default function CustomerWelcome() {
 
   if (loading) {
     return (
-      <div className="customerWelcomePage customerWelcomePage--loading">
+      <div className="customerWelcomePage freelancerWelcomePage customerWelcomePage--loading">
         <div className="customerWelcomePage__bg" aria-hidden="true" />
         <div className="customerWelcomeLoading">
           <span className="customerWelcomeLoading__eyebrow">Carvver</span>
-          <h1 className="customerWelcomeLoading__title">Getting your welcome page ready</h1>
+          <h1 className="customerWelcomeLoading__title">
+            Getting your welcome page ready
+          </h1>
           <div className="customerWelcomeLoading__dots" aria-hidden="true">
             <span />
             <span />
@@ -450,11 +596,11 @@ export default function CustomerWelcome() {
 
   if (loadError) {
     return (
-      <div className="customerWelcomePage">
+      <div className="customerWelcomePage freelancerWelcomePage">
         <div className="customerWelcomePage__bg" aria-hidden="true" />
         <main className="customerWelcomeShell">
           <section className="customerWelcomeError">
-            <span className="customerWelcomeLoading__eyebrow">Customer welcome</span>
+            <span className="customerWelcomeLoading__eyebrow">Freelancer welcome</span>
             <h1 className="customerWelcomeError__title">
               We couldn&apos;t open this page
             </h1>
@@ -476,10 +622,16 @@ export default function CustomerWelcome() {
   }
 
   return (
-    <div className="customerWelcomePage">
+    <div className="customerWelcomePage freelancerWelcomePage">
       <div className="customerWelcomePage__bg" aria-hidden="true" />
-      <div className="customerWelcomePage__orb customerWelcomePage__orb--violet" aria-hidden="true" />
-      <div className="customerWelcomePage__orb customerWelcomePage__orb--gold" aria-hidden="true" />
+      <div
+        className="customerWelcomePage__orb customerWelcomePage__orb--violet"
+        aria-hidden="true"
+      />
+      <div
+        className="customerWelcomePage__orb customerWelcomePage__orb--gold"
+        aria-hidden="true"
+      />
 
       <main className="customerWelcomeShell">
         <div className="customerWelcomeCard">
@@ -496,23 +648,41 @@ export default function CustomerWelcome() {
                       <TypewriterText text="Welcome to Carvver" />
                     </h1>
                     <p className="customerWelcomeIntro__text">
-                      Before you start browsing, let&apos;s set up the name and
-                      location details that will follow your customer account.
+                      Let&apos;s set up the details people will use to understand
+                      your work.
                     </p>
 
                     <div className="customerWelcomeIntro__list">
                       <div className="customerWelcomeIntro__item">
                         <span className="customerWelcomeIntro__number">01</span>
                         <div>
-                          <strong>Set your customer identity</strong>
-                          <span>Choose the name and display name you want to use here.</span>
+                          <strong>Add your profile details</strong>
+                          <span>
+                            Use your real name for your account and choose the
+                            display name people will remember.
+                          </span>
                         </div>
                       </div>
+
                       <div className="customerWelcomeIntro__item">
                         <span className="customerWelcomeIntro__number">02</span>
                         <div>
-                          <strong>Add your location</strong>
-                          <span>Choose your region, city, and barangay or area.</span>
+                          <strong>Show what you offer</strong>
+                          <span>
+                            Add your headline, main category, specialties, and
+                            experience level.
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="customerWelcomeIntro__item">
+                        <span className="customerWelcomeIntro__number">03</span>
+                        <div>
+                          <strong>Set your location</strong>
+                          <span>
+                            Choose the region, city, and barangay or area you
+                            want shown with your profile.
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -525,7 +695,7 @@ export default function CustomerWelcome() {
                       transition={SPRING}
                       onClick={() => setCurrentStep(1)}
                     >
-                      Start
+                      Start setup
                     </motion.button>
                   </div>
 
@@ -549,11 +719,11 @@ export default function CustomerWelcome() {
                   <div className="customerWelcomeForm__head">
                     <p className="customerWelcomeForm__eyebrow">Step 1</p>
                     <h2 className="customerWelcomeForm__title">
-                      <TypewriterText text="Tell us who you are" />
+                      <TypewriterText text="Tell people who you are" />
                     </h2>
                     <p className="customerWelcomeForm__text">
-                      Use your real name for the account, then choose the display
-                      name you want people to see on Carvver.
+                      Use your real name for your account, then choose the
+                      display name you want clients to see.
                     </p>
                   </div>
 
@@ -562,15 +732,21 @@ export default function CustomerWelcome() {
                       <span className="customerWelcomeField__label">First name</span>
                       <input
                         className={`customerWelcomeField__control ${
-                          fieldErrors.firstName ? "customerWelcomeField__control--error" : ""
+                          fieldErrors.firstName
+                            ? "customerWelcomeField__control--error"
+                            : ""
                         }`}
                         type="text"
                         value={formValues.firstName}
-                        onChange={(event) => updateField("firstName", event.target.value)}
+                        onChange={(event) =>
+                          updateField("firstName", event.target.value)
+                        }
                         placeholder="Your first name"
                       />
                       {fieldErrors.firstName ? (
-                        <span className="customerWelcomeField__error">{fieldErrors.firstName}</span>
+                        <span className="customerWelcomeField__error">
+                          {fieldErrors.firstName}
+                        </span>
                       ) : null}
                     </label>
 
@@ -578,15 +754,21 @@ export default function CustomerWelcome() {
                       <span className="customerWelcomeField__label">Last name</span>
                       <input
                         className={`customerWelcomeField__control ${
-                          fieldErrors.lastName ? "customerWelcomeField__control--error" : ""
+                          fieldErrors.lastName
+                            ? "customerWelcomeField__control--error"
+                            : ""
                         }`}
                         type="text"
                         value={formValues.lastName}
-                        onChange={(event) => updateField("lastName", event.target.value)}
+                        onChange={(event) =>
+                          updateField("lastName", event.target.value)
+                        }
                         placeholder="Your last name"
                       />
                       {fieldErrors.lastName ? (
-                        <span className="customerWelcomeField__error">{fieldErrors.lastName}</span>
+                        <span className="customerWelcomeField__error">
+                          {fieldErrors.lastName}
+                        </span>
                       ) : null}
                     </label>
 
@@ -600,8 +782,10 @@ export default function CustomerWelcome() {
                         }`}
                         type="text"
                         value={formValues.displayName}
-                        onChange={(event) => updateField("displayName", event.target.value)}
-                        placeholder="How you want to appear on Carvver"
+                        onChange={(event) =>
+                          updateField("displayName", event.target.value)
+                        }
+                        placeholder="How you want your name to appear"
                       />
                       {fieldErrors.displayName ? (
                         <span className="customerWelcomeField__error">
@@ -611,12 +795,14 @@ export default function CustomerWelcome() {
                     </label>
 
                     <label className="customerWelcomeField customerWelcomeField--wide">
-                      <span className="customerWelcomeField__label">Short bio (optional)</span>
+                      <span className="customerWelcomeField__label">
+                        Short bio (optional)
+                      </span>
                       <textarea
                         className="customerWelcomeField__control customerWelcomeField__control--textarea"
                         value={formValues.bio}
                         onChange={(event) => updateField("bio", event.target.value)}
-                        placeholder="A short note about how you like to work with freelancers."
+                        placeholder="Share a short note about the kind of work you do."
                       />
                     </label>
                   </div>
@@ -649,15 +835,184 @@ export default function CustomerWelcome() {
             ) : null}
 
             {currentStep === 2 ? (
+              <Panel panelKey="work">
+                <section className="customerWelcomeFormSection freelancerWelcomeFormSection--wide">
+                  <div className="customerWelcomeForm__head">
+                    <p className="customerWelcomeForm__eyebrow">Step 2</p>
+                    <h2 className="customerWelcomeForm__title">
+                      <TypewriterText text="Show what you do best" />
+                    </h2>
+                    <p className="customerWelcomeForm__text">
+                      Add the details that help people understand your work at a
+                      glance.
+                    </p>
+                  </div>
+
+                  <div className="customerWelcomeFieldGrid freelancerWelcomeWorkGrid">
+                    <label className="customerWelcomeField customerWelcomeField--wide">
+                      <span className="customerWelcomeField__label">
+                        Professional headline
+                      </span>
+                      <input
+                        className={`customerWelcomeField__control ${
+                          fieldErrors.headline
+                            ? "customerWelcomeField__control--error"
+                            : ""
+                        }`}
+                        type="text"
+                        value={formValues.headline}
+                        onChange={(event) =>
+                          updateField("headline", event.target.value)
+                        }
+                        placeholder="Example: Brand designer for local businesses"
+                      />
+                      {fieldErrors.headline ? (
+                        <span className="customerWelcomeField__error">
+                          {fieldErrors.headline}
+                        </span>
+                      ) : null}
+                    </label>
+
+                    <label className="customerWelcomeField customerWelcomeField--wide">
+                      <span className="customerWelcomeField__label">
+                        Primary category
+                      </span>
+                      <SearchableCombobox
+                        value={formValues.primaryCategory}
+                        onSelect={(nextValue) =>
+                          updateField("primaryCategory", nextValue)
+                        }
+                        options={ALL_SERVICE_CATEGORIES}
+                        placeholder="Choose your main category"
+                        ariaLabel="Choose your main category"
+                        error={Boolean(fieldErrors.primaryCategory)}
+                      />
+                      {fieldErrors.primaryCategory ? (
+                        <span className="customerWelcomeField__error">
+                          {fieldErrors.primaryCategory}
+                        </span>
+                      ) : null}
+                    </label>
+
+                    <div className="customerWelcomeField customerWelcomeField--wide">
+                      <span className="customerWelcomeField__label">
+                        Experience level
+                      </span>
+                      <div className="freelancerWelcomeChoices">
+                        {EXPERIENCE_OPTIONS.map((option) => (
+                          <button
+                            key={option}
+                            type="button"
+                            className={`freelancerWelcomeChoice ${
+                              formValues.experienceLevel === option
+                                ? "freelancerWelcomeChoice--active"
+                                : ""
+                            }`}
+                            onClick={() => updateField("experienceLevel", option)}
+                          >
+                            {option}
+                          </button>
+                        ))}
+                      </div>
+                      {fieldErrors.experienceLevel ? (
+                        <span className="customerWelcomeField__error">
+                          {fieldErrors.experienceLevel}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <div className="customerWelcomeField customerWelcomeField--wide">
+                      <span className="customerWelcomeField__label">
+                        Specialties
+                        <span className="freelancerWelcomeField__meta">
+                          {formValues.specialties.length}/5
+                        </span>
+                      </span>
+                      <div className="freelancerWelcomeSpecialties">
+                        {SPECIALTY_OPTIONS.map((specialty) => (
+                          <button
+                            key={specialty}
+                            type="button"
+                            className={`freelancerWelcomeSpecialty ${
+                              formValues.specialties.includes(specialty)
+                                ? "freelancerWelcomeSpecialty--active"
+                                : ""
+                            }`}
+                            onClick={() => toggleSpecialty(specialty)}
+                          >
+                            {specialty}
+                          </button>
+                        ))}
+                      </div>
+                      {fieldErrors.specialties ? (
+                        <span className="customerWelcomeField__error">
+                          {fieldErrors.specialties}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <label className="customerWelcomeField customerWelcomeField--wide">
+                      <span className="customerWelcomeField__label">
+                        Portfolio link (optional)
+                      </span>
+                      <input
+                        className={`customerWelcomeField__control ${
+                          fieldErrors.portfolioUrl
+                            ? "customerWelcomeField__control--error"
+                            : ""
+                        }`}
+                        type="url"
+                        value={formValues.portfolioUrl}
+                        onChange={(event) =>
+                          updateField("portfolioUrl", event.target.value)
+                        }
+                        placeholder="https://your-portfolio-link.com"
+                      />
+                      {fieldErrors.portfolioUrl ? (
+                        <span className="customerWelcomeField__error">
+                          {fieldErrors.portfolioUrl}
+                        </span>
+                      ) : null}
+                    </label>
+                  </div>
+
+                  <div className="customerWelcomeActions">
+                    <motion.button
+                      type="button"
+                      className="customerWelcomeButton customerWelcomeButton--ghost"
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.985 }}
+                      transition={SPRING}
+                      onClick={() => goToStep(1)}
+                    >
+                      Back
+                    </motion.button>
+
+                    <motion.button
+                      type="button"
+                      className="customerWelcomeButton customerWelcomeButton--primary"
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.985 }}
+                      transition={SPRING}
+                      onClick={handleWorkContinue}
+                    >
+                      Continue
+                    </motion.button>
+                  </div>
+                </section>
+              </Panel>
+            ) : null}
+
+            {currentStep === 3 ? (
               <Panel panelKey="location">
                 <section className="customerWelcomeFormSection">
                   <div className="customerWelcomeForm__head">
-                    <p className="customerWelcomeForm__eyebrow">Step 2</p>
+                    <p className="customerWelcomeForm__eyebrow">Step 3</p>
                     <h2 className="customerWelcomeForm__title">
                       <TypewriterText text="Where are you based?" />
                     </h2>
                     <p className="customerWelcomeForm__text">
-                      Choose the location you want tied to your customer profile.
+                      Choose the location you want shown with your profile.
                     </p>
                   </div>
 
@@ -673,7 +1028,9 @@ export default function CustomerWelcome() {
                         error={Boolean(fieldErrors.region)}
                       />
                       {fieldErrors.region ? (
-                        <span className="customerWelcomeField__error">{fieldErrors.region}</span>
+                        <span className="customerWelcomeField__error">
+                          {fieldErrors.region}
+                        </span>
                       ) : null}
                     </label>
 
@@ -691,15 +1048,21 @@ export default function CustomerWelcome() {
                         disabled={!formValues.region}
                       />
                       {fieldErrors.city ? (
-                        <span className="customerWelcomeField__error">{fieldErrors.city}</span>
+                        <span className="customerWelcomeField__error">
+                          {fieldErrors.city}
+                        </span>
                       ) : null}
                     </label>
 
                     <label className="customerWelcomeField customerWelcomeField--wide">
-                      <span className="customerWelcomeField__label">Barangay / area</span>
+                      <span className="customerWelcomeField__label">
+                        Barangay / area
+                      </span>
                       <SearchableCombobox
                         value={formValues.barangay}
-                        onSelect={(nextValue) => updateField("barangay", nextValue)}
+                        onSelect={(nextValue) =>
+                          updateField("barangay", nextValue)
+                        }
                         options={barangayOptions}
                         placeholder={
                           formValues.city
@@ -714,7 +1077,9 @@ export default function CustomerWelcome() {
                         noResultsText="No barangays found. Type your area and press Enter."
                       />
                       {fieldErrors.barangay ? (
-                        <span className="customerWelcomeField__error">{fieldErrors.barangay}</span>
+                        <span className="customerWelcomeField__error">
+                          {fieldErrors.barangay}
+                        </span>
                       ) : null}
                     </label>
                   </div>
@@ -730,7 +1095,7 @@ export default function CustomerWelcome() {
                       whileHover={{ y: -2 }}
                       whileTap={{ scale: 0.985 }}
                       transition={SPRING}
-                      onClick={() => goToStep(1)}
+                      onClick={() => goToStep(2)}
                       disabled={saving}
                     >
                       Back
@@ -752,7 +1117,7 @@ export default function CustomerWelcome() {
               </Panel>
             ) : null}
 
-            {currentStep === 3 ? (
+            {currentStep === 4 ? (
               <Panel panelKey="complete">
                 <div className="customerWelcomeComplete">
                   <CheckCircle2 className="customerWelcomeComplete__icon" />
@@ -767,7 +1132,11 @@ export default function CustomerWelcome() {
           </AnimatePresence>
 
           {currentStep < TOTAL_STEPS ? (
-            <WelcomePager page={currentStep} total={TOTAL_STEPS} onChange={goToStep} />
+            <WelcomePager
+              page={currentStep}
+              total={TOTAL_STEPS}
+              onChange={goToStep}
+            />
           ) : null}
         </div>
       </main>

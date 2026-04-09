@@ -3,6 +3,10 @@ import { getProfile } from "../../../lib/supabase/auth";
 import { createClient } from "../../../lib/supabase/client";
 import { emitProfileUpdated } from "../../../lib/profileSync";
 import {
+  buildPhilippinesLocationLabel,
+  PHILIPPINES_COUNTRY,
+} from "../../../lib/phLocations";
+import {
   SHOWCASE_SLOT_LIMIT,
   buildCustomerAchievementMetrics,
   getAchievementById,
@@ -18,20 +22,24 @@ export const AVATAR_ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 function friendlySupabaseMessage(error, fallback) {
   const message = String(error?.message || "");
 
-  if (/column .*(display_name|address|age|first_name|last_name)/i.test(message)) {
-    return "Some profile details are unavailable right now.";
+  if (
+    /column .*(display_name|address|age|first_name|last_name|region|city|barangay)/i.test(
+      message
+    )
+  ) {
+    return "Some profile details couldn't be loaded.";
   }
 
   if (/bucket/i.test(message) || /storage/i.test(message)) {
-    return "Profile photo uploads are unavailable right now.";
+    return "Profile photo uploads are unavailable at the moment.";
   }
 
   if (/customer_achievement_unlocks|customer_badge_showcase/i.test(message)) {
-    return "Some profile achievements are unavailable right now.";
+    return "Some profile achievements couldn't be loaded.";
   }
 
   if (/row-level security|permission denied/i.test(message)) {
-    return "This profile action is unavailable right now.";
+    return "That profile action isn't available at the moment.";
   }
 
   return fallback;
@@ -285,7 +293,7 @@ export function useCustomerProfileData() {
         setProfile(profileRes.value);
       } else {
         nextWarnings.push(
-          friendlySupabaseMessage(profileRes.reason, "Couldn't load your profile.")
+          friendlySupabaseMessage(profileRes.reason, "We couldn't load your profile.")
         );
         setProfile(null);
       }
@@ -293,21 +301,21 @@ export function useCustomerProfileData() {
       setSavedItems(savedRes.status === "fulfilled" ? savedRes.value : []);
       if (savedRes.status === "rejected") {
         nextWarnings.push(
-          friendlySupabaseMessage(savedRes.reason, "Couldn't load saved listings.")
+          friendlySupabaseMessage(savedRes.reason, "We couldn't load your saved listings.")
         );
       }
 
       setOrders(ordersRes.status === "fulfilled" ? ordersRes.value : []);
       if (ordersRes.status === "rejected") {
         nextWarnings.push(
-          friendlySupabaseMessage(ordersRes.reason, "Couldn't load customer orders.")
+          friendlySupabaseMessage(ordersRes.reason, "We couldn't load your orders.")
         );
       }
 
       setReviews(reviewsRes.status === "fulfilled" ? reviewsRes.value : []);
       if (reviewsRes.status === "rejected") {
         nextWarnings.push(
-          friendlySupabaseMessage(reviewsRes.reason, "Couldn't load reviews.")
+          friendlySupabaseMessage(reviewsRes.reason, "We couldn't load your reviews.")
         );
       }
 
@@ -322,7 +330,7 @@ export function useCustomerProfileData() {
         nextWarnings.push(
           friendlySupabaseMessage(
             unlockRes.reason,
-            "Achievement persistence is not ready yet."
+            "Some achievements couldn't be updated."
           )
         );
       }
@@ -331,7 +339,7 @@ export function useCustomerProfileData() {
         nextWarnings.push(
           friendlySupabaseMessage(
             showcaseRes.reason,
-            "Badge showcase persistence is not ready yet."
+            "Your badge showcase couldn't be updated."
           )
         );
       }
@@ -341,7 +349,7 @@ export function useCustomerProfileData() {
       );
       if (mfaRes.status === "rejected") {
         nextWarnings.push(
-          friendlySupabaseMessage(mfaRes.reason, "Couldn't read your 2FA status.")
+          friendlySupabaseMessage(mfaRes.reason, "We couldn't read your 2FA status.")
         );
       }
 
@@ -412,10 +420,10 @@ export function useCustomerProfileData() {
         complete: metrics.hasBio,
       },
       {
-        id: "country",
+        id: "location",
         label: "Add your location",
         detail: "Location helps with local expectations and logistics.",
-        complete: metrics.hasCountry,
+        complete: metrics.hasLocation,
       },
       {
         id: "mfa",
@@ -474,7 +482,7 @@ export function useCustomerProfileData() {
           ...prev,
           friendlySupabaseMessage(
             error,
-            "New achievements were detected, but Carvver couldn't persist them yet."
+            "New achievements were found, but they couldn't be saved yet."
           ),
         ]);
         setCapabilities((prev) => ({
@@ -495,8 +503,9 @@ export function useCustomerProfileData() {
       lastName,
       displayName,
       bio,
-      country,
-      address,
+      region,
+      city,
+      barangay,
       age,
       avatarFile,
       removeAvatar = false,
@@ -527,6 +536,15 @@ export function useCustomerProfileData() {
         normalizedAge = numericAge;
       }
 
+      const normalizedRegion = String(region || "").trim();
+      const normalizedCity = String(city || "").trim();
+      const normalizedBarangay = String(barangay || "").trim();
+      const normalizedLocation = buildPhilippinesLocationLabel({
+        region: normalizedRegion,
+        city: normalizedCity,
+        barangay: normalizedBarangay,
+      });
+
       let nextAvatarUrl = removeAvatar ? null : profile?.avatar_url || null;
 
       if (avatarFile) {
@@ -538,8 +556,14 @@ export function useCustomerProfileData() {
         last_name: normalizedLastName,
         display_name: String(displayName || "").trim() || null,
         bio: String(bio || "").trim() || null,
-        country: String(country || "").trim() || null,
-        address: String(address || "").trim() || null,
+        country:
+          normalizedRegion || normalizedCity || normalizedBarangay
+            ? PHILIPPINES_COUNTRY
+            : null,
+        region: normalizedRegion || null,
+        city: normalizedCity || null,
+        barangay: normalizedBarangay || null,
+        address: normalizedLocation || null,
         age: normalizedAge,
         avatar_url: nextAvatarUrl,
       };
@@ -553,7 +577,7 @@ export function useCustomerProfileData() {
 
       if (error) {
         throw new Error(
-          friendlySupabaseMessage(error, "Couldn't save your profile just yet.")
+          friendlySupabaseMessage(error, "We couldn't save your profile. Please try again.")
         );
       }
 
@@ -576,7 +600,7 @@ export function useCustomerProfileData() {
       }
 
       if (!capabilities.canPersistShowcase) {
-        throw new Error("Badge showcase changes are unavailable right now.");
+        throw new Error("Badge showcase changes are unavailable at the moment.");
       }
 
       const uniqueIds = Array.from(
@@ -610,7 +634,7 @@ export function useCustomerProfileData() {
       } catch (error) {
         setShowcaseIds(previousIds);
         throw new Error(
-          friendlySupabaseMessage(error, "Couldn't update your badge showcase.")
+          friendlySupabaseMessage(error, "We couldn't update your badge showcase.")
         );
       }
     },
@@ -685,7 +709,7 @@ export function useCustomerOrdersData() {
         setOrders([]);
         setSavedCount(0);
         setError(
-          friendlySupabaseMessage(nextError, "Couldn't load customer orders.")
+          friendlySupabaseMessage(nextError, "We couldn't load your orders.")
         );
       } finally {
         if (active) setLoading(false);

@@ -161,7 +161,7 @@ const founders = [
     quote:
       "Growth should not depend on creators shouting louder than everyone else. The platform should help them travel further without losing clarity.",
     bio:
-      "Jhoanis Paulo shapes how Carvver reaches people, tying together social visibility, creator promotion, and the few-click posting direction that expands discovery beyond one platform.",
+      "Jhoanis Paulo shapes how Carvver reaches people, tying together social visibility, creator promotion, and few-click posting that expands discovery beyond one platform.",
     imageSrc: founderJhoanis,
     imagePosition: "center 18%",
   },
@@ -171,7 +171,7 @@ const founders = [
     quote:
       "A community-driven platform gets stronger when the people using it feel heard early, especially while the product is still learning what the market needs most.",
     bio:
-      "Mark brings the community and partnership lens, reinforcing Carvver's early-adopter energy through local outreach, user feedback, and the collaborative direction described in the concept paper.",
+      "Mark brings the community and partnership lens, reinforcing Carvver's early-adopter energy through local outreach, user feedback, and collaborative work shaped by the concept paper.",
     imageSrc: founderMark,
     imagePosition: "center 20%",
   },
@@ -844,7 +844,7 @@ export default function HomeAboutUs() {
                   />
                   <TextScramble
                     as="p"
-                    text="That makes the platform useful in two directions at once: creators get wider reach, while customers still return to one cleaner place for profiles, reviews, trust signals, and safer payment handling."
+                    text="That gives creators wider reach while still giving customers one cleaner place for profiles, reviews, trust signals, and safer payment handling."
                     className="aboutUsFeature__text aboutUsFeature__text--muted"
                     trigger={active}
                     startDelay={220}
@@ -861,7 +861,7 @@ export default function HomeAboutUs() {
                       <Share2 className="aboutUsFlow__icon" />
                     </span>
                     <div>
-                      <h3 className="aboutUsFlow__title">Few-click posting direction</h3>
+                      <h3 className="aboutUsFlow__title">Few-click posting</h3>
                       <TextScramble
                         as="p"
                         text="One listing, wider reach, and a stronger source of truth."

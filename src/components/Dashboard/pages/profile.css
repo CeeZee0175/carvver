@@ -4,7 +4,8 @@
   position: relative;
   min-height: 100vh;
   width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .profileHubShell__base {
@@ -48,6 +49,64 @@
 
 .profilePage {
   align-content: start;
+}
+
+.profilePage--details {
+  gap: 24px;
+}
+
+.profilePage--details .profileHero,
+.profilePage--details .profileEditorBand,
+.profilePage--details .profileNotice,
+.profilePage--details .profileNavBand,
+.profilePage--details .profileSection,
+.profilePage--details .profileEmpty {
+  position: relative;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.profilePage--details .profileHero::before,
+.profilePage--details .profileEditorBand::before,
+.profilePage--details .profileNotice::before,
+.profilePage--details .profileNavBand::before,
+.profilePage--details .profileSection::before,
+.profilePage--details .profileEmpty::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(42, 20, 80, 0.02) 0%,
+    rgba(42, 20, 80, 0.12) 18%,
+    rgba(242, 193, 78, 0.22) 50%,
+    rgba(42, 20, 80, 0.12) 82%,
+    rgba(42, 20, 80, 0.02) 100%
+  );
+}
+
+.profilePage--details .profileHero {
+  padding: 28px 0 8px;
+}
+
+.profilePage--details .profileNotice,
+.profilePage--details .profileNavBand,
+.profilePage--details .profileSection {
+  padding: 24px 0 0;
+}
+
+.profilePage--details .profileEditorBand {
+  padding: 24px 0 0;
+}
+
+.profilePage--details .profileEmpty {
+  padding-inline: 0;
 }
 
 .profileCrumbs {
@@ -530,8 +589,7 @@
   color: rgba(27, 16, 46, 0.52);
 }
 
-.profileField__control,
-.profileField__value {
+.profileField__control {
   min-height: 48px;
   width: 100%;
   padding: 14px 16px;
@@ -553,20 +611,26 @@
   box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08);
 }
 
-.profileField__control--textarea,
-.profileField__value--textarea {
+.profileField__control--textarea {
   min-height: 152px;
   resize: vertical;
 }
 
-.profileField__value {
+.profileField__display {
+  min-height: 48px;
   display: flex;
   align-items: center;
-  line-height: 1.62;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.68;
+  color: rgba(27, 16, 46, 0.88);
+  overflow-wrap: anywhere;
 }
 
-.profileField__value--textarea {
+.profileField__display--textarea {
   align-items: flex-start;
+  min-height: auto;
 }
 
 .profileNavBand {
@@ -710,6 +774,11 @@
   text-align: center;
   justify-items: center;
   gap: 12px;
+}
+
+.profileEmpty--iconless {
+  gap: 14px;
+  padding-block: clamp(40px, 6vw, 70px);
 }
 
 .profileEmpty__iconWrap {
@@ -1288,6 +1357,27 @@
 
   .profileHero__title {
     font-size: clamp(48px, 14vw, 68px);
+  }
+}
+
+@media (max-width: 560px) {
+  .profilePage--details .profileHero,
+  .profilePage--details .profileEditorBand,
+  .profilePage--details .profileSection,
+  .profilePage--details .profileNotice,
+  .profilePage--details .profileNavBand,
+  .profilePage--details .profileEmpty {
+    border-radius: 0;
+  }
+
+  .profilePage--details .profileHero,
+  .profilePage--details .profileEditorBand,
+  .profilePage--details .profileSection,
+  .profilePage--details .profileNotice,
+  .profilePage--details .profileNavBand,
+  .profilePage--details .profileEmpty {
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 

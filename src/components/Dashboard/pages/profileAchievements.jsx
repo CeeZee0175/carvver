@@ -165,7 +165,7 @@ export default function ProfileAchievements() {
             </div>
             <div className="profileNotice__copy">
               <h2 className="profileNotice__title">
-                Some achievement features are unavailable right now
+                Some achievement details couldn't be loaded
               </h2>
               <p className="profileNotice__desc">{warnings[0]}</p>
             </div>
@@ -352,8 +352,8 @@ export default function ProfileAchievements() {
           <section className="profileSection">
             <EmptySurface
               icon={BadgeCheck}
-              title="Badge featuring is unavailable right now"
-              description="The catalog still works, but featured badge changes cannot be saved at the moment."
+              title="Badge updates are unavailable at the moment"
+              description="You can still browse your achievements, but badge changes cannot be saved at the moment."
             />
           </section>
         </Reveal>

@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, User, MapPinned } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowRight, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import "./sign-up.css";
 import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
+import SearchableCombobox from "../../Shared/searchable_combobox";
 import { signInWithOAuth, signUp } from "../../../lib/supabase/auth";
+import { PH_REGION_OPTIONS } from "../../../lib/phLocations";
 import {
   buildOAuthCallbackUrl,
   setAuthFlowIntent,
@@ -142,7 +144,7 @@ function RoleToggle({ value, onChange }) {
 function validateSignUpField(name, values, role) {
   const firstName = values.firstName.trim();
   const lastName = values.lastName.trim();
-  const country = values.country.trim();
+  const region = values.region.trim();
   const email = values.email.trim();
 
   switch (name) {
@@ -150,9 +152,9 @@ function validateSignUpField(name, values, role) {
       return firstName ? "" : "First name is required.";
     case "lastName":
       return lastName ? "" : "Last name is required.";
-    case "country":
-      if (role === "freelancer" && !country) {
-        return "Country is required for freelancer accounts.";
+    case "region":
+      if (role === "freelancer" && !region) {
+        return "Region is required for freelancer accounts.";
       }
       return "";
     case "email":
@@ -182,7 +184,7 @@ function getSignUpErrors(values, role) {
   [
     "firstName",
     "lastName",
-    "country",
+    "region",
     "email",
     "password",
     "confirmPassword",
@@ -200,7 +202,7 @@ function getSignUpErrors(values, role) {
 function getSocialSignUpErrors(values, role) {
   const nextErrors = {};
 
-  ["country", "agreeTerms"].forEach((fieldName) => {
+  ["region", "agreeTerms"].forEach((fieldName) => {
     const error = validateSignUpField(fieldName, values, role);
     if (error) {
       nextErrors[fieldName] = error;
@@ -236,7 +238,7 @@ export default function SignUp() {
   const [formValues, setFormValues] = useState({
     firstName: "",
     lastName: "",
-    country: "",
+    region: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -305,9 +307,9 @@ export default function SignUp() {
     setRole(nextRole);
 
     if (nextRole !== "freelancer") {
-      setFieldError("country", "");
-    } else if (fieldErrors.country) {
-      setFieldError("country", validateSignUpField("country", formValues, nextRole));
+      setFieldError("region", "");
+    } else if (fieldErrors.region) {
+      setFieldError("region", validateSignUpField("region", formValues, nextRole));
     }
 
     if (formError) setFormError("");
@@ -334,7 +336,7 @@ export default function SignUp() {
         email: formValues.email.trim(),
         password: formValues.password,
         role,
-        country: formValues.country.trim(),
+        region: formValues.region.trim(),
       });
       toast.success("Account created! Please check your email to verify.");
       if (categoryIntent) {
@@ -365,7 +367,7 @@ export default function SignUp() {
       setAuthFlowIntent({
         mode: "sign-up",
         role,
-        country: role === "freelancer" ? formValues.country.trim() : "",
+        region: role === "freelancer" ? formValues.region.trim() : "",
         firstName: formValues.firstName.trim(),
         lastName: formValues.lastName.trim(),
         categoryIntent,
@@ -479,27 +481,36 @@ export default function SignUp() {
 
             <AnimatePresence initial={false}>
               {role === "freelancer" && (
-                <motion.div key="country-field"
+                <motion.div key="region-field"
                   initial={{ opacity: 0, height: 0, y: -8 }}
                   animate={{ opacity: 1, height: "auto", y: 0 }}
                   exit={{ opacity: 0, height: 0, y: -8 }}
                   transition={{ duration: 0.28, ease: "easeInOut" }}
                   className="signUpReveal">
                   <label className="signUpFieldBlock">
-                    <span className="signUpFieldBlock__label">Country</span>
-                    <div className={`signUpField ${fieldErrors.country ? "signUpField--error" : ""}`}>
-                      <span className="signUpField__iconWrap" aria-hidden="true"><MapPinned className="signUpField__icon" /></span>
-                      <input className="signUpField__control" type="text" name="country"
-                        placeholder="Philippines" autoComplete="country-name"
-                        value={formValues.country}
-                        onChange={handleFieldChange}
-                        onBlur={handleFieldBlur}
-                        aria-invalid={fieldErrors.country ? "true" : "false"}
-                        aria-describedby={fieldErrors.country ? "sign-up-country-error" : undefined} />
-                    </div>
-                    {fieldErrors.country && (
-                      <span className="signUpFieldBlock__error" id="sign-up-country-error">
-                        {fieldErrors.country}
+                    <span className="signUpFieldBlock__label">Region</span>
+                    <SearchableCombobox
+                      value={formValues.region}
+                      onSelect={(nextValue) => {
+                        const nextValues = { ...formValues, region: nextValue };
+                        setFormValues(nextValues);
+                        if (fieldErrors.region) {
+                          setFieldError(
+                            "region",
+                            validateSignUpField("region", nextValues, role)
+                          );
+                        }
+                        if (formError) setFormError("");
+                        if (socialError) setSocialError("");
+                      }}
+                      options={PH_REGION_OPTIONS}
+                      placeholder="Choose your region"
+                      ariaLabel="Choose your region"
+                      error={Boolean(fieldErrors.region)}
+                    />
+                    {fieldErrors.region && (
+                      <span className="signUpFieldBlock__error" id="sign-up-region-error">
+                        {fieldErrors.region}
                       </span>
                     )}
                   </label>

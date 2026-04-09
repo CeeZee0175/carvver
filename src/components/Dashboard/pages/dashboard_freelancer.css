@@ -1,0 +1,573 @@
+.freelancerDash {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: clip;
+  background:
+    radial-gradient(920px 520px at 12% 0%, rgba(255, 255, 255, 0.72), transparent 58%),
+    radial-gradient(760px 420px at 88% 12%, rgba(242, 193, 78, 0.14), transparent 62%),
+    radial-gradient(780px 540px at 14% 86%, rgba(124, 58, 237, 0.08), transparent 68%),
+    linear-gradient(180deg, rgba(250, 247, 241, 1), rgba(244, 238, 232, 1));
+  color: rgba(27, 16, 46, 0.96);
+}
+
+.freelancerDash__base,
+.freelancerDash__shadow,
+.freelancerDash__bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.freelancerDash__base {
+  background: linear-gradient(180deg, rgba(250, 247, 241, 1), rgba(244, 238, 232, 1));
+}
+
+.freelancerDash__bg {
+  background:
+    radial-gradient(740px 420px at 0% 14%, rgba(124, 58, 237, 0.08), transparent 60%),
+    radial-gradient(640px 360px at 100% 18%, rgba(242, 193, 78, 0.16), transparent 64%);
+}
+
+.freelancerDash__bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 0.9rem 1rem;
+  background: rgba(250, 247, 241, 0.84);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(42, 20, 80, 0.08);
+}
+
+.freelancerDash__barInner {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.freelancerDash__brand,
+.freelancerDash__nav a {
+  color: rgba(27, 16, 46, 0.9);
+  text-decoration: none;
+}
+
+.freelancerDash__brand {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.freelancerDash__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.freelancerDash__nav a,
+.freelancerDash__signOut {
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.freelancerDash__signOut {
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  color: rgba(27, 16, 46, 0.84);
+  min-height: 2.7rem;
+  padding: 0 0.95rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+}
+
+.freelancerDash__signOutIcon,
+.freelancerDash__actionIcon,
+.freelancerDash__heroBadgeIcon,
+.freelancerDash__toolIcon,
+.freelancerDash__readinessPillIcon,
+.freelancerDash__exploreArrow,
+.freelancerDash__detailLinkIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.freelancerDash__main {
+  position: relative;
+  z-index: 2;
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 1.8rem 0 3.4rem;
+  display: grid;
+  gap: 2.3rem;
+}
+
+.freelancerDash__hero,
+.freelancerDash__band {
+  position: relative;
+  padding-top: 1.55rem;
+}
+
+.freelancerDash__hero::before,
+.freelancerDash__band::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(42, 20, 80, 0.02),
+    rgba(42, 20, 80, 0.12) 18%,
+    rgba(242, 193, 78, 0.24) 50%,
+    rgba(42, 20, 80, 0.12) 82%,
+    rgba(42, 20, 80, 0.02)
+  );
+}
+
+.freelancerDash__heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.88fr);
+  gap: 1.35rem;
+  align-items: start;
+}
+
+.freelancerDash__eyebrow,
+.freelancerDash__sectionEyebrow,
+.freelancerDash__summaryLabel,
+.freelancerDash__detailLabel {
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(87, 34, 182, 0.72);
+}
+
+.freelancerDash__title {
+  margin: 0.55rem 0 0;
+  font-size: clamp(3rem, 4vw, 4.9rem);
+  line-height: 0.94;
+  letter-spacing: -0.05em;
+  color: rgba(27, 16, 46, 0.98);
+}
+
+.freelancerDash__cursor {
+  margin-left: 0.15rem;
+  color: rgba(42, 20, 80, 0.42);
+}
+
+.freelancerDash__sub,
+.freelancerDash__sectionText,
+.freelancerDash__summaryHint,
+.freelancerDash__detailValue {
+  font-size: 0.97rem;
+  line-height: 1.72;
+  color: rgba(27, 16, 46, 0.68);
+}
+
+.freelancerDash__sub {
+  max-width: 58ch;
+  margin: 0.9rem 0 0;
+}
+
+.freelancerDash__heroActions {
+  margin-top: 1.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.freelancerDash__action {
+  min-height: 2.95rem;
+  border-radius: 999px;
+  padding: 0 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font: inherit;
+  font-size: 0.94rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.freelancerDash__action--primary {
+  border: 1px solid rgba(42, 20, 80, 0.18);
+  background: linear-gradient(180deg, rgba(42, 20, 80, 1), rgba(42, 20, 80, 0.88));
+  color: #fff;
+  box-shadow: 0 18px 42px rgba(42, 20, 80, 0.16);
+}
+
+.freelancerDash__action--ghost {
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.78);
+  color: rgba(27, 16, 46, 0.88);
+}
+
+.freelancerDash__heroSignal {
+  justify-self: stretch;
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+  padding: 1rem 0 0;
+}
+
+.freelancerDash__heroBadge,
+.freelancerDash__readinessPill,
+.freelancerDash__toolBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2rem;
+  width: fit-content;
+  padding: 0 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.82);
+}
+
+.freelancerDash__heroSignalValue,
+.freelancerDash__readinessValue,
+.freelancerDash__summaryValue,
+.freelancerDash__sectionTitle,
+.freelancerDash__exploreTitle {
+  color: rgba(27, 16, 46, 0.96);
+}
+
+.freelancerDash__heroSignalValue {
+  font-size: clamp(2.8rem, 5vw, 4.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+  font-weight: 850;
+}
+
+.freelancerDash__heroSignalText {
+  margin: 0;
+  max-width: 30ch;
+  font-size: 0.95rem;
+  line-height: 1.68;
+  color: rgba(27, 16, 46, 0.66);
+}
+
+.freelancerDash__sectionHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.freelancerDash__sectionTitle {
+  margin: 0.35rem 0 0;
+  font-size: 1.48rem;
+  line-height: 1.08;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+}
+
+.freelancerDash__sectionText {
+  margin: 0;
+  max-width: 64ch;
+}
+
+.freelancerDash__summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.freelancerDash__summaryCard {
+  min-height: 7.1rem;
+  padding: 1rem;
+  border-radius: 1.3rem;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 14px 34px rgba(12, 7, 18, 0.04);
+  display: grid;
+  gap: 0.45rem;
+  align-content: start;
+}
+
+.freelancerDash__summaryValue {
+  font-size: 1.72rem;
+  line-height: 1;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+}
+
+.freelancerDash__detailGrid,
+.freelancerDash__readinessGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.15rem;
+}
+
+.freelancerDash__detailItem {
+  padding-top: 0.95rem;
+  border-top: 1px solid rgba(42, 20, 80, 0.1);
+  display: grid;
+  gap: 0.4rem;
+}
+
+.freelancerDash__detailItem--wide {
+  grid-column: 1 / -1;
+}
+
+.freelancerDash__detailValue {
+  margin: 0;
+}
+
+.freelancerDash__detailLink {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(66, 29, 133, 0.96);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.freelancerDash__detailLink:hover {
+  text-decoration: underline;
+}
+
+.freelancerDash__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.freelancerDash__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.82);
+}
+
+.freelancerDash__toolGrid,
+.freelancerDash__exploreGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.95rem;
+}
+
+.freelancerDash__toolGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.freelancerDash__toolCard,
+.freelancerDash__exploreCard,
+.freelancerDash__messageBlock {
+  border-radius: 1.45rem;
+}
+
+.freelancerDash__toolCard {
+  padding: 1.1rem;
+  border: 1px dashed rgba(42, 20, 80, 0.16);
+  background: rgba(255, 255, 255, 0.58);
+  display: grid;
+  gap: 0.7rem;
+}
+
+.freelancerDash__toolTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.freelancerDash__toolIconWrap,
+.freelancerDash__exploreArrowWrap {
+  width: 2.3rem;
+  height: 2.3rem;
+  flex: 0 0 2.3rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(42, 20, 80, 0.06);
+  color: rgba(27, 16, 46, 0.76);
+}
+
+.freelancerDash__toolTitle {
+  margin: 0;
+  font-size: 1.06rem;
+  line-height: 1.22;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.95);
+}
+
+.freelancerDash__readiness {
+  display: grid;
+  gap: 1rem;
+}
+
+.freelancerDash__readinessTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.freelancerDash__readinessValue {
+  display: block;
+  font-size: 2.6rem;
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  font-weight: 850;
+}
+
+.freelancerDash__progressTrack {
+  width: 100%;
+  height: 0.72rem;
+  border-radius: 999px;
+  background: rgba(42, 20, 80, 0.08);
+  overflow: hidden;
+}
+
+.freelancerDash__progressFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.92), rgba(242, 193, 78, 0.92));
+}
+
+.freelancerDash__readinessItem {
+  min-height: 3rem;
+  padding: 0.85rem 1rem;
+  border-radius: 1.1rem;
+  border: 1px solid rgba(42, 20, 80, 0.08);
+  background: rgba(255, 255, 255, 0.62);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.78);
+}
+
+.freelancerDash__readinessItem--done {
+  border-color: rgba(87, 34, 182, 0.16);
+  color: rgba(27, 16, 46, 0.9);
+}
+
+.freelancerDash__readinessDot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: rgba(42, 20, 80, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(42, 20, 80, 0.08);
+}
+
+.freelancerDash__readinessItem--done .freelancerDash__readinessDot {
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.92), rgba(242, 193, 78, 0.92));
+  box-shadow: none;
+}
+
+.freelancerDash__exploreCard {
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 16px 38px rgba(12, 7, 18, 0.05);
+  padding: 1.1rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.freelancerDash__exploreCopy {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.freelancerDash__exploreTitle {
+  font-size: 1.08rem;
+  line-height: 1.2;
+}
+
+.freelancerDash__messageBlock {
+  padding: 1.2rem;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.72);
+  display: grid;
+  gap: 0.7rem;
+}
+
+.freelancerDash__messageTitle {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.94);
+}
+
+.freelancerDash__retry {
+  width: fit-content;
+  min-height: 2.7rem;
+  padding: 0 0.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  color: rgba(27, 16, 46, 0.9);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.freelancerDash__footer {
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 1024px) {
+  .freelancerDash__heroGrid,
+  .freelancerDash__summaryGrid,
+  .freelancerDash__toolGrid,
+  .freelancerDash__exploreGrid,
+  .freelancerDash__detailGrid,
+  .freelancerDash__readinessGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .freelancerDash__barInner,
+  .freelancerDash__sectionHead,
+  .freelancerDash__readinessTop {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .freelancerDash__nav {
+    gap: 0.8rem;
+  }
+
+  .freelancerDash__main {
+    width: calc(100% - 1rem);
+  }
+
+  .freelancerDash__heroActions {
+    width: 100%;
+  }
+
+  .freelancerDash__action {
+    width: 100%;
+    justify-content: center;
+  }
+}

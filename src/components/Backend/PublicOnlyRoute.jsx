@@ -4,7 +4,9 @@ import { createClient } from "../../lib/supabase/client";
 import {
   CUSTOMER_WELCOME_PATH,
   DEFAULT_CUSTOMER_DESTINATION,
+  FREELANCER_WELCOME_PATH,
   isCustomerOnboardingComplete,
+  isFreelancerOnboardingComplete,
   resolveProfileRole,
 } from "../../lib/customerOnboarding";
 
@@ -34,7 +36,11 @@ export default function PublicOnlyRoute({ children }) {
         const role = resolveProfileRole(data, session);
 
         if (role === "freelancer") {
-          setRedirectTo("/dashboard/freelancer");
+          setRedirectTo(
+            isFreelancerOnboardingComplete(data)
+              ? "/dashboard/freelancer"
+              : FREELANCER_WELCOME_PATH
+          );
           return;
         }
 

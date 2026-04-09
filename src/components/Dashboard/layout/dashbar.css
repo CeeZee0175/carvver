@@ -9,6 +9,8 @@
   top: 0;
   z-index: 60;
   width: 100%;
+  isolation: isolate;
+  overflow: visible;
 }
 
 .dashbarEnter{

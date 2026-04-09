@@ -6,7 +6,6 @@ import {
   ArrowRight,
   CreditCard,
   MapPin,
-  ShieldCheck,
   ShoppingCart,
   Sparkles,
   Store,
@@ -78,8 +77,8 @@ function CartLineItem({ item, onRemove, removing }) {
 
           {invalid && (
             <p className="cartLineItem__split cartLineItem__split--warning">
-              Remove this item before checkout. Only currently published service
-              listings can be paid through Carvver escrow.
+              Remove this item before checkout. Only currently published
+              listings can move forward to payment.
             </p>
           )}
         </div>
@@ -283,9 +282,8 @@ export default function CartPage() {
               </motion.svg>
             </div>
             <p className="cartHero__sub">
-              Collect the listings you want to book, pay the listed total
-              through PayMongo, and let Carvver hold the payment in escrow while
-              the order gets underway.
+              Keep the listings you want in one place, review the total, and
+              continue when you are ready to book them.
             </p>
           </div>
 
@@ -298,14 +296,7 @@ export default function CartPage() {
             <div className="cartHeroStat">
               <span className="cartHeroStat__label">Customer total</span>
               <strong className="cartHeroStat__value">{heroTotalValue}</strong>
-              <span className="cartHeroStat__hint">Charged at the listed price</span>
-            </div>
-            <div className="cartHeroStat">
-              <span className="cartHeroStat__label">Escrow</span>
-              <strong className="cartHeroStat__value">Held safely</strong>
-              <span className="cartHeroStat__hint">
-                Released only after the order moves forward
-              </span>
+              <span className="cartHeroStat__hint">Based on the listed prices</span>
             </div>
           </div>
         </section>
@@ -333,7 +324,7 @@ export default function CartPage() {
               </h2>
               <p className="cartNotice__desc">
                 {checkoutState === "success"
-                  ? "We're syncing PayMongo confirmation with your escrow-backed orders now. If your cart does not clear immediately, give it a moment and refresh."
+                  ? "We are syncing your payment into your orders now. If your cart does not clear right away, give it a moment and refresh."
                   : "Your cart is still intact. You can review the listings or try checkout again whenever you're ready."}
               </p>
             </div>
@@ -360,7 +351,7 @@ export default function CartPage() {
           <EmptySurface
             icon={Sparkles}
             title="Payment is in motion"
-            description="Your cart is clear and Carvver is syncing the paid checkout into customer orders. Check your order page in a moment for the escrow-backed entries."
+            description="Your cart is clear and your payment is being added to your orders now. Check your order page again in a moment."
             actionLabel="Open orders"
             onAction={() => navigate("/dashboard/customer/orders")}
           />
@@ -370,7 +361,7 @@ export default function CartPage() {
           <EmptySurface
             icon={ShoppingCart}
             title="Your cart is empty"
-            description="Add listings from Browse Services or Saved Listings when you want to collect work before a single PayMongo checkout."
+            description="Add listings from Browse Services or Saved Listings when you want to keep work in one place before checkout."
             actionLabel="Browse services"
             className="cartPage__empty"
             actionButtonClassName="cartPage__emptyBtn"
@@ -433,7 +424,7 @@ export default function CartPage() {
               <section className="cartSummary">
                 <div className="cartSummary__head">
                   <p className="cartSection__eyebrow">Checkout summary</p>
-                  <h2 className="cartSection__title">PayMongo + escrow</h2>
+                  <h2 className="cartSection__title">Ready when you are</h2>
                 </div>
 
                 <div className="cartSummary__rows">
@@ -444,10 +435,6 @@ export default function CartPage() {
                   <div className="cartSummary__row">
                     <span>Customer total charged</span>
                     <strong>{formatPeso(summary.subtotal)}</strong>
-                  </div>
-                  <div className="cartSummary__row cartSummary__row--muted">
-                    <span>Escrow protection</span>
-                    <strong>Included</strong>
                   </div>
                 </div>
 
@@ -490,34 +477,13 @@ export default function CartPage() {
                   <span className="cartCheckoutBtn__copy">
                     <span className="cartCheckoutBtn__eyebrow">Checkout</span>
                     <strong className="cartCheckoutBtn__title">
-                      {checkoutLoading ? "Opening PayMongo..." : "Pay with PayMongo"}
+                      {checkoutLoading ? "Opening checkout..." : "Continue to payment"}
                     </strong>
                   </span>
                   <span className="cartCheckoutBtn__iconWrap" aria-hidden="true">
                     <CreditCard className="cartCheckoutBtn__icon" />
                   </span>
                 </motion.button>
-
-                <div className="cartInfoCard">
-                  <div className="cartInfoCard__top">
-                    <div className="cartInfoCard__iconWrap" aria-hidden="true">
-                      <ShieldCheck className="cartInfoCard__icon" />
-                    </div>
-                    <div>
-                      <h3 className="cartInfoCard__title">Escrow-first flow</h3>
-                      <p className="cartInfoCard__desc">
-                        PayMongo handles the checkout while Carvver records the
-                        order with payment held in escrow first, giving both sides
-                        a calmer starting point.
-                      </p>
-                    </div>
-                  </div>
-                  <ul className="cartInfoCard__list">
-                    <li>GCash and card payments go through PayMongo checkout.</li>
-                    <li>You pay only the listed service price.</li>
-                    <li>Funds stay held first while the order is created.</li>
-                  </ul>
-                </div>
 
                 <motion.button
                   type="button"

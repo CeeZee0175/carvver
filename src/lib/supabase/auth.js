@@ -1,4 +1,5 @@
 import { createClient } from "./client";
+import { PHILIPPINES_COUNTRY } from "../phLocations";
 
 const supabase = createClient();
 
@@ -60,7 +61,7 @@ function getAvatarUrl(user) {
   return metadata.avatar_url || metadata.picture || metadata.avatar || null;
 }
 
-export async function signUp({ firstName, lastName, email, password, role, country }) {
+export async function signUp({ firstName, lastName, email, password, role, region }) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -69,7 +70,8 @@ export async function signUp({ firstName, lastName, email, password, role, count
         first_name: firstName,
         last_name: lastName,
         role,
-        country: country || null,
+        region: region || null,
+        country: region ? PHILIPPINES_COUNTRY : null,
       },
     },
   });
@@ -175,7 +177,11 @@ export async function ensureProfileForSession(session, intent = {}) {
       first_name: names.firstName,
       last_name: names.lastName,
       role: intent.role || user.user_metadata?.role || "customer",
-      country: intent.country || user.user_metadata?.country || null,
+      region: intent.region || user.user_metadata?.region || null,
+      country:
+        intent.region || user.user_metadata?.region
+          ? PHILIPPINES_COUNTRY
+          : intent.country || user.user_metadata?.country || null,
       avatar_url: getAvatarUrl(user),
     };
 
@@ -197,6 +203,12 @@ export async function ensureProfileForSession(session, intent = {}) {
         updates.last_name = names.lastName;
         shouldUpdate = true;
       }
+    }
+
+    if (!profile.region && intent.region) {
+      updates.region = intent.region;
+      updates.country = PHILIPPINES_COUNTRY;
+      shouldUpdate = true;
     }
 
     if (!profile.country && intent.country) {

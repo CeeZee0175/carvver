@@ -2,35 +2,29 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import {
-  Award,
-  BadgeCheck,
   ChevronRight,
   Facebook,
   Globe,
   Instagram,
   Mail,
-  MapPin,
-  Share2,
-  ShieldCheck,
 } from "lucide-react";
 import "./home_footer.css";
+import { createClient } from "../../../lib/supabase/client";
+import {
+  buildCategoryPath,
+  setFeaturedCategoryIntent,
+} from "../../../lib/featuredCategoryIntent";
+import { ALL_SERVICE_CATEGORIES } from "../../../lib/serviceCategories";
+
+const supabase = createClient();
 
 const exploreLinks = [
   { label: "Home", target: "home-hero" },
   { label: "About Us", routeKey: "about-us" },
-  { label: "Categories", target: "home-categories" },
   { label: "How It Works", target: "home-how" },
   { label: "Stay Tuned", target: "home-updates" },
   { label: "Community", routeKey: "community" },
   { label: "Pricing", routeKey: "pricing" },
-];
-
-const platformLinks = [
-  { label: "Achievements and Badges", Icon: Award, target: null },
-  { label: "Verified Badges", Icon: BadgeCheck, target: null },
-  { label: "Few-click Posting", Icon: Share2, target: null },
-  { label: "Secured Transactions", Icon: ShieldCheck, target: null },
-  { label: "Location Services", Icon: MapPin, target: "home-categories" },
 ];
 
 const supportLinks = [
@@ -146,6 +140,10 @@ function FooterLinkItem({ item, index, onNavigate, onRouteNavigate, active }) {
       whileHover={{ x: 2 }}
       whileTap={{ scale: 0.985 }}
       onClick={() => {
+        if (item.onClick) {
+          item.onClick();
+          return;
+        }
         if (item.route) {
           onRouteNavigate(item.route);
           return;
@@ -195,6 +193,35 @@ export default function HomeFooter({ fullBleed = false }) {
 
     return item;
   });
+
+  const handleCategoryNavigate = async (category) => {
+    const normalized = String(category || "").trim();
+    if (!normalized) return;
+
+    setFeaturedCategoryIntent(normalized);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session) {
+        navigate(buildCategoryPath("/dashboard/customer/browse-services", normalized));
+        return;
+      }
+    } catch {
+      // Fall through to sign-up.
+    }
+
+    navigate(buildCategoryPath("/sign-up", normalized));
+  };
+
+  const categoryLinks = ALL_SERVICE_CATEGORIES.map((label) => ({
+    label,
+    onClick: () => {
+      handleCategoryNavigate(label);
+    },
+  }));
 
   const scrollToTarget = (id) => {
     if (!id) return;
@@ -294,9 +321,9 @@ export default function HomeFooter({ fullBleed = false }) {
             </div>
 
             <div className="homeFooter__col">
-              <FooterHeading active={inView}>Platform</FooterHeading>
-              <div className="homeFooter__links">
-                {platformLinks.map((item, index) => (
+              <FooterHeading active={inView}>Categories</FooterHeading>
+              <div className="homeFooter__links homeFooter__links--categories">
+                {categoryLinks.map((item, index) => (
                   <FooterLinkItem
                     key={item.label}
                     item={item}

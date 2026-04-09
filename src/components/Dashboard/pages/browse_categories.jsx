@@ -15,25 +15,16 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Bookmark,
-  Camera,
   Check,
   ChevronDown,
-  GraduationCap,
   ShieldCheck,
   MapPin,
-  Mic2,
   Package,
-  Palette,
-  PenTool,
-  Share2,
-  ShoppingBag,
   ShoppingCart,
   SlidersHorizontal,
   Sparkles,
   Star,
-  Video,
   BadgeCheck,
-  Code2,
   ArrowUpDown,
   X,
   Clock,
@@ -57,6 +48,11 @@ import HomeFooter from "../../Homepage/layout/home_footer";
 import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
 import { createClient } from "../../../lib/supabase/client";
 import {
+  ALL_SERVICE_CATEGORIES,
+  SERVICE_CATEGORY_GROUPS,
+  getCategoryIcon,
+} from "../../../lib/serviceCategories";
+import {
   clearFeaturedCategoryIntent,
   resolveFeaturedCategoryIntent,
 } from "../../../lib/featuredCategoryIntent";
@@ -74,44 +70,8 @@ const PH_BOUNDS = [
   [21.8, 127.5],
 ];
 
-const CATEGORY_GROUPS = [
-  {
-    label: "Creative Services",
-    items: [
-      "Art & Illustration",
-      "Graphic Design",
-      "Video Editing",
-      "Voice Over",
-      "Social Media",
-      "Photography",
-      "Web Development",
-    ],
-  },
-  {
-    label: "Handmade & Custom Work",
-    items: [
-      "Handmade Products",
-      "Plushies",
-      "Custom Gifts",
-      "Costumes & Props",
-      "Crochet & Knitting",
-      "Embroidery",
-    ],
-  },
-  {
-    label: "Learning & Support",
-    items: [
-      "Tutoring",
-      "Language Help",
-      "Writing",
-      "Virtual Assistance",
-      "Craft Lessons",
-      "Event Styling",
-    ],
-  },
-];
-
-const ALL_CATEGORY_ITEMS = CATEGORY_GROUPS.flatMap((group) => group.items);
+const CATEGORY_GROUPS = SERVICE_CATEGORY_GROUPS;
+const ALL_CATEGORY_ITEMS = ALL_SERVICE_CATEGORIES;
 
 const DELIVERY_OPTIONS = [
   { label: "Any", value: null },
@@ -338,22 +298,6 @@ const ACCENT_COLORS = [
 ];
 
 const ITEMS_PER_PAGE = 8;
-
-const CATEGORY_ICONS = {
-  "Art & Illustration": Palette,
-  "Photography": Camera,
-  "Video Editing": Video,
-  "Graphic Design": PenTool,
-  "Voice Over": Mic2,
-  "Social Media": Share2,
-  "Web Development": Code2,
-  "Tutoring": GraduationCap,
-  "Handmade Products": ShoppingBag,
-};
-
-function getCategoryIcon(category) {
-  return CATEGORY_ICONS[category] || Package;
-}
 
 function createPinIcon(className) {
   return L.divIcon({
@@ -1093,7 +1037,7 @@ function ServiceCard({
               whileHover={{ x: 2 }}
               whileTap={{ scale: 0.96 }}
               transition={cardTransition}
-              onClick={() => toast("Service detail page coming soon!")}
+              onClick={() => toast("Service details aren't available yet.")}
             >
               View
               <ArrowRight style={{ width: 13, height: 13 }} />
