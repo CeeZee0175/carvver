@@ -146,7 +146,7 @@
 .notifPage__titleWrap{
   position: relative;
   display: inline-block;
-  padding-bottom: 18px;
+  padding-bottom: 0;
 }
 
 .notifPage__title{
@@ -156,6 +156,17 @@
   line-height: 0.95;
   font-weight: 700;
   color: var(--notif-ink);
+  display: inline-block;
+}
+
+.notifPage__titleText{
+  position: relative;
+  display: inline-block;
+  padding-bottom: 16px;
+}
+
+.notifPage__titleTextValue{
+  display: inline-block;
 }
 
 .notifPage__cursor{
@@ -165,11 +176,11 @@
 
 .notifPage__line{
   position: absolute;
-  left: -8px;
-  right: -8px;
+  left: 7%;
+  right: auto;
   bottom: 0;
-  width: calc(100% + 16px);
-  height: 18px;
+  width: 86%;
+  height: 16px;
   color: rgba(242,193,78,0.96);
 }
 

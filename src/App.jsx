@@ -36,6 +36,7 @@ const CartPage = lazy(() => import("./components/Dashboard/pages/cart_page"));
 const PostRequest = lazy(() => import("./components/Dashboard/pages/post_request"));
 const NotifPage = lazy(() => import("./components/Dashboard/pages/notifPage"));
 const Profile = lazy(() => import("./components/Dashboard/pages/profile"));
+const CustomerSettings = lazy(() => import("./components/Dashboard/pages/customer_settings"));
 const ProfileAchievements = lazy(() => import("./components/Dashboard/pages/profileAchievements"));
 const CustomerOrders = lazy(() => import("./components/Dashboard/pages/customerOrders"));
 const CustomerFreelancerProfile = lazy(() =>
@@ -404,6 +405,16 @@ function AppRoutes() {
           <Suspense fallback={<RouteFallback />}>
             <CustomerRoute>
               <Profile />
+            </CustomerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/customer/settings"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <CustomerRoute>
+              <CustomerSettings />
             </CustomerRoute>
           </Suspense>
         }

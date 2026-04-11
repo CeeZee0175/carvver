@@ -6,7 +6,6 @@ import {
   ArrowRight,
   CreditCard,
   MapPin,
-  ShoppingCart,
   Sparkles,
   Store,
   Trash2,
@@ -52,13 +51,11 @@ function CartLineItem({ item, onRemove, removing }) {
             <span className="cartLineItem__category">
               {service?.category || "Unavailable service"}
             </span>
-            <span
-              className={`cartLineItem__status ${
-                invalid ? "cartLineItem__status--invalid" : ""
-              }`}
-            >
-              {invalid ? "Unavailable" : "Ready for checkout"}
-            </span>
+            {invalid ? (
+              <span className="cartLineItem__status cartLineItem__status--invalid">
+                Unavailable
+              </span>
+            ) : null}
           </div>
 
           <h3 className="cartLineItem__title">
@@ -258,7 +255,6 @@ export default function CartPage() {
       <Reveal delay={0.04}>
         <section className="cartHero">
           <div className="cartHero__heading">
-            <p className="cartHero__eyebrow">Customer Cart</p>
             <div className="cartHero__titleWrap">
               <h1 className="cartHero__title">
                 <TypewriterHeading text="Cart" />
@@ -281,22 +277,16 @@ export default function CartPage() {
                 />
               </motion.svg>
             </div>
-            <p className="cartHero__sub">
-              Keep the listings you want in one place, review the total, and
-              continue when you are ready to book them.
-            </p>
           </div>
 
           <div className="cartHero__stats">
-            <div className="cartHeroStat">
+            <div className="cartHeroStat cartHeroStat--open">
               <span className="cartHeroStat__label">Listings</span>
               <strong className="cartHeroStat__value">{heroListingsValue}</strong>
-              <span className="cartHeroStat__hint">Ready for checkout</span>
             </div>
-            <div className="cartHeroStat">
+            <div className="cartHeroStat cartHeroStat--open">
               <span className="cartHeroStat__label">Customer total</span>
               <strong className="cartHeroStat__value">{heroTotalValue}</strong>
-              <span className="cartHeroStat__hint">Based on the listed prices</span>
             </div>
           </div>
         </section>
@@ -359,9 +349,8 @@ export default function CartPage() {
       ) : showEmptyCart ? (
         <Reveal delay={0.1}>
           <EmptySurface
-            icon={ShoppingCart}
+            hideIcon
             title="Your cart is empty"
-            description="Add listings from Browse Services or Saved Listings when you want to keep work in one place before checkout."
             actionLabel="Browse services"
             className="cartPage__empty"
             actionButtonClassName="cartPage__emptyBtn"

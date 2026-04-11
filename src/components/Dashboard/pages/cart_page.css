@@ -78,7 +78,7 @@
 .cartHero__titleWrap {
   position: relative;
   display: inline-block;
-  padding-bottom: 18px;
+  padding-bottom: 16px;
 }
 
 .cartHero__title {
@@ -101,50 +101,63 @@
   color: rgba(242, 193, 78, 0.96);
 }
 
-.cartHero__sub {
-  margin: 10px 0 0;
-  max-width: 62ch;
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 15px;
-  line-height: 1.72;
-  color: rgba(27, 16, 46, 0.72);
-}
-
 .cartHero__stats {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 12px;
+  align-content: end;
+  gap: 18px 26px;
 }
 
 .cartHeroStat {
-  min-height: 102px;
-  padding: 16px;
-  border-radius: 20px;
-  border: 1px solid rgba(42, 20, 80, 0.1);
-  background: rgba(255, 255, 255, 0.8);
   display: grid;
-  gap: 6px;
+  gap: 10px;
+  align-content: start;
+}
+
+.cartHeroStat--open {
+  position: relative;
+  min-height: auto;
+  padding: 8px 0 10px 20px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.cartHeroStat--open::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(42, 20, 80, 0.1) 0%,
+    rgba(124, 58, 237, 0.34) 48%,
+    rgba(242, 193, 78, 0.3) 100%
+  );
 }
 
 .cartHeroStat__label {
   font-family: Inter, system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.11em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(87, 34, 182, 0.72);
+  color: rgba(42, 20, 80, 0.58);
 }
 
 .cartHeroStat__value {
   font-family: Inter, system-ui, sans-serif;
-  font-size: clamp(24px, 2.4vw, 30px);
-  line-height: 1;
+  font-size: clamp(38px, 4vw, 50px);
+  line-height: 0.9;
   font-weight: 850;
   letter-spacing: -0.04em;
   color: rgba(27, 16, 46, 0.98);
 }
 
-.cartHeroStat__hint,
 .cartNotice__desc,
 .cartLineItem__info,
 .cartLineItem__split,
@@ -736,20 +749,24 @@
 }
 
 .cartPage__empty {
-  gap: 16px;
+  gap: 18px;
   padding-inline: 0;
+  padding-block: clamp(52px, 7vw, 82px);
 }
 
-.cartPage__empty .profileEmpty__desc {
-  max-width: 42ch;
-  margin-bottom: 8px;
+.cartPage__empty.profileEmpty--iconless {
+  gap: 18px;
+}
+
+.cartPage__empty .profileEmpty__title {
+  max-width: 18ch;
 }
 
 .cartPage__empty .profileEmpty__btn,
 .cartPage__emptyBtn {
   position: relative;
   overflow: hidden;
-  margin-top: 8px;
+  margin-top: 12px;
   min-width: 184px;
   transition:
     transform 280ms cubic-bezier(0.22, 1, 0.36, 1),

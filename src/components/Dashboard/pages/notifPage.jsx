@@ -50,7 +50,7 @@ function TypewriterHeading({ text = "Notifications" }) {
   }, [text, reduceMotion]);
 
   return (
-    <h1 className="notifPage__title">
+    <span className="notifPage__titleTextValue">
       {displayText}
       {!reduceMotion && displayText.length < text.length && (
         <motion.span
@@ -62,7 +62,7 @@ function TypewriterHeading({ text = "Notifications" }) {
           |
         </motion.span>
       )}
-    </h1>
+    </span>
   );
 }
 
@@ -334,24 +334,28 @@ export default function NotifPage() {
 
           <div className="notifPage__hero">
             <div className="notifPage__titleWrap">
-              <TypewriterHeading />
-              <motion.svg
-                className="notifPage__line"
-                viewBox="0 0 300 20"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                <motion.path
-                  d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 1.05, ease: "easeInOut", delay: 0.1 }}
-                />
-              </motion.svg>
+              <h1 className="notifPage__title">
+                <span className="notifPage__titleText">
+                  <TypewriterHeading />
+                  <motion.svg
+                    className="notifPage__line"
+                    viewBox="0 0 300 20"
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                  >
+                    <motion.path
+                      d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 1.05, ease: "easeInOut", delay: 0.1 }}
+                    />
+                  </motion.svg>
+                </span>
+              </h1>
             </div>
           </div>
 

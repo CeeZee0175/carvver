@@ -1,7 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { LoaderCircle } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  LoaderCircle,
+} from "lucide-react";
 import "./profile.css";
 import "./post_request.css";
 import {
@@ -13,7 +18,6 @@ import {
   REQUEST_MEDIA_MAX_IMAGE_BYTES,
   REQUEST_MEDIA_MAX_VIDEO_BYTES,
   REQUEST_MEDIA_MAX_VIDEOS,
-  REQUEST_TIMELINE_OPTIONS,
   useCustomerRequests,
 } from "../hooks/useCustomerRequests";
 import {
@@ -30,8 +34,72 @@ const INITIAL_FORM = {
   description: "",
   budgetAmount: "",
   location: "",
-  timeline: "Flexible",
+  timeline: "",
 };
+
+const CATEGORY_OPTIONS = [...REQUEST_CATEGORY_OPTIONS, "Other"];
+const DEADLINE_WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function getTodayDateValue() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function createDateFromValue(value) {
+  return new Date(`${value}T00:00:00`);
+}
+
+function formatDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatDeadlineValue(value) {
+  if (!value) return "";
+
+  try {
+    return new Intl.DateTimeFormat("en-PH", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(createDateFromValue(value));
+  } catch {
+    return value;
+  }
+}
+
+function formatMonthLabel(date) {
+  return new Intl.DateTimeFormat("en-PH", {
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function buildCalendarDays(monthDate, minDateValue) {
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+  const firstOfMonth = new Date(year, month, 1);
+  const startDay = firstOfMonth.getDay();
+  const startDate = new Date(year, month, 1 - startDay);
+  const todayValue = getTodayDateValue();
+  const selectedDays = [];
+
+  for (let index = 0; index < 42; index += 1) {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + index);
+    const value = formatDateKey(date);
+    selectedDays.push({
+      value,
+      dateNumber: date.getDate(),
+      inMonth: date.getMonth() === month,
+      isDisabled: value < minDateValue,
+      isToday: value === todayValue,
+    });
+  }
+
+  return selectedDays;
+}
 
 function buildAttachmentErrorMessage(file) {
   const isVideo = String(file?.type || "").startsWith("video/");
@@ -48,11 +116,26 @@ export default function PostRequest() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const attachmentsRef = useRef([]);
+  const categoryWrapRef = useRef(null);
+  const categoryButtonRef = useRef(null);
+  const categoryOptionRefs = useRef([]);
+  const deadlineWrapRef = useRef(null);
+  const deadlineButtonRef = useRef(null);
+  const categoryListId = useId();
+  const deadlineGridId = useId();
   const { openCount } = useCustomerRequests({ limit: 2 });
   const [formValues, setFormValues] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [attachments, setAttachments] = useState([]);
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [categoryFocusIndex, setCategoryFocusIndex] = useState(-1);
+  const [deadlineOpen, setDeadlineOpen] = useState(false);
+  const [visibleMonth, setVisibleMonth] = useState(() => {
+    const initialValue = INITIAL_FORM.timeline || getTodayDateValue();
+    const initialDate = createDateFromValue(initialValue);
+    return new Date(initialDate.getFullYear(), initialDate.getMonth(), 1);
+  });
 
   useEffect(() => {
     attachmentsRef.current = attachments;
@@ -67,11 +150,76 @@ export default function PostRequest() {
     []
   );
 
+  useEffect(() => {
+    if (!categoryOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (!categoryWrapRef.current?.contains(event.target)) {
+        setCategoryOpen(false);
+        setCategoryFocusIndex(-1);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setCategoryOpen(false);
+        setCategoryFocusIndex(-1);
+        categoryButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [categoryOpen]);
+
+  useEffect(() => {
+    if (!deadlineOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (!deadlineWrapRef.current?.contains(event.target)) {
+        setDeadlineOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setDeadlineOpen(false);
+        deadlineButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [deadlineOpen]);
+
+  useEffect(() => {
+    if (!categoryOpen || categoryFocusIndex < 0) return;
+    categoryOptionRefs.current[categoryFocusIndex]?.focus();
+  }, [categoryOpen, categoryFocusIndex]);
+
   const attachmentStats = useMemo(() => {
     const images = attachments.filter((item) => item.kind === "image").length;
     const videos = attachments.filter((item) => item.kind === "video").length;
     return { images, videos };
   }, [attachments]);
+
+  const selectedCategoryLabel =
+    CATEGORY_OPTIONS.find((option) => option === formValues.category) || "";
+  const minimumDateValue = getTodayDateValue();
+  const calendarDays = useMemo(
+    () => buildCalendarDays(visibleMonth, minimumDateValue),
+    [minimumDateValue, visibleMonth]
+  );
 
   const updateField = (field, value) => {
     setFormValues((prev) => ({ ...prev, [field]: value }));
@@ -153,13 +301,16 @@ export default function PostRequest() {
     if (!title) return void setError("Please add a short title for your request.");
     if (!category) return void setError("Please choose a category.");
     if (!description) return void setError("Please describe what you want clearly.");
-    if (!timeline) return void setError("Please choose a timeline.");
+    if (!budgetAmount) return void setError("Please enter your budget amount.");
+    if (!timeline) return void setError("Please choose a deadline date.");
 
-    if (budgetAmount !== "") {
-      const numericBudget = Number(budgetAmount);
-      if (!Number.isFinite(numericBudget) || numericBudget <= 0) {
-        return void setError("Please enter a valid budget amount.");
-      }
+    const numericBudget = Number(budgetAmount);
+    if (!Number.isFinite(numericBudget) || numericBudget <= 0) {
+      return void setError("Please enter a valid budget amount.");
+    }
+
+    if (timeline < getTodayDateValue()) {
+      return void setError("Please choose a deadline that is today or later.");
     }
 
     try {
@@ -190,6 +341,107 @@ export default function PostRequest() {
     }
   };
 
+  const handleCategoryToggle = () => {
+    setCategoryOpen((prev) => {
+      const nextOpen = !prev;
+      if (nextOpen) {
+        const selectedIndex = Math.max(
+          0,
+          CATEGORY_OPTIONS.findIndex((option) => option === formValues.category)
+        );
+        setCategoryFocusIndex(selectedIndex >= 0 ? selectedIndex : 0);
+      } else {
+        setCategoryFocusIndex(-1);
+      }
+      return nextOpen;
+    });
+  };
+
+  const handleCategorySelect = (value) => {
+    updateField("category", value);
+    setCategoryOpen(false);
+    setCategoryFocusIndex(-1);
+    categoryButtonRef.current?.focus();
+  };
+
+  const handleCategoryTriggerKeyDown = (event) => {
+    if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      if (!categoryOpen) {
+        setCategoryOpen(true);
+        const selectedIndex = CATEGORY_OPTIONS.findIndex(
+          (option) => option === formValues.category
+        );
+        setCategoryFocusIndex(selectedIndex >= 0 ? selectedIndex : 0);
+      }
+    }
+  };
+
+  const handleCategoryOptionKeyDown = (event, index) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setCategoryFocusIndex((index + 1) % CATEGORY_OPTIONS.length);
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setCategoryFocusIndex((index - 1 + CATEGORY_OPTIONS.length) % CATEGORY_OPTIONS.length);
+      return;
+    }
+
+    if (event.key === "Home") {
+      event.preventDefault();
+      setCategoryFocusIndex(0);
+      return;
+    }
+
+    if (event.key === "End") {
+      event.preventDefault();
+      setCategoryFocusIndex(CATEGORY_OPTIONS.length - 1);
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleCategorySelect(CATEGORY_OPTIONS[index]);
+    }
+  };
+
+  const handleDeadlineToggle = () => {
+    setDeadlineOpen((prev) => {
+      const nextOpen = !prev;
+      if (nextOpen) {
+        const anchorValue = formValues.timeline || minimumDateValue;
+        const anchorDate = createDateFromValue(anchorValue);
+        setVisibleMonth(new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 1));
+      }
+      return nextOpen;
+    });
+  };
+
+  const handleDeadlineSelect = (value) => {
+    if (value < minimumDateValue) return;
+    updateField("timeline", value);
+    const nextDate = createDateFromValue(value);
+    setVisibleMonth(new Date(nextDate.getFullYear(), nextDate.getMonth(), 1));
+    setDeadlineOpen(false);
+    deadlineButtonRef.current?.focus();
+  };
+
+  const shiftVisibleMonth = (direction) => {
+    setVisibleMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + direction, 1));
+  };
+
+  const handleDeadlineTriggerKeyDown = (event) => {
+    if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      if (!deadlineOpen) {
+        setDeadlineOpen(true);
+      }
+    }
+  };
+
   return (
     <CustomerDashboardFrame mainClassName="profilePage requestPage">
       <Reveal>
@@ -199,16 +451,11 @@ export default function PostRequest() {
       <Reveal delay={0.04}>
         <section className="requestPage__hero">
           <div className="requestPage__heroCopy">
-            <p className="requestPage__eyebrow">Customer Requests</p>
             <div className="requestPage__titleWrap">
               <h1 className="requestPage__title">
                 <TypewriterHeading text="Post a Request" />
               </h1>
             </div>
-            <p className="requestPage__sub">
-              Write a clear brief, add optional photos or video if they help,
-              and make it easy for freelancers to understand what you need.
-            </p>
           </div>
 
           <div className="requestPage__stats">
@@ -233,11 +480,7 @@ export default function PostRequest() {
         <form className="requestComposer" onSubmit={handleSubmit} noValidate>
           <div className="requestComposer__head">
             <div>
-              <p className="requestComposer__eyebrow">Request brief</p>
               <h2 className="requestComposer__title">Tell freelancers what you need</h2>
-              <p className="requestComposer__desc">
-                Keep the details clear and direct so the right freelancer can understand the work quickly.
-              </p>
             </div>
             <motion.button
               type="button"
@@ -265,38 +508,194 @@ export default function PostRequest() {
               />
             </label>
 
-            <label className="requestField">
+            <div className="requestField" ref={categoryWrapRef}>
               <span className="requestField__label">Category</span>
-              <select
-                className="requestField__input requestField__select"
-                value={formValues.category}
-                onChange={(event) => updateField("category", event.target.value)}
-                disabled={submitting}
-              >
-                <option value="">Choose a category</option>
-                {REQUEST_CATEGORY_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <div className={`requestDropdown ${categoryOpen ? "requestDropdown--open" : ""}`}>
+                <motion.button
+                  ref={categoryButtonRef}
+                  type="button"
+                  className="requestField__input requestDropdown__trigger"
+                  aria-haspopup="listbox"
+                  aria-expanded={categoryOpen}
+                  aria-controls={categoryListId}
+                  whileHover={submitting ? {} : { y: -1.5 }}
+                  whileTap={submitting ? {} : { scale: 0.992 }}
+                  transition={PROFILE_SPRING}
+                  onClick={handleCategoryToggle}
+                  onKeyDown={handleCategoryTriggerKeyDown}
+                  disabled={submitting}
+                >
+                  <span
+                    className={`requestDropdown__value ${
+                      selectedCategoryLabel ? "" : "requestDropdown__value--placeholder"
+                    }`}
+                  >
+                    {selectedCategoryLabel || "Choose a category"}
+                  </span>
+                  <ChevronDown className="requestDropdown__chevron" aria-hidden="true" />
+                </motion.button>
 
-            <label className="requestField">
-              <span className="requestField__label">Timeline</span>
-              <select
-                className="requestField__input requestField__select"
-                value={formValues.timeline}
-                onChange={(event) => updateField("timeline", event.target.value)}
-                disabled={submitting}
-              >
-                {REQUEST_TIMELINE_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </label>
+                <AnimatePresence>
+                  {categoryOpen ? (
+                    <motion.div
+                      id={categoryListId}
+                      className="requestDropdown__menu"
+                      role="listbox"
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 6, scale: 0.985 }}
+                      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      {CATEGORY_OPTIONS.map((option, index) => {
+                        const selected = option === formValues.category;
+                        return (
+                          <motion.button
+                            key={option}
+                            ref={(node) => {
+                              categoryOptionRefs.current[index] = node;
+                            }}
+                            type="button"
+                            role="option"
+                            aria-selected={selected}
+                            className={`requestDropdown__option ${
+                              selected ? "requestDropdown__option--selected" : ""
+                            }`}
+                            whileHover={{ x: 2 }}
+                            transition={{ duration: 0.16 }}
+                            onClick={() => handleCategorySelect(option)}
+                            onKeyDown={(event) => handleCategoryOptionKeyDown(event, index)}
+                          >
+                            {option}
+                          </motion.button>
+                        );
+                      })}
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            <div className="requestField" ref={deadlineWrapRef}>
+              <span className="requestField__label">Deadline</span>
+              <div className={`requestDateField ${deadlineOpen ? "requestDateField--open" : ""}`}>
+                <motion.button
+                  ref={deadlineButtonRef}
+                  type="button"
+                  className="requestField__input requestDateField__trigger"
+                  aria-haspopup="dialog"
+                  aria-expanded={deadlineOpen}
+                  aria-controls={deadlineGridId}
+                  whileHover={submitting ? {} : { y: -1.5 }}
+                  whileTap={submitting ? {} : { scale: 0.992 }}
+                  transition={PROFILE_SPRING}
+                  onClick={handleDeadlineToggle}
+                  onKeyDown={handleDeadlineTriggerKeyDown}
+                  disabled={submitting}
+                >
+                  <span
+                    className={`requestDateField__value ${
+                      formValues.timeline ? "" : "requestDateField__value--placeholder"
+                    }`}
+                  >
+                    {formValues.timeline
+                      ? formatDeadlineValue(formValues.timeline)
+                      : "Choose a deadline"}
+                  </span>
+                  <ChevronDown className="requestDateField__chevron" aria-hidden="true" />
+                </motion.button>
+
+                <AnimatePresence>
+                  {deadlineOpen ? (
+                    <motion.div
+                      id={deadlineGridId}
+                      className="requestCalendar"
+                      role="dialog"
+                      aria-label="Choose a deadline"
+                      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.985 }}
+                      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      <div className="requestCalendar__header">
+                        <motion.button
+                          type="button"
+                          className="requestCalendar__nav"
+                          whileHover={{ y: -1.5 }}
+                          whileTap={{ scale: 0.96 }}
+                          transition={PROFILE_SPRING}
+                          onClick={() => shiftVisibleMonth(-1)}
+                        >
+                          <ChevronLeft aria-hidden="true" />
+                        </motion.button>
+
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.strong
+                            key={formatMonthLabel(visibleMonth)}
+                            className="requestCalendar__month"
+                            initial={{ opacity: 0, y: 6, filter: "blur(6px)" }}
+                            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                            exit={{ opacity: 0, y: -6, filter: "blur(6px)" }}
+                            transition={{ duration: 0.18 }}
+                          >
+                            {formatMonthLabel(visibleMonth)}
+                          </motion.strong>
+                        </AnimatePresence>
+
+                        <motion.button
+                          type="button"
+                          className="requestCalendar__nav"
+                          whileHover={{ y: -1.5 }}
+                          whileTap={{ scale: 0.96 }}
+                          transition={PROFILE_SPRING}
+                          onClick={() => shiftVisibleMonth(1)}
+                        >
+                          <ChevronRight aria-hidden="true" />
+                        </motion.button>
+                      </div>
+
+                      <div className="requestCalendar__weekdays">
+                        {DEADLINE_WEEKDAYS.map((day) => (
+                          <span key={day} className="requestCalendar__weekday">
+                            {day}
+                          </span>
+                        ))}
+                      </div>
+
+                      <motion.div
+                        key={`${visibleMonth.getFullYear()}-${visibleMonth.getMonth()}`}
+                        className="requestCalendar__grid"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.18 }}
+                      >
+                        {calendarDays.map((day) => {
+                          const isSelected = day.value === formValues.timeline;
+                          return (
+                            <motion.button
+                              key={day.value}
+                              type="button"
+                              className={`requestCalendar__day ${
+                                day.inMonth ? "" : "requestCalendar__day--outside"
+                              } ${day.isToday ? "requestCalendar__day--today" : ""} ${
+                                isSelected ? "requestCalendar__day--selected" : ""
+                              }`}
+                              whileHover={day.isDisabled ? {} : { y: -1.5 }}
+                              whileTap={day.isDisabled ? {} : { scale: 0.96 }}
+                              transition={PROFILE_SPRING}
+                              onClick={() => handleDeadlineSelect(day.value)}
+                              disabled={day.isDisabled}
+                            >
+                              {day.dateNumber}
+                            </motion.button>
+                          );
+                        })}
+                      </motion.div>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </div>
+            </div>
 
             <label className="requestField">
               <span className="requestField__label">Budget amount</span>
@@ -305,7 +704,7 @@ export default function PostRequest() {
                 type="number"
                 min="0"
                 step="1"
-                placeholder="Optional"
+                placeholder="Example: 1500"
                 value={formValues.budgetAmount}
                 onChange={(event) => updateField("budgetAmount", event.target.value)}
                 disabled={submitting}
@@ -365,10 +764,6 @@ export default function PostRequest() {
                 >
                   Add photos or video
                 </motion.button>
-
-                <p className="requestUpload__copy">
-                  Images can help with references, and a short video can help show movement or pacing.
-                </p>
               </div>
 
               <AnimatePresence>
@@ -436,7 +831,7 @@ export default function PostRequest() {
               }`}
               aria-live="polite"
             >
-              {error || "Your request will appear on your dashboard after you post it."}
+              {error || ""}
             </p>
 
             <motion.button

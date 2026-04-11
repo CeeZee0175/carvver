@@ -20,7 +20,6 @@ import {
   Heart,
   ShieldCheck,
   MapPin,
-  Package,
   ShoppingCart,
   SlidersHorizontal,
   Sparkles,
@@ -46,7 +45,6 @@ import toast, { Toaster } from "react-hot-toast";
 import "./browse_categories.css";
 import DashBar from "../layout/dashbar";
 import HomeFooter from "../../Homepage/layout/home_footer";
-import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
 import { createClient } from "../../../lib/supabase/client";
 import {
   ALL_SERVICE_CATEGORIES,
@@ -1115,17 +1113,9 @@ function SkeletonCard() {
 function EmptyState({ hasFilters, onClearFilters }) {
   return (
     <ScrollReveal className="browseEmptyState">
-      <div className="browseEmptyState__iconWrap" aria-hidden="true">
-        <Package style={{ width: 26, height: 26 }} />
-      </div>
       <h3 className="browseEmptyState__title">
         {hasFilters ? "No services match your filters" : "No services yet"}
       </h3>
-      <p className="browseEmptyState__desc">
-        {hasFilters
-          ? "Try adjusting or clearing your filters to discover more services."
-          : "Once freelancers start publishing their services, they'll appear here."}
-      </p>
       {hasFilters && (
         <motion.button
           type="button"
@@ -1509,15 +1499,6 @@ export default function BrowseCategories() {
       <Toaster position="top-center" />
 
       <div className="browseCategories__base" />
-      <div className="browseCategories__shadow" aria-hidden="true">
-        <EtheralShadow
-          sizing="fill"
-          color="rgba(0,0,0,0.55)"
-          animation={{ scale: 45, speed: 35 }}
-          noise={{ opacity: 0.1, scale: 1 }}
-          performanceMode="auto"
-        />
-      </div>
       <div className="browseCategories__bg" aria-hidden="true" />
 
       <DashBar />
@@ -1560,7 +1541,7 @@ export default function BrowseCategories() {
             </motion.button>
 
             <span className="browseCrumbs__sep">/</span>
-            <span className="browseCrumbs__current">Service Listings</span>
+            <span className="browseCrumbs__current">Browse Services</span>
           </section>
         </ScrollReveal>
 
@@ -1587,10 +1568,6 @@ export default function BrowseCategories() {
               </motion.svg>
             </div>
 
-            <p className="browseHero__sub">
-              Discover creative and handmade services from casual freelancers, hobbyists, and trusted
-              creators — all in one place.
-            </p>
           </section>
         </ScrollReveal>
 

@@ -35,13 +35,6 @@ const REQUEST_COLUMNS = `
 
 export const REQUEST_CATEGORY_OPTIONS = ALL_SERVICE_CATEGORIES;
 
-export const REQUEST_TIMELINE_OPTIONS = [
-  "ASAP",
-  "This week",
-  "This month",
-  "Flexible",
-];
-
 function getCustomerRequestErrorMessage(error, fallback) {
   const message = String(error?.message || "");
 

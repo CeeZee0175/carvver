@@ -190,6 +190,11 @@ export default function DashBar() {
       return;
     }
 
+    if (label === "Account Settings") {
+      navigate("/dashboard/customer/settings");
+      return;
+    }
+
     if (label === "My Orders") {
       navigate("/dashboard/customer/orders");
       return;

@@ -19,31 +19,31 @@
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: #fff;
-}
-.browseCategories__shadow{
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.92;
-  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(250,247,241,1) 0%,
+    rgba(247,241,235,1) 52%,
+    rgba(244,238,232,1) 100%
+  );
 }
 .browseCategories__bg{
   position: fixed;
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(900px 520px at 30% 10%, rgba(124,58,237,0.10), transparent 60%),
-    radial-gradient(900px 520px at 80% 40%, rgba(242,193,78,0.12), transparent 62%),
-    radial-gradient(900px 520px at 30% 85%, rgba(42,20,80,0.08), transparent 65%);
+    radial-gradient(900px 520px at 14% 10%, rgba(255,255,255,0.78), transparent 62%),
+    radial-gradient(720px 400px at 86% 16%, rgba(242,193,78,0.12), transparent 64%),
+    radial-gradient(760px 500px at 18% 82%, rgba(124,58,237,0.09), transparent 66%),
+    radial-gradient(860px 540px at 84% 74%, rgba(42,20,80,0.06), transparent 68%);
+  pointer-events: none;
 }
 
 .browseCategories__main{
   position: relative;
   z-index: 2;
-  width: min(1340px, 94vw);
+  width: min(1340px, calc(100% - 40px));
   margin: 0 auto;
-  padding: 18px 0 48px;
+  padding: 22px 0 48px;
   display: grid;
   gap: 18px;
   overflow: visible;
@@ -1534,46 +1534,27 @@
 /* ── Empty state ── */
 .browseEmptyState{
   grid-column: 1 / -1;
-  padding: clamp(44px, 7vw, 80px) 24px;
+  padding: clamp(52px, 7vw, 84px) 24px;
   border-radius: 24px;
   border: 1px solid rgba(42,20,80,0.10);
   background: rgba(255,255,255,0.80);
   text-align: center;
   display: grid;
   justify-items: center;
-  gap: 10px;
-}
-
-.browseEmptyState__iconWrap{
-  width: 56px;
-  height: 56px;
-  border-radius: 20px;
-  display: grid;
-  place-items: center;
-  background: rgba(124,58,237,0.07);
-  border: 1px solid rgba(42,20,80,0.10);
-  color: rgba(42,20,80,0.58);
+  gap: 18px;
 }
 
 .browseEmptyState__title{
-  margin: 4px 0 0;
+  margin: 0;
+  max-width: 18ch;
   font-family: Inter, system-ui, sans-serif;
   font-size: 19px;
   font-weight: 850;
   color: rgba(27,16,46,0.90);
 }
 
-.browseEmptyState__desc{
-  margin: 0;
-  max-width: 38ch;
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 14px;
-  line-height: 1.65;
-  color: rgba(27,16,46,0.56);
-}
-
 .browseEmptyState__btn{
-  margin-top: 6px;
+  margin-top: 10px;
   height: 42px;
   padding: 0 18px;
   border-radius: 13px;
@@ -1673,7 +1654,7 @@
 
 @media (max-width: 820px){
   .browseCategories__main{
-    width: min(96vw, 96vw);
+    width: min(96vw, calc(100% - 20px));
   }
 
   .browseMapModal__preview,
