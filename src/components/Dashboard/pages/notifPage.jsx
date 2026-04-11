@@ -17,7 +17,6 @@ import toast, { Toaster } from "react-hot-toast";
 import "./notifPage.css";
 import DashBar from "../layout/dashbar";
 import HomeFooter from "../../Homepage/layout/home_footer";
-import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
 import {
   formatNotificationTime,
   NOTIFICATION_FILTERS,
@@ -305,15 +304,6 @@ export default function NotifPage() {
       <Toaster position="top-center" />
 
       <div className="notifPage__base" />
-      <div className="notifPage__shadow" aria-hidden="true">
-        <EtheralShadow
-          sizing="fill"
-          color="rgba(0,0,0,0.55)"
-          animation={{ scale: 45, speed: 35 }}
-          noise={{ opacity: 0.1, scale: 1 }}
-          performanceMode="auto"
-        />
-      </div>
       <div className="notifPage__bg" aria-hidden="true" />
 
       <DashBar />
@@ -343,49 +333,25 @@ export default function NotifPage() {
           </section>
 
           <div className="notifPage__hero">
-            <div>
-              <div className="notifPage__titleWrap">
-                <TypewriterHeading />
-                <motion.svg
-                  className="notifPage__line"
-                  viewBox="0 0 300 20"
-                  preserveAspectRatio="none"
-                  aria-hidden="true"
-                >
-                  <motion.path
-                    d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1 }}
-                    transition={{ duration: 1.05, ease: "easeInOut", delay: 0.1 }}
-                  />
-                </motion.svg>
-              </div>
-
-              <p className="notifPage__sub">
-                See your latest updates in one place, keep track of what you
-                have already read, and jump straight to what needs your attention.
-              </p>
-            </div>
-
-            <div className="notifPage__heroMeta">
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={hasUnread ? "unread" : "clear"}
-                  className="notifPage__status"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  {hasUnread
-                    ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}`
-                    : "No unread notifications"}
-                </motion.p>
-              </AnimatePresence>
+            <div className="notifPage__titleWrap">
+              <TypewriterHeading />
+              <motion.svg
+                className="notifPage__line"
+                viewBox="0 0 300 20"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <motion.path
+                  d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 1.05, ease: "easeInOut", delay: 0.1 }}
+                />
+              </motion.svg>
             </div>
           </div>
 

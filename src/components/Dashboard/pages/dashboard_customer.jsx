@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -25,7 +25,7 @@ import {
 import {
   getCustomerDisplayName,
   getCustomerInitials,
-} from "../shared/customerAchievements";
+} from "../shared/customerIdentity";
 import {
   CustomerDashboardFrame,
   EmptySurface,
@@ -40,38 +40,34 @@ const supabase = createClient();
 const quickBoardItems = [
   {
     label: "Post a Request",
-    sub: "Tell freelancers what you need",
     Icon: PlusCircle,
     action: (navigate) => navigate("/dashboard/customer/post-request"),
   },
   {
     label: "Saved Listings",
-    sub: "Return to the work you shortlisted",
     Icon: Bookmark,
     action: (navigate) => navigate("/dashboard/customer/saved"),
   },
   {
     label: "My Orders",
-    sub: "Track active and completed work",
     Icon: ShoppingBag,
     action: (navigate) => navigate("/dashboard/customer/orders"),
   },
   {
     label: "Notifications",
-    sub: "Check updates that need attention",
     Icon: Bell,
     action: (navigate) => navigate("/dashboard/customer/notifications"),
   },
 ];
 
 const HERO_BUTTON_MOTION = {
-  whileHover: { y: -5, scale: 1.02 },
+  whileHover: { y: -6, scale: 1.024 },
   whileTap: { y: -1, scale: 0.982 },
   transition: { type: "spring", stiffness: 330, damping: 18, mass: 0.7 },
 };
 
 const SURFACE_BUTTON_MOTION = {
-  whileHover: { y: -4, scale: 1.012 },
+  whileHover: { y: -5, scale: 1.016 },
   whileTap: { scale: 0.986 },
   transition: { type: "spring", stiffness: 320, damping: 19, mass: 0.74 },
 };
@@ -131,6 +127,7 @@ function QuietEmptyState({ title, desc, actionLabel, onAction }) {
 export default function DashboardCustomer() {
   const navigate = useNavigate();
   const location = useLocation();
+  const reduceMotion = useReducedMotion();
   const [statsLoading, setStatsLoading] = useState(true);
   const [savedCount, setSavedCount] = useState(0);
   const [activeOrdersCount, setActiveOrdersCount] = useState(0);
@@ -228,31 +225,18 @@ export default function DashboardCustomer() {
     {
       label: "Saved Listings",
       value: statsLoading ? "..." : savedCount,
-      hint: savedCount === 0 ? "Start shortlisting work you want to revisit." : "Ready when you want to compare again.",
     },
     {
       label: "Open Requests",
       value: requestsLoading ? "..." : openCount,
-      hint:
-        openCount === 0
-          ? "Post a request when you need something specific."
-          : "Your active briefs are ready to review.",
     },
     {
       label: "Active Orders",
       value: statsLoading ? "..." : activeOrdersCount,
-      hint:
-        activeOrdersCount === 0
-          ? "Nothing is in progress."
-          : "Work you are still waiting on.",
     },
     {
       label: "Favorite Freelancers",
       value: favoritesLoading ? "..." : favoriteFreelancers.length,
-      hint:
-        favoriteFreelancers.length === 0
-          ? "Freelancers you favorite will show up here."
-          : "The freelancers you chose to keep close.",
     },
   ];
 
@@ -274,7 +258,6 @@ export default function DashboardCustomer() {
       <Reveal>
         <section className="profileHero dashLandingHero">
           <div className="profileHero__heading">
-            <p className="profileHero__eyebrow">Customer Dashboard</p>
             <div className="profileHero__titleWrap">
               <h1 className="profileHero__title">
                 <TypewriterHeading text="Welcome Back!" />
@@ -285,7 +268,7 @@ export default function DashboardCustomer() {
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-              <motion.path
+                <motion.path
                   d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                   fill="none"
                   stroke="currentColor"
@@ -297,10 +280,6 @@ export default function DashboardCustomer() {
                 />
               </motion.svg>
             </div>
-            <p className="profileHero__sub">
-              Explore creative services, keep track of saved work, or post a request
-              so freelancers can understand exactly what you need.
-            </p>
 
             <div className="dashLandingHero__actions">
               <motion.button
@@ -326,15 +305,34 @@ export default function DashboardCustomer() {
           </div>
 
           <div className="profileHero__stats dashLandingStats">
-            {quickStats.map((item) => (
+            {quickStats.map((item, index) => (
               <motion.article
                 key={item.label}
-                className="profileMiniStat dashLandingStat"
-                {...SURFACE_BUTTON_MOTION}
+                className="dashLandingStat"
+                initial={
+                  reduceMotion ? false : { opacity: 0, y: 18, filter: "blur(10px)" }
+                }
+                animate={
+                  reduceMotion
+                    ? { opacity: 1 }
+                    : { opacity: 1, y: 0, filter: "blur(0px)" }
+                }
+                transition={
+                  reduceMotion
+                    ? { duration: 0 }
+                    : {
+                        duration: 0.58,
+                        ease: [0.22, 1, 0.36, 1],
+                        delay: 0.18 + index * 0.08,
+                      }
+                }
+                whileHover={reduceMotion ? undefined : { y: -3 }}
               >
                 <span className="profileMiniStat__label">{item.label}</span>
                 <strong className="profileMiniStat__value">{item.value}</strong>
-                <span className="profileMiniStat__hint">{item.hint}</span>
+                {item.hint ? (
+                  <span className="profileMiniStat__hint">{item.hint}</span>
+                ) : null}
               </motion.article>
             ))}
           </div>
@@ -345,8 +343,7 @@ export default function DashboardCustomer() {
         <section className="dashLandingSection dashLandingSection--quick">
           <div className="dashLandingSection__head">
             <div>
-              <p className="dashLandingSection__eyebrow">Quick board</p>
-              <h2 className="dashLandingSection__title">Keep the main actions close</h2>
+              <h2 className="dashLandingSection__title">Quick board</h2>
             </div>
           </div>
 
@@ -370,7 +367,6 @@ export default function DashboardCustomer() {
                   </span>
                   <span className="dashLandingQuickCard__copy">
                     <span className="dashLandingQuickCard__title">{item.label}</span>
-                    <span className="dashLandingQuickCard__sub">{item.sub}</span>
                   </span>
                 </motion.button>
               );
@@ -383,11 +379,7 @@ export default function DashboardCustomer() {
         <section className="dashLandingSection">
           <div className="dashLandingSection__head">
             <div>
-              <p className="dashLandingSection__eyebrow">Recent requests</p>
-              <h2 className="dashLandingSection__title">The briefs you already posted</h2>
-              <p className="dashLandingSection__desc">
-                Post something specific once, then come back here to check the briefs you have opened.
-              </p>
+              <h2 className="dashLandingSection__title">Recent requests</h2>
             </div>
 
             <motion.button
@@ -418,7 +410,6 @@ export default function DashboardCustomer() {
           ) : requests.length === 0 ? (
             <QuietEmptyState
               title="You have not posted a request yet"
-              desc="Create your first request when you want freelancers to understand a specific need."
               actionLabel="Post your first request"
               onAction={() => navigate("/dashboard/customer/post-request")}
             />
@@ -465,11 +456,7 @@ export default function DashboardCustomer() {
         <section className="dashLandingSection">
           <div className="dashLandingSection__head">
             <div>
-              <p className="dashLandingSection__eyebrow">Recommended picks</p>
-              <h2 className="dashLandingSection__title">Published work worth checking first</h2>
-              <p className="dashLandingSection__desc">
-                These picks come from live service listings that are already published on the platform.
-              </p>
+              <h2 className="dashLandingSection__title">Recommended picks</h2>
             </div>
 
             <motion.button
@@ -492,7 +479,6 @@ export default function DashboardCustomer() {
           ) : services.length === 0 ? (
             <QuietEmptyState
               title="No published services yet"
-              desc="Once freelancers publish their work, recommended picks will show up here."
               actionLabel="Browse services"
               onAction={() => navigate("/dashboard/customer/browse-services")}
             />
@@ -583,11 +569,7 @@ export default function DashboardCustomer() {
         <section className="dashLandingSection">
           <div className="dashLandingSection__head">
             <div>
-              <p className="dashLandingSection__eyebrow">Categories</p>
-              <h2 className="dashLandingSection__title">Popular places to start</h2>
-              <p className="dashLandingSection__desc">
-                Jump into the service areas customers often explore first.
-              </p>
+              <h2 className="dashLandingSection__title">Categories</h2>
             </div>
           </div>
 
@@ -625,11 +607,7 @@ export default function DashboardCustomer() {
         <section className="dashLandingSection">
           <div className="dashLandingSection__head">
             <div>
-              <p className="dashLandingSection__eyebrow">Favorite freelancers</p>
-              <h2 className="dashLandingSection__title">Freelancers you chose to keep close</h2>
-              <p className="dashLandingSection__desc">
-                Only freelancers you explicitly favorite will appear here.
-              </p>
+              <h2 className="dashLandingSection__title">Favorite freelancers</h2>
             </div>
           </div>
 
@@ -650,7 +628,6 @@ export default function DashboardCustomer() {
           ) : favoriteFreelancers.length === 0 ? (
             <QuietEmptyState
               title="No favorite freelancers yet"
-              desc="Mark a freelancer as favorite from a listing or from their profile to keep them here."
               actionLabel="Browse services"
               onAction={() => navigate("/dashboard/customer/browse-services")}
             />

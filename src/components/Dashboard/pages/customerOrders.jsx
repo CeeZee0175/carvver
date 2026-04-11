@@ -8,7 +8,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import { getCustomerDisplayName } from "../shared/customerAchievements";
+import { getCustomerDisplayName } from "../shared/customerIdentity";
 import { useCustomerOrdersData } from "../hooks/useCustomerProfileData";
 import {
   CustomerDashboardFrame,
@@ -52,6 +52,15 @@ function formatOrderPrice(value) {
   return `PHP ${Number(value || 0).toLocaleString()}`;
 }
 
+function OrderStat({ label, value }) {
+  return (
+    <div className="profileMiniStat profileMiniStat--open">
+      <span className="profileMiniStat__label">{label}</span>
+      <strong className="profileMiniStat__value">{value}</strong>
+    </div>
+  );
+}
+
 export default function CustomerOrders() {
   const navigate = useNavigate();
   const { loading, orders, savedCount, error } = useCustomerOrdersData();
@@ -73,7 +82,7 @@ export default function CustomerOrders() {
   );
 
   return (
-    <CustomerDashboardFrame mainClassName="profilePage">
+    <CustomerDashboardFrame mainClassName="profilePage profilePage--details customerOrdersPage">
       <Reveal>
         <DashboardBreadcrumbs
           items={[
@@ -86,57 +95,37 @@ export default function CustomerOrders() {
       <Reveal delay={0.04}>
         <section className="profileHero">
           <div className="profileHero__heading">
-            <p className="profileHero__eyebrow">Customer Orders</p>
             <div className="profileHero__titleWrap">
               <h1 className="profileHero__title">
-                <TypewriterHeading text="Orders" />
+                <span className="customerOrdersPage__titleText">
+                  <TypewriterHeading text="Orders" />
+                  <motion.svg
+                    className="profileHero__line customerOrdersPage__line"
+                    viewBox="0 0 300 20"
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                  >
+                    <motion.path
+                      d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 1.05, ease: "easeInOut", delay: 0.2 }}
+                    />
+                  </motion.svg>
+                </span>
               </h1>
-              <motion.svg
-                className="profileHero__line"
-                viewBox="0 0 300 20"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                <motion.path
-                  d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 1.05, ease: "easeInOut", delay: 0.2 }}
-                />
-              </motion.svg>
             </div>
-            <p className="profileHero__sub">
-              Keep track of every service you have booked, check what is still in
-              progress, and come back here whenever you want a clear view of your
-              customer activity.
-            </p>
           </div>
 
-          <div className="profileHero__stats">
-            <div className="profileMiniStat">
-              <span className="profileMiniStat__label">Total</span>
-              <strong className="profileMiniStat__value">{stats.total}</strong>
-              <span className="profileMiniStat__hint">Orders placed</span>
-            </div>
-            <div className="profileMiniStat">
-              <span className="profileMiniStat__label">Active</span>
-              <strong className="profileMiniStat__value">{stats.active}</strong>
-              <span className="profileMiniStat__hint">Pending + active work</span>
-            </div>
-            <div className="profileMiniStat">
-              <span className="profileMiniStat__label">Completed</span>
-              <strong className="profileMiniStat__value">{stats.completed}</strong>
-              <span className="profileMiniStat__hint">Finished orders</span>
-            </div>
-            <div className="profileMiniStat">
-              <span className="profileMiniStat__label">Bookmarked Items</span>
-              <strong className="profileMiniStat__value">{savedCount}</strong>
-              <span className="profileMiniStat__hint">Saved listings to revisit</span>
-            </div>
+          <div className="profileHero__stats profileHero__stats--open">
+            <OrderStat label="Total" value={stats.total} />
+            <OrderStat label="Active" value={stats.active} />
+            <OrderStat label="Completed" value={stats.completed} />
+            <OrderStat label="Bookmarked Items" value={savedCount} />
           </div>
         </section>
       </Reveal>
@@ -159,8 +148,7 @@ export default function CustomerOrders() {
         <section className="profileSection">
           <div className="profileSection__head">
             <div>
-              <p className="profileSection__eyebrow">Filters</p>
-              <h2 className="profileSection__title">Check one status or scan everything</h2>
+              <h2 className="profileSection__title">Status</h2>
             </div>
             <motion.button
               type="button"
@@ -196,7 +184,6 @@ export default function CustomerOrders() {
         <section className="profileSection">
           <div className="profileSection__head">
             <div>
-              <p className="profileSection__eyebrow">Order List</p>
               <h2 className="profileSection__title">Your order history</h2>
             </div>
             <div className="profileSection__sideNote">
@@ -212,11 +199,14 @@ export default function CustomerOrders() {
             </div>
           ) : filteredOrders.length === 0 ? (
             <EmptySurface
-              icon={ShoppingBag}
+              className={`customerOrdersPage__empty ${
+                orders.length === 0 ? "customerOrdersPage__empty--noDesc" : ""
+              }`}
+              hideIcon
               title="No orders match this view"
               description={
                 orders.length === 0
-                  ? "Once you place your first order, it will show up here with its real status and service details."
+                  ? null
                   : "Try a different status filter to see the rest of your order history."
               }
               actionLabel={orders.length === 0 ? "Browse services" : undefined}

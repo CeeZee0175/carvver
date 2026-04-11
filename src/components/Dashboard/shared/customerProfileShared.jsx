@@ -191,7 +191,7 @@ export function EmptySurface({
         </div>
       ) : null}
       <h3 className="profileEmpty__title">{title}</h3>
-      <p className="profileEmpty__desc">{description}</p>
+      {description ? <p className="profileEmpty__desc">{description}</p> : null}
       {actionLabel && onAction && (
         <motion.button
           type="button"

@@ -4,49 +4,16 @@
    Page Shell
    ═══════════════════════════════════════ */
 
+.favBookPage{
+  align-content: start;
+}
+
 .favBook{
   position: relative;
-  height: 100vh;
   width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.favBook::-webkit-scrollbar{ display: none; }
-
-.favBook__base{
-  position: fixed; inset: 0; z-index: 0; background: #fff;
-}
-.favBook__shadow{
-  position: fixed; inset: 0; z-index: 0; opacity: 0.92; pointer-events: none;
-}
-.favBook__bg{
-  position: fixed; inset: 0; z-index: 0;
-  background:
-    radial-gradient(900px 520px at 30% 10%, rgba(124,58,237,0.10), transparent 60%),
-    radial-gradient(900px 520px at 80% 40%, rgba(242,193,78,0.12), transparent 62%),
-    radial-gradient(900px 520px at 30% 85%, rgba(42,20,80,0.08), transparent 65%);
-}
-
-.favBook__main{
-  position: relative;
-  z-index: 2;
-  width: min(1340px, 94vw);
-  margin: 0 auto;
-  padding: 18px 0 48px;
   display: grid;
   gap: 20px;
-  overflow: visible;
-}
-
-.favBook__footerSection{
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  margin-top: 12px;
+  align-content: start;
 }
 
 /* ═══════════════════════════════════════
@@ -699,28 +666,18 @@
 
 .favEmpty{
   grid-column: 1 / -1;
-  padding: clamp(52px, 8vw, 100px) 24px;
+  padding: clamp(52px, 8vw, 96px) 24px;
   border-radius: 24px;
   border: 1px solid rgba(42,20,80,0.10);
   background: rgba(255,255,255,0.82);
   text-align: center;
   display: grid;
   justify-items: center;
-  gap: 12px;
+  gap: 18px;
 }
-
-.favEmpty__iconWrap{
-  width: 64px; height: 64px;
-  border-radius: 22px;
-  display: grid; place-items: center;
-  background: rgba(242,193,78,0.10);
-  border: 1px solid rgba(242,193,78,0.20);
-  color: rgba(42,20,80,0.50);
-}
-.favEmpty__icon{ width: 28px; height: 28px; }
 
 .favEmpty__title{
-  margin: 4px 0 0;
+  margin: 0;
   font-family: Inter, system-ui, sans-serif;
   font-size: 20px;
   font-weight: 850;
@@ -728,17 +685,8 @@
   color: rgba(27,16,46,0.88);
 }
 
-.favEmpty__desc{
-  margin: 0;
-  max-width: 40ch;
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 14px;
-  line-height: 1.65;
-  color: rgba(27,16,46,0.54);
-}
-
 .favEmpty__btn{
-  margin-top: 8px;
+  margin-top: 2px;
   height: 46px;
   padding: 0 20px;
   border-radius: 14px;
@@ -832,8 +780,8 @@
 }
 
 @media (max-width: 820px){
-  .favBook__main{
-    width: min(96vw, 96vw);
+  .favBook{
+    gap: 16px;
   }
 }
 
@@ -842,8 +790,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
-  .favBook__main{
-    padding-top: 14px;
+  .favBook{
     gap: 14px;
   }
   .favCard__media{

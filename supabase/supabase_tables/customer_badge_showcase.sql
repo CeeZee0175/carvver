@@ -9,7 +9,7 @@ create table public.customer_badge_showcase (
   constraint customer_badge_showcase_slot_check check (
     (
       (slot >= 1)
-      and (slot <= 6)
+      and (slot <= 9)
     )
   )
 ) TABLESPACE pg_default;

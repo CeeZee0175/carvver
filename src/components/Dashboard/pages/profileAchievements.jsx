@@ -5,7 +5,6 @@ import {
   ArrowRight,
   BadgeCheck,
   ShieldCheck,
-  Sparkles,
   Star,
   Trophy,
 } from "lucide-react";
@@ -64,7 +63,7 @@ export default function ProfileAchievements() {
       await saveBadgeShowcase(nextIds);
       toast.success(successMessage);
     } catch (error) {
-      toast.error(error.message || "Couldn't update your badge showcase.");
+      toast.error(error.message || "Couldn't update your displayed badges.");
     } finally {
       setShowcaseSaving(false);
     }
@@ -74,17 +73,17 @@ export default function ProfileAchievements() {
     if (showcaseIds.includes(achievementId)) {
       updateShowcase(
         showcaseIds.filter((id) => id !== achievementId),
-        "Badge removed from your profile wall."
+        "Badge removed from your profile."
       );
       return;
     }
 
     if (showcaseIds.length >= SHOWCASE_SLOT_LIMIT) {
-      toast.error("Your badge wall is already full.");
+      toast.error(`You can display up to ${SHOWCASE_SLOT_LIMIT} badges.`);
       return;
     }
 
-    updateShowcase([...showcaseIds, achievementId], "Badge featured on your profile.");
+    updateShowcase([...showcaseIds, achievementId], "Badge added to your profile.");
   };
 
   return (
@@ -125,8 +124,8 @@ export default function ProfileAchievements() {
               </motion.svg>
             </div>
             <p className="profileHero__sub">
-              Browse every customer achievement, inspect the badge tied to it, and
-              decide which earned signals deserve a place on your profile wall.
+              Browse every customer achievement and choose which earned badges you
+              want to display on your profile.
             </p>
           </div>
 
@@ -149,9 +148,9 @@ export default function ProfileAchievements() {
               <span className="profileMiniStat__hint">Theme-hinting reward tier</span>
             </div>
             <div className="profileMiniStat">
-              <span className="profileMiniStat__label">Featured</span>
+              <span className="profileMiniStat__label">Displayed</span>
               <strong className="profileMiniStat__value">{showcaseIds.length}</strong>
-              <span className="profileMiniStat__hint">Badges on your profile</span>
+              <span className="profileMiniStat__hint">Badges shown on your profile</span>
             </div>
           </div>
         </section>
@@ -329,12 +328,12 @@ export default function ProfileAchievements() {
                           onClick={() => handleToggleFeature(achievement.id)}
                           disabled={showcaseSaving || !capabilities.canPersistShowcase}
                         >
-                          {isDisplayed ? "On profile" : "Feature badge"}
+                          {isDisplayed ? "Displayed" : "Display badge"}
                         </button>
                       ) : (
                         <span className="profileCatalogCard__lockedNote">
                           {achievement.legendary
-                            ? "Legendary rewards hint at future visual prestige."
+                            ? "Unlock this through deeper customer activity."
                             : "Unlock this through real customer activity."}
                         </span>
                       )}
@@ -353,7 +352,7 @@ export default function ProfileAchievements() {
             <EmptySurface
               icon={BadgeCheck}
               title="Badge updates are unavailable at the moment"
-              description="You can still browse your achievements, but badge changes cannot be saved at the moment."
+              description="You can still browse your achievements, but badge changes cannot be saved right now."
             />
           </section>
         </Reveal>

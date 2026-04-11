@@ -6,7 +6,9 @@
 
 .dashLandingHero {
   align-items: start;
-  padding: 8px 0 8px;
+  grid-template-columns: minmax(0, 1.18fr) minmax(300px, 0.9fr);
+  gap: clamp(22px, 4vw, 42px);
+  padding: 6px 0 2px;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -20,10 +22,10 @@
 }
 
 .dashLandingHero__actions {
-  margin-top: 26px;
+  margin-top: 28px;
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 16px;
 }
 
 .dashLandingAction {
@@ -117,18 +119,61 @@
 }
 
 .dashLandingStats {
-  align-content: start;
+  align-content: end;
+  gap: 18px 26px;
+  padding: 8px 0 2px;
 }
 
 .dashLandingStat {
-  min-height: 112px;
+  position: relative;
+  min-height: auto;
+  padding: 8px 0 10px 20px;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.dashLandingStat::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(42, 20, 80, 0.1) 0%,
+    rgba(124, 58, 237, 0.34) 48%,
+    rgba(242, 193, 78, 0.3) 100%
+  );
+}
+
+.dashLandingStat .profileMiniStat__label {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: rgba(42, 20, 80, 0.58);
+}
+
+.dashLandingStat .profileMiniStat__value {
+  font-size: clamp(36px, 3.8vw, 48px);
+  line-height: 0.9;
+}
+
+.dashLandingStat .profileMiniStat__hint {
+  margin-top: 2px;
+  font-size: 13px;
 }
 
 .dashLandingSection {
   position: relative;
-  padding-top: 30px;
+  padding-top: clamp(34px, 4vw, 46px);
   display: grid;
-  gap: 20px;
+  gap: 24px;
 }
 
 .dashLandingSection::before {
@@ -149,14 +194,14 @@
 }
 
 .dashLandingSection--quick {
-  gap: 16px;
+  gap: 18px;
 }
 
 .dashLandingSection__head {
   display: flex;
   align-items: end;
   justify-content: space-between;
-  gap: 24px;
+  gap: 28px;
 }
 
 .dashLandingSection__head > div {
@@ -236,7 +281,7 @@
 .dashLandingRequestGrid,
 .dashLandingFavoritesGrid {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
 .dashLandingQuickBoard {
@@ -269,7 +314,7 @@
   border-color: rgba(124, 58, 237, 0.18);
   background: rgba(255, 255, 255, 0.86);
   box-shadow:
-    0 22px 52px rgba(12, 7, 18, 0.08),
+    0 26px 60px rgba(12, 7, 18, 0.09),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
@@ -356,7 +401,7 @@
 .dashLandingListingCard:hover,
 .dashLandingFavoriteCard:hover {
   border-color: rgba(124, 58, 237, 0.16);
-  box-shadow: 0 24px 60px rgba(12, 7, 18, 0.08);
+  box-shadow: 0 28px 66px rgba(12, 7, 18, 0.09);
 }
 
 .dashLandingRequestCard,
@@ -497,7 +542,7 @@
   border-color: rgba(124, 58, 237, 0.18);
   background: rgba(255, 255, 255, 0.84);
   box-shadow:
-    0 20px 46px rgba(12, 7, 18, 0.08),
+    0 24px 54px rgba(12, 7, 18, 0.09),
     inset 0 1px 0 rgba(255, 255, 255, 0.88);
 }
 
@@ -615,12 +660,14 @@
 }
 
 .dashLandingEmpty {
-  padding: clamp(42px, 6vw, 64px) 0 14px;
-  gap: 16px;
+  padding: clamp(52px, 7vw, 80px) 0 20px;
+  gap: 18px;
 }
 
 .dashLandingEmpty--quiet {
-  padding-top: clamp(48px, 6vw, 72px);
+  gap: 18px;
+  padding-top: clamp(62px, 8vw, 92px);
+  padding-bottom: 24px;
 }
 
 .dashLandingEmpty .profileEmpty__desc {
@@ -628,7 +675,11 @@
 }
 
 .dashLandingEmpty .profileEmpty__btn {
-  margin-top: 14px;
+  margin-top: 16px;
+}
+
+.dashLandingEmpty--quiet .profileEmpty__btn {
+  margin-top: 28px;
 }
 
 .dashLandingRequestCard--skeleton,
@@ -683,7 +734,11 @@
   }
 
   .dashLandingHero {
-    gap: 22px;
+    gap: 26px;
+  }
+
+  .dashLandingStats {
+    gap: 16px 20px;
   }
 
   .dashLandingQuickBoard,
@@ -696,6 +751,14 @@
 @media (max-width: 540px) {
   .dashLandingSection__title {
     font-size: 20px;
+  }
+
+  .dashLandingStat {
+    padding-left: 16px;
+  }
+
+  .dashLandingStat .profileMiniStat__value {
+    font-size: 34px;
   }
 
   .dashLandingQuickCard,

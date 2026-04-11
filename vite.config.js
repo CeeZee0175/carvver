@@ -5,6 +5,20 @@ import path from "path";
 function getManualChunkName(id) {
   const normalizedId = id.split(path.sep).join("/");
 
+  if (
+    normalizedId.includes("/src/lib/phLocations.js") ||
+    normalizedId.includes("/src/lib/phLocations.data.json")
+  ) {
+    return "ph-locations";
+  }
+
+  if (
+    normalizedId.includes("/src/components/Dashboard/shared/customerAchievements.js") ||
+    normalizedId.includes("/src/components/Dashboard/shared/customerBadgeMedia.js")
+  ) {
+    return "customer-achievements";
+  }
+
   if (!normalizedId.includes("/node_modules/")) {
     return undefined;
   }
@@ -55,6 +69,7 @@ export default defineConfig({
     },
   },
   build: {
+    chunkSizeWarningLimit: 750,
     rollupOptions: {
       output: {
         manualChunks: getManualChunkName,

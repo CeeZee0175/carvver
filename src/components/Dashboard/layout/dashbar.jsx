@@ -9,9 +9,9 @@ import {
   MessageCircle,
   Search,
   Settings,
+  Sparkles,
   ShoppingBag,
   ShoppingCart,
-  Sparkles,
   UserRound,
   Bookmark,
 } from "lucide-react";
@@ -20,7 +20,7 @@ import "./dashbar.css";
 import { signOut, getProfile } from "../../../lib/supabase/auth";
 import { PROFILE_UPDATED_EVENT } from "../../../lib/profileSync";
 import { formatNotificationTime, useNotifications } from "../hooks/useNotifications";
-import { getCustomerDisplayName, getCustomerInitials } from "../shared/customerAchievements";
+import { getCustomerDisplayName, getCustomerInitials } from "../shared/customerIdentity";
 import { useCart } from "../hooks/useCart";
 
 const SPRING = { type: "spring", stiffness: 340, damping: 24 };
@@ -372,14 +372,7 @@ export default function DashBar() {
                   >
                     <div className="dashbarNotifyMenu__header">
                       <div>
-                        <p className="dashbarNotifyMenu__eyebrow">Notifications</p>
-                        <h3 className="dashbarNotifyMenu__title">
-                          {hasUnread
-                            ? `${unreadCount} unread update${
-                                unreadCount === 1 ? "" : "s"
-                              }`
-                            : "You are all caught up"}
-                        </h3>
+                        <h3 className="dashbarNotifyMenu__title">Notifications</h3>
                       </div>
 
                       {hasUnread && (
@@ -419,17 +412,8 @@ export default function DashBar() {
                         ))
                       ) : (
                         <div className="dashbarNotifyEmpty">
-                          <div
-                            className="dashbarNotifyEmpty__iconWrap"
-                            aria-hidden="true"
-                          >
-                            <Sparkles className="dashbarNotifyEmpty__icon" />
-                          </div>
                           <p className="dashbarNotifyEmpty__title">
-                            Nothing unread.
-                          </p>
-                          <p className="dashbarNotifyEmpty__desc">
-                            New activity will appear here the moment something needs your attention.
+                            Notifications
                           </p>
                         </div>
                       )}

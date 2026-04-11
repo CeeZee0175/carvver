@@ -275,11 +275,6 @@ export default function HomeFooter({ fullBleed = false }) {
               </motion.svg>
             </div>
 
-            <p className="homeFooter__desc">
-              Built for hobbyists or casual freelancers who are keen on creating and sharing their
-              handmade products or services to get discovered more easily.
-            </p>
-
             <div className="homeFooter__socials" aria-label="Social links">
               {socials.map(({ label, Icon }, index) => (
                 <motion.button

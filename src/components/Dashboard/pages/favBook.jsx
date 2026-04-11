@@ -16,13 +16,11 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   BadgeCheck,
-  Bookmark,
   Camera,
   Check,
   ChevronDown,
   Clock,
   GraduationCap,
-  Home,
   MapPin,
   Mic2,
   Package,
@@ -38,11 +36,12 @@ import {
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import "./favBook.css";
-import DashBar from "../layout/dashbar";
-import HomeFooter from "../../Homepage/layout/home_footer";
-import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
 import { createClient } from "../../../lib/supabase/client";
 import { useCart } from "../hooks/useCart";
+import {
+  CustomerDashboardFrame,
+  DashboardBreadcrumbs,
+} from "../shared/customerProfileShared";
 
 const supabase = createClient();
 
@@ -125,7 +124,7 @@ function ScrollReveal({ children, delay = 0, y = 20, className }) {
 
 /* ─── Typewriter Heading ─── */
 
-function TypewriterHeading({ text = "Saved Services" }) {
+function TypewriterHeading({ text = "Saved Listings" }) {
   const [displayText, setDisplayText] = useState("");
   const reduceMotion = useReducedMotion();
 
@@ -343,19 +342,9 @@ function EmptyState({ hasSearch, onClearSearch, onBrowse }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="favEmpty__iconWrap" aria-hidden="true">
-        <Bookmark className="favEmpty__icon" />
-      </div>
-
       <h3 className="favEmpty__title">
-        {hasSearch ? "No matches found" : "No saved services yet"}
+        {hasSearch ? "No matches found" : "No saved listings yet"}
       </h3>
-
-      <p className="favEmpty__desc">
-        {hasSearch
-          ? "Try adjusting your search or filters to find what you're looking for."
-          : "When you find services you love while browsing, save them here to revisit later."}
-      </p>
 
       {hasSearch ? (
         <motion.button
@@ -444,7 +433,7 @@ export default function FavBook() {
         if (error) throw error;
         setSavedItems(data || []);
       } catch {
-        toast.error("Couldn't load saved services.");
+        toast.error("Couldn't load saved listings.");
         setSavedItems([]);
       } finally {
         setLoading(false);
@@ -627,50 +616,20 @@ export default function FavBook() {
   /* ─── Render ─── */
 
   return (
-    <div className="favBook">
+    <CustomerDashboardFrame mainClassName="favBookPage">
       <Toaster position="top-center" />
-
-      {/* Background layers */}
-      <div className="favBook__base" />
-      <div className="favBook__shadow" aria-hidden="true">
-        <EtheralShadow
-          sizing="fill"
-          color="rgba(0,0,0,0.55)"
-          animation={{ scale: 45, speed: 35 }}
-          noise={{ opacity: 0.1, scale: 1 }}
-          performanceMode="auto"
-        />
-      </div>
-      <div className="favBook__bg" aria-hidden="true" />
-
-      <DashBar />
-
-      <main className="favBook__main">
+      <div className="favBook">
+      
         {/* ── Breadcrumb ── */}
         <ScrollReveal y={8}>
-          <nav className="favCrumbs">
-            <motion.button
-              type="button"
-              className="favCrumbs__home"
-              whileHover={{ x: -1 }}
-              whileTap={{ scale: 0.97 }}
-              transition={SPRING}
-              onClick={() => navigate("/dashboard/customer")}
-            >
-              <Home className="favCrumbs__icon" />
-              <span>Home</span>
-            </motion.button>
-
-            <span className="favCrumbs__sep">/</span>
-            <span className="favCrumbs__current">Saved Services</span>
-          </nav>
+          <DashboardBreadcrumbs items={[{ label: "Saved Listings" }]} />
         </ScrollReveal>
 
         {/* ── Hero ── */}
         <ScrollReveal y={14} delay={0.04}>
           <section className="favHero">
             <div className="favHero__titleWrap">
-              <TypewriterHeading />
+              <TypewriterHeading text="Saved Listings" />
 
               <motion.svg
                 className="favHero__line"
@@ -694,8 +653,6 @@ export default function FavBook() {
                 />
               </motion.svg>
             </div>
-
-            <p className="favHero__sub">{subtitle}</p>
           </section>
         </ScrollReveal>
 
@@ -711,7 +668,7 @@ export default function FavBook() {
               <input
                 className="favSearch__input"
                 type="text"
-                placeholder="Search saved services…"
+                placeholder="Search saved listings…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -872,12 +829,9 @@ export default function FavBook() {
             />
           )}
         </section>
-      </main>
+      </div>
 
       {/* ── Footer ── */}
-      <section className="favBook__footerSection">
-        <HomeFooter fullBleed />
-      </section>
-    </div>
+    </CustomerDashboardFrame>
   );
 }

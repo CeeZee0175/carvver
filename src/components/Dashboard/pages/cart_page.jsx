@@ -12,7 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { getCustomerDisplayName } from "../shared/customerAchievements";
+import { getCustomerDisplayName } from "../shared/customerIdentity";
 import {
   CustomerDashboardFrame,
   DashboardBreadcrumbs,

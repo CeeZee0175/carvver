@@ -18,8 +18,14 @@ import {
   Users,
 } from "lucide-react";
 import { buildPhilippinesLocationLabel } from "../../../lib/phLocations";
+import { ORDERED_CUSTOMER_BADGE_MEDIA } from "./customerBadgeMedia";
+import {
+  getCustomerDisplayName,
+  getCustomerInitials,
+  getCustomerRealName,
+} from "./customerIdentity";
 
-export const SHOWCASE_SLOT_LIMIT = 6;
+export const SHOWCASE_SLOT_LIMIT = 9;
 
 export const ACHIEVEMENT_CATEGORIES = [
   "Profile",
@@ -114,38 +120,7 @@ function makeAchievement({
   };
 }
 
-export function getCustomerDisplayName(profile) {
-  if (!profile) return "Customer";
-
-  const displayName = String(profile.display_name || "").trim();
-  if (displayName) return displayName;
-
-  const first = String(profile.first_name || "").trim();
-  const last = String(profile.last_name || "").trim();
-  const fallback = `${first} ${last}`.trim();
-
-  return fallback || "Customer";
-}
-
-export function getCustomerRealName(profile) {
-  if (!profile) return "No real name added yet";
-
-  const first = String(profile.first_name || "").trim();
-  const last = String(profile.last_name || "").trim();
-  const fullName = `${first} ${last}`.trim();
-
-  return fullName || "No real name added yet";
-}
-
-export function getCustomerInitials(profile) {
-  const displayName = getCustomerDisplayName(profile);
-  const parts = displayName.split(/\s+/).filter(Boolean);
-
-  return parts
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("") || "C";
-}
+export { getCustomerDisplayName, getCustomerInitials, getCustomerRealName };
 
 function buildReviewMetrics(reviews) {
   const count = reviews.length;
@@ -711,7 +686,7 @@ export const CUSTOMER_ACHIEVEMENTS = [
   makeAchievement({
     id: "badge-on-display",
     title: "Badge On Display",
-    description: "Feature one earned badge on your profile.",
+    description: "Display one earned badge on your profile.",
     category: "Showcase & Tenure",
     badgeLabel: "Badge On Display",
     Icon: BadgeCheck,
@@ -721,7 +696,7 @@ export const CUSTOMER_ACHIEVEMENTS = [
   makeAchievement({
     id: "curated-shelf",
     title: "Curated Shelf",
-    description: "Feature three badges on your profile.",
+    description: "Display three badges on your profile.",
     category: "Showcase & Tenure",
     badgeLabel: "Curated Shelf",
     Icon: BadgeCheck,
@@ -731,12 +706,12 @@ export const CUSTOMER_ACHIEVEMENTS = [
   makeAchievement({
     id: "wall-of-signal",
     title: "Wall of Signal",
-    description: "Fill all six profile badge slots.",
+    description: "Fill all nine displayed badge slots on your profile.",
     category: "Showcase & Tenure",
     badgeLabel: "Wall of Signal",
     Icon: BadgeCheck,
     meta: true,
-    evaluate: (_metrics, context) => context.showcasedBadgeCount >= 6,
+    evaluate: (_metrics, context) => context.showcasedBadgeCount >= 9,
   }),
   makeAchievement({
     id: "early-legacy",
@@ -751,6 +726,12 @@ export const CUSTOMER_ACHIEVEMENTS = [
       metrics.accountAgeDays >= 365 && context.earnedCount >= 10,
   }),
 ];
+
+CUSTOMER_ACHIEVEMENTS.forEach((achievement, index) => {
+  achievement.badge.media =
+    ORDERED_CUSTOMER_BADGE_MEDIA[index] ||
+    ORDERED_CUSTOMER_BADGE_MEDIA[ORDERED_CUSTOMER_BADGE_MEDIA.length - 1];
+});
 
 export function resolveCustomerAchievementStates({
   metrics,

@@ -1,10 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
-import SplashScreen from "./components/StartUp/pages/splash_screen";
-import NavBar from "./components/Homepage/layout/navbar";
-import Home from "./components/Homepage/pages/home";
-import HomeFooter from "./components/Homepage/layout/home_footer";
-import DashBar from "./components/Dashboard/layout/dashbar";
 import CustomerRoute from "./components/Backend/CustomerRoute";
 import CustomerWelcomeRoute from "./components/Backend/CustomerWelcomeRoute";
 import FreelancerRoute from "./components/Backend/FreelancerRoute";
@@ -16,6 +11,11 @@ import {
   resolveProfileRole,
 } from "./lib/customerOnboarding";
 
+const SplashScreen = lazy(() => import("./components/StartUp/pages/splash_screen"));
+const NavBar = lazy(() => import("./components/Homepage/layout/navbar"));
+const Home = lazy(() => import("./components/Homepage/pages/home"));
+const HomeFooter = lazy(() => import("./components/Homepage/layout/home_footer"));
+const DashBar = lazy(() => import("./components/Dashboard/layout/dashbar"));
 const HomeAboutUs = lazy(() => import("./components/Homepage/pages/home_aboutUs"));
 const HomeCommunity = lazy(() => import("./components/Homepage/pages/home_community"));
 const PricingPageContent = lazy(() => import("./components/Homepage/pages/pricing_page"));
@@ -43,19 +43,16 @@ const CustomerFreelancerProfile = lazy(() =>
 );
 const supabase = createClient();
 
-function RouteFallback({ withNav = false }) {
+function RouteFallback() {
   return (
-    <>
-      {withNav && <NavBar />}
-      <div
-        style={{
-          minHeight: withNav ? "calc(100vh - 66px)" : "100vh",
-          width: "100%",
-          background: "transparent",
-        }}
-        aria-hidden="true"
-      />
-    </>
+    <div
+      style={{
+        minHeight: "100vh",
+        width: "100%",
+        background: "transparent",
+      }}
+      aria-hidden="true"
+    />
   );
 }
 
@@ -134,16 +131,18 @@ function BrandPageShell({ children }) {
   return (
     <div className="brandPageShell">
       {shellState.resolved ? (
-        shellState.useDashboardShell ? (
-          <DashBar />
-        ) : (
-          <NavBar />
-        )
+        <Suspense
+          fallback={<div className="brandPageShell__barPlaceholder" aria-hidden="true" />}
+        >
+          {shellState.useDashboardShell ? <DashBar /> : <NavBar />}
+        </Suspense>
       ) : (
         <div className="brandPageShell__barPlaceholder" aria-hidden="true" />
       )}
       <div className="brandPageShell__content">{children}</div>
-      <HomeFooter />
+      <Suspense fallback={null}>
+        <HomeFooter />
+      </Suspense>
     </div>
   );
 }
@@ -195,13 +194,24 @@ function AppRoutes() {
   };
 
   if (location.pathname === "/" && showSplash && !splashDone) {
-    return <SplashScreen duration={9000} onFinish={handleSplashFinish} />;
+    return (
+      <Suspense fallback={<RouteFallback />}>
+        <SplashScreen duration={9000} onFinish={handleSplashFinish} />
+      </Suspense>
+    );
   }
 
   return (
     <Routes>
       {/* Public routes */}
-      <Route path="/" element={<HomePage />} />
+      <Route
+        path="/"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <HomePage />
+          </Suspense>
+        }
+      />
       <Route
         path="/about-us"
         element={

@@ -1,18 +1,16 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
-  BadgeCheck,
   Bookmark,
   Check,
-  ChevronLeft,
-  ChevronRight,
   MessageCircle,
+  Minus,
   PenTool,
+  Plus,
   ShieldCheck,
   ShoppingBag,
-  Sparkles,
   Star,
   Trophy,
   Upload,
@@ -29,10 +27,12 @@ import {
 } from "../../../lib/phLocations";
 import {
   SHOWCASE_SLOT_LIMIT,
+} from "../shared/customerAchievements";
+import {
   getCustomerDisplayName,
   getCustomerInitials,
   getCustomerRealName,
-} from "../shared/customerAchievements";
+} from "../shared/customerIdentity";
 import {
   AVATAR_ACCEPTED_TYPES,
   AVATAR_MAX_BYTES,
@@ -84,95 +84,26 @@ function ReviewStars({ rating }) {
   );
 }
 
-function StatMiniCard({ label, value, hint }) {
+function StatMiniCard({ label, value, hint, className = "" }) {
   return (
-    <div className="profileMiniStat">
+    <div className={`profileMiniStat ${className}`.trim()}>
       <span className="profileMiniStat__label">{label}</span>
       <strong className="profileMiniStat__value">{value}</strong>
-      <span className="profileMiniStat__hint">{hint}</span>
+      {hint ? <span className="profileMiniStat__hint">{hint}</span> : null}
     </div>
   );
 }
 
-function BadgeSlot({
-  achievement,
-  index,
-  canMoveLeft,
-  canMoveRight,
-  onMoveLeft,
-  onMoveRight,
-  onRemove,
-  disabled,
-}) {
-  if (!achievement) {
-    return (
-      <div className="profileBadgeSlot profileBadgeSlot--empty">
-        <span className="profileBadgeSlot__index">0{index + 1}</span>
-        <p className="profileBadgeSlot__emptyTitle">Open badge slot</p>
-        <p className="profileBadgeSlot__emptyDesc">
-          Feature an earned badge to make your profile feel more complete.
-        </p>
-      </div>
-    );
+function AchievementBadgeMedia({ achievement, className = "", alt = "" }) {
+  const mediaSrc = achievement?.badge?.media || "";
+  const badgeLabel = achievement?.badge?.label || achievement?.title || "Badge";
+
+  if (mediaSrc) {
+    return <img src={mediaSrc} alt={alt || badgeLabel} className={className} />;
   }
 
-  const Icon = achievement.badge.Icon;
-
-  return (
-    <div
-      className={`profileBadgeSlot ${
-        achievement.legendary ? "profileBadgeSlot--legendary" : ""
-      }`}
-      style={{
-        "--badge-bg": achievement.badge.bg,
-        "--badge-border": achievement.badge.border,
-        "--badge-color": achievement.badge.color,
-      }}
-    >
-      <span className="profileBadgeSlot__index">0{index + 1}</span>
-      <div className="profileBadgeSlot__content">
-        <span className="profileBadgeSlot__iconWrap" aria-hidden="true">
-          <Icon className="profileBadgeSlot__icon" />
-        </span>
-        <div className="profileBadgeSlot__copy">
-          <span className="profileBadgeSlot__tier">
-            {achievement.legendary ? "Legendary badge" : `${achievement.category} badge`}
-          </span>
-          <strong className="profileBadgeSlot__title">{achievement.badge.label}</strong>
-          <span className="profileBadgeSlot__desc">{achievement.title}</span>
-        </div>
-      </div>
-      <div className="profileBadgeSlot__actions">
-        <button
-          type="button"
-          className="profileBadgeSlot__action"
-          onClick={onMoveLeft}
-          disabled={!canMoveLeft || disabled}
-          aria-label={`Move ${achievement.title} left`}
-        >
-          <ChevronLeft className="profileBadgeSlot__actionIcon" />
-        </button>
-        <button
-          type="button"
-          className="profileBadgeSlot__action"
-          onClick={onMoveRight}
-          disabled={!canMoveRight || disabled}
-          aria-label={`Move ${achievement.title} right`}
-        >
-          <ChevronRight className="profileBadgeSlot__actionIcon" />
-        </button>
-        <button
-          type="button"
-          className="profileBadgeSlot__action profileBadgeSlot__action--danger"
-          onClick={onRemove}
-          disabled={disabled}
-          aria-label={`Remove ${achievement.title} from showcase`}
-        >
-          <X className="profileBadgeSlot__actionIcon" />
-        </button>
-      </div>
-    </div>
-  );
+  const Icon = achievement?.badge?.Icon;
+  return Icon ? <Icon className={className} aria-hidden={alt ? undefined : "true"} /> : null;
 }
 
 export default function Profile() {
@@ -187,7 +118,6 @@ export default function Profile() {
     metrics,
     progressTasks,
     earnedAchievements,
-    achievementStates,
     showcasedBadges,
     showcaseIds,
     capabilities,
@@ -197,6 +127,7 @@ export default function Profile() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showcaseSaving, setShowcaseSaving] = useState(false);
+  const [badgePickerOpen, setBadgePickerOpen] = useState(false);
   const [formValues, setFormValues] = useState({
     firstName: "",
     lastName: "",
@@ -210,6 +141,7 @@ export default function Profile() {
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("");
   const [removeAvatar, setRemoveAvatar] = useState(false);
+
   const cityOptions = useMemo(
     () => getCitiesByRegion(formValues.region),
     [formValues.region]
@@ -253,6 +185,7 @@ export default function Profile() {
   const profileCompletion = useMemo(() => {
     const completed = progressTasks.filter((task) => task.complete).length;
     const total = progressTasks.length;
+
     return {
       completed,
       total,
@@ -260,9 +193,6 @@ export default function Profile() {
     };
   }, [progressTasks]);
   const earnedBadgeCount = earnedAchievements.length;
-  const earnedLegendaryCount = earnedAchievements.filter(
-    (achievement) => achievement.legendary
-  ).length;
   const averageRatingLabel =
     metrics.reviewCount > 0 ? metrics.averageRating.toFixed(1) : "--";
   const avatarSrc = removeAvatar
@@ -276,7 +206,54 @@ export default function Profile() {
     }) ||
     String(profile?.address || profile?.country || "").trim();
   const ageLabel = profile?.age == null ? "" : String(profile.age);
-  const topAchievements = earnedAchievements.slice(0, 8);
+  const displayedBadges = useMemo(
+    () => showcasedBadges.slice(0, SHOWCASE_SLOT_LIMIT),
+    [showcasedBadges]
+  );
+  const previewAchievements = earnedAchievements.slice(0, 6);
+  const hasSelectableBadges = earnedAchievements.length > 0;
+  const canEditDisplayedBadges =
+    editing &&
+    capabilities.canPersistShowcase &&
+    showcaseIds.length < SHOWCASE_SLOT_LIMIT &&
+    earnedAchievements.some((achievement) => !showcaseIds.includes(achievement.id));
+
+  const handleShowcaseUpdate = async (nextIds, successMessage) => {
+    try {
+      setShowcaseSaving(true);
+      await saveBadgeShowcase(nextIds);
+      if (successMessage) {
+        toast.success(successMessage);
+      }
+    } catch (error) {
+      toast.error(error.message || "We couldn't update your displayed badges.");
+    } finally {
+      setShowcaseSaving(false);
+    }
+  };
+
+  const handleRemoveDisplayedBadge = async (achievementId) => {
+    if (!editing || showcaseSaving) return;
+
+    await handleShowcaseUpdate(
+      showcaseIds.filter((id) => id !== achievementId),
+      "Badge removed from your profile."
+    );
+  };
+
+  const handleAddDisplayedBadge = async (achievementId) => {
+    if (!editing || showcaseSaving || showcaseIds.includes(achievementId)) return;
+    if (showcaseIds.length >= SHOWCASE_SLOT_LIMIT) {
+      toast.error(`You can display up to ${SHOWCASE_SLOT_LIMIT} badges.`);
+      return;
+    }
+
+    await handleShowcaseUpdate(
+      [...showcaseIds, achievementId],
+      "Badge added to your profile."
+    );
+    setBadgePickerOpen(false);
+  };
 
   const resetEditor = () => {
     const normalizedLocation = coercePhilippinesLocation({
@@ -284,10 +261,12 @@ export default function Profile() {
       city: profile?.city || "",
       barangay: profile?.barangay || "",
     });
+
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
       previewUrlRef.current = "";
     }
+
     setAvatarFile(null);
     setAvatarPreview("");
     setRemoveAvatar(false);
@@ -306,28 +285,34 @@ export default function Profile() {
   const handleEditToggle = () => {
     if (editing) {
       resetEditor();
+      setBadgePickerOpen(false);
       setEditing(false);
       return;
     }
+
     setEditing(true);
   };
 
   const handleAvatarPick = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
     if (!AVATAR_ACCEPTED_TYPES.includes(file.type)) {
       toast.error("Use a JPG, PNG, or WEBP image for your profile photo.");
       event.target.value = "";
       return;
     }
+
     if (file.size > AVATAR_MAX_BYTES) {
       toast.error("Profile photos must be 5 MB or smaller.");
       event.target.value = "";
       return;
     }
+
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
     }
+
     const nextPreviewUrl = URL.createObjectURL(file);
     previewUrlRef.current = nextPreviewUrl;
     setAvatarFile(file);
@@ -340,14 +325,19 @@ export default function Profile() {
       URL.revokeObjectURL(previewUrlRef.current);
       previewUrlRef.current = "";
     }
+
     setAvatarFile(null);
     setAvatarPreview("");
     setRemoveAvatar(true);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleSaveProfile = async (event) => {
     event.preventDefault();
+
     try {
       setSaving(true);
       await saveProfile({
@@ -363,6 +353,7 @@ export default function Profile() {
         removeAvatar,
       });
       toast.success("Your customer profile is up to date.");
+      setBadgePickerOpen(false);
       setEditing(false);
       resetEditor();
     } catch (error) {
@@ -370,45 +361,6 @@ export default function Profile() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const updateShowcase = async (nextIds, successMessage) => {
-    try {
-      setShowcaseSaving(true);
-      await saveBadgeShowcase(nextIds);
-      toast.success(successMessage);
-    } catch (error) {
-      toast.error(error.message || "Couldn't update your badge showcase.");
-    } finally {
-      setShowcaseSaving(false);
-    }
-  };
-
-  const handleFeatureBadge = (achievementId) => {
-    if (showcaseIds.includes(achievementId)) {
-      toast("That badge is already on display.");
-      return;
-    }
-    if (showcaseIds.length >= SHOWCASE_SLOT_LIMIT) {
-      toast.error("Your badge wall is full. Remove one before adding another.");
-      return;
-    }
-    updateShowcase([...showcaseIds, achievementId], "Badge featured on your profile.");
-  };
-
-  const handleRemoveBadge = (achievementId) => {
-    updateShowcase(
-      showcaseIds.filter((id) => id !== achievementId),
-      "Badge removed from your profile wall."
-    );
-  };
-
-  const handleMoveBadge = (index, direction) => {
-    const nextIndex = index + direction;
-    if (nextIndex < 0 || nextIndex >= showcaseIds.length) return;
-    const nextIds = [...showcaseIds];
-    [nextIds[index], nextIds[nextIndex]] = [nextIds[nextIndex], nextIds[index]];
-    updateShowcase(nextIds, "Badge order updated.");
   };
 
   return (
@@ -420,7 +372,6 @@ export default function Profile() {
       <Reveal delay={0.04}>
         <section className="profileHero">
           <div className="profileHero__heading">
-            <p className="profileHero__eyebrow">Customer Profile</p>
             <div className="profileHero__titleWrap">
               <h1 className="profileHero__title">
                 <TypewriterHeading text="Profile" />
@@ -443,32 +394,28 @@ export default function Profile() {
                 />
               </motion.svg>
             </div>
-            <p className="profileHero__sub">
-              Keep your customer profile grounded in real activity, clearer trust
-              signals, and the badges you have genuinely earned inside Carvver.
-            </p>
           </div>
 
-          <div className="profileHero__stats">
+          <div className="profileHero__stats profileHero__stats--open">
             <StatMiniCard
+              className="profileMiniStat--open"
               label="Saved"
-              value={loading ? "—" : metrics.savedCount}
-              hint="Listings on your shortlist"
+              value={loading ? "--" : metrics.savedCount}
             />
             <StatMiniCard
+              className="profileMiniStat--open"
               label="Orders"
-              value={loading ? "—" : metrics.totalOrders}
-              hint="Placed through Carvver"
+              value={loading ? "--" : metrics.totalOrders}
             />
             <StatMiniCard
+              className="profileMiniStat--open"
               label="Reviews"
-              value={loading ? "—" : metrics.reviewCount}
-               hint={metrics.reviewCount > 0 ? `${averageRatingLabel} average` : "No reviews yet"}
+              value={loading ? "--" : metrics.reviewCount}
             />
             <StatMiniCard
+              className="profileMiniStat--open"
               label="Earned"
-              value={loading ? "—" : earnedBadgeCount}
-              hint={`${earnedLegendaryCount} legendary`}
+              value={loading ? "--" : earnedBadgeCount}
             />
           </div>
         </section>
@@ -538,11 +485,74 @@ export default function Profile() {
             </div>
 
             <div className="profileIdentity__copy">
-              <p className="profileIdentity__eyebrow">Public display name</p>
               <h2 className="profileIdentity__name">{displayName}</h2>
               <p className="profileIdentity__email">
                 {profile?.email || "Signed-in customer"}
               </p>
+
+              {displayedBadges.length > 0 || (editing && hasSelectableBadges) ? (
+                <motion.div
+                  className="profileIdentity__badges"
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{ duration: 0.42, delay: 0.08 }}
+                >
+                  {displayedBadges.map((achievement, index) => (
+                    <motion.span
+                      key={achievement.id}
+                      className={`profileIdentity__badge ${
+                        editing ? "profileIdentity__badge--editable" : ""
+                      }`}
+                      title={achievement.badge.label}
+                      initial={{ opacity: 0, y: 8, scale: 0.94 }}
+                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                      viewport={{ once: true, amount: 0.5 }}
+                      transition={{ duration: 0.34, delay: 0.1 + index * 0.04 }}
+                      whileHover={{ y: -3, scale: 1.04 }}
+                    >
+                      <AchievementBadgeMedia
+                        achievement={achievement}
+                        className="profileIdentity__badgeImage"
+                        alt={achievement.badge.label}
+                      />
+                      {editing && capabilities.canPersistShowcase ? (
+                        <button
+                          type="button"
+                          className="profileIdentity__badgeControl"
+                          onClick={() => handleRemoveDisplayedBadge(achievement.id)}
+                          disabled={showcaseSaving}
+                          aria-label={`Remove ${achievement.badge.label} from your profile`}
+                        >
+                          <Minus className="profileIdentity__badgeControlIcon" />
+                        </button>
+                      ) : null}
+                    </motion.span>
+                  ))}
+
+                  {canEditDisplayedBadges ? (
+                    <motion.button
+                      type="button"
+                      className="profileIdentity__badgeAdder"
+                      initial={{ opacity: 0, y: 8, scale: 0.94 }}
+                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                      viewport={{ once: true, amount: 0.5 }}
+                      transition={{
+                        duration: 0.34,
+                        delay: 0.1 + displayedBadges.length * 0.04,
+                      }}
+                      whileHover={{ y: -3, scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setBadgePickerOpen(true)}
+                      disabled={showcaseSaving}
+                      aria-label="Add a badge to your profile"
+                    >
+                      <Plus className="profileIdentity__badgeAdderIcon" />
+                    </motion.button>
+                  ) : null}
+                </motion.div>
+              ) : null}
+
               <div className="profileIdentity__facts">
                 <div className="profileIdentity__fact">
                   <span className="profileIdentity__factLabel">Real name</span>
@@ -561,24 +571,16 @@ export default function Profile() {
                   </span>
                 </div>
               </div>
-              <div className="profileIdentity__chips">
-                <span className="profileIdentity__chip">
-                  <BadgeCheck className="profileIdentity__chipIcon" />
-                  {profileCompletion.percent}% complete
-                </span>
-                <span className="profileIdentity__chip">
-                  <Sparkles className="profileIdentity__chipIcon" />
-                  {earnedBadgeCount} earned badges
-                </span>
-              </div>
             </div>
           </div>
 
-          <form className="profileEditor" onSubmit={handleSaveProfile}>
+          <form
+            className={`profileEditor ${editing ? "profileEditor--editing" : "profileEditor--viewing"}`}
+            onSubmit={handleSaveProfile}
+          >
             <div className="profileEditor__head">
               <div>
-                <p className="profileEditor__eyebrow">Editable profile details</p>
-                <h3 className="profileEditor__title">Shape how creators see you</h3>
+                <h3 className="profileEditor__title">Profile details</h3>
               </div>
 
               <div className="profileEditor__actions">
@@ -725,7 +727,9 @@ export default function Profile() {
                       }))
                     }
                     options={cityOptions}
-                    placeholder={formValues.region ? "Choose your city" : "Choose a region first"}
+                    placeholder={
+                      formValues.region ? "Choose your city" : "Choose a region first"
+                    }
                     ariaLabel="Choose your city"
                     disabled={!formValues.region}
                   />
@@ -748,7 +752,11 @@ export default function Profile() {
                       }))
                     }
                     options={barangayOptions}
-                    placeholder={formValues.city ? "Choose your barangay or type your area" : "Choose a city first"}
+                    placeholder={
+                      formValues.city
+                        ? "Choose your barangay or type your area"
+                        : "Choose a city first"
+                    }
                     ariaLabel="Choose your barangay or area"
                     disabled={!formValues.city}
                     allowCustomValue
@@ -802,8 +810,7 @@ export default function Profile() {
                   />
                 ) : (
                   <div className="profileField__display profileField__display--textarea">
-                    {formValues.bio ||
-                      "No bio yet. A short note here helps creators understand your tone and expectations before they reply."}
+                    {formValues.bio || "No bio added yet"}
                   </div>
                 )}
               </label>
@@ -824,7 +831,6 @@ export default function Profile() {
           >
             <ShoppingBag className="profileNavBand__icon" />
             <span className="profileNavBand__label">Orders</span>
-            <span className="profileNavBand__desc">Track every request and status</span>
           </motion.button>
 
           <motion.button
@@ -837,7 +843,6 @@ export default function Profile() {
           >
             <Bookmark className="profileNavBand__icon" />
             <span className="profileNavBand__label">Favorites</span>
-            <span className="profileNavBand__desc">Revisit your saved listings</span>
           </motion.button>
 
           <motion.button
@@ -850,7 +855,6 @@ export default function Profile() {
           >
             <Trophy className="profileNavBand__icon" />
             <span className="profileNavBand__label">Achievements</span>
-            <span className="profileNavBand__desc">Browse every possible badge</span>
           </motion.button>
         </section>
       </Reveal>
@@ -859,8 +863,7 @@ export default function Profile() {
         <section className="profileSection">
           <div className="profileSection__head">
             <div>
-              <p className="profileSection__eyebrow">Account Progress</p>
-              <h2 className="profileSection__title">What still makes the profile stronger</h2>
+              <h2 className="profileSection__title">Account progress</h2>
             </div>
             <div className="profileProgress__meta">
               <strong>{profileCompletion.completed}</strong>
@@ -900,8 +903,7 @@ export default function Profile() {
         <section className="profileSection">
           <div className="profileSection__head">
             <div>
-              <p className="profileSection__eyebrow">Freelancer Reviews</p>
-              <h2 className="profileSection__title">What creators have said so far</h2>
+              <h2 className="profileSection__title">Freelancer reviews</h2>
             </div>
             {metrics.reviewCount > 0 && (
               <div className="profileReviewSummary">
@@ -920,11 +922,7 @@ export default function Profile() {
               ))}
             </div>
           ) : reviews.length === 0 ? (
-            <EmptySurface
-              icon={MessageCircle}
-              title="No freelancer reviews yet"
-              description="Once a creator leaves feedback about working with you, it will appear here without any fake filler."
-            />
+            <EmptySurface icon={MessageCircle} title="No freelancer reviews yet" />
           ) : (
             <div className="profileReviewGrid">
               {reviews.map((review) => {
@@ -976,56 +974,7 @@ export default function Profile() {
         <section className="profileSection">
           <div className="profileSection__head">
             <div>
-              <p className="profileSection__eyebrow">Featured Badges</p>
-              <h2 className="profileSection__title">What you want visible first</h2>
-            </div>
-            <div className="profileSection__sideNote">
-              {showcaseIds.length} / {SHOWCASE_SLOT_LIMIT} slots used
-            </div>
-          </div>
-
-          {earnedAchievements.length === 0 ? (
-            <EmptySurface
-              icon={BadgeCheck}
-              title="No badges to feature yet"
-              description="As soon as you earn achievements, their paired badges can be pinned here."
-            />
-          ) : (
-            <div className="profileBadgeSlots">
-              {Array.from({ length: SHOWCASE_SLOT_LIMIT }).map((_, index) => (
-                <BadgeSlot
-                  key={index}
-                  index={index}
-                  achievement={showcasedBadges[index]}
-                  canMoveLeft={index > 0 && index < showcasedBadges.length}
-                  canMoveRight={index < showcasedBadges.length - 1}
-                  disabled={showcaseSaving}
-                  onMoveLeft={() => handleMoveBadge(index, -1)}
-                  onMoveRight={() => handleMoveBadge(index, 1)}
-                  onRemove={() =>
-                    showcasedBadges[index]
-                      ? handleRemoveBadge(showcasedBadges[index].id)
-                      : null
-                  }
-                />
-              ))}
-            </div>
-          )}
-
-          {!capabilities.canPersistShowcase && (
-            <p className="profileSection__footnote">
-              Badge showcase changes are unavailable at the moment.
-            </p>
-          )}
-        </section>
-      </Reveal>
-
-      <Reveal delay={0.2}>
-        <section className="profileSection">
-          <div className="profileSection__head">
-            <div>
-              <p className="profileSection__eyebrow">Earned Achievements</p>
-              <h2 className="profileSection__title">Reward signals backed by real activity</h2>
+              <h2 className="profileSection__title">Achievements</h2>
             </div>
             <motion.button
               type="button"
@@ -1042,150 +991,142 @@ export default function Profile() {
 
           {loading ? (
             <div className="profileAchievementGrid profileAchievementGrid--skeleton">
-              {Array.from({ length: 4 }).map((_, index) => (
+              {Array.from({ length: 6 }).map((_, index) => (
                 <div key={index} className="profileAchievement profileAchievement--skeleton" />
               ))}
             </div>
-          ) : topAchievements.length === 0 ? (
-            <EmptySurface
-              icon={Trophy}
-              title="No achievements earned yet"
-              description="Your achievements wall will grow from real profile completion, saved listings, orders, reviews, and badge curation."
-            />
+          ) : previewAchievements.length === 0 ? (
+            <EmptySurface icon={Trophy} title="No achievements earned yet" />
           ) : (
             <div className="profileAchievementGrid">
-              {topAchievements.map((achievement) => {
-                const Icon = achievement.badge.Icon;
-                const isDisplayed = showcaseIds.includes(achievement.id);
-
-                return (
-                  <article
-                    key={achievement.id}
-                    className={`profileAchievement ${
-                      achievement.legendary ? "profileAchievement--legendary" : ""
-                    }`}
-                    style={{
-                      "--achievement-badge-bg": achievement.badge.bg,
-                      "--achievement-badge-border": achievement.badge.border,
-                      "--achievement-badge-color": achievement.badge.color,
-                    }}
-                  >
-                    <div className="profileAchievement__top">
-                      <span className="profileAchievement__badgePreview" aria-hidden="true">
-                        <Icon className="profileAchievement__badgeIcon" />
+              {previewAchievements.map((achievement, index) => (
+                <motion.article
+                  key={achievement.id}
+                  className={`profileAchievement ${
+                    achievement.legendary ? "profileAchievement--legendary" : ""
+                  }`}
+                  style={{
+                    "--achievement-badge-bg": achievement.badge.bg,
+                    "--achievement-badge-border": achievement.badge.border,
+                    "--achievement-badge-color": achievement.badge.color,
+                  }}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.42, delay: index * 0.04 }}
+                  whileHover={{ y: -4, scale: 1.01 }}
+                >
+                  <div className="profileAchievement__top">
+                    <div className="profileAchievement__headline">
+                      <span className="profileAchievement__badgeMediaWrap" aria-hidden="true">
+                        <AchievementBadgeMedia
+                          achievement={achievement}
+                          className="profileAchievement__badgeMedia"
+                        />
                       </span>
-                      <div>
-                        <span className="profileAchievement__category">{achievement.category}</span>
+                      <div className="profileAchievement__copy">
+                        <span className="profileAchievement__category">
+                          {achievement.category}
+                        </span>
                         <h3 className="profileAchievement__title">{achievement.title}</h3>
                       </div>
                     </div>
+                    <span className="profileAchievement__tier">
+                      {achievement.legendary ? "Legendary" : "Earned"}
+                    </span>
+                  </div>
 
-                    <p className="profileAchievement__desc">{achievement.description}</p>
+                  <p className="profileAchievement__desc">{achievement.description}</p>
 
-                    <div className="profileAchievement__bottom">
-                      <span className="profileAchievement__tier">
-                        {achievement.legendary ? "Legendary" : "Earned"}
-                      </span>
-
-                      <button
-                        type="button"
-                        className={`profileAchievement__action ${
-                          isDisplayed ? "profileAchievement__action--active" : ""
-                        }`}
-                        onClick={() =>
-                          isDisplayed
-                            ? handleRemoveBadge(achievement.id)
-                            : handleFeatureBadge(achievement.id)
-                        }
-                        disabled={showcaseSaving}
-                      >
-                        {isDisplayed ? "Displayed" : "Display badge"}
-                      </button>
-                    </div>
-                  </article>
-                );
-              })}
+                  <div className="profileAchievement__meta">
+                    <span className="profileAchievement__date">
+                      {achievement.unlockedAt
+                        ? `Unlocked ${formatCompactDate(achievement.unlockedAt)}`
+                        : "Earned through your activity"}
+                    </span>
+                  </div>
+                </motion.article>
+              ))}
             </div>
           )}
         </section>
       </Reveal>
 
-      <Reveal delay={0.22}>
-        <section className="profileSection">
-          <div className="profileSection__head">
-            <div>
-              <p className="profileSection__eyebrow">Badge Wall</p>
-              <h2 className="profileSection__title">Every badge you have actually earned</h2>
-            </div>
-            <div className="profileSection__sideNote">{earnedAchievements.length} total</div>
-          </div>
+      <AnimatePresence>
+        {badgePickerOpen && editing ? (
+          <motion.div
+            className="profileBadgePicker"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setBadgePickerOpen(false)}
+          >
+            <motion.div
+              className="profileBadgePicker__dialog"
+              initial={{ opacity: 0, y: 18, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.98 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              onClick={(event) => event.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="profile-badge-picker-title"
+            >
+              <div className="profileBadgePicker__head">
+                <h2 id="profile-badge-picker-title" className="profileBadgePicker__title">
+                  Display badges
+                </h2>
+                <button
+                  type="button"
+                  className="profileBadgePicker__close"
+                  onClick={() => setBadgePickerOpen(false)}
+                  aria-label="Close badge picker"
+                >
+                  <X className="profileBadgePicker__closeIcon" />
+                </button>
+              </div>
 
-          {loading ? (
-            <div className="profileBadgeWall profileBadgeWall--skeleton">
-              {Array.from({ length: 8 }).map((_, index) => (
-                <div key={index} className="profileBadgeChip profileBadgeChip--skeleton" />
-              ))}
-            </div>
-          ) : earnedAchievements.length === 0 ? (
-            <EmptySurface
-              icon={Sparkles}
-              title="Your badge wall is still empty"
-              description="Real signals only: once you unlock achievements, their paired badges will show up here."
-            />
-          ) : (
-            <div className="profileBadgeWall">
-              {achievementStates
-                .filter((achievement) => achievement.earned)
-                .map((achievement) => {
-                  const Icon = achievement.badge.Icon;
+              <div className="profileBadgePicker__grid">
+                {earnedAchievements.map((achievement, index) => {
                   const isDisplayed = showcaseIds.includes(achievement.id);
 
                   return (
-                    <article
+                    <motion.button
                       key={achievement.id}
-                      className={`profileBadgeChip ${
-                        achievement.legendary ? "profileBadgeChip--legendary" : ""
-                      } ${isDisplayed ? "profileBadgeChip--displayed" : ""}`}
-                      style={{
-                        "--badge-chip-bg": achievement.badge.bg,
-                        "--badge-chip-border": achievement.badge.border,
-                        "--badge-chip-color": achievement.badge.color,
-                      }}
+                      type="button"
+                      className={`profileBadgePicker__option ${
+                        isDisplayed ? "profileBadgePicker__option--selected" : ""
+                      }`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.24, delay: index * 0.012 }}
+                      onClick={() => handleAddDisplayedBadge(achievement.id)}
+                      disabled={isDisplayed || showcaseSaving}
+                      aria-label={
+                        isDisplayed
+                          ? `${achievement.badge.label} is already displayed`
+                          : `Display ${achievement.badge.label}`
+                      }
+                      title={achievement.badge.label}
                     >
-                      <span className="profileBadgeChip__iconWrap" aria-hidden="true">
-                        <Icon className="profileBadgeChip__icon" />
-                      </span>
-                      <div className="profileBadgeChip__copy">
-                        <strong className="profileBadgeChip__label">{achievement.badge.label}</strong>
-                        <span className="profileBadgeChip__title">{achievement.title}</span>
-                        <span className="profileBadgeChip__date">
-                          {achievement.unlockedAt
-                            ? `Unlocked ${formatCompactDate(achievement.unlockedAt)}`
-                            : "Freshly earned"}
+                      <AchievementBadgeMedia
+                        achievement={achievement}
+                        className="profileBadgePicker__image"
+                        alt={achievement.badge.label}
+                      />
+                      {isDisplayed ? (
+                        <span className="profileBadgePicker__selectedMark" aria-hidden="true">
+                          <Check className="profileBadgePicker__selectedIcon" />
                         </span>
-                      </div>
-
-                      <button
-                        type="button"
-                        className={`profileBadgeChip__toggle ${
-                          isDisplayed ? "profileBadgeChip__toggle--active" : ""
-                        }`}
-                        onClick={() =>
-                          isDisplayed
-                            ? handleRemoveBadge(achievement.id)
-                            : handleFeatureBadge(achievement.id)
-                        }
-                        disabled={showcaseSaving}
-                      >
-                        {isDisplayed ? "On profile" : "Feature"}
-                      </button>
-                    </article>
+                      ) : null}
+                    </motion.button>
                   );
                 })}
-            </div>
-          )}
-        </section>
-      </Reveal>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </CustomerDashboardFrame>
   );
 }
