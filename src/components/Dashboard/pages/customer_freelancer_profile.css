@@ -130,6 +130,7 @@
 }
 
 .customerFreelancerHero__favoriteBtn,
+.customerFreelancerHero__primaryBtn,
 .customerFreelancerHero__ghostBtn,
 .customerFreelancerServiceCard__link {
   min-height: 44px;
@@ -153,15 +154,22 @@
     color 180ms ease;
 }
 
-.customerFreelancerHero__favoriteBtn {
+.customerFreelancerHero__primaryBtn {
   background: rgba(42, 20, 80, 0.92);
   color: #fff;
   box-shadow: 0 16px 40px rgba(42, 20, 80, 0.16);
 }
 
+.customerFreelancerHero__favoriteBtn {
+  background: rgba(255, 255, 255, 0.82);
+  color: rgba(27, 16, 46, 0.88);
+  box-shadow: none;
+}
+
 .customerFreelancerHero__favoriteBtn--active {
   background: rgba(124, 58, 237, 0.92);
   border-color: rgba(124, 58, 237, 0.24);
+  color: #fff;
 }
 
 .customerFreelancerHero__favoriteIcon {

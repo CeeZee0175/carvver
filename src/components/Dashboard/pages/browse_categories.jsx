@@ -919,6 +919,7 @@ function ServiceCard({
   onAddToCart,
   onOpenCart,
   onViewFreelancer,
+  onOpenMessage,
   cardTransition,
 }) {
   const reduceMotion = useReducedMotion();
@@ -1062,6 +1063,21 @@ function ServiceCard({
             >
               <ShoppingCart className="browseServiceCard__cartIcon" />
               <span>{inCart ? "In cart" : "Add"}</span>
+            </motion.button>
+
+            <motion.button
+              type="button"
+              className="browseServiceCard__btn browseServiceCard__btn--ghost"
+              whileHover={{ x: 1 }}
+              whileTap={{ scale: 0.96 }}
+              transition={cardTransition}
+              onClick={() =>
+                onOpenMessage(service.freelancer_id, {
+                  serviceTitle: service.title,
+                })
+              }
+            >
+              Message
             </motion.button>
 
             <motion.button
@@ -1470,6 +1486,25 @@ export default function BrowseCategories() {
     [navigate]
   );
 
+  const handleOpenMessage = useCallback(
+    (freelancerId, options = {}) => {
+      if (!freelancerId) {
+        toast.error("We couldn't open this conversation right now.");
+        return;
+      }
+
+      const params = new URLSearchParams();
+      params.set("freelancer", freelancerId);
+
+      if (options.serviceTitle) {
+        params.set("serviceTitle", options.serviceTitle);
+      }
+
+      navigate(`/dashboard/customer/messages?${params.toString()}`);
+    },
+    [navigate]
+  );
+
   const categoriesLabel =
     selectedCategories.length === 0 && !includeOthers
       ? "Categories"
@@ -1813,6 +1848,7 @@ export default function BrowseCategories() {
                 onAddToCart={handleAddToCart}
                 onOpenCart={handleOpenCart}
                 onViewFreelancer={handleViewFreelancer}
+                onOpenMessage={handleOpenMessage}
                 cardTransition={cardTransition}
               />
             ))

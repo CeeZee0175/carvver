@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { Eye, EyeOff, Lock, Mail, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowRight, LoaderCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import "./sign-in.css";
@@ -10,10 +10,7 @@ import {
   signIn,
   signInWithOAuth,
 } from "../../../lib/supabase/auth";
-import {
-  buildOAuthCallbackUrl,
-  setAuthFlowIntent,
-} from "../../../lib/authFlowIntent";
+import { buildOAuthCallbackUrl, setAuthFlowIntent } from "../../../lib/authFlowIntent";
 import {
   CUSTOMER_WELCOME_PATH,
   DEFAULT_CUSTOMER_DESTINATION,
@@ -185,6 +182,23 @@ export default function SignIn() {
     persistFeaturedCategoryFromSearch(location.search);
   }, [location.search]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    if (params.get("reset") === "success") {
+      toast.success("Your password has been updated. You can sign in now.");
+      params.delete("reset");
+      const nextSearch = params.toString();
+      navigate(
+        {
+          pathname: location.pathname,
+          search: nextSearch ? `?${nextSearch}` : "",
+        },
+        { replace: true }
+      );
+    }
+  }, [location.pathname, location.search, navigate]);
+
   const setFieldError = (name, message) => {
     setFieldErrors((prev) => {
       if (!message) {
@@ -298,6 +312,17 @@ export default function SignIn() {
       setOauthProvider("");
       setSocialError(err.message || `We couldn't start ${provider} sign-in.`);
     }
+  };
+
+  const handleForgotPassword = async () => {
+    setFormError("");
+    setSocialError("");
+    const normalizedEmail = formValues.email.trim();
+    navigate(
+      normalizedEmail
+        ? `/recover-password?email=${encodeURIComponent(normalizedEmail)}`
+        : "/recover-password"
+    );
   };
 
   return (
@@ -431,25 +456,28 @@ export default function SignIn() {
               </label>
 
               <button type="button" className="signInForm__linkBtn"
-                onClick={() => toast("Password reset isn't available yet.")}>
+                onClick={handleForgotPassword}
+                disabled={isLoading}>
                 Forgot password?
               </button>
             </div>
 
             {formError && <p className="signInForm__error">{formError}</p>}
 
-            <motion.button type="submit" className="signPrimaryBtn"
+            <motion.button type="submit" className={`signPrimaryBtn ${isLoading ? "signPrimaryBtn--loading" : ""}`}
               disabled={isLoading}
               whileHover={isLoading ? {} : { y: -1.5 }}
               whileTap={isLoading ? {} : { scale: 0.98 }}
               transition={{ type: "spring", stiffness: 340, damping: 24 }}>
-              <span className="signPrimaryBtn__text">
-                {isLoading ? "Signing In..." : "Sign In"}
-              </span>
-              {!isLoading && (
-                <span className="signPrimaryBtn__arrowWrap" aria-hidden="true">
-                  <ArrowRight className="signPrimaryBtn__arrow" />
-                </span>
+              {isLoading ? (
+                <LoaderCircle className="signPrimaryBtn__spinner" aria-hidden="true" />
+              ) : (
+                <>
+                  <span className="signPrimaryBtn__text">Sign In</span>
+                  <span className="signPrimaryBtn__arrowWrap" aria-hidden="true">
+                    <ArrowRight className="signPrimaryBtn__arrow" />
+                  </span>
+                </>
               )}
             </motion.button>
           </motion.form>

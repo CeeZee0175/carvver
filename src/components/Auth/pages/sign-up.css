@@ -545,6 +545,10 @@
   opacity: 0.76;
 }
 
+.signUpPrimaryBtn--loading{
+  gap: 0;
+}
+
 .signUpPrimaryBtn__text{
   transition: transform 220ms ease;
 }
@@ -561,6 +565,12 @@
   width: 18px;
   height: 18px;
   display: block;
+}
+
+.signUpPrimaryBtn__spinner{
+  width: 18px;
+  height: 18px;
+  animation: signUpPrimaryBtnSpin 0.9s linear infinite;
 }
 
 .signUpPrimaryBtn:hover .signUpPrimaryBtn__text{
@@ -793,4 +803,13 @@
   .signUpToggle__btn{
     transition: none !important;
   }
+
+  .signUpPrimaryBtn__spinner{
+    animation: none !important;
+  }
+}
+
+@keyframes signUpPrimaryBtnSpin{
+  from{ transform: rotate(0deg); }
+  to{ transform: rotate(360deg); }
 }

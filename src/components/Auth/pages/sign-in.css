@@ -447,6 +447,10 @@
   opacity: 0.76;
 }
 
+.signPrimaryBtn--loading{
+  gap: 0;
+}
+
 .signPrimaryBtn__text{
   transition: transform 220ms ease;
 }
@@ -463,6 +467,12 @@
   width: 18px;
   height: 18px;
   display: block;
+}
+
+.signPrimaryBtn__spinner{
+  width: 18px;
+  height: 18px;
+  animation: signPrimaryBtnSpin 0.9s linear infinite;
 }
 
 .signPrimaryBtn:hover .signPrimaryBtn__text{
@@ -663,4 +673,13 @@
   .signInSocial{
     transition: none !important;
   }
+
+  .signPrimaryBtn__spinner{
+    animation: none !important;
+  }
+}
+
+@keyframes signPrimaryBtnSpin{
+  from{ transform: rotate(0deg); }
+  to{ transform: rotate(360deg); }
 }

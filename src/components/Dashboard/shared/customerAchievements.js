@@ -11,7 +11,6 @@ import {
   MessageCircle,
   Package,
   Search,
-  ShieldCheck,
   ShoppingBag,
   Sparkles,
   Star,
@@ -205,7 +204,6 @@ export function buildCustomerAchievementMetrics({
   savedItems = [],
   orders = [],
   reviews = [],
-  mfaEnabled = false,
   showcaseIds = [],
 }) {
   const displayName = String(profile?.display_name || "").trim();
@@ -235,7 +233,6 @@ export function buildCustomerAchievementMetrics({
     hasCountry: Boolean(locationSignal),
     hasAddress: Boolean(barangay || address),
     profileSignalCount: profileSignals,
-    mfaEnabled,
     showcasedBadgeCount: showcaseIds.filter(Boolean).length,
     accountAgeDays: ageDays,
     ...buildSavedMetrics(savedItems),
@@ -300,26 +297,16 @@ export const CUSTOMER_ACHIEVEMENTS = [
     evaluate: (metrics) => metrics.profileSignalCount >= 4,
   }),
   makeAchievement({
-    id: "double-locked",
-    title: "Double Locked",
-    description: "Enable two-factor authentication on your account.",
-    category: "Profile",
-    badgeLabel: "Double Locked",
-    Icon: ShieldCheck,
-    evaluate: (metrics) => metrics.mfaEnabled,
-  }),
-  makeAchievement({
     id: "signature-customer",
     title: "Signature Customer",
     description:
-      "Reach full profile completion, enable 2FA, and place your first order.",
+      "Complete your profile and place your first order.",
     category: "Profile",
     tier: "legendary",
     badgeLabel: "Signature Customer",
     Icon: Star,
     evaluate: (metrics) =>
       metrics.profileSignalCount >= 4 &&
-      metrics.mfaEnabled &&
       metrics.totalOrders >= 1,
   }),
 

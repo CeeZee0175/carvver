@@ -1,23 +1,14 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  CheckCircle2,
-  Copy,
-  KeyRound,
-  LoaderCircle,
-  LogOut,
-  ShieldCheck,
-  Smartphone,
-  Trash2,
-  X,
-} from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { signOut } from "../../../lib/supabase/auth";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import {
   CustomerDashboardFrame,
   DashboardBreadcrumbs,
+  EmptySurface,
   Reveal,
   TypewriterHeading,
 } from "../shared/customerProfileShared";
@@ -25,13 +16,53 @@ import { useCustomerAccountSettings } from "../hooks/useCustomerAccountSettings"
 import "./profile.css";
 import "./customer_settings.css";
 
-function StatMiniCard({ label, value, className = "" }) {
-  return (
-    <div className={`profileMiniStat profileMiniStat--open ${className}`.trim()}>
-      <span className="profileMiniStat__label">{label}</span>
-      <strong className="profileMiniStat__value">{value}</strong>
-    </div>
-  );
+function formatBillingDate(value) {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+function getBillingStatusLabel(status) {
+  switch (String(status || "").toLowerCase()) {
+    case "paid":
+      return "Paid";
+    case "failed":
+      return "Failed";
+    case "expired":
+      return "Expired";
+    case "refunded":
+      return "Refunded";
+    case "draft":
+      return "Draft";
+    default:
+      return "Pending";
+  }
+}
+
+function formatCardSummary(profile) {
+  if (
+    !profile?.defaultCardBrand ||
+    !profile?.defaultCardLast4 ||
+    !profile?.defaultCardExpMonth ||
+    !profile?.defaultCardExpYear
+  ) {
+    return "";
+  }
+
+  const brand = String(profile.defaultCardBrand || "")
+    .replace(/_/g, " ")
+    .trim();
+
+  return `${brand} ending in ${profile.defaultCardLast4} · ${String(
+    profile.defaultCardExpMonth
+  ).padStart(2, "0")}/${profile.defaultCardExpYear}`;
 }
 
 function InlineStatus({ tone = "neutral", message }) {
@@ -50,37 +81,48 @@ function InlineStatus({ tone = "neutral", message }) {
   );
 }
 
-function renderQrMarkup(qrCode) {
-  const normalized = String(qrCode || "").trim();
-  if (!normalized) return null;
+function OverviewItem({ label, value }) {
+  return (
+    <article className="customerSettingsOverviewItem">
+      <span className="customerSettingsOverviewItem__label">{label}</span>
+      <strong className="customerSettingsOverviewItem__value">{value}</strong>
+    </article>
+  );
+}
 
-  if (normalized.startsWith("<svg")) {
-    return (
-      <div
-        className="customerSettingsQr__svg"
-        dangerouslySetInnerHTML={{ __html: normalized }}
-      />
-    );
-  }
-
-  return <img src={normalized} alt="Authenticator QR code" className="customerSettingsQr__image" />;
+function DetailRow({ label, value, wrap = false }) {
+  return (
+    <div className="customerSettingsDetails__row">
+      <span className="customerSettingsDetails__label">{label}</span>
+      <span
+        className={`customerSettingsDetails__value ${
+          wrap ? "customerSettingsDetails__value--wrap" : ""
+        }`}
+      >
+        {value}
+      </span>
+    </div>
+  );
 }
 
 export default function CustomerSettings() {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     loading,
     email,
     providerLabel,
     hasPasswordProvider,
-    mfaEnabled,
-    verifiedFactor,
-    enrollment,
+    billingProfile,
+    billingHistory,
+    billingAvailable,
+    billingHistorySummary,
+    hasSavedWallet,
+    hasSavedCard,
     changePassword,
-    startTotpEnrollment,
-    verifyTotpEnrollment,
-    cancelTotpEnrollment,
-    disableTotp,
+    sendPasswordRecovery,
+    updateEmailAddress,
+    saveBillingProfile,
     deleteAccount,
   } = useCustomerAccountSettings();
 
@@ -89,18 +131,34 @@ export default function CustomerSettings() {
     newPassword: "",
     confirmPassword: "",
   });
+  const [emailEditing, setEmailEditing] = useState(false);
+  const [emailValue, setEmailValue] = useState("");
+  const [billingEditing, setBillingEditing] = useState(false);
+  const [billingValues, setBillingValues] = useState({
+    preferredPaymentMethod: "",
+    walletProvider: "",
+    walletPhoneNumber: "",
+  });
   const [passwordState, setPasswordState] = useState({
     pending: false,
     error: "",
     success: "",
   });
-  const [twoFactorState, setTwoFactorState] = useState({
+  const [recoveryState, setRecoveryState] = useState({
     pending: false,
     error: "",
     success: "",
   });
-  const [setupCode, setSetupCode] = useState("");
-  const [disableCode, setDisableCode] = useState("");
+  const [emailState, setEmailState] = useState({
+    pending: false,
+    error: "",
+    success: "",
+  });
+  const [billingState, setBillingState] = useState({
+    pending: false,
+    error: "",
+    success: "",
+  });
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [deleteState, setDeleteState] = useState({
@@ -108,23 +166,89 @@ export default function CustomerSettings() {
     error: "",
   });
 
-  const passwordModeLabel = hasPasswordProvider ? "Password" : "Add password";
-  const twoFactorLabel = mfaEnabled ? "On" : enrollment ? "Setting up" : "Off";
-  const signInLabel = useMemo(() => providerLabel || "Password", [providerLabel]);
+  useEffect(() => {
+    if (location.search.includes("emailChange=success")) {
+      setEmailState({
+        pending: false,
+        error: "",
+        success: "Your email change was confirmed.",
+      });
+    }
+  }, [location.search]);
+
+  const overviewItems = useMemo(
+    () => [
+      {
+        label: "Email",
+        value: loading ? "--" : email || "Not available",
+      },
+      {
+        label: "Sign-in method",
+        value: loading ? "--" : providerLabel,
+      },
+      {
+        label: "Account status",
+        value: loading ? "--" : "Active",
+      },
+    ],
+    [email, loading, providerLabel]
+  );
+
+  const cardSummary = useMemo(
+    () => formatCardSummary(billingProfile),
+    [billingProfile]
+  );
+
+  const hasBillingSetup = useMemo(
+    () =>
+      Boolean(
+        billingProfile.preferredPaymentMethod || hasSavedWallet || hasSavedCard
+      ),
+    [billingProfile.preferredPaymentMethod, hasSavedCard, hasSavedWallet]
+  );
 
   const resetPasswordState = () =>
-    setPasswordState({
-      pending: false,
-      error: "",
-      success: "",
-    });
+    setPasswordState({ pending: false, error: "", success: "" });
+  const resetRecoveryState = () =>
+    setRecoveryState({ pending: false, error: "", success: "" });
+  const resetEmailState = () =>
+    setEmailState({ pending: false, error: "", success: "" });
+  const resetBillingState = () =>
+    setBillingState({ pending: false, error: "", success: "" });
 
-  const resetTwoFactorState = () =>
-    setTwoFactorState({
-      pending: false,
-      error: "",
-      success: "",
+  const startEmailEdit = () => {
+    setEmailValue(email || "");
+    resetEmailState();
+    setEmailEditing(true);
+  };
+
+  const cancelEmailEdit = () => {
+    setEmailEditing(false);
+    setEmailValue("");
+    resetEmailState();
+  };
+
+  const startBillingEdit = () => {
+    setBillingValues({
+      preferredPaymentMethod:
+        billingProfile.preferredPaymentMethod ||
+        (billingProfile.walletProvider ? "wallet" : hasSavedCard ? "card" : ""),
+      walletProvider: billingProfile.walletProvider || "",
+      walletPhoneNumber: billingProfile.walletPhoneNumber || "",
     });
+    resetBillingState();
+    setBillingEditing(true);
+  };
+
+  const cancelBillingEdit = () => {
+    setBillingEditing(false);
+    setBillingValues({
+      preferredPaymentMethod: "",
+      walletProvider: "",
+      walletPhoneNumber: "",
+    });
+    resetBillingState();
+  };
 
   const handlePasswordChange = async (event) => {
     event.preventDefault();
@@ -154,79 +278,67 @@ export default function CustomerSettings() {
     }
   };
 
-  const handleStartTwoFactor = async () => {
-    resetTwoFactorState();
-    setTwoFactorState((prev) => ({ ...prev, pending: true }));
+  const handleForgotPassword = async () => {
+    resetRecoveryState();
+    setRecoveryState((prev) => ({ ...prev, pending: true }));
 
     try {
-      await startTotpEnrollment();
-      setSetupCode("");
-      setTwoFactorState({
+      const recoveryEmail = await sendPasswordRecovery();
+      setRecoveryState({
         pending: false,
         error: "",
-        success: "",
+        success: `A recovery code was sent to ${recoveryEmail}.`,
       });
     } catch (error) {
-      setTwoFactorState({
+      setRecoveryState({
         pending: false,
-        error: error.message || "We couldn't start two-factor setup.",
+        error: error.message || "We couldn't send a recovery email.",
         success: "",
       });
     }
   };
 
-  const handleVerifyTwoFactor = async (event) => {
+  const handleEmailSave = async (event) => {
     event.preventDefault();
-    resetTwoFactorState();
-    setTwoFactorState((prev) => ({ ...prev, pending: true }));
+    resetEmailState();
+    setEmailState((prev) => ({ ...prev, pending: true }));
 
     try {
-      await verifyTotpEnrollment(setupCode);
-      setSetupCode("");
-      setTwoFactorState({
+      const nextEmail = await updateEmailAddress(emailValue);
+      setEmailState({
         pending: false,
         error: "",
-        success: "Two-factor authentication is now on.",
+        success: `Check ${nextEmail} to confirm your new email.`,
       });
+      setEmailEditing(false);
     } catch (error) {
-      setTwoFactorState({
+      setEmailState({
         pending: false,
-        error: error.message || "We couldn't confirm that code.",
+        error: error.message || "We couldn't start your email change.",
         success: "",
       });
     }
   };
 
-  const handleDisableTwoFactor = async (event) => {
+  const handleBillingSave = async (event) => {
     event.preventDefault();
-    resetTwoFactorState();
-    setTwoFactorState((prev) => ({ ...prev, pending: true }));
+    resetBillingState();
+    setBillingState((prev) => ({ ...prev, pending: true }));
 
     try {
-      await disableTotp(disableCode);
-      setDisableCode("");
-      setTwoFactorState({
+      await saveBillingProfile(billingValues);
+      setBillingEditing(false);
+      setBillingState({
         pending: false,
         error: "",
-        success: "Two-factor authentication has been turned off.",
+        success: "Your payment preferences were saved.",
       });
     } catch (error) {
-      setTwoFactorState({
+      setBillingState({
         pending: false,
-        error: error.message || "We couldn't turn off two-factor authentication.",
+        error: error.message || "We couldn't save your payment preferences.",
         success: "",
       });
-    }
-  };
-
-  const handleCopySecret = async () => {
-    if (!enrollment?.secret) return;
-
-    try {
-      await navigator.clipboard.writeText(enrollment.secret);
-      toast.success("Setup key copied.");
-    } catch {
-      toast.error("We couldn't copy that key.");
     }
   };
 
@@ -243,25 +355,16 @@ export default function CustomerSettings() {
     if (deleteState.pending) return;
     setDeleteModalOpen(false);
     setDeleteConfirmation("");
-    setDeleteState({
-      pending: false,
-      error: "",
-    });
+    setDeleteState({ pending: false, error: "" });
   };
 
   const handleDeleteAccount = async (event) => {
     event.preventDefault();
-    setDeleteState({
-      pending: true,
-      error: "",
-    });
+    setDeleteState({ pending: true, error: "" });
 
     try {
       await deleteAccount(deleteConfirmation);
-      navigate("/", {
-        replace: true,
-        state: { accountDeleted: true },
-      });
+      navigate("/", { replace: true, state: { accountDeleted: true } });
     } catch (error) {
       setDeleteState({
         pending: false,
@@ -277,20 +380,20 @@ export default function CustomerSettings() {
       </Reveal>
 
       <Reveal delay={0.04}>
-        <section className="profileHero customerSettingsHero">
-          <div className="profileHero__heading">
-            <div className="profileHero__titleWrap customerSettingsHero__titleWrap">
-              <h1 className="profileHero__title">
+        <section className="customerSettingsHero">
+          <div className="customerSettingsHero__heading">
+            <div className="customerSettingsHero__titleWrap">
+              <h1 className="customerSettingsHero__title">
                 <TypewriterHeading text="Settings" />
               </h1>
               <motion.svg
-                className="profileHero__line customerSettingsHero__line"
-                viewBox="0 0 300 20"
+                className="customerSettingsHero__line"
+                viewBox="0 0 248 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
                 <motion.path
-                  d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                  d="M 0,10 Q 62,0 124,10 Q 186,20 248,10"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.2"
@@ -302,215 +405,383 @@ export default function CustomerSettings() {
               </motion.svg>
             </div>
           </div>
-
-          <div className="profileHero__stats profileHero__stats--open customerSettingsHero__stats">
-            <StatMiniCard label="Sign-in" value={loading ? "--" : signInLabel} />
-            <StatMiniCard label="Password" value={loading ? "--" : passwordModeLabel} />
-            <StatMiniCard label="2FA" value={loading ? "--" : twoFactorLabel} />
-            <StatMiniCard label="Email" value={loading ? "--" : email || "Not available"} />
-          </div>
         </section>
       </Reveal>
 
       <Reveal delay={0.08}>
         <section className="profileSection customerSettingsSection">
-          <div className="profileSection__head">
-            <div>
+          <div className="profileSection__head customerSettingsSection__head">
+            <h2 className="profileSection__title">Account Overview</h2>
+          </div>
+
+          <div className="customerSettingsOverview">
+            {overviewItems.map((item, index) => (
+              <motion.div
+                key={item.label}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ duration: 0.32, delay: index * 0.04 }}
+              >
+                <OverviewItem label={item.label} value={item.value} />
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal delay={0.12}>
+        <section className="profileSection customerSettingsSection">
+          <div className="profileSection__head customerSettingsSection__head">
+            <div className="customerSettingsSectionIntro">
               <h2 className="profileSection__title">Security</h2>
+              <p className="customerSettingsSectionIntro__copy">
+                Use at least 8 characters for your next password.
+              </p>
             </div>
           </div>
 
-          <div className="customerSettingsGrid">
-            <article className="customerSettingsPanel">
-              <div className="customerSettingsPanel__head">
-                <div className="customerSettingsPanel__titleWrap">
-                  <span className="customerSettingsPanel__iconWrap" aria-hidden="true">
-                    <KeyRound className="customerSettingsPanel__icon" />
-                  </span>
-                  <div>
-                    <h3 className="customerSettingsPanel__title">Password</h3>
-                    <p className="customerSettingsPanel__meta">{passwordModeLabel}</p>
-                  </div>
-                </div>
+          <form className="customerSettingsForm" onSubmit={handlePasswordChange}>
+            {hasPasswordProvider ? (
+              <label className="customerSettingsField">
+                <span className="customerSettingsField__label">Current password</span>
+                <input
+                  className="customerSettingsField__control"
+                  type="password"
+                  autoComplete="current-password"
+                  value={passwordValues.currentPassword}
+                  onChange={(event) =>
+                    setPasswordValues((prev) => ({
+                      ...prev,
+                      currentPassword: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+            ) : null}
+
+            <div className="customerSettingsForm__row">
+              <label className="customerSettingsField">
+                <span className="customerSettingsField__label">New password</span>
+                <input
+                  className="customerSettingsField__control"
+                  type="password"
+                  autoComplete="new-password"
+                  value={passwordValues.newPassword}
+                  onChange={(event) =>
+                    setPasswordValues((prev) => ({
+                      ...prev,
+                      newPassword: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+
+              <label className="customerSettingsField">
+                <span className="customerSettingsField__label">Confirm password</span>
+                <input
+                  className="customerSettingsField__control"
+                  type="password"
+                  autoComplete="new-password"
+                  value={passwordValues.confirmPassword}
+                  onChange={(event) =>
+                    setPasswordValues((prev) => ({
+                      ...prev,
+                      confirmPassword: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {passwordState.error ? (
+                <InlineStatus key="password-error" tone="danger" message={passwordState.error} />
+              ) : passwordState.success ? (
+                <InlineStatus
+                  key="password-success"
+                  tone="success"
+                  message={passwordState.success}
+                />
+              ) : recoveryState.error ? (
+                <InlineStatus key="recovery-error" tone="danger" message={recoveryState.error} />
+              ) : recoveryState.success ? (
+                <InlineStatus
+                  key="recovery-success"
+                  tone="success"
+                  message={recoveryState.success}
+                />
+              ) : null}
+            </AnimatePresence>
+
+            <div className="customerSettingsActionsRow customerSettingsActionsRow--split">
+              <motion.button
+                type="submit"
+                className="profileEditor__btn profileEditor__btn--primary customerSettingsAction"
+                whileHover={{ y: -1.5 }}
+                whileTap={{ scale: 0.98 }}
+                transition={PROFILE_SPRING}
+                disabled={passwordState.pending}
+              >
+                {passwordState.pending ? (
+                  <LoaderCircle className="customerSettingsAction__spinner" />
+                ) : null}
+                <span>{hasPasswordProvider ? "Update password" : "Add password"}</span>
+              </motion.button>
+
+              <motion.button
+                type="button"
+                className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
+                whileHover={{ y: -1.5 }}
+                whileTap={{ scale: 0.98 }}
+                transition={PROFILE_SPRING}
+                onClick={handleForgotPassword}
+                disabled={recoveryState.pending}
+              >
+                {recoveryState.pending ? (
+                  <LoaderCircle className="customerSettingsAction__spinner" />
+                ) : null}
+                <span>Forgot password</span>
+              </motion.button>
+            </div>
+          </form>
+        </section>
+      </Reveal>
+
+      <Reveal delay={0.16}>
+        <section className="profileSection customerSettingsSection">
+          <div className="profileSection__head customerSettingsSection__head">
+            <h2 className="profileSection__title">Email</h2>
+          </div>
+
+          {emailEditing ? (
+            <form className="customerSettingsForm" onSubmit={handleEmailSave}>
+              <div className="customerSettingsDetails customerSettingsDetails--single">
+                <DetailRow label="Current email" value={email || "Not available"} wrap />
               </div>
 
-              <form className="customerSettingsForm" onSubmit={handlePasswordChange}>
-                {hasPasswordProvider ? (
-                  <label className="customerSettingsField">
-                    <span className="customerSettingsField__label">Current password</span>
-                    <input
-                      className="customerSettingsField__control"
-                      type="password"
-                      autoComplete="current-password"
-                      value={passwordValues.currentPassword}
-                      onChange={(event) =>
-                        setPasswordValues((prev) => ({
-                          ...prev,
-                          currentPassword: event.target.value,
-                        }))
-                      }
-                    />
-                  </label>
+              <label className="customerSettingsField">
+                <span className="customerSettingsField__label">New email</span>
+                <input
+                  className="customerSettingsField__control"
+                  type="email"
+                  autoComplete="email"
+                  value={emailValue}
+                  onChange={(event) => setEmailValue(event.target.value)}
+                />
+              </label>
+
+              <AnimatePresence mode="wait">
+                {emailState.error ? (
+                  <InlineStatus key="email-error" tone="danger" message={emailState.error} />
+                ) : emailState.success ? (
+                  <InlineStatus key="email-success" tone="success" message={emailState.success} />
                 ) : null}
+              </AnimatePresence>
 
-                <label className="customerSettingsField">
-                  <span className="customerSettingsField__label">New password</span>
-                  <input
-                    className="customerSettingsField__control"
-                    type="password"
-                    autoComplete="new-password"
-                    value={passwordValues.newPassword}
-                    onChange={(event) =>
-                      setPasswordValues((prev) => ({
-                        ...prev,
-                        newPassword: event.target.value,
-                      }))
-                    }
-                  />
-                </label>
-
-                <label className="customerSettingsField">
-                  <span className="customerSettingsField__label">Confirm new password</span>
-                  <input
-                    className="customerSettingsField__control"
-                    type="password"
-                    autoComplete="new-password"
-                    value={passwordValues.confirmPassword}
-                    onChange={(event) =>
-                      setPasswordValues((prev) => ({
-                        ...prev,
-                        confirmPassword: event.target.value,
-                      }))
-                    }
-                  />
-                </label>
-
-                <AnimatePresence mode="wait">
-                  {passwordState.error ? (
-                    <InlineStatus key="password-error" tone="danger" message={passwordState.error} />
-                  ) : passwordState.success ? (
-                    <InlineStatus
-                      key="password-success"
-                      tone="success"
-                      message={passwordState.success}
-                    />
-                  ) : null}
-                </AnimatePresence>
-
+              <div className="customerSettingsActionsRow">
                 <motion.button
                   type="submit"
                   className="profileEditor__btn profileEditor__btn--primary customerSettingsAction"
                   whileHover={{ y: -1.5 }}
                   whileTap={{ scale: 0.98 }}
                   transition={PROFILE_SPRING}
-                  disabled={passwordState.pending}
+                  disabled={emailState.pending}
                 >
-                  {passwordState.pending ? (
+                  {emailState.pending ? (
                     <LoaderCircle className="customerSettingsAction__spinner" />
                   ) : null}
-                  <span>{hasPasswordProvider ? "Update password" : "Add password"}</span>
+                  <span>Save email</span>
                 </motion.button>
-              </form>
-            </article>
 
-            <article className="customerSettingsPanel">
-              <div className="customerSettingsPanel__head">
-                <div className="customerSettingsPanel__titleWrap">
-                  <span className="customerSettingsPanel__iconWrap" aria-hidden="true">
-                    <ShieldCheck className="customerSettingsPanel__icon" />
+                <motion.button
+                  type="button"
+                  className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
+                  whileHover={{ y: -1.5 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={PROFILE_SPRING}
+                  onClick={cancelEmailEdit}
+                  disabled={emailState.pending}
+                >
+                  Cancel
+                </motion.button>
+              </div>
+            </form>
+          ) : (
+            <div className="customerSettingsAccountSurface">
+              <div className="customerSettingsAccountAction">
+                <div className="customerSettingsAccountAction__copy">
+                  <span className="customerSettingsDetails__label">Current email</span>
+                  <span className="customerSettingsDetails__value customerSettingsDetails__value--wrap">
+                    {email || "Not available"}
                   </span>
-                  <div>
-                    <h3 className="customerSettingsPanel__title">Two-factor authentication</h3>
-                    <p className="customerSettingsPanel__meta">{twoFactorLabel}</p>
-                  </div>
                 </div>
 
-                {!mfaEnabled && !enrollment ? (
-                  <motion.button
-                    type="button"
-                    className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
-                    whileHover={{ y: -1.5 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={PROFILE_SPRING}
-                    onClick={handleStartTwoFactor}
-                    disabled={twoFactorState.pending}
-                  >
-                    {twoFactorState.pending ? (
-                      <LoaderCircle className="customerSettingsAction__spinner" />
-                    ) : null}
-                    <span>Set up 2FA</span>
-                  </motion.button>
-                ) : null}
+                <motion.button
+                  type="button"
+                  className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
+                  whileHover={{ y: -1.5 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={PROFILE_SPRING}
+                  onClick={startEmailEdit}
+                >
+                  Change email
+                </motion.button>
               </div>
 
               <AnimatePresence mode="wait">
-                {twoFactorState.error ? (
-                  <InlineStatus key="twofactor-error" tone="danger" message={twoFactorState.error} />
-                ) : twoFactorState.success ? (
+                {emailState.error ? (
+                  <InlineStatus key="email-error-view" tone="danger" message={emailState.error} />
+                ) : emailState.success ? (
                   <InlineStatus
-                    key="twofactor-success"
+                    key="email-success-view"
                     tone="success"
-                    message={twoFactorState.success}
+                    message={emailState.success}
                   />
                 ) : null}
               </AnimatePresence>
+            </div>
+          )}
+        </section>
+      </Reveal>
 
-              {enrollment ? (
-                <motion.div
-                  className="customerSettingsTotp"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <div className="customerSettingsQr">
-                    {renderQrMarkup(enrollment.qrCode)}
-                  </div>
+      <Reveal delay={0.2}>
+        <section className="profileSection customerSettingsSection">
+          <div className="profileSection__head customerSettingsSection__head">
+            <h2 className="profileSection__title">Billing</h2>
+          </div>
 
-                  <div className="customerSettingsTotp__keyRow">
-                    <code className="customerSettingsTotp__key">{enrollment.secret || "No key available"}</code>
-                    {enrollment.secret ? (
-                      <motion.button
+          {billingAvailable ? (
+            <div className="customerSettingsBillingLayout">
+              <div className="customerSettingsBillingBlock">
+                <div className="customerSettingsBillingBlock__head">
+                  <h3 className="customerSettingsSubheading">Payment methods</h3>
+                  {hasBillingSetup && !billingEditing ? (
+                    <motion.button
+                      type="button"
+                      className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
+                      whileHover={{ y: -1.5 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={PROFILE_SPRING}
+                      onClick={startBillingEdit}
+                    >
+                      Edit
+                    </motion.button>
+                  ) : null}
+                </div>
+
+                {billingEditing ? (
+                  <form className="customerSettingsForm" onSubmit={handleBillingSave}>
+                    <div className="customerSettingsChoiceGroup">
+                      <button
                         type="button"
-                        className="customerSettingsIconAction"
-                        whileHover={{ y: -1 }}
-                        whileTap={{ scale: 0.96 }}
-                        transition={PROFILE_SPRING}
-                        onClick={handleCopySecret}
-                        aria-label="Copy setup key"
+                        className={`customerSettingsChoice ${
+                          billingValues.preferredPaymentMethod === "card"
+                            ? "customerSettingsChoice--active"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          setBillingValues((prev) => ({
+                            ...prev,
+                            preferredPaymentMethod: "card",
+                          }))
+                        }
                       >
-                        <Copy className="customerSettingsIconAction__icon" />
-                      </motion.button>
+                        Card
+                      </button>
+                      <button
+                        type="button"
+                        className={`customerSettingsChoice ${
+                          billingValues.preferredPaymentMethod === "wallet"
+                            ? "customerSettingsChoice--active"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          setBillingValues((prev) => ({
+                            ...prev,
+                            preferredPaymentMethod: "wallet",
+                          }))
+                        }
+                      >
+                        GCash or Maya
+                      </button>
+                    </div>
+
+                    {billingValues.preferredPaymentMethod === "wallet" ? (
+                      <>
+                        <div className="customerSettingsChoiceGroup">
+                          {["GCash", "Maya"].map((provider) => (
+                            <button
+                              key={provider}
+                              type="button"
+                              className={`customerSettingsChoice ${
+                                billingValues.walletProvider === provider
+                                  ? "customerSettingsChoice--active"
+                                  : ""
+                              }`}
+                              onClick={() =>
+                                setBillingValues((prev) => ({
+                                  ...prev,
+                                  walletProvider: provider,
+                                }))
+                              }
+                            >
+                              {provider}
+                            </button>
+                          ))}
+                        </div>
+
+                        <label className="customerSettingsField">
+                          <span className="customerSettingsField__label">
+                            Wallet phone number
+                          </span>
+                          <input
+                            className="customerSettingsField__control"
+                            type="tel"
+                            inputMode="tel"
+                            value={billingValues.walletPhoneNumber}
+                            onChange={(event) =>
+                              setBillingValues((prev) => ({
+                                ...prev,
+                                walletPhoneNumber: event.target.value,
+                              }))
+                            }
+                          />
+                        </label>
+                      </>
+                    ) : billingValues.preferredPaymentMethod === "card" ? (
+                      <div className="customerSettingsCompactNote">
+                        {hasSavedCard
+                          ? "Your saved card will stay available as your default method."
+                          : "Use a card during checkout and it will appear here once PayMongo returns its saved details."}
+                      </div>
                     ) : null}
-                  </div>
 
-                  <form className="customerSettingsInlineForm" onSubmit={handleVerifyTwoFactor}>
-                    <label className="customerSettingsField">
-                      <span className="customerSettingsField__label">Verification code</span>
-                      <input
-                        className="customerSettingsField__control"
-                        type="text"
-                        inputMode="numeric"
-                        autoComplete="one-time-code"
-                        maxLength={6}
-                        value={setupCode}
-                        onChange={(event) => setSetupCode(event.target.value.replace(/\D+/g, ""))}
-                      />
-                    </label>
+                    <AnimatePresence mode="wait">
+                      {billingState.error ? (
+                        <InlineStatus key="billing-error" tone="danger" message={billingState.error} />
+                      ) : billingState.success ? (
+                        <InlineStatus
+                          key="billing-success"
+                          tone="success"
+                          message={billingState.success}
+                        />
+                      ) : null}
+                    </AnimatePresence>
 
-                    <div className="customerSettingsInlineForm__actions">
+                    <div className="customerSettingsActionsRow">
                       <motion.button
                         type="submit"
                         className="profileEditor__btn profileEditor__btn--primary customerSettingsAction"
                         whileHover={{ y: -1.5 }}
                         whileTap={{ scale: 0.98 }}
                         transition={PROFILE_SPRING}
-                        disabled={twoFactorState.pending}
+                        disabled={billingState.pending}
                       >
-                        {twoFactorState.pending ? (
+                        {billingState.pending ? (
                           <LoaderCircle className="customerSettingsAction__spinner" />
                         ) : null}
-                        <span>Confirm code</span>
+                        <span>Save billing</span>
                       </motion.button>
 
                       <motion.button
@@ -519,135 +790,187 @@ export default function CustomerSettings() {
                         whileHover={{ y: -1.5 }}
                         whileTap={{ scale: 0.98 }}
                         transition={PROFILE_SPRING}
-                        onClick={cancelTotpEnrollment}
-                        disabled={twoFactorState.pending}
+                        onClick={cancelBillingEdit}
+                        disabled={billingState.pending}
                       >
-                        <span>Cancel</span>
+                        Cancel
                       </motion.button>
                     </div>
                   </form>
-                </motion.div>
-              ) : null}
-
-              {mfaEnabled && verifiedFactor ? (
-                <form className="customerSettingsInlineForm" onSubmit={handleDisableTwoFactor}>
-                  <div className="customerSettingsVerified">
-                    <div className="customerSettingsVerified__copy">
-                      <span className="customerSettingsVerified__iconWrap" aria-hidden="true">
-                        <Smartphone className="customerSettingsVerified__icon" />
-                      </span>
-                      <div>
-                        <strong className="customerSettingsVerified__title">Authenticator app</strong>
-                        <span className="customerSettingsVerified__meta">
-                          {verifiedFactor.friendly_name || "Connected"}
-                        </span>
-                      </div>
-                    </div>
-
-                    <span className="customerSettingsVerified__pill">
-                      <CheckCircle2 className="customerSettingsVerified__pillIcon" />
-                      Enabled
-                    </span>
-                  </div>
-
-                  <label className="customerSettingsField">
-                    <span className="customerSettingsField__label">Code to turn it off</span>
-                    <input
-                      className="customerSettingsField__control"
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      maxLength={6}
-                      value={disableCode}
-                      onChange={(event) =>
-                        setDisableCode(event.target.value.replace(/\D+/g, ""))
+                ) : hasBillingSetup ? (
+                  <div className="customerSettingsDetails">
+                    <DetailRow
+                      label="Preferred method"
+                      value={
+                        billingProfile.preferredPaymentMethod === "wallet"
+                          ? "GCash or Maya"
+                          : billingProfile.preferredPaymentMethod === "card"
+                            ? "Card"
+                            : "Not set"
                       }
                     />
-                  </label>
-
-                  <motion.button
-                    type="submit"
-                    className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--danger"
-                    whileHover={{ y: -1.5 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={PROFILE_SPRING}
-                    disabled={twoFactorState.pending}
-                  >
-                    {twoFactorState.pending ? (
-                      <LoaderCircle className="customerSettingsAction__spinner" />
+                    {hasSavedCard ? (
+                      <DetailRow label="Saved card" value={cardSummary} wrap />
                     ) : null}
-                    <span>Turn off 2FA</span>
-                  </motion.button>
-                </form>
-              ) : null}
-            </article>
-          </div>
+                    {hasSavedWallet ? (
+                      <>
+                        <DetailRow label="Wallet" value={billingProfile.walletProvider} />
+                        <DetailRow
+                          label="Wallet phone"
+                          value={billingProfile.walletPhoneNumber}
+                          wrap
+                        />
+                      </>
+                    ) : null}
+                  </div>
+                ) : (
+                  <EmptySurface
+                    hideIcon
+                    title="No payment method saved yet"
+                    actionLabel="Add payment method"
+                    onAction={startBillingEdit}
+                    className="customerSettingsBillingEmpty"
+                    actionButtonClassName="customerSettingsBillingEmpty__btn"
+                  />
+                )}
+              </div>
+
+              <div className="customerSettingsBillingBlock">
+                <div className="customerSettingsBillingBlock__head">
+                  <h3 className="customerSettingsSubheading">Billing history</h3>
+                </div>
+
+                {billingHistory.length > 0 ? (
+                  <>
+                    <div className="customerSettingsHistory__summary">
+                      <OverviewItem
+                        label="Entries"
+                        value={loading ? "--" : billingHistorySummary.count}
+                      />
+                      <OverviewItem
+                        label="Paid"
+                        value={loading ? "--" : billingHistorySummary.paidCount}
+                      />
+                      <OverviewItem
+                        label="Paid total"
+                        value={loading ? "--" : billingHistorySummary.paidTotalLabel}
+                      />
+                    </div>
+
+                    <div className="customerSettingsHistoryList">
+                      {billingHistory.map((entry, index) => (
+                        <motion.article
+                          key={entry.id}
+                          className="customerSettingsHistoryItem"
+                          initial={{ opacity: 0, y: 12 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true, amount: 0.3 }}
+                          transition={{ duration: 0.34, delay: index * 0.04 }}
+                          whileHover={{ y: -2 }}
+                        >
+                          <div className="customerSettingsHistoryItem__top">
+                            <h3 className="customerSettingsHistoryItem__amount">
+                              {entry.currency}{" "}
+                              {entry.subtotal.toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </h3>
+                            <span
+                              className={`customerSettingsHistoryItem__status customerSettingsHistoryItem__status--${String(
+                                entry.status || ""
+                              ).toLowerCase()}`}
+                            >
+                              {getBillingStatusLabel(entry.status)}
+                            </span>
+                          </div>
+
+                          <div className="customerSettingsHistoryItem__meta">
+                            <span>{formatBillingDate(entry.paidAt || entry.createdAt)}</span>
+                            <span>{entry.itemCount} item{entry.itemCount === 1 ? "" : "s"}</span>
+                            {entry.paymentReference ? (
+                              <span className="customerSettingsHistoryItem__reference">
+                                {entry.paymentReference}
+                              </span>
+                            ) : null}
+                          </div>
+                        </motion.article>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <EmptySurface
+                    hideIcon
+                    title="No billing history yet"
+                    className="customerSettingsHistory__empty"
+                  />
+                )}
+              </div>
+            </div>
+          ) : (
+            <EmptySurface
+              hideIcon
+              title="Billing information is unavailable right now"
+              className="customerSettingsHistory__empty"
+            />
+          )}
         </section>
       </Reveal>
 
-      <Reveal delay={0.12}>
+      <Reveal delay={0.24}>
         <section className="profileSection customerSettingsSection">
-          <div className="profileSection__head">
-            <div>
-              <h2 className="profileSection__title">Account</h2>
+          <div className="profileSection__head customerSettingsSection__head">
+            <div className="customerSettingsSectionIntro">
+              <h2 className="profileSection__title">Account Actions</h2>
+              <p className="customerSettingsSectionIntro__copy">
+                Sign out when you are done. Deleting your account removes your profile, saved
+                activity, and customer history.
+              </p>
             </div>
           </div>
 
-          <div className="customerSettingsGrid customerSettingsGrid--account">
-            <article className="customerSettingsPanel">
-              <div className="customerSettingsPanel__head">
-                <div className="customerSettingsPanel__titleWrap">
-                  <span className="customerSettingsPanel__iconWrap" aria-hidden="true">
-                    <LogOut className="customerSettingsPanel__icon" />
+          <div className="customerSettingsAccount">
+            <div className="customerSettingsAccount__row">
+              <div className="customerSettingsAccountAction">
+                <div className="customerSettingsAccountAction__copy">
+                  <span className="customerSettingsDetails__label">Session</span>
+                  <span className="customerSettingsDetails__value customerSettingsDetails__value--wrap">
+                    {email || "Signed in"}
                   </span>
-                  <div>
-                    <h3 className="customerSettingsPanel__title">Session</h3>
-                    <p className="customerSettingsPanel__meta">{email || "Signed in"}</p>
-                  </div>
                 </div>
+                <motion.button
+                  type="button"
+                  className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
+                  whileHover={{ y: -1.5 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={PROFILE_SPRING}
+                  onClick={handleSignOut}
+                >
+                  Sign out
+                </motion.button>
               </div>
+            </div>
 
-              <motion.button
-                type="button"
-                className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
-                whileHover={{ y: -1.5 }}
-                whileTap={{ scale: 0.98 }}
-                transition={PROFILE_SPRING}
-                onClick={handleSignOut}
-              >
-                <LogOut className="profileEditor__btnIcon" />
-                <span>Sign out</span>
-              </motion.button>
-            </article>
-
-            <article className="customerSettingsPanel customerSettingsPanel--danger">
-              <div className="customerSettingsPanel__head">
-                <div className="customerSettingsPanel__titleWrap">
-                  <span
-                    className="customerSettingsPanel__iconWrap customerSettingsPanel__iconWrap--danger"
-                    aria-hidden="true"
-                  >
-                    <Trash2 className="customerSettingsPanel__icon customerSettingsPanel__icon--danger" />
+            <div className="customerSettingsAccount__row customerSettingsAccount__row--danger">
+              <div className="customerSettingsAccountAction">
+                <div className="customerSettingsAccountAction__copy">
+                  <span className="customerSettingsDetails__label">Delete account</span>
+                  <span className="customerSettingsAccountAction__warning">
+                    This permanently removes your account and cannot be undone.
                   </span>
-                  <div>
-                    <h3 className="customerSettingsPanel__title">Delete account</h3>
-                    <p className="customerSettingsPanel__meta">Permanent</p>
-                  </div>
                 </div>
+                <motion.button
+                  type="button"
+                  className="profileEditor__btn customerSettingsAction customerSettingsAction--dangerSolid"
+                  whileHover={{ y: -1.5 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={PROFILE_SPRING}
+                  onClick={() => setDeleteModalOpen(true)}
+                >
+                  Delete account
+                </motion.button>
               </div>
-
-              <motion.button
-                type="button"
-                className="profileEditor__btn customerSettingsAction customerSettingsAction--dangerSolid"
-                whileHover={{ y: -1.5 }}
-                whileTap={{ scale: 0.98 }}
-                transition={PROFILE_SPRING}
-                onClick={() => setDeleteModalOpen(true)}
-              >
-                <Trash2 className="profileEditor__btnIcon" />
-                <span>Delete account</span>
-              </motion.button>
-            </article>
+            </div>
           </div>
         </section>
       </Reveal>
@@ -678,11 +1001,11 @@ export default function CustomerSettings() {
                 </h2>
                 <button
                   type="button"
-                  className="customerSettingsModal__close"
+                  className="customerSettingsModal__textBtn"
                   onClick={closeDeleteModal}
                   aria-label="Close delete account dialog"
                 >
-                  <X className="customerSettingsModal__closeIcon" />
+                  Close
                 </button>
               </div>
 
@@ -703,7 +1026,7 @@ export default function CustomerSettings() {
                   ) : null}
                 </AnimatePresence>
 
-                <div className="customerSettingsModal__actions">
+                <div className="customerSettingsActionsRow">
                   <motion.button
                     type="button"
                     className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"

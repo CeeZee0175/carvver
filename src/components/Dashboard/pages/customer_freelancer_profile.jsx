@@ -158,6 +158,17 @@ export default function CustomerFreelancerProfile() {
     }
   };
 
+  const handleOpenMessage = () => {
+    if (!freelancerId) {
+      toast.error("We couldn't open this conversation right now.");
+      return;
+    }
+
+    navigate(
+      `/dashboard/customer/messages?freelancer=${encodeURIComponent(freelancerId)}`
+    );
+  };
+
   return (
     <CustomerDashboardFrame mainClassName="customerFreelancerPage">
       <Reveal>
@@ -226,6 +237,18 @@ export default function CustomerFreelancerProfile() {
           </div>
 
           <div className="customerFreelancerHero__actions">
+            <motion.button
+              type="button"
+              className="customerFreelancerHero__primaryBtn"
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              transition={PROFILE_SPRING}
+              onClick={handleOpenMessage}
+            >
+              <span>Message</span>
+              <ArrowRight className="customerFreelancerHero__ghostIcon" />
+            </motion.button>
+
             <motion.button
               type="button"
               className={`customerFreelancerHero__favoriteBtn ${

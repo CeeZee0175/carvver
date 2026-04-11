@@ -169,28 +169,6 @@ async function fetchBadgeShowcase(userId) {
     .map((row) => row.achievement_id);
 }
 
-async function fetchMfaStatus() {
-  const [factorResult, assuranceResult] = await Promise.allSettled([
-    supabase.auth.mfa.listFactors(),
-    supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
-  ]);
-
-  const factors =
-    factorResult.status === "fulfilled" ? factorResult.value.data?.all || [] : [];
-  const currentLevel =
-    assuranceResult.status === "fulfilled"
-      ? assuranceResult.value.data?.currentLevel
-      : null;
-
-  return {
-    enabled:
-      currentLevel === "aal2" ||
-      factors.some((factor) => factor.status === "verified"),
-    available:
-      factorResult.status === "fulfilled" || assuranceResult.status === "fulfilled",
-  };
-}
-
 function validateAvatarFile(file) {
   if (!file) {
     throw new Error("Choose an image before saving.");
@@ -237,7 +215,6 @@ export function useCustomerProfileData() {
   const [reviews, setReviews] = useState([]);
   const [unlockMap, setUnlockMap] = useState({});
   const [showcaseIds, setShowcaseIds] = useState([]);
-  const [mfaEnabled, setMfaEnabled] = useState(false);
   const [warnings, setWarnings] = useState([]);
   const [capabilities, setCapabilities] = useState({
     canPersistAchievements: true,
@@ -263,7 +240,6 @@ export function useCustomerProfileData() {
         setReviews([]);
         setUnlockMap({});
         setShowcaseIds([]);
-        setMfaEnabled(false);
         return;
       }
 
@@ -277,7 +253,6 @@ export function useCustomerProfileData() {
         reviewsRes,
         unlockRes,
         showcaseRes,
-        mfaRes,
       ] = await Promise.allSettled([
         getProfile(),
         fetchSavedItems(nextUserId),
@@ -285,7 +260,6 @@ export function useCustomerProfileData() {
         fetchReviews(nextUserId),
         fetchAchievementUnlockMap(nextUserId),
         fetchBadgeShowcase(nextUserId),
-        fetchMfaStatus(),
       ]);
 
       const nextWarnings = [];
@@ -345,15 +319,6 @@ export function useCustomerProfileData() {
         );
       }
 
-      setMfaEnabled(
-        mfaRes.status === "fulfilled" ? Boolean(mfaRes.value.enabled) : false
-      );
-      if (mfaRes.status === "rejected") {
-        nextWarnings.push(
-          friendlySupabaseMessage(mfaRes.reason, "We couldn't read your 2FA status.")
-        );
-      }
-
       setWarnings(nextWarnings);
     } finally {
       setLoading(false);
@@ -371,10 +336,9 @@ export function useCustomerProfileData() {
         savedItems,
         orders,
         reviews,
-        mfaEnabled,
         showcaseIds,
       }),
-    [mfaEnabled, orders, profile, reviews, savedItems, showcaseIds]
+    [orders, profile, reviews, savedItems, showcaseIds]
   );
 
   const achievementStates = useMemo(
@@ -425,12 +389,6 @@ export function useCustomerProfileData() {
         label: "Add your location",
         detail: "Location helps with local expectations and logistics.",
         complete: metrics.hasLocation,
-      },
-      {
-        id: "mfa",
-        label: "Enable 2FA",
-        detail: "Extra sign-in protection helps keep your account safer.",
-        complete: metrics.mfaEnabled,
       },
       {
         id: "save-listing",
@@ -661,7 +619,6 @@ export function useCustomerProfileData() {
     earnedAchievements,
     showcasedBadges,
     showcaseIds,
-    mfaEnabled,
     capabilities,
     saveProfile,
     saveBadgeShowcase,

@@ -244,6 +244,7 @@ export default function DashBar() {
   const onNotificationsPage =
     location.pathname === "/dashboard/customer/notifications";
   const onCartPage = location.pathname === "/dashboard/customer/cart";
+  const onMessagesPage = location.pathname === "/dashboard/customer/messages";
   const cartBadgeLabel = cartCount > 99 ? "99+" : String(cartCount);
 
   return (
@@ -304,12 +305,13 @@ export default function DashBar() {
 
             <motion.button
               type="button"
-              className="dashbarIconBtn"
+              className={`dashbarIconBtn ${onMessagesPage ? "dashbarIconBtn--active" : ""}`}
               whileHover={{ y: -1.5, scale: 1.03 }}
               whileTap={{ scale: 0.95 }}
               transition={SPRING}
               aria-label="Messages"
-              onClick={() => toast("Messages aren't available yet.")}
+              aria-current={onMessagesPage ? "page" : undefined}
+              onClick={() => navigate("/dashboard/customer/messages")}
             >
               <MessageCircle className="dashbarIconBtn__icon" />
             </motion.button>

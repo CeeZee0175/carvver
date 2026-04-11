@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "../../../lib/supabase/client";
-import { getProfile, signOut } from "../../../lib/supabase/auth";
+import {
+  getProfile,
+  requestEmailChange,
+  requestPasswordRecovery,
+  signOut,
+} from "../../../lib/supabase/auth";
 import { emitProfileUpdated } from "../../../lib/profileSync";
 
 const supabase = createClient();
@@ -34,11 +39,19 @@ function friendlySettingsMessage(error, fallback) {
   }
 
   if (
-    message.includes("mfa") ||
-    message.includes("factor") ||
-    message.includes("verification code")
+    /customer_billing_profiles|column .*billing_|preferred_payment_method|wallet_|default_card_|paymongo_customer_id/i.test(
+      message
+    )
   ) {
-    return "That verification code didn't work. Try again with a fresh code.";
+    return "Billing information is unavailable right now.";
+  }
+
+  if (message.includes("email") && message.includes("already")) {
+    return "That email is already in use.";
+  }
+
+  if (message.includes("email") && message.includes("invalid")) {
+    return "Enter a valid email address.";
   }
 
   if (message.includes("row-level security") || message.includes("permission denied")) {
@@ -102,62 +115,146 @@ function formatProviderLabel(provider) {
   }
 }
 
-async function getMfaSnapshot() {
-  const [{ data: factorData, error: factorError }, { data: aalData, error: aalError }] =
-    await Promise.all([
-      supabase.auth.mfa.listFactors(),
-      supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
-    ]);
+function formatMoney(value, currency = "PHP") {
+  const amount = Number(value || 0);
 
-  if (factorError) throw factorError;
-  if (aalError) throw aalError;
+  if (!Number.isFinite(amount)) {
+    return currency === "PHP" ? "PHP 0.00" : `${currency} 0.00`;
+  }
 
-  const allFactors = factorData?.all || [];
-  const verifiedFactor =
-    allFactors.find(
-      (factor) => factor.factor_type === "totp" && factor.status === "verified"
-    ) || null;
-  const pendingFactor =
-    allFactors.find(
-      (factor) => factor.factor_type === "totp" && factor.status !== "verified"
-    ) || null;
+  return `${currency} ${amount.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
 
+function normalizeBillingProfile(row) {
   return {
-    allFactors,
-    verifiedFactor,
-    pendingFactor,
-    enabled: Boolean(verifiedFactor) || aalData?.currentLevel === "aal2",
-    assuranceLevel: aalData?.currentLevel || null,
+    billingName: String(row?.billing_name || "").trim(),
+    billingEmail: String(row?.billing_email || "").trim(),
+    billingAddress: String(row?.billing_address || "").trim(),
+    preferredPaymentMethod: String(row?.preferred_payment_method || "").trim(),
+    walletProvider: String(row?.wallet_provider || "").trim(),
+    walletPhoneNumber: String(row?.wallet_phone_number || "").trim(),
+    paymongoCustomerId: String(row?.paymongo_customer_id || "").trim(),
+    defaultCardPaymentMethodId: String(row?.default_card_payment_method_id || "").trim(),
+    defaultCardBrand: String(row?.default_card_brand || "").trim(),
+    defaultCardLast4: String(row?.default_card_last4 || "").trim(),
+    defaultCardExpMonth: Number.isFinite(Number(row?.default_card_exp_month))
+      ? Number(row?.default_card_exp_month)
+      : null,
+    defaultCardExpYear: Number.isFinite(Number(row?.default_card_exp_year))
+      ? Number(row?.default_card_exp_year)
+      : null,
   };
+}
+
+function normalizeBillingHistory(rows = []) {
+  return rows.map((row) => ({
+    id: row.id,
+    status: String(row.status || "").trim() || "pending",
+    subtotal: Number(row.subtotal || 0),
+    currency: String(row.currency || "PHP").trim() || "PHP",
+    paymentReference: String(row.payment_reference || "").trim(),
+    createdAt: row.created_at || null,
+    paidAt: row.paid_at || null,
+    itemCount: Array.isArray(row.customer_checkout_items)
+      ? row.customer_checkout_items.length
+      : 0,
+  }));
+}
+
+function normalizePhoneNumber(value) {
+  const digits = String(value || "").replace(/[^\d+]/g, "");
+
+  if (digits.startsWith("+63")) return digits;
+  if (digits.startsWith("63")) return `+${digits}`;
+  if (digits.startsWith("09")) return `+63${digits.slice(1)}`;
+  return digits;
+}
+
+async function fetchBillingProfile(userId) {
+  const { data, error } = await supabase
+    .from("customer_billing_profiles")
+    .select("*")
+    .eq("customer_id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return normalizeBillingProfile(data);
+}
+
+async function fetchBillingHistory(userId) {
+  const { data, error } = await supabase
+    .from("customer_checkout_sessions")
+    .select(
+      `
+      id,
+      status,
+      subtotal,
+      currency,
+      payment_reference,
+      created_at,
+      paid_at,
+      customer_checkout_items (
+        id
+      )
+    `
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(8);
+
+  if (error) throw error;
+  return normalizeBillingHistory(data || []);
 }
 
 export function useCustomerAccountSettings() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
   const [providers, setProviders] = useState([]);
-  const [mfa, setMfa] = useState({
-    enabled: false,
-    verifiedFactor: null,
-    pendingFactor: null,
-    assuranceLevel: null,
-  });
-  const [enrollment, setEnrollment] = useState(null);
+  const [billingProfile, setBillingProfile] = useState(
+    normalizeBillingProfile(null)
+  );
+  const [billingHistory, setBillingHistory] = useState([]);
+  const [billingAvailable, setBillingAvailable] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
 
     try {
-      const [
-        {
-          data: { user },
-        },
-        nextProfile,
-        mfaSnapshot,
-      ] = await Promise.all([supabase.auth.getUser(), getProfile(), getMfaSnapshot()]);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
+      const nextProfile = await getProfile();
       setProfile(nextProfile);
       setProviders(getIdentityProviders(user));
-      setMfa(mfaSnapshot);
+
+      if (user?.id) {
+        try {
+          const [nextBillingProfile, nextBillingHistory] = await Promise.all([
+            fetchBillingProfile(user.id),
+            fetchBillingHistory(user.id),
+          ]);
+
+          setBillingProfile(nextBillingProfile);
+          setBillingHistory(nextBillingHistory);
+          setBillingAvailable(true);
+        } catch (error) {
+          setBillingAvailable(false);
+          setBillingProfile(normalizeBillingProfile(null));
+          setBillingHistory([]);
+
+          if (
+            !/customer_billing_profiles|column .*billing_|preferred_payment_method|wallet_|default_card_|paymongo_customer_id/i.test(
+              String(error?.message || "")
+            )
+          ) {
+            throw error;
+          }
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -178,6 +275,36 @@ export function useCustomerAccountSettings() {
     if (providers.length === 0) return "Password";
     return providers.map(formatProviderLabel).join(" + ");
   }, [providers]);
+
+  const billingHistorySummary = useMemo(() => {
+    const paidSessions = billingHistory.filter((entry) => entry.status === "paid");
+    const paidTotal = paidSessions.reduce((sum, entry) => sum + Number(entry.subtotal || 0), 0);
+
+    return {
+      count: billingHistory.length,
+      paidCount: paidSessions.length,
+      paidTotalLabel: formatMoney(paidTotal),
+    };
+  }, [billingHistory]);
+
+  const hasSavedWallet = useMemo(
+    () =>
+      Boolean(
+        billingProfile.walletProvider && billingProfile.walletPhoneNumber
+      ),
+    [billingProfile]
+  );
+
+  const hasSavedCard = useMemo(
+    () =>
+      Boolean(
+        billingProfile.defaultCardBrand &&
+          billingProfile.defaultCardLast4 &&
+          billingProfile.defaultCardExpMonth &&
+          billingProfile.defaultCardExpYear
+      ),
+    [billingProfile]
+  );
 
   const changePassword = useCallback(
     async ({ currentPassword, newPassword, confirmPassword }) => {
@@ -235,138 +362,111 @@ export function useCustomerAccountSettings() {
     [hasPasswordProvider, load]
   );
 
-  const startTotpEnrollment = useCallback(async () => {
+  const sendPasswordRecovery = useCallback(async () => {
     try {
-      const snapshot = await getMfaSnapshot();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      if (snapshot.verifiedFactor) {
-        setMfa(snapshot);
-        throw new Error("Two-factor authentication is already turned on.");
+      if (!user?.email) {
+        throw new Error("We couldn't find your email for this account.");
       }
 
-      if (snapshot.pendingFactor?.id) {
-        const { error: unenrollError } = await supabase.auth.mfa.unenroll({
-          factorId: snapshot.pendingFactor.id,
-        });
+      await requestPasswordRecovery(user.email);
+      return user.email;
+    } catch (error) {
+      throw new Error(
+        friendlySettingsMessage(error, "We couldn't send a password recovery email.")
+      );
+    }
+  }, []);
 
-        if (unenrollError) throw unenrollError;
+  const updateEmailAddress = useCallback(async (nextEmail) => {
+    const normalizedEmail = String(nextEmail || "").trim();
+
+    if (!normalizedEmail) {
+      throw new Error("Enter a new email address.");
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(normalizedEmail)) {
+      throw new Error("Enter a valid email address.");
+    }
+
+    try {
+      await requestEmailChange(normalizedEmail);
+      return normalizedEmail;
+    } catch (error) {
+      throw new Error(
+        friendlySettingsMessage(error, "We couldn't start your email change.")
+      );
+    }
+  }, []);
+
+  const saveBillingProfile = useCallback(async (values) => {
+    const preferredPaymentMethod = String(
+      values?.preferredPaymentMethod || ""
+    ).trim();
+    const walletProvider = String(values?.walletProvider || "").trim();
+    const walletPhoneNumber = normalizePhoneNumber(values?.walletPhoneNumber);
+
+    if (!preferredPaymentMethod) {
+      throw new Error("Choose how you want to pay.");
+    }
+
+    if (!["card", "wallet"].includes(preferredPaymentMethod)) {
+      throw new Error("Choose a valid payment method.");
+    }
+
+    if (preferredPaymentMethod === "wallet") {
+      if (!walletProvider) {
+        throw new Error("Choose GCash or Maya.");
       }
 
-      const { data, error } = await supabase.auth.mfa.enroll({
-        factorType: "totp",
-        friendlyName: "Carvver Authenticator",
-      });
+      if (!["GCash", "Maya"].includes(walletProvider)) {
+        throw new Error("Choose GCash or Maya.");
+      }
+
+      if (!walletPhoneNumber) {
+        throw new Error("Enter the phone number linked to your wallet.");
+      }
+    }
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.user?.id) {
+        throw new Error("You need to be signed in to update billing information.");
+      }
+
+      const payload = {
+        customer_id: session.user.id,
+        preferred_payment_method: preferredPaymentMethod,
+        wallet_provider: preferredPaymentMethod === "wallet" ? walletProvider : null,
+        wallet_phone_number:
+          preferredPaymentMethod === "wallet" ? walletPhoneNumber : null,
+      };
+
+      const { data, error } = await supabase
+        .from("customer_billing_profiles")
+        .upsert(payload, { onConflict: "customer_id" })
+        .select("*")
+        .single();
 
       if (error) throw error;
 
-      setEnrollment({
-        factorId: data.id,
-        qrCode: data.totp?.qr_code || "",
-        secret: data.totp?.secret || "",
-        uri: data.totp?.uri || "",
-        friendlyName: data.friendly_name || "Authenticator app",
-      });
-
-      await load();
-      return data;
+      const nextProfile = normalizeBillingProfile(data);
+      setBillingProfile(nextProfile);
+      setBillingAvailable(true);
+      return nextProfile;
     } catch (error) {
       throw new Error(
-        friendlySettingsMessage(
-          error,
-          "We couldn't start two-factor setup. Please try again."
-        )
+        friendlySettingsMessage(error, "We couldn't save your billing information.")
       );
     }
-  }, [load]);
-
-  const verifyTotpEnrollment = useCallback(
-    async (code) => {
-      const normalizedCode = String(code || "").trim();
-
-      if (!enrollment?.factorId) {
-        throw new Error("Start setup again before entering a code.");
-      }
-
-      if (!normalizedCode) {
-        throw new Error("Enter the 6-digit code from your authenticator app.");
-      }
-
-      try {
-        const { error } = await supabase.auth.mfa.challengeAndVerify({
-          factorId: enrollment.factorId,
-          code: normalizedCode,
-        });
-
-        if (error) throw error;
-
-        setEnrollment(null);
-        await load();
-      } catch (error) {
-        throw new Error(
-          friendlySettingsMessage(
-            error,
-            "We couldn't confirm that code. Please try again."
-          )
-        );
-      }
-    },
-    [enrollment, load]
-  );
-
-  const cancelTotpEnrollment = useCallback(async () => {
-    if (!enrollment?.factorId) {
-      setEnrollment(null);
-      return;
-    }
-
-    try {
-      await supabase.auth.mfa.unenroll({ factorId: enrollment.factorId });
-    } catch {
-      // Ignore cleanup errors here and refresh state below.
-    } finally {
-      setEnrollment(null);
-      await load();
-    }
-  }, [enrollment, load]);
-
-  const disableTotp = useCallback(
-    async (code) => {
-      const normalizedCode = String(code || "").trim();
-
-      if (!mfa.verifiedFactor?.id) {
-        throw new Error("Two-factor authentication is already off.");
-      }
-
-      if (!normalizedCode) {
-        throw new Error("Enter the code from your authenticator app.");
-      }
-
-      try {
-        const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({
-          factorId: mfa.verifiedFactor.id,
-          code: normalizedCode,
-        });
-
-        if (verifyError) throw verifyError;
-
-        const { error: unenrollError } = await supabase.auth.mfa.unenroll({
-          factorId: mfa.verifiedFactor.id,
-        });
-
-        if (unenrollError) throw unenrollError;
-
-        await load();
-      } catch (error) {
-        throw new Error(
-          friendlySettingsMessage(
-            error,
-            "We couldn't turn off two-factor authentication."
-          )
-        );
-      }
-    },
-    [load, mfa.verifiedFactor]
-  );
+  }, []);
 
   const deleteAccount = useCallback(async (confirmation) => {
     const normalizedConfirmation = String(confirmation || "").trim();
@@ -401,18 +501,18 @@ export function useCustomerAccountSettings() {
     loading,
     profile,
     email: String(profile?.email || "").trim(),
-    providers,
     providerLabel,
     hasPasswordProvider,
-    mfaEnabled: mfa.enabled,
-    verifiedFactor: mfa.verifiedFactor,
-    pendingFactor: mfa.pendingFactor,
-    enrollment,
+    billingProfile,
+    billingHistory,
+    billingAvailable,
+    billingHistorySummary,
+    hasSavedWallet,
+    hasSavedCard,
     changePassword,
-    startTotpEnrollment,
-    verifyTotpEnrollment,
-    cancelTotpEnrollment,
-    disableTotp,
+    sendPasswordRecovery,
+    updateEmailAddress,
+    saveBillingProfile,
     deleteAccount,
     reload: load,
   };

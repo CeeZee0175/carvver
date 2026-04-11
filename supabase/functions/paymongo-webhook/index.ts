@@ -15,6 +15,47 @@ function unixToIso(value: number | null | undefined) {
   return new Date(value * 1000).toISOString();
 }
 
+function extractCardMetadata(payment: any) {
+  const source = payment?.attributes?.source || {};
+  const paymentMethodDetails =
+    payment?.attributes?.payment_method_details ||
+    payment?.attributes?.payment_method?.details ||
+    source?.details ||
+    {};
+  const card =
+    paymentMethodDetails?.card ||
+    source?.card ||
+    source?.details?.card ||
+    payment?.attributes?.card ||
+    {};
+  const brand = card?.brand || paymentMethodDetails?.brand || null;
+  const last4 = card?.last4 || paymentMethodDetails?.last4 || null;
+  const expMonth = card?.exp_month || paymentMethodDetails?.exp_month || null;
+  const expYear = card?.exp_year || paymentMethodDetails?.exp_year || null;
+  const paymentMethodId =
+    payment?.attributes?.payment_method_id ||
+    payment?.attributes?.payment_method?.id ||
+    null;
+  const customerId =
+    payment?.attributes?.customer_id ||
+    payment?.attributes?.payment_method?.customer_id ||
+    null;
+
+  if (!brand || !last4 || !expMonth || !expYear) {
+    return null;
+  }
+
+  return {
+    default_card_payment_method_id: paymentMethodId,
+    default_card_brand: String(brand),
+    default_card_last4: String(last4),
+    default_card_exp_month: Number(expMonth),
+    default_card_exp_year: Number(expYear),
+    paymongo_customer_id: customerId ? String(customerId) : null,
+    preferred_payment_method: "card",
+  };
+}
+
 Deno.serve(async (request: Request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -61,6 +102,7 @@ Deno.serve(async (request: Request) => {
       unixToIso(payment?.attributes?.paid_at) ||
       unixToIso(checkoutAttributes?.paid_at) ||
       new Date().toISOString();
+    const cardMetadata = extractCardMetadata(payment);
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
@@ -137,6 +179,22 @@ Deno.serve(async (request: Request) => {
 
     if (sessionUpdateError) {
       throw sessionUpdateError;
+    }
+
+    if (cardMetadata) {
+      const { error: billingProfileError } = await supabase
+        .from("customer_billing_profiles")
+        .upsert(
+          {
+            customer_id: checkoutSession.user_id,
+            ...cardMetadata,
+          },
+          { onConflict: "customer_id" }
+        );
+
+      if (billingProfileError) {
+        throw billingProfileError;
+      }
     }
 
     const serviceIds = checkoutItems.map((item) => item.service_id);

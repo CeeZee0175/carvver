@@ -38,3 +38,17 @@ export function buildOAuthCallbackUrl(mode) {
 
   return url.toString();
 }
+
+export function buildPasswordRecoveryUrl(params = {}) {
+  if (!isBrowser()) return "/recover-password";
+
+  const url = new URL("/recover-password", window.location.origin);
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      url.searchParams.set(key, String(value));
+    }
+  });
+
+  return url.toString();
+}

@@ -20,6 +20,15 @@ const HomeAboutUs = lazy(() => import("./components/Homepage/pages/home_aboutUs"
 const HomeCommunity = lazy(() => import("./components/Homepage/pages/home_community"));
 const PricingPageContent = lazy(() => import("./components/Homepage/pages/pricing_page"));
 const AuthCallback = lazy(() => import("./components/Auth/pages/auth_callback"));
+const PasswordRecovery = lazy(() =>
+  import("./components/Auth/pages/password_recovery")
+);
+const PasswordRecoveryVerify = lazy(() =>
+  import("./components/Auth/pages/password_recovery_verify")
+);
+const PasswordRecoveryReset = lazy(() =>
+  import("./components/Auth/pages/password_recovery_reset")
+);
 const SignIn = lazy(() => import("./components/Auth/pages/sign-in"));
 const SignUp = lazy(() => import("./components/Auth/pages/sign-up"));
 const CustomerWelcome = lazy(() => import("./components/Dashboard/pages/customer_welcome"));
@@ -39,6 +48,9 @@ const Profile = lazy(() => import("./components/Dashboard/pages/profile"));
 const CustomerSettings = lazy(() => import("./components/Dashboard/pages/customer_settings"));
 const ProfileAchievements = lazy(() => import("./components/Dashboard/pages/profileAchievements"));
 const CustomerOrders = lazy(() => import("./components/Dashboard/pages/customerOrders"));
+const CustomerMessages = lazy(() =>
+  import("./components/Dashboard/pages/customer_messages")
+);
 const CustomerFreelancerProfile = lazy(() =>
   import("./components/Dashboard/pages/customer_freelancer_profile")
 );
@@ -248,6 +260,30 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/recover-password"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <PasswordRecovery />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/recover-password/verify"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <PasswordRecoveryVerify />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/recover-password/reset"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <PasswordRecoveryReset />
+          </Suspense>
+        }
+      />
+      <Route
         path="/sign-in"
         element={
           <Suspense fallback={<RouteFallback />}>
@@ -435,6 +471,16 @@ function AppRoutes() {
           <Suspense fallback={<RouteFallback />}>
             <CustomerRoute>
               <CustomerOrders />
+            </CustomerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/customer/messages"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <CustomerRoute>
+              <CustomerMessages />
             </CustomerRoute>
           </Suspense>
         }

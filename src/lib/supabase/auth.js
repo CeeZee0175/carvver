@@ -1,5 +1,9 @@
 import { createClient } from "./client";
 import { PHILIPPINES_COUNTRY } from "../phLocations";
+import {
+  buildOAuthCallbackUrl,
+  buildPasswordRecoveryUrl,
+} from "../authFlowIntent";
 
 const supabase = createClient();
 
@@ -109,6 +113,103 @@ export async function signInWithOAuth({ provider, redirectTo }) {
       redirectTo,
     },
   });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function requestPasswordRecovery(email, options = {}) {
+  const normalizedEmail = String(email || "").trim();
+
+  if (!normalizedEmail) {
+    throw new Error("Enter your email first.");
+  }
+
+  const redirectTo =
+    options.redirectTo ||
+    buildPasswordRecoveryUrl({
+      email: normalizedEmail,
+    });
+
+  const { data, error } = await supabase.auth.resetPasswordForEmail(
+    normalizedEmail,
+    {
+      redirectTo,
+    }
+  );
+
+  if (error) throw error;
+  return data;
+}
+
+export async function verifyPasswordRecoveryOtp({ email, token }) {
+  const normalizedEmail = String(email || "").trim();
+  const normalizedToken = String(token || "").trim();
+
+  if (!normalizedEmail) {
+    throw new Error("Enter your email.");
+  }
+
+  if (!normalizedToken) {
+    throw new Error("Enter the code from your email.");
+  }
+
+  const { data, error } = await supabase.auth.verifyOtp({
+    email: normalizedEmail,
+    token: normalizedToken,
+    type: "recovery",
+  });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function verifyPasswordRecoveryTokenHash(tokenHash) {
+  const normalizedTokenHash = String(tokenHash || "").trim();
+
+  if (!normalizedTokenHash) {
+    throw new Error("That recovery link is incomplete.");
+  }
+
+  const { data, error } = await supabase.auth.verifyOtp({
+    token_hash: normalizedTokenHash,
+    type: "recovery",
+  });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updatePassword(password) {
+  const normalizedPassword = String(password || "");
+
+  if (!normalizedPassword) {
+    throw new Error("Enter a new password.");
+  }
+
+  const { data, error } = await supabase.auth.updateUser({
+    password: normalizedPassword,
+  });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function requestEmailChange(email) {
+  const normalizedEmail = String(email || "").trim();
+
+  if (!normalizedEmail) {
+    throw new Error("Enter a new email address.");
+  }
+
+  const { data, error } = await supabase.auth.updateUser(
+    {
+      email: normalizedEmail,
+    },
+    {
+      emailRedirectTo: buildOAuthCallbackUrl("email-change"),
+    }
+  );
 
   if (error) throw error;
   return data;

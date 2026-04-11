@@ -69,6 +69,20 @@ export default function AuthCallback() {
           throw new Error("We couldn't find your session after authentication.");
         }
 
+        if (mode === "email-change") {
+          setStatus("Confirming your new email...");
+          const profile = await ensureProfileForSession(session, intent);
+          clearAuthFlowIntent();
+
+          navigate(
+            profile?.role === "freelancer"
+              ? "/dashboard/freelancer/settings?emailChange=success"
+              : "/dashboard/customer/settings?emailChange=success",
+            { replace: true }
+          );
+          return;
+        }
+
         setStatus("Setting up your Carvver profile...");
 
         const profile = await ensureProfileForSession(session, intent);

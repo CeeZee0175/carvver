@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, User } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowRight, User, LoaderCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import "./sign-up.css";
@@ -638,18 +638,20 @@ export default function SignUp() {
             )}
             {formError && <p className="signUpForm__error">{formError}</p>}
 
-            <motion.button type="submit" className="signUpPrimaryBtn"
+            <motion.button type="submit" className={`signUpPrimaryBtn ${isLoading ? "signUpPrimaryBtn--loading" : ""}`}
               disabled={isLoading}
               whileHover={isLoading ? {} : { y: -1.5 }}
               whileTap={isLoading ? {} : { scale: 0.98 }}
               transition={{ type: "spring", stiffness: 340, damping: 24 }}>
-              <span className="signUpPrimaryBtn__text">
-                {isLoading ? "Creating Account..." : "Create Account"}
-              </span>
-              {!isLoading && (
-                <span className="signUpPrimaryBtn__arrowWrap" aria-hidden="true">
-                  <ArrowRight className="signUpPrimaryBtn__arrow" />
-                </span>
+              {isLoading ? (
+                <LoaderCircle className="signUpPrimaryBtn__spinner" aria-hidden="true" />
+              ) : (
+                <>
+                  <span className="signUpPrimaryBtn__text">Create Account</span>
+                  <span className="signUpPrimaryBtn__arrowWrap" aria-hidden="true">
+                    <ArrowRight className="signUpPrimaryBtn__arrow" />
+                  </span>
+                </>
               )}
             </motion.button>
           </motion.form>
