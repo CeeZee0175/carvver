@@ -135,9 +135,7 @@ export default function CustomerSettings() {
   const [emailValue, setEmailValue] = useState("");
   const [billingEditing, setBillingEditing] = useState(false);
   const [billingValues, setBillingValues] = useState({
-    preferredPaymentMethod: "",
-    walletProvider: "",
-    walletPhoneNumber: "",
+    preferredPaymentMethod: "qrph",
   });
   const [passwordState, setPasswordState] = useState({
     pending: false,
@@ -230,11 +228,7 @@ export default function CustomerSettings() {
 
   const startBillingEdit = () => {
     setBillingValues({
-      preferredPaymentMethod:
-        billingProfile.preferredPaymentMethod ||
-        (billingProfile.walletProvider ? "wallet" : hasSavedCard ? "card" : ""),
-      walletProvider: billingProfile.walletProvider || "",
-      walletPhoneNumber: billingProfile.walletPhoneNumber || "",
+      preferredPaymentMethod: "qrph",
     });
     resetBillingState();
     setBillingEditing(true);
@@ -243,9 +237,7 @@ export default function CustomerSettings() {
   const cancelBillingEdit = () => {
     setBillingEditing(false);
     setBillingValues({
-      preferredPaymentMethod: "",
-      walletProvider: "",
-      walletPhoneNumber: "",
+      preferredPaymentMethod: "qrph",
     });
     resetBillingState();
   };
@@ -665,7 +657,7 @@ export default function CustomerSettings() {
             <div className="customerSettingsSectionIntro">
               <h2 className="profileSection__title">Billing</h2>
               <p className="customerSettingsSectionIntro__copy">
-                Manage payment preferences and review your recent charges in one place.
+                Use QRPh for checkout and keep your recent payment activity in view.
               </p>
             </div>
           </div>
@@ -695,86 +687,25 @@ export default function CustomerSettings() {
                       <button
                         type="button"
                         className={`customerSettingsChoice ${
-                          billingValues.preferredPaymentMethod === "card"
+                          billingValues.preferredPaymentMethod === "qrph"
                             ? "customerSettingsChoice--active"
                             : ""
                         }`}
                         onClick={() =>
                           setBillingValues((prev) => ({
                             ...prev,
-                            preferredPaymentMethod: "card",
+                            preferredPaymentMethod: "qrph",
                           }))
                         }
                       >
-                        Card
-                      </button>
-                      <button
-                        type="button"
-                        className={`customerSettingsChoice ${
-                          billingValues.preferredPaymentMethod === "wallet"
-                            ? "customerSettingsChoice--active"
-                            : ""
-                        }`}
-                        onClick={() =>
-                          setBillingValues((prev) => ({
-                            ...prev,
-                            preferredPaymentMethod: "wallet",
-                          }))
-                        }
-                      >
-                        GCash or Maya
+                        QRPh
                       </button>
                     </div>
 
-                    {billingValues.preferredPaymentMethod === "wallet" ? (
-                      <>
-                        <div className="customerSettingsChoiceGroup">
-                          {["GCash", "Maya"].map((provider) => (
-                            <button
-                              key={provider}
-                              type="button"
-                              className={`customerSettingsChoice ${
-                                billingValues.walletProvider === provider
-                                  ? "customerSettingsChoice--active"
-                                  : ""
-                              }`}
-                              onClick={() =>
-                                setBillingValues((prev) => ({
-                                  ...prev,
-                                  walletProvider: provider,
-                                }))
-                              }
-                            >
-                              {provider}
-                            </button>
-                          ))}
-                        </div>
-
-                        <label className="customerSettingsField">
-                          <span className="customerSettingsField__label">
-                            Wallet phone number
-                          </span>
-                          <input
-                            className="customerSettingsField__control"
-                            type="tel"
-                            inputMode="tel"
-                            value={billingValues.walletPhoneNumber}
-                            onChange={(event) =>
-                              setBillingValues((prev) => ({
-                                ...prev,
-                                walletPhoneNumber: event.target.value,
-                              }))
-                            }
-                          />
-                        </label>
-                      </>
-                    ) : billingValues.preferredPaymentMethod === "card" ? (
-                      <div className="customerSettingsCompactNote">
-                        {hasSavedCard
-                          ? "Your saved card will stay available as your default method."
-                          : "Use a card during checkout and it will appear here once PayMongo returns its saved details."}
-                      </div>
-                    ) : null}
+                    <div className="customerSettingsCompactNote">
+                      Checkout now opens with QRPh, which matches the active wallet channel on
+                      your PayMongo account.
+                    </div>
 
                     <AnimatePresence mode="wait">
                       {billingState.error ? (
@@ -800,7 +731,7 @@ export default function CustomerSettings() {
                         {billingState.pending ? (
                           <LoaderCircle className="customerSettingsAction__spinner" />
                         ) : null}
-                        <span>Save billing</span>
+                        <span>Save QRPh</span>
                       </motion.button>
 
                       <motion.button
@@ -819,34 +750,25 @@ export default function CustomerSettings() {
                 ) : hasBillingSetup ? (
                   <div className="customerSettingsDetails">
                     <DetailRow
-                      label="Preferred method"
+                      label="Checkout method"
                       value={
-                        billingProfile.preferredPaymentMethod === "wallet"
-                          ? "GCash or Maya"
-                          : billingProfile.preferredPaymentMethod === "card"
-                            ? "Card"
+                        billingProfile.preferredPaymentMethod === "card"
+                          ? "Saved card details on file"
+                          : hasSavedWallet
+                            ? "QRPh"
                             : "Not set"
                       }
                     />
                     {hasSavedCard ? (
                       <DetailRow label="Saved card" value={cardSummary} wrap />
                     ) : null}
-                    {hasSavedWallet ? (
-                      <>
-                        <DetailRow label="Wallet" value={billingProfile.walletProvider} />
-                        <DetailRow
-                          label="Wallet phone"
-                          value={billingProfile.walletPhoneNumber}
-                          wrap
-                        />
-                      </>
-                    ) : null}
+                    {hasSavedWallet ? <DetailRow label="Wallet channel" value="QRPh" /> : null}
                   </div>
                 ) : (
                   <EmptySurface
                     hideIcon
                     title="No payment method saved yet"
-                    actionLabel="Add payment method"
+                    actionLabel="Set up QRPh"
                     onAction={startBillingEdit}
                     className="customerSettingsBillingEmpty"
                     actionButtonClassName="customerSettingsBillingEmpty__btn"

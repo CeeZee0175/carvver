@@ -199,7 +199,7 @@ Deno.serve(async (request: Request) => {
               item.service.description ||
               "Carvver service listing",
           })),
-          payment_method_types: ["gcash", "card"],
+          payment_method_types: ["qrph"],
           send_email_receipt: true,
           show_description: true,
           show_line_items: true,

@@ -164,15 +164,6 @@ function normalizeBillingHistory(rows = []) {
   }));
 }
 
-function normalizePhoneNumber(value) {
-  const digits = String(value || "").replace(/[^\d+]/g, "");
-
-  if (digits.startsWith("+63")) return digits;
-  if (digits.startsWith("63")) return `+${digits}`;
-  if (digits.startsWith("09")) return `+63${digits.slice(1)}`;
-  return digits;
-}
-
 async function fetchBillingProfile(userId) {
   const { data, error } = await supabase
     .from("customer_billing_profiles")
@@ -289,9 +280,8 @@ export function useCustomerAccountSettings() {
 
   const hasSavedWallet = useMemo(
     () =>
-      Boolean(
-        billingProfile.walletProvider && billingProfile.walletPhoneNumber
-      ),
+      billingProfile.preferredPaymentMethod === "qrph" ||
+      billingProfile.walletProvider === "QRPh",
     [billingProfile]
   );
 
@@ -407,29 +397,13 @@ export function useCustomerAccountSettings() {
     const preferredPaymentMethod = String(
       values?.preferredPaymentMethod || ""
     ).trim();
-    const walletProvider = String(values?.walletProvider || "").trim();
-    const walletPhoneNumber = normalizePhoneNumber(values?.walletPhoneNumber);
 
     if (!preferredPaymentMethod) {
-      throw new Error("Choose how you want to pay.");
+      throw new Error("Choose QRPh to continue.");
     }
 
-    if (!["card", "wallet"].includes(preferredPaymentMethod)) {
-      throw new Error("Choose a valid payment method.");
-    }
-
-    if (preferredPaymentMethod === "wallet") {
-      if (!walletProvider) {
-        throw new Error("Choose GCash or Maya.");
-      }
-
-      if (!["GCash", "Maya"].includes(walletProvider)) {
-        throw new Error("Choose GCash or Maya.");
-      }
-
-      if (!walletPhoneNumber) {
-        throw new Error("Enter the phone number linked to your wallet.");
-      }
+    if (preferredPaymentMethod !== "qrph") {
+      throw new Error("Choose QRPh to continue.");
     }
 
     try {
@@ -444,9 +418,8 @@ export function useCustomerAccountSettings() {
       const payload = {
         customer_id: session.user.id,
         preferred_payment_method: preferredPaymentMethod,
-        wallet_provider: preferredPaymentMethod === "wallet" ? walletProvider : null,
-        wallet_phone_number:
-          preferredPaymentMethod === "wallet" ? walletPhoneNumber : null,
+        wallet_provider: "QRPh",
+        wallet_phone_number: null,
       };
 
       const { data, error } = await supabase
