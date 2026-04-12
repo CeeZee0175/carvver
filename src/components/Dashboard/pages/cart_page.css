@@ -101,6 +101,15 @@
   color: rgba(242, 193, 78, 0.96);
 }
 
+.cartHero__sub {
+  margin: 10px 0 0;
+  max-width: 56ch;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(27, 16, 46, 0.68);
+}
+
 .cartHero__stats {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));

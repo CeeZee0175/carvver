@@ -119,6 +119,10 @@ export default function CustomerOrders() {
                 </span>
               </h1>
             </div>
+
+            <p className="profileHero__sub">
+              See every order in one place and check what still needs your attention.
+            </p>
           </div>
 
           <div className="profileHero__stats profileHero__stats--open">
@@ -221,6 +225,16 @@ export default function CustomerOrders() {
               {filteredOrders.map((order) => {
                 const meta = STATUS_META[order.status] || STATUS_META.pending;
                 const freelancerName = getCustomerDisplayName(order.freelancer);
+                const packageName = String(order.selected_package_name || "").trim();
+                const packageSummary = String(order.selected_package_summary || "").trim();
+                const packageDeliveryDays = Number(
+                  order.selected_package_delivery_time_days || 0
+                );
+                const packageRevisions =
+                  order.selected_package_revisions === null ||
+                  order.selected_package_revisions === undefined
+                    ? null
+                    : Number(order.selected_package_revisions);
 
                 return (
                   <article key={order.id} className="profileOrderCard">
@@ -232,6 +246,12 @@ export default function CustomerOrders() {
                         <h3 className="profileOrderCard__title">
                           {order.services?.title || "Service unavailable"}
                         </h3>
+                        {packageName ? (
+                          <p className="profileCard__supportingCopy">
+                            {packageName}
+                            {packageSummary ? ` · ${packageSummary}` : ""}
+                          </p>
+                        ) : null}
                       </div>
                       <strong className="profileOrderCard__price">
                         {formatOrderPrice(order.total_price)}
@@ -247,6 +267,21 @@ export default function CustomerOrders() {
                         <Package className="profileOrderCard__metaIcon" />
                         {freelancerName}
                       </span>
+                      {packageName ? (
+                        <span className="profileOrderCard__metaItem">
+                          <Package className="profileOrderCard__metaIcon" />
+                          {packageDeliveryDays > 0
+                            ? `${packageName} · ${packageDeliveryDays} day${
+                                packageDeliveryDays === 1 ? "" : "s"
+                              }`
+                            : packageName}
+                          {packageRevisions !== null
+                            ? ` · ${packageRevisions} revision${
+                                packageRevisions === 1 ? "" : "s"
+                              }`
+                            : ""}
+                        </span>
+                      ) : null}
                       <span className="profileOrderCard__metaItem">
                         <ShoppingBag className="profileOrderCard__metaIcon" />
                         {formatOrderDate(order.created_at)}

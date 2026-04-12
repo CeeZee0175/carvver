@@ -225,8 +225,16 @@ export default function HomeFooter({ fullBleed = false }) {
 
   const scrollToTarget = (id) => {
     if (!id) return;
+    if (location.pathname !== "/") {
+      navigate(`/#${id}`);
+      return;
+    }
+
     const element = document.getElementById(id);
-    if (!element) return;
+    if (!element) {
+      navigate(`/#${id}`);
+      return;
+    }
 
     element.scrollIntoView({
       behavior: reduceMotion ? "auto" : "smooth",
@@ -274,6 +282,10 @@ export default function HomeFooter({ fullBleed = false }) {
                 />
               </motion.svg>
             </div>
+
+            <p className="homeFooter__desc">
+              Creative services and handmade work, all in one place.
+            </p>
 
             <div className="homeFooter__socials" aria-label="Social links">
               {socials.map(({ label, Icon }, index) => (

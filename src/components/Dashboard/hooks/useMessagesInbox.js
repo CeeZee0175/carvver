@@ -315,6 +315,52 @@ export function useMessagesInbox(role = "customer") {
     [cleanupExpiredThreads, refreshThreads, role, userId]
   );
 
+  const ensureThreadForCustomer = useCallback(
+    async (customerId) => {
+      if (!customerId || !userId || role !== "freelancer") return "";
+
+      setStartingThread(true);
+
+      try {
+        await cleanupExpiredThreads();
+
+        const { data: existing, error: existingError } = await supabase
+          .from("customer_freelancer_threads")
+          .select("id")
+          .eq("customer_id", customerId)
+          .eq("freelancer_id", userId)
+          .maybeSingle();
+
+        if (existingError) throw existingError;
+
+        let threadId = existing?.id || "";
+
+        if (!threadId) {
+          const { data: inserted, error: insertError } = await supabase
+            .from("customer_freelancer_threads")
+            .insert([
+              {
+                customer_id: customerId,
+                freelancer_id: userId,
+              },
+            ])
+            .select("id")
+            .single();
+
+          if (insertError) throw insertError;
+          threadId = inserted.id;
+        }
+
+        await refreshThreads();
+        setActiveThreadId(threadId);
+        return threadId;
+      } finally {
+        setStartingThread(false);
+      }
+    },
+    [cleanupExpiredThreads, refreshThreads, role, userId]
+  );
+
   const sendMessage = useCallback(
     async (body) => {
       const trimmedBody = String(body || "").trim();
@@ -369,6 +415,7 @@ export function useMessagesInbox(role = "customer") {
     setActiveThreadId,
     sendMessage,
     ensureThreadForFreelancer,
+    ensureThreadForCustomer,
     refreshThreads,
   };
 }

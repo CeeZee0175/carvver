@@ -298,6 +298,7 @@ const ACCENT_COLORS = [
 ];
 
 const ITEMS_PER_PAGE = 8;
+const SERVICE_MEDIA_BUCKET = "service-media";
 
 function createPinIcon(className) {
   return L.divIcon({
@@ -311,6 +312,12 @@ function createPinIcon(className) {
 
 const regionPinIcon = createPinIcon("browseLeafletPin browseLeafletPin--region");
 const cityPinIcon = createPinIcon("browseLeafletPin browseLeafletPin--city");
+
+function getPublicServiceMediaUrl(path) {
+  if (!path) return "";
+  const { data } = supabase.storage.from(SERVICE_MEDIA_BUCKET).getPublicUrl(path);
+  return data?.publicUrl || "";
+}
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /* Helpers                                                                   */
@@ -916,8 +923,8 @@ function ServiceCard({
   cartServiceIds,
   onToggleSave,
   onToggleFavoriteFreelancer,
-  onAddToCart,
   onOpenCart,
+  onOpenServiceDetail,
   onViewFreelancer,
   onOpenMessage,
   cardTransition,
@@ -955,11 +962,33 @@ function ServiceCard({
       whileTap={reduceMotion ? undefined : { scale: 0.985 }}
     >
       <div className="browseServiceCard__media">
-        <div className="browseServiceCard__mediaBg">
-          <span className="browseServiceCard__mediaIconWrap" aria-hidden="true">
-            <Icon className="browseServiceCard__mediaIcon" />
-          </span>
-        </div>
+        {service.previewMedia?.publicUrl ? (
+          service.previewMedia.media_kind === "video" ? (
+            <video
+              className="browseServiceCard__mediaAsset"
+              src={service.previewMedia.publicUrl}
+              muted
+              playsInline
+            />
+          ) : (
+            <img
+              className="browseServiceCard__mediaAsset"
+              src={service.previewMedia.publicUrl}
+              alt={service.title}
+            />
+          )
+        ) : (
+          <div className="browseServiceCard__mediaBg">
+            <span className="browseServiceCard__mediaIconWrap" aria-hidden="true">
+              <Icon className="browseServiceCard__mediaIcon" />
+            </span>
+            {service.packageCount > 0 ? (
+              <span className="browseServiceCard__packageMeta">
+                {service.packageCount} package{service.packageCount === 1 ? "" : "s"}
+              </span>
+            ) : null}
+          </div>
+        )}
 
         <div className="browseServiceCard__mediaTop">
           <span className="browseServiceCard__tag">{service.category}</span>
@@ -1037,7 +1066,7 @@ function ServiceCard({
 
         <div className="browseServiceCard__bottom">
           <div className="browseServiceCard__priceWrap">
-            <span className="browseServiceCard__priceFrom">From</span>
+            <span className="browseServiceCard__priceFrom">Starting at</span>
             <span className="browseServiceCard__price">
               ₱{Number(service.price).toLocaleString()}
             </span>
@@ -1058,11 +1087,11 @@ function ServiceCard({
                   return;
                 }
 
-                onAddToCart(service);
+                onOpenServiceDetail(service.id);
               }}
             >
               <ShoppingCart className="browseServiceCard__cartIcon" />
-              <span>{inCart ? "In cart" : "Add"}</span>
+              <span>{inCart ? "In cart" : "Choose package"}</span>
             </motion.button>
 
             <motion.button
@@ -1088,7 +1117,7 @@ function ServiceCard({
               transition={cardTransition}
               onClick={() => onViewFreelancer(service.freelancer_id)}
             >
-              View
+              Freelancer
               <ArrowRight style={{ width: 13, height: 13 }} />
             </motion.button>
           </div>
@@ -1228,7 +1257,7 @@ export default function BrowseCategories() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [savedIds, setSavedIds] = useState([]);
-  const { addItem, serviceIds: cartServiceIds } = useCart();
+  const { serviceIds: cartServiceIds } = useCart();
   const { favoriteIds, toggleFavoriteFreelancer } = useCustomerFavoriteFreelancers({
     includeProfiles: false,
   });
@@ -1258,7 +1287,73 @@ export default function BrowseCategories() {
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        setServices(data || []);
+        const nextServices = data || [];
+        const serviceIds = nextServices.map((item) => item.id).filter(Boolean);
+
+        if (serviceIds.length === 0) {
+          setServices(nextServices);
+          return;
+        }
+
+        try {
+          const [
+            { data: mediaRows, error: mediaError },
+            { data: packageRows, error: packageError },
+          ] = await Promise.all([
+            supabase
+              .from("service_media")
+              .select("service_id, bucket_path, media_kind, is_cover, sort_order")
+              .in("service_id", serviceIds)
+              .order("is_cover", { ascending: false })
+              .order("sort_order", { ascending: true }),
+            supabase
+              .from("service_packages")
+              .select("service_id, price")
+              .in("service_id", serviceIds),
+          ]);
+
+          if (mediaError) throw mediaError;
+          if (packageError) throw packageError;
+
+          const previewMap = new Map();
+          (mediaRows || []).forEach((item) => {
+            if (!previewMap.has(item.service_id)) {
+              previewMap.set(item.service_id, {
+                ...item,
+                publicUrl: getPublicServiceMediaUrl(item.bucket_path),
+              });
+            }
+          });
+
+          const packageMap = new Map();
+          (packageRows || []).forEach((item) => {
+            const existing = packageMap.get(item.service_id) || [];
+            existing.push(Number(item.price || 0));
+            packageMap.set(item.service_id, existing);
+          });
+
+          setServices(
+            nextServices.map((item) => ({
+              ...item,
+              price: (() => {
+                const prices = (packageMap.get(item.id) || []).filter((value) => value > 0);
+                return prices.length > 0
+                  ? Math.min(...prices)
+                  : Number(item.price || 0);
+              })(),
+              startingPrice: (() => {
+                const prices = (packageMap.get(item.id) || []).filter((value) => value > 0);
+                return prices.length > 0
+                  ? Math.min(...prices)
+                  : Number(item.price || 0);
+              })(),
+              packageCount: (packageMap.get(item.id) || []).length,
+              previewMedia: previewMap.get(item.id) || null,
+            }))
+          );
+        } catch {
+          setServices(nextServices);
+        }
       } catch {
         setServices([]);
       } finally {
@@ -1438,26 +1533,21 @@ export default function BrowseCategories() {
     }
   }, [savedIds]);
 
-  const handleAddToCart = useCallback(
-    async (service) => {
-      try {
-        const result = await addItem(service);
-        if (result?.duplicate) {
-          toast("Already in cart.", { duration: 1800 });
-          return;
-        }
-
-        toast.success("Added to cart.");
-      } catch (error) {
-        toast.error(error.message || "Couldn't add this listing to your cart.");
-      }
-    },
-    [addItem]
-  );
-
   const handleOpenCart = useCallback(() => {
     navigate("/dashboard/customer/cart");
   }, [navigate]);
+
+  const handleOpenServiceDetail = useCallback(
+    (serviceId) => {
+      if (!serviceId) {
+        toast.error("We couldn't open this listing right now.");
+        return;
+      }
+
+      navigate(`/dashboard/customer/browse-services/${serviceId}`);
+    },
+    [navigate]
+  );
 
   const handleToggleFavoriteFreelancer = useCallback(
     async (freelancerId, snapshot) => {
@@ -1845,8 +1935,8 @@ export default function BrowseCategories() {
                 cartServiceIds={cartServiceIds}
                 onToggleSave={handleToggleSave}
                 onToggleFavoriteFreelancer={handleToggleFavoriteFreelancer}
-                onAddToCart={handleAddToCart}
                 onOpenCart={handleOpenCart}
+                onOpenServiceDetail={handleOpenServiceDetail}
                 onViewFreelancer={handleViewFreelancer}
                 onOpenMessage={handleOpenMessage}
                 cardTransition={cardTransition}

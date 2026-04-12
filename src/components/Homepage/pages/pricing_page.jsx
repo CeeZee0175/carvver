@@ -25,19 +25,19 @@ const NEWSLETTER_TABLE = "newsletter_signups";
 
 const heroSignals = [
   {
-    label: "Pricing model",
-    value: "Freemium",
-    note: "The core experience starts free, then Carvver Pro adds extra visibility and convenience.",
+    label: "Start free",
+    value: "Core access is ready",
+    note: "Browse, save, post, and manage your customer flow without a monthly fee.",
   },
   {
-    label: "Best available now",
-    value: "Customer-side flow",
-    note: "Browse, save, cart, orders, profile, and badge-driven progress are already strongest here.",
+    label: "Upgrade when needed",
+    value: "More reach with Pro",
+    note: "Carvver Pro is for extra visibility, stronger presentation, and added convenience.",
   },
   {
-    label: "Where Pro helps most",
-    value: "Growth for freelancers",
-    note: "Featured visibility, few-click posting, and profile upgrades are part of the Carvver Pro plan.",
+    label: "Built to grow",
+    value: "Made for both sides",
+    note: "Keep customer tools simple now and grow into more polished freelancer-facing perks over time.",
   },
 ];
 
@@ -360,7 +360,7 @@ export default function PricingPage() {
                   <p className="pricingHero__eyebrow">Pricing</p>
                   <div className="pricingHero__titleWrap">
                     <h1 className="pricingHero__title">
-                      <TypewriterTitle text="Free to start. Pro when it fits." active={active} />
+                      <TypewriterTitle text="Start free. Grow with Pro." active={active} />
                     </h1>
                     <motion.svg className="pricingHero__line" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
                       <motion.path
@@ -377,14 +377,8 @@ export default function PricingPage() {
                   </div>
 
                   <p className="pricingHero__sub">
-                    Carvver follows a freemium plan. The free tier already lets people use the core parts
-                    of the platform, while Carvver Pro is where we place extra visibility, customization,
-                    and convenience tools.
-                  </p>
-                  <p className="pricingHero__support">
-                    Since the current build is stronger on customer-side flows, this page keeps that
-                    honest. Free shows what people can already use today, while some freelancer-side
-                    Pro perks are part of the Carvver Pro plan.
+                    Use Carvver for free today, then step into Carvver Pro when you want more reach,
+                    stronger presentation, and a more polished platform experience.
                   </p>
 
                   <div className="pricingHero__actions">
@@ -420,7 +414,7 @@ export default function PricingPage() {
                 {heroSignals.map((signal, index) => (
                   <motion.article
                     key={signal.label}
-                    className="pricingSignal"
+                    className="pricingSignal pricingSignal--hero"
                     initial={{ opacity: 0, y: 12 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.5 }}

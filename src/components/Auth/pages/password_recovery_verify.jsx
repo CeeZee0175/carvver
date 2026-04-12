@@ -41,8 +41,8 @@ export default function PasswordRecoveryVerify() {
 
   const validateOtp = (value) => {
     const normalized = String(value || "").trim();
-    if (!normalized) return "Enter the 6-digit code from your email.";
-    if (!/^\d{6}$/.test(normalized)) return "Enter the 6-digit code from your email.";
+    if (!normalized) return "Enter the 8-digit code from your email.";
+    if (!/^\d{8}$/.test(normalized)) return "Enter the 8-digit code from your email.";
     return "";
   };
 

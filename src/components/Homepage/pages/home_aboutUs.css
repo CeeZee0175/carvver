@@ -166,16 +166,7 @@
   margin: 10px auto 0;
   font-size: clamp(16px, 1.7vw, 20px);
   line-height: 1.72;
-  min-height: 3.5em;
-}
-
-.aboutUsHero__support{
-  max-width: 72ch;
-  margin: 14px auto 0;
-  font-size: 14.8px;
-  line-height: 1.76;
-  color: rgba(27,16,46,0.64);
-  min-height: 3.6em;
+  min-height: 0;
 }
 
 .aboutUsHero__metrics{

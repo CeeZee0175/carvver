@@ -35,7 +35,14 @@ function CartLineItem({ item, onRemove, removing }) {
     ? getCustomerDisplayName(service.profiles)
     : "Unavailable creator";
   const invalid = !service || service.is_published === false;
-  const price = Number(service?.price || 0);
+  const price = Number(item.selected_package_price ?? service?.price ?? 0);
+  const packageName = String(item.selected_package_name || "").trim();
+  const packageSummary = String(item.selected_package_summary || "").trim();
+  const packageDeliveryDays = Number(item.selected_package_delivery_time_days || 0);
+  const packageRevisions =
+    item.selected_package_revisions === null || item.selected_package_revisions === undefined
+      ? null
+      : Number(item.selected_package_revisions);
 
   return (
     <article
@@ -62,6 +69,13 @@ function CartLineItem({ item, onRemove, removing }) {
             {service?.title || "This listing is no longer available"}
           </h3>
 
+          {packageName ? (
+            <p className="cartLineItem__split">
+              {packageName}
+              {packageSummary ? ` · ${packageSummary}` : ""}
+            </p>
+          ) : null}
+
           <div className="cartLineItem__info">
             <span>{creatorName}</span>
             {service?.location && (
@@ -70,6 +84,12 @@ function CartLineItem({ item, onRemove, removing }) {
                 {service.location}
               </span>
             )}
+            {packageDeliveryDays > 0 ? (
+              <span>{packageDeliveryDays} day{packageDeliveryDays === 1 ? "" : "s"} delivery</span>
+            ) : null}
+            {packageRevisions !== null ? (
+              <span>{packageRevisions} revision{packageRevisions === 1 ? "" : "s"}</span>
+            ) : null}
           </div>
 
           {invalid && (
@@ -180,7 +200,7 @@ export default function CartPage() {
       items.map((item) => {
         const service = item.services;
         const invalid = !service || service.is_published === false;
-        const amount = Number(service?.price || 0);
+        const amount = Number(item.selected_package_price ?? service?.price ?? 0);
 
         return {
           ...item,
@@ -277,6 +297,10 @@ export default function CartPage() {
                 />
               </motion.svg>
             </div>
+
+            <p className="cartHero__sub">
+              Review your listings here before you move to payment.
+            </p>
           </div>
 
           <div className="cartHero__stats">

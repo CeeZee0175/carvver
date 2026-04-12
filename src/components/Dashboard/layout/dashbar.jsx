@@ -420,7 +420,7 @@ export default function DashBar() {
                       ) : (
                         <div className="dashbarNotifyEmpty">
                           <p className="dashbarNotifyEmpty__title">
-                            Notifications
+                            No recent notification
                           </p>
                         </div>
                       )}

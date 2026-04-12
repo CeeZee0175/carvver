@@ -1184,6 +1184,13 @@
   overflow: hidden;
 }
 
+.browseServiceCard__mediaAsset{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
 .browseServiceCard__media--skeleton{
   background: linear-gradient(
     90deg,
@@ -1423,6 +1430,7 @@
 
 .browseServiceCard__priceWrap{
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 4px;
 }
@@ -1440,6 +1448,14 @@
   font-weight: 850;
   letter-spacing: -0.02em;
   color: rgba(27,16,46,0.96);
+}
+
+.browseServiceCard__packageMeta{
+  flex-basis: 100%;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: rgba(27,16,46,0.56);
 }
 
 .browseServiceCard__actions{

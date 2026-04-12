@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import "./home.css";
 import HomeBackdrop from "../layout/home_backdrop";
 import HomeOne from "../sections/home_one";
@@ -8,6 +9,7 @@ import HomeFour from "../sections/home_four";
 import HomeFooter from "../layout/home_footer";
 
 export default function Home() {
+  const location = useLocation();
   const scrollRef = useRef(null);
   const wheelLockRef = useRef(false);
   const wheelTimerRef = useRef(null);
@@ -21,6 +23,29 @@ export default function Home() {
   }, []);
 
   useEffect(() => clearWheelLock, [clearWheelLock]);
+
+  useEffect(() => {
+    if (!location.hash) return;
+
+    const targetId = location.hash.replace(/^#/, "");
+    if (!targetId) return;
+
+    const timerId = window.setTimeout(() => {
+      const element = document.getElementById(targetId);
+      if (!element) return;
+
+      element.scrollIntoView({
+        behavior:
+          typeof window !== "undefined" &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "auto"
+            : "smooth",
+        block: "start",
+      });
+    }, 60);
+
+    return () => window.clearTimeout(timerId);
+  }, [location.hash]);
 
   const getSections = useCallback(() => {
     const container = scrollRef.current;

@@ -281,6 +281,10 @@ export default function DashboardCustomer() {
               </motion.svg>
             </div>
 
+            <p className="profileHero__sub">
+              Pick up where you left off, revisit saved work, or post something new.
+            </p>
+
             <div className="dashLandingHero__actions">
               <motion.button
                 type="button"

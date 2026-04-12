@@ -61,11 +61,17 @@
 .requestComposer__feedback,
 .requestField__hint,
 .requestPage__statHint,
-.requestMediaCard__meta {
+.requestMediaCard__meta,
+.requestPage__sub {
   font-family: Inter, system-ui, sans-serif;
   font-size: 0.94rem;
   line-height: 1.72;
   color: rgba(27, 16, 46, 0.64);
+}
+
+.requestPage__sub {
+  margin: 0;
+  max-width: 42rem;
 }
 
 .requestPage__stats {

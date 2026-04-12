@@ -14,6 +14,18 @@ type CartService = {
   freelancer_id: string;
 };
 
+type CartItemRow = {
+  service_id: string;
+  selected_package_id: string | null;
+  selected_package_name: string | null;
+  selected_package_summary: string | null;
+  selected_package_price: number | string | null;
+  selected_package_delivery_time_days: number | null;
+  selected_package_revisions: number | null;
+  selected_package_included_items: string[] | null;
+  services: CartService | CartService[] | null;
+};
+
 function getEnv(name: string) {
   const value = Deno.env.get(name);
   if (!value) {
@@ -32,6 +44,27 @@ function normalizeService(service: CartService | CartService[] | null | undefine
   }
 
   return service ?? null;
+}
+
+function normalizeCartItem(row: CartItemRow) {
+  const service = normalizeService(row.services);
+  if (!service) return null;
+
+  const selectedPrice = Number(row.selected_package_price ?? service.price ?? 0);
+  const unitPrice = roundCurrency(selectedPrice);
+
+  return {
+    service,
+    packageSnapshot: {
+      id: row.selected_package_id || null,
+      name: row.selected_package_name || null,
+      summary: row.selected_package_summary || null,
+      deliveryTimeDays: row.selected_package_delivery_time_days ?? null,
+      revisions: row.selected_package_revisions ?? null,
+      includedItems: row.selected_package_included_items || [],
+    },
+    unitPrice,
+  };
 }
 
 function resolveReturnUrl(baseUrl: string, candidate: unknown, fallback: string) {
@@ -94,6 +127,13 @@ Deno.serve(async (request: Request) => {
       .select(
         `
         service_id,
+        selected_package_id,
+        selected_package_name,
+        selected_package_summary,
+        selected_package_price,
+        selected_package_delivery_time_days,
+        selected_package_revisions,
+        selected_package_included_items,
         services (
           id,
           title,
@@ -116,9 +156,14 @@ Deno.serve(async (request: Request) => {
       return jsonResponse({ error: "Your cart is empty." }, 400);
     }
 
-    const validItems = cartItems
-      .map((row) => normalizeService(row.services as CartService | CartService[] | null))
-      .filter((service): service is CartService => Boolean(service?.is_published));
+    const validItems = (cartItems || [])
+      .map((row) => normalizeCartItem(row as CartItemRow))
+      .filter(
+        (
+          item
+        ): item is NonNullable<ReturnType<typeof normalizeCartItem>> =>
+          Boolean(item?.service?.is_published)
+      );
 
     if (validItems.length === 0) {
       return jsonResponse(
@@ -128,7 +173,7 @@ Deno.serve(async (request: Request) => {
     }
 
     const subtotal = roundCurrency(
-      validItems.reduce((total, service) => total + Number(service.price || 0), 0)
+      validItems.reduce((total, item) => total + Number(item.unitPrice || 0), 0)
     );
 
     const paymongoPayload = {
@@ -141,12 +186,18 @@ Deno.serve(async (request: Request) => {
           description: `Carvver service checkout (${validItems.length} listing${
             validItems.length === 1 ? "" : "s"
           })`,
-          line_items: validItems.map((service) => ({
+          line_items: validItems.map((item) => ({
             currency: "PHP",
-            amount: toCentavos(Number(service.price || 0)),
-            name: service.title,
+            amount: toCentavos(Number(item.unitPrice || 0)),
+            name: item.packageSnapshot.name
+              ? `${item.service.title} - ${item.packageSnapshot.name}`
+              : item.service.title,
             quantity: 1,
-            description: service.category || service.description || "Carvver service listing",
+            description:
+              item.packageSnapshot.summary ||
+              item.service.category ||
+              item.service.description ||
+              "Carvver service listing",
           })),
           payment_method_types: ["gcash", "card"],
           send_email_receipt: true,
@@ -182,8 +233,9 @@ Deno.serve(async (request: Request) => {
       throw checkoutSessionError || new Error("Couldn't create a checkout session record.");
     }
 
-    const checkoutRows = validItems.map((service) => {
-      const unitPrice = roundCurrency(Number(service.price || 0));
+    const checkoutRows = validItems.map((item) => {
+      const service = item.service;
+      const unitPrice = roundCurrency(Number(item.unitPrice || 0));
       const platformFee = roundCurrency(unitPrice * COMMISSION_RATE);
       const freelancerNet = roundCurrency(unitPrice - platformFee);
 
@@ -194,6 +246,12 @@ Deno.serve(async (request: Request) => {
         title: service.title,
         category: service.category || null,
         description: service.description || null,
+        selected_package_id: item.packageSnapshot.id,
+        selected_package_name: item.packageSnapshot.name,
+        selected_package_summary: item.packageSnapshot.summary,
+        selected_package_delivery_time_days: item.packageSnapshot.deliveryTimeDays,
+        selected_package_revisions: item.packageSnapshot.revisions,
+        selected_package_included_items: item.packageSnapshot.includedItems,
         unit_price: unitPrice,
         platform_fee: platformFee,
         freelancer_net: freelancerNet,

@@ -183,7 +183,7 @@ function EmptyState({ activeFilter, onShowAll }) {
         }
       />
 
-      <h3 className="notifEmpty__title">You&apos;re all caught up.</h3>
+      <h3 className="notifEmpty__title">No notifications here yet.</h3>
       <p className="notifEmpty__desc">
         {activeFilter === "unread"
           ? "There are no unread notifications."
@@ -357,6 +357,10 @@ export default function NotifPage() {
                 </span>
               </h1>
             </div>
+
+            <p className="notifPage__sub">
+              Keep up with new activity, order updates, and saved listing changes.
+            </p>
           </div>
 
           <div className="notifToolbar">

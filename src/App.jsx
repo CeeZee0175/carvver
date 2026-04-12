@@ -35,11 +35,23 @@ const CustomerWelcome = lazy(() => import("./components/Dashboard/pages/customer
 const FreelancerWelcome = lazy(() => import("./components/Dashboard/pages/freelancer_welcome"));
 const DashboardCustomer = lazy(() => import("./components/Dashboard/pages/dashboard_customer"));
 const DashboardFreelancer = lazy(() => import("./components/Dashboard/pages/dashboard_freelancer"));
+const FreelancerBrowseRequests = lazy(() =>
+  import("./components/Dashboard/pages/freelancer_browse_requests")
+);
+const FreelancerRequestDetail = lazy(() =>
+  import("./components/Dashboard/pages/freelancer_request_detail")
+);
+const FreelancerPostListing = lazy(() =>
+  import("./components/Dashboard/pages/freelancer_post_listing")
+);
 const FreelancerProfile = lazy(() => import("./components/Dashboard/pages/freelancer_profile"));
 const FreelancerSettings = lazy(() => import("./components/Dashboard/pages/freelancer_settings"));
 const FreelancerMessages = lazy(() => import("./components/Dashboard/pages/freelancer_messages"));
 const DashboardAboutUs = lazy(() => import("./components/Dashboard/pages/dashboard_aboutUs"));
 const BrowseCategories = lazy(() => import("./components/Dashboard/pages/browse_categories"));
+const CustomerServiceDetail = lazy(() =>
+  import("./components/Dashboard/pages/customer_service_detail")
+);
 const FavBook = lazy(() => import("./components/Dashboard/pages/favBook"));
 const CartPage = lazy(() => import("./components/Dashboard/pages/cart_page"));
 const PostRequest = lazy(() => import("./components/Dashboard/pages/post_request"));
@@ -51,34 +63,18 @@ const CustomerOrders = lazy(() => import("./components/Dashboard/pages/customerO
 const CustomerMessages = lazy(() =>
   import("./components/Dashboard/pages/customer_messages")
 );
+const FreelancerListings = lazy(() =>
+  import("./components/Dashboard/pages/freelancer_listings")
+);
+const FreelancerListingPreview = lazy(() =>
+  import("./components/Dashboard/pages/freelancer_listing_preview")
+);
 const CustomerFreelancerProfile = lazy(() =>
   import("./components/Dashboard/pages/customer_freelancer_profile")
 );
 const supabase = createClient();
 
-function RouteFallback() {
-  return (
-    <div
-      style={{
-        minHeight: "100vh",
-        width: "100%",
-        background: "transparent",
-      }}
-      aria-hidden="true"
-    />
-  );
-}
-
-function HomePage() {
-  return (
-    <>
-      <NavBar />
-      <Home />
-    </>
-  );
-}
-
-function BrandPageShell({ children }) {
+function useCustomerBrandShell() {
   const [shellState, setShellState] = useState({
     resolved: false,
     useDashboardShell: false,
@@ -140,6 +136,44 @@ function BrandPageShell({ children }) {
       subscription.unsubscribe();
     };
   }, []);
+
+  return shellState;
+}
+
+function RouteFallback() {
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        width: "100%",
+        background: "transparent",
+      }}
+      aria-hidden="true"
+    />
+  );
+}
+
+function HomePage() {
+  const shellState = useCustomerBrandShell();
+
+  return (
+    <>
+      {shellState.resolved ? (
+        <Suspense
+          fallback={<div className="brandPageShell__barPlaceholder" aria-hidden="true" />}
+        >
+          {shellState.useDashboardShell ? <DashBar /> : <NavBar />}
+        </Suspense>
+      ) : (
+        <div className="brandPageShell__barPlaceholder" aria-hidden="true" />
+      )}
+      <Home />
+    </>
+  );
+}
+
+function BrandPageShell({ children }) {
+  const shellState = useCustomerBrandShell();
 
   return (
     <div className="brandPageShell">
@@ -346,6 +380,66 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/dashboard/freelancer/browse-requests"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerBrowseRequests />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer/browse-requests/:requestId"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerRequestDetail />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer/post-listing"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerPostListing />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer/listings"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerListings />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer/listings/:listingId/edit"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerPostListing />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer/listings/:listingId"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerListingPreview />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
         path="/dashboard/freelancer/profile"
         element={
           <Suspense fallback={<RouteFallback />}>
@@ -391,6 +485,16 @@ function AppRoutes() {
           <Suspense fallback={<RouteFallback />}>
             <CustomerRoute>
               <BrowseCategories />
+            </CustomerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/customer/browse-services/:serviceId"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <CustomerRoute>
+              <CustomerServiceDetail />
             </CustomerRoute>
           </Suspense>
         }

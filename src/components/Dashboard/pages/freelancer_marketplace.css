@@ -1,0 +1,707 @@
+@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap");
+
+.freelancerMarketplacePage {
+  gap: clamp(20px, 2.8vw, 30px);
+}
+
+.freelancerMarketplaceHero {
+  display: grid;
+  gap: 18px;
+  padding: 8px 0 4px;
+}
+
+.freelancerMarketplaceHero__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.freelancerMarketplaceHero__copy {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.freelancerMarketplaceHero__titleWrap {
+  position: relative;
+  display: inline-block;
+  max-width: fit-content;
+  padding-bottom: 16px;
+}
+
+.freelancerMarketplaceHero__title {
+  margin: 0;
+  font-family: "Dancing Script", cursive;
+  font-size: clamp(56px, 6vw, 86px);
+  line-height: 0.94;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: rgba(27, 16, 46, 0.98);
+}
+
+.freelancerMarketplaceHero__line {
+  position: absolute;
+  left: 8%;
+  width: 82%;
+  bottom: 0;
+  height: 18px;
+  color: rgba(242, 193, 78, 0.96);
+}
+
+.freelancerMarketplaceHero__sub {
+  margin: 0;
+  max-width: 58ch;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(27, 16, 46, 0.68);
+}
+
+.freelancerMarketplaceHero__actions,
+.freelancerListingActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.freelancerMarketplaceHero__action,
+.freelancerMarketplaceHero__ghost,
+.freelancerListingActionBtn,
+.freelancerListingActionBtn--ghost,
+.freelancerRequestCard__btn,
+.freelancerRequestDetail__action,
+.freelancerRequestDetail__ghost,
+.freelancerListingUpload__button,
+.freelancerListingMediaCard__remove {
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 14px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  transition:
+    transform 160ms ease,
+    box-shadow 220ms ease,
+    background 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease;
+}
+
+.freelancerMarketplaceHero__action,
+.freelancerListingActionBtn,
+.freelancerRequestDetail__action,
+.freelancerRequestCard__btn {
+  background: linear-gradient(180deg, rgba(42, 20, 80, 1), rgba(42, 20, 80, 0.86));
+  color: #fff;
+  box-shadow: 0 18px 52px rgba(42, 20, 80, 0.14);
+}
+
+.freelancerMarketplaceHero__ghost,
+.freelancerListingActionBtn--ghost,
+.freelancerRequestDetail__ghost,
+.freelancerListingUpload__button,
+.freelancerListingMediaCard__remove {
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  color: rgba(27, 16, 46, 0.82);
+}
+
+.freelancerMarketplaceHero__action:hover,
+.freelancerMarketplaceHero__ghost:hover,
+.freelancerListingActionBtn:hover,
+.freelancerListingActionBtn--ghost:hover,
+.freelancerRequestCard__btn:hover,
+.freelancerRequestDetail__action:hover,
+.freelancerRequestDetail__ghost:hover,
+.freelancerListingUpload__button:hover,
+.freelancerListingMediaCard__remove:hover {
+  transform: translateY(-1.5px);
+}
+
+.freelancerMarketplaceHero__ghost:hover,
+.freelancerListingActionBtn--ghost:hover,
+.freelancerRequestDetail__ghost:hover,
+.freelancerListingUpload__button:hover,
+.freelancerListingMediaCard__remove:hover {
+  border-color: rgba(124, 58, 237, 0.18);
+  background: rgba(124, 58, 237, 0.06);
+}
+
+.freelancerMarketplaceHero__meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 24px;
+}
+
+.freelancerMarketplaceHero__metaItem {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding-left: 18px;
+}
+
+.freelancerMarketplaceHero__metaItem::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(42, 20, 80, 0.1) 0%,
+    rgba(124, 58, 237, 0.34) 48%,
+    rgba(242, 193, 78, 0.3) 100%
+  );
+}
+
+.freelancerMarketplaceHero__metaLabel,
+.freelancerRequestCard__label,
+.freelancerRequestDetail__label,
+.freelancerListingField__label,
+.freelancerListingSection__eyebrow {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: rgba(87, 34, 182, 0.72);
+}
+
+.freelancerMarketplaceHero__metaValue,
+.freelancerRequestCard__title,
+.freelancerRequestDetail__title,
+.freelancerListingSection__title {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 850;
+  color: rgba(27, 16, 46, 0.96);
+}
+
+.freelancerMarketplaceControls {
+  display: grid;
+  gap: 14px;
+  padding-top: 18px;
+}
+
+.freelancerMarketplaceFilters {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(180px, 0.4fr));
+  gap: 12px;
+}
+
+.freelancerMarketplaceInput,
+.freelancerMarketplaceSelect,
+.freelancerListingField__input,
+.freelancerListingField__textarea {
+  min-height: 48px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.76);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.9);
+  outline: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.freelancerMarketplaceInput:focus,
+.freelancerMarketplaceSelect:focus,
+.freelancerListingField__input:focus,
+.freelancerListingField__textarea:focus {
+  border-color: rgba(124, 58, 237, 0.22);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08);
+  transform: translateY(-1px);
+}
+
+.freelancerMarketplaceCount {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.58);
+}
+
+.freelancerRequestGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.freelancerRequestGrid--preview {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.freelancerRequestCard {
+  border-radius: 22px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 16px 44px rgba(12, 7, 18, 0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.freelancerRequestCard__media {
+  position: relative;
+  height: 180px;
+  background:
+    radial-gradient(160px 120px at 15% 10%, rgba(124, 58, 237, 0.16), transparent 72%),
+    radial-gradient(140px 110px at 86% 88%, rgba(242, 193, 78, 0.16), transparent 72%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.4));
+  overflow: hidden;
+}
+
+.freelancerRequestCard__media img,
+.freelancerRequestCard__media video,
+.freelancerRequestDetail__media img,
+.freelancerRequestDetail__media video,
+.freelancerListingMediaCard__preview img,
+.freelancerListingMediaCard__preview video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.freelancerRequestCard__mediaFallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 18px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.54);
+}
+
+.freelancerRequestCard__body {
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+  flex: 1;
+}
+
+.freelancerRequestCard__meta,
+.freelancerRequestDetail__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.freelancerRequestCard__chip,
+.freelancerRequestDetail__chip,
+.freelancerRequestDetail__customerMeta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.82);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.76);
+}
+
+.freelancerRequestCard__desc,
+.freelancerRequestDetail__desc,
+.freelancerRequestDetail__customerDesc,
+.freelancerListingField__hint,
+.freelancerListingEmptyText {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.66;
+  color: rgba(27, 16, 46, 0.62);
+}
+
+.freelancerRequestCard__desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.freelancerRequestCard__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(42, 20, 80, 0.08);
+}
+
+.freelancerRequestCard__customer {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.freelancerRequestCard__customerName {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 850;
+  color: rgba(27, 16, 46, 0.88);
+}
+
+.freelancerRequestCard__customerMetaText {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 1.55;
+  color: rgba(27, 16, 46, 0.52);
+}
+
+.freelancerRequestDetailLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.78fr);
+  gap: 24px;
+  padding-top: 20px;
+}
+
+.freelancerRequestDetailMain,
+.freelancerRequestDetailSide {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
+.freelancerRequestDetailCard,
+.freelancerListingCard {
+  border-radius: 24px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 16px 46px rgba(12, 7, 18, 0.05);
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+}
+
+.freelancerRequestDetail__media {
+  border-radius: 20px;
+  overflow: hidden;
+  height: 360px;
+  background:
+    radial-gradient(160px 120px at 15% 10%, rgba(124, 58, 237, 0.16), transparent 72%),
+    radial-gradient(140px 110px at 86% 88%, rgba(242, 193, 78, 0.16), transparent 72%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.4));
+}
+
+.freelancerRequestDetail__customer {
+  display: grid;
+  gap: 12px;
+}
+
+.freelancerRequestDetail__customerTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.freelancerRequestDetail__avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.92);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 850;
+  color: rgba(42, 20, 80, 0.9);
+}
+
+.freelancerRequestDetail__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.freelancerRequestDetail__customerName {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 850;
+  color: rgba(27, 16, 46, 0.94);
+}
+
+.freelancerRequestDetail__customerLocation {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(27, 16, 46, 0.56);
+}
+
+.freelancerListingForm {
+  display: grid;
+  gap: 22px;
+  padding-top: 18px;
+}
+
+.freelancerListingGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+
+.freelancerListingField {
+  display: grid;
+  gap: 8px;
+}
+
+.freelancerListingField--wide {
+  grid-column: 1 / -1;
+}
+
+.freelancerListingField__textarea {
+  min-height: 148px;
+  resize: vertical;
+}
+
+.freelancerListingPackages {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.freelancerListingPackageCard {
+  border-radius: 20px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.76);
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.freelancerListingPackageCard__title {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 850;
+  color: rgba(27, 16, 46, 0.94);
+}
+
+.freelancerListingMediaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+.freelancerListingMediaCard {
+  border-radius: 20px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.76);
+  overflow: hidden;
+  display: grid;
+  gap: 0;
+}
+
+.freelancerListingMediaCard__preview {
+  height: 160px;
+  background:
+    radial-gradient(160px 120px at 15% 10%, rgba(124, 58, 237, 0.16), transparent 72%),
+    radial-gradient(140px 110px at 86% 88%, rgba(242, 193, 78, 0.16), transparent 72%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.4));
+}
+
+.freelancerListingMediaCard__body {
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.freelancerListingMediaCard__name {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.86);
+  overflow-wrap: anywhere;
+}
+
+.freelancerListingMediaCard__meta {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.52);
+}
+
+.freelancerListingInputError {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  font-weight: 700;
+  color: rgba(184, 52, 81, 0.92);
+}
+
+.freelancerListingSection__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.freelancerListingSection__title {
+  margin: 2px 0 0;
+}
+
+.freelancerListingsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.freelancerListingCard {
+  overflow: hidden;
+}
+
+.freelancerListingCard--skeleton {
+  min-height: 320px;
+  opacity: 0.55;
+}
+
+.freelancerListingCard__media {
+  height: 220px;
+  background:
+    radial-gradient(160px 120px at 15% 10%, rgba(124, 58, 237, 0.16), transparent 72%),
+    radial-gradient(140px 110px at 86% 88%, rgba(242, 193, 78, 0.16), transparent 72%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.4));
+  overflow: hidden;
+}
+
+.freelancerListingCard__media img,
+.freelancerListingCard__media video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.freelancerListingCard__mediaFallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.54);
+}
+
+.freelancerListingCard__body {
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.freelancerListingCard__facts,
+.freelancerListingCard__actions,
+.freelancerPreviewPackages {
+  display: grid;
+  gap: 10px;
+}
+
+.freelancerListingCard__facts {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(27, 16, 46, 0.56);
+}
+
+.freelancerListingCard__actions {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.freelancerPreviewPackage {
+  border-radius: 18px;
+  border: 1px solid rgba(42, 20, 80, 0.08);
+  background: rgba(255, 255, 255, 0.76);
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.freelancerPreviewPackage__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.freelancerRequestEmpty.profileEmpty--iconless,
+.freelancerListingEmpty.profileEmpty--iconless {
+  gap: 18px;
+}
+
+.freelancerRequestEmpty .profileEmpty__btn,
+.freelancerListingEmpty .profileEmpty__btn {
+  margin-top: 10px;
+}
+
+@media (max-width: 1120px) {
+  .freelancerRequestGrid,
+  .freelancerRequestGrid--preview,
+  .freelancerMarketplaceHero__meta,
+  .freelancerListingPackages,
+  .freelancerRequestDetailLayout,
+  .freelancerListingsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 820px) {
+  .freelancerMarketplaceHero__top,
+  .freelancerListingSection__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .freelancerMarketplaceFilters,
+  .freelancerListingGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .freelancerRequestDetail__media {
+    height: 280px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .freelancerMarketplaceHero__action,
+  .freelancerMarketplaceHero__ghost,
+  .freelancerListingActionBtn,
+  .freelancerListingActionBtn--ghost,
+  .freelancerRequestCard__btn,
+  .freelancerRequestDetail__action,
+  .freelancerRequestDetail__ghost,
+  .freelancerListingUpload__button,
+  .freelancerListingMediaCard__remove,
+  .freelancerMarketplaceInput,
+  .freelancerMarketplaceSelect,
+  .freelancerListingField__input,
+  .freelancerListingField__textarea {
+    transition: none !important;
+  }
+}

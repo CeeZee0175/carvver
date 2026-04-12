@@ -407,12 +407,20 @@
   gap: 18px;
 }
 
+.messagesEmpty--spacious.profileEmpty--iconless {
+  gap: 20px;
+}
+
 .messagesEmpty--threads.profileEmpty--iconless {
   min-height: 220px;
 }
 
 .messagesEmpty--conversation.profileEmpty--iconless {
   min-height: 360px;
+}
+
+.messagesEmpty--spacious .profileEmpty__title + .profileEmpty__btn {
+  margin-top: 26px;
 }
 
 @keyframes messagesShimmer {

@@ -271,6 +271,10 @@
   gap: 14px;
 }
 
+.customerSettingsBillingEmpty .profileEmpty__title + .profileEmpty__btn {
+  margin-top: 24px;
+}
+
 .customerSettingsHistoryList {
   display: grid;
   gap: 14px;

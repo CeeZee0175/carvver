@@ -760,17 +760,10 @@ export default function HomeAboutUs() {
                   </div>
                   <TextScramble
                     as="p"
-                    text="Carvver is a platform for Filipino skilled hobbyists, handmade-product makers, and casual freelancers who need a clearer way to be discovered, trusted, and paid more safely."
+                    text="Carvver gives Filipino creators and customers one clearer place to discover work, build trust, and move through services more confidently."
                     className="aboutUsHero__sub"
                     trigger={active}
                     startDelay={120}
-                  />
-                  <TextScramble
-                    as="p"
-                    text="Instead of making people juggle discovery, proof, and customer conversations across several social feeds, Carvver gives both service providers and customers one dedicated place to work with more confidence."
-                    className="aboutUsHero__support"
-                    trigger={active}
-                    startDelay={260}
                   />
                 </>
               )}

@@ -97,8 +97,8 @@
 
 .communityHero__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
-  gap: clamp(24px, 4vw, 48px);
+  grid-template-columns: 1fr;
+  gap: clamp(20px, 3.4vw, 34px);
   align-items: start;
 }
 
@@ -164,18 +164,10 @@
 }
 
 .communityHero__sub {
-  max-width: 62ch;
+  max-width: 54ch;
   margin-top: 12px;
   font-size: clamp(16px, 1.7vw, 20px);
   line-height: 1.72;
-}
-
-.communityHero__support {
-  max-width: 70ch;
-  margin-top: 14px;
-  font-size: 15px;
-  line-height: 1.76;
-  color: rgba(27, 16, 46, 0.64);
 }
 
 .communityHero__actions {
@@ -263,7 +255,8 @@
 
 .communityHero__signalStack {
   display: grid;
-  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 22px);
 }
 
 .communitySignal,
@@ -285,6 +278,17 @@
   padding: 18px 20px;
   display: grid;
   gap: 10px;
+}
+
+.communitySignal--hero {
+  padding: 0 0 0 18px;
+  gap: 8px;
+  border: 0;
+  border-left: 1px solid rgba(42, 20, 80, 0.14);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .communitySignal__label {
@@ -616,11 +620,14 @@
 }
 
 @media (max-width: 1024px) {
-  .communityHero__layout,
   .communityCta,
   .communityCards,
   .communityLanes,
   .communityStandards__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .communityHero__signalStack {
     grid-template-columns: 1fr;
   }
 }

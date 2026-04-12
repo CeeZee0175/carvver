@@ -456,6 +456,9 @@ export default function PostRequest() {
                 <TypewriterHeading text="Post a Request" />
               </h1>
             </div>
+            <p className="requestPage__sub">
+              Share the details clearly so the right freelancer can respond with work that fits.
+            </p>
           </div>
 
           <div className="requestPage__stats">

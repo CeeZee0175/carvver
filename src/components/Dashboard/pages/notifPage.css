@@ -184,6 +184,15 @@
   color: rgba(242,193,78,0.96);
 }
 
+.notifPage__sub{
+  margin: 12px 0 0;
+  max-width: 58ch;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.68;
+  color: var(--notif-ink-soft);
+}
+
 .notifToolbar{
   margin-top: 12px;
   display: flex;

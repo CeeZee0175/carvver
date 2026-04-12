@@ -24,18 +24,18 @@ const NEWSLETTER_TABLE = "newsletter_signups";
 const heroSignals = [
   {
     label: "Built for",
-    value: "Filipino creators still growing",
-    note: "Hobbyists, handmade-product makers, and casual freelancers.",
+    value: "Creators and customers",
+    note: "A calmer space for discovery, trust, and honest early feedback.",
   },
   {
-    label: "Center of gravity",
-    value: "Trust, visibility, and calmer transactions",
-    note: "Badges, reviews, verification, and escrow-backed checkout.",
+    label: "What matters here",
+    value: "Trust and visibility",
+    note: "Profiles, reviews, and clearer signals should feel easy to read.",
   },
   {
-    label: "Community mode",
-    value: "Early and collaborative",
-    note: "We are building this with customer and creator feedback, not around fake activity.",
+    label: "How it grows",
+    value: "Together, not noisily",
+    note: "Community updates stay grounded in real progress and real participation.",
   },
 ];
 
@@ -355,15 +355,8 @@ export default function HomeCommunity() {
                   </div>
 
                   <p className="communityHero__sub">
-                    Carvver community is being built for Filipino hobbyists,
-                    handmade-product makers, casual freelancers, and the
-                    customers who want a clearer and safer place to work with them.
-                  </p>
-                  <p className="communityHero__support">
-                    This is not a fake finished ecosystem. It is an early,
-                    real community effort around creator visibility, better trust
-                    signals, achievements over leaderboards, and calmer
-                    escrow-backed transactions.
+                    Follow the people, updates, and conversations helping Carvver grow into a
+                    more trustworthy place for creators and customers to work together.
                   </p>
 
                   <div className="communityHero__actions">
@@ -399,7 +392,7 @@ export default function HomeCommunity() {
                 {heroSignals.map((signal, index) => (
                   <motion.article
                     key={signal.label}
-                    className="communitySignal"
+                    className="communitySignal communitySignal--hero"
                     initial={{ opacity: 0, y: 12 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.5 }}

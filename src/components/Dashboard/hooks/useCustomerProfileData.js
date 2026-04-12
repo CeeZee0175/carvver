@@ -113,6 +113,12 @@ async function fetchOrders(userId) {
       freelancer_id,
       status,
       total_price,
+      selected_package_id,
+      selected_package_name,
+      selected_package_summary,
+      selected_package_delivery_time_days,
+      selected_package_revisions,
+      selected_package_included_items,
       created_at,
       services (*),
       freelancer:profiles!orders_freelancer_id_fkey (*)

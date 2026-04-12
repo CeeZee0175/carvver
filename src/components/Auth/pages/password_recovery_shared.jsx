@@ -8,7 +8,7 @@ import {
 } from "../../../lib/supabase/auth";
 
 const RECOVERY_STATE_KEY = "carvver-password-recovery";
-export const RECOVERY_OTP_LENGTH = 6;
+export const RECOVERY_OTP_LENGTH = 8;
 
 function isBrowser() {
   return typeof window !== "undefined";

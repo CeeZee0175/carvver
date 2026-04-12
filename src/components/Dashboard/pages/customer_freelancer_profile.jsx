@@ -429,9 +429,11 @@ export default function CustomerFreelancerProfile() {
                           whileHover={{ x: 2 }}
                           whileTap={{ scale: 0.98 }}
                           transition={PROFILE_SPRING}
-                          onClick={() => navigate("/dashboard/customer/browse-services")}
+                          onClick={() =>
+                            navigate(`/dashboard/customer/browse-services/${service.id}`)
+                          }
                         >
-                          Browse listings
+                          View listing
                           <ArrowRight className="customerFreelancerServiceCard__linkIcon" />
                         </motion.button>
                       </div>

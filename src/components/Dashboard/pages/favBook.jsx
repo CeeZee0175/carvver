@@ -166,7 +166,14 @@ function TypewriterHeading({ text = "Saved Listings" }) {
 
 /* ─── Fav Card ─── */
 
-function FavCard({ item, index, cartServiceIds, onAddToCart, onOpenCart, onRemove }) {
+function FavCard({
+  item,
+  index,
+  cartServiceIds,
+  onOpenServiceDetail,
+  onOpenCart,
+  onRemove,
+}) {
   const reduceMotion = useReducedMotion();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.1 });
@@ -283,11 +290,11 @@ function FavCard({ item, index, cartServiceIds, onAddToCart, onOpenCart, onRemov
                   return;
                 }
 
-                onAddToCart(service);
+                onOpenServiceDetail(service.id);
               }}
             >
               <ShoppingCart className="favCard__cartIcon" />
-              <span>{inCart ? "In cart" : "Add"}</span>
+              <span>{inCart ? "In cart" : "Choose package"}</span>
             </motion.button>
 
             <motion.button
@@ -296,7 +303,7 @@ function FavCard({ item, index, cartServiceIds, onAddToCart, onOpenCart, onRemov
               whileHover={{ x: 2 }}
               whileTap={{ scale: 0.96 }}
               transition={SPRING}
-              onClick={() => toast("Service details aren't available yet.")}
+              onClick={() => onOpenServiceDetail(service.id)}
             >
               View
               <ArrowRight className="favCard__viewIcon" />
@@ -381,7 +388,7 @@ function EmptyState({ hasSearch, onClearSearch, onBrowse }) {
 export default function FavBook() {
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
-  const { addItem, serviceIds: cartServiceIds } = useCart();
+  const { serviceIds: cartServiceIds } = useCart();
 
   const [savedItems, setSavedItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -570,28 +577,21 @@ export default function FavBook() {
     [savedItems]
   );
 
-  const handleAddToCart = useCallback(
-    async (service) => {
-      try {
-        const result = await addItem(service);
-        if (result?.duplicate) {
-          toast("Already in cart", {
-            duration: 1800,
-          });
-          return;
-        }
-
-        toast.success("Added to cart.");
-      } catch (error) {
-        toast.error(error.message || "Couldn't add this listing to your cart.");
-      }
-    },
-    [addItem]
-  );
-
   const handleOpenCart = useCallback(() => {
     navigate("/dashboard/customer/cart");
   }, [navigate]);
+
+  const handleOpenServiceDetail = useCallback(
+    (serviceId) => {
+      if (!serviceId) {
+        toast.error("We couldn't open this listing right now.");
+        return;
+      }
+
+      navigate(`/dashboard/customer/browse-services/${serviceId}`);
+    },
+    [navigate]
+  );
 
   /* ── Clear search / filters ── */
 
@@ -653,6 +653,10 @@ export default function FavBook() {
                 />
               </motion.svg>
             </div>
+
+            <p className="favHero__sub">
+              Keep the listings you want to revisit close by.
+            </p>
           </section>
         </ScrollReveal>
 
@@ -812,7 +816,7 @@ export default function FavBook() {
                     item={item}
                     index={index}
                     cartServiceIds={cartServiceIds}
-                    onAddToCart={handleAddToCart}
+                    onOpenServiceDetail={handleOpenServiceDetail}
                     onOpenCart={handleOpenCart}
                     onRemove={handleRemove}
                   />

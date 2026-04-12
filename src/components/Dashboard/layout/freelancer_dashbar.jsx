@@ -283,6 +283,19 @@ export default function FreelancerDashBar() {
                     role="menuitem"
                     onClick={() => {
                       setOpenProfile(false);
+                      navigate("/dashboard/freelancer/listings");
+                    }}
+                  >
+                    <Home className="dashbarProfileMenu__itemIcon" />
+                    <span>My Listings</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => {
+                      setOpenProfile(false);
                       navigate("/dashboard/freelancer/settings");
                     }}
                   >

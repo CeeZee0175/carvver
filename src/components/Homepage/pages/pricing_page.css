@@ -97,8 +97,8 @@
 
 .pricingHero__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
-  gap: clamp(24px, 4vw, 48px);
+  grid-template-columns: 1fr;
+  gap: clamp(20px, 3.4vw, 34px);
   align-items: start;
 }
 
@@ -129,7 +129,7 @@
 .pricingHero__title {
   margin: 12px 0 0;
   font-family: "Dancing Script", cursive;
-  font-size: clamp(58px, 7.6vw, 96px);
+  font-size: clamp(68px, 8.8vw, 118px);
   line-height: 0.94;
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -164,18 +164,10 @@
 }
 
 .pricingHero__sub {
-  max-width: 60ch;
+  max-width: 54ch;
   margin-top: 12px;
-  font-size: clamp(16px, 1.7vw, 20px);
-  line-height: 1.72;
-}
-
-.pricingHero__support {
-  max-width: 68ch;
-  margin-top: 14px;
-  font-size: 15px;
-  line-height: 1.76;
-  color: rgba(27, 16, 46, 0.64);
+  font-size: clamp(16px, 1.65vw, 19px);
+  line-height: 1.68;
 }
 
 .pricingHero__actions {
@@ -281,7 +273,8 @@
 
 .pricingHero__signalStack {
   display: grid;
-  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 22px);
 }
 
 .pricingSignal,
@@ -301,6 +294,17 @@
   padding: 18px 20px;
   display: grid;
   gap: 10px;
+}
+
+.pricingSignal--hero {
+  padding: 0 0 0 18px;
+  gap: 8px;
+  border: 0;
+  border-left: 1px solid rgba(42, 20, 80, 0.14);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .pricingSignal__label {
@@ -818,9 +822,12 @@
 }
 
 @media (max-width: 1080px) {
-  .pricingHero__layout,
   .pricingPlans,
   .pricingCta {
+    grid-template-columns: 1fr;
+  }
+
+  .pricingHero__signalStack {
     grid-template-columns: 1fr;
   }
 }

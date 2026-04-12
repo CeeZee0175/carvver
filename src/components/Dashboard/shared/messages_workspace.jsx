@@ -65,6 +65,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
     setActiveThreadId,
     sendMessage,
     ensureThreadForFreelancer,
+    ensureThreadForCustomer,
   } = useMessagesInbox(role);
 
   const homePath =
@@ -73,16 +74,23 @@ export default function MessagesWorkspace({ role = "customer" }) {
   const browsePath =
     role === "customer"
       ? "/dashboard/customer/browse-services"
-      : "/dashboard/freelancer";
+      : "/dashboard/freelancer/browse-requests";
   const browseLabel =
-    role === "customer" ? "Browse services" : "Back to dashboard";
+    role === "customer" ? "Browse services" : "Browse requests";
   const freelancerId = String(searchParams.get("freelancer") || "").trim();
+  const customerId = String(searchParams.get("customer") || "").trim();
   const serviceTitle = String(searchParams.get("serviceTitle") || "").trim();
+  const requestTitle = String(searchParams.get("requestTitle") || "").trim();
 
   useEffect(() => {
     if (role !== "customer" || !freelancerId) return;
     ensureThreadForFreelancer(freelancerId).catch(() => {});
   }, [ensureThreadForFreelancer, freelancerId, role]);
+
+  useEffect(() => {
+    if (role !== "freelancer" || !customerId) return;
+    ensureThreadForCustomer(customerId).catch(() => {});
+  }, [customerId, ensureThreadForCustomer, role]);
 
   useEffect(() => {
     if (!sending) return;
@@ -105,7 +113,13 @@ export default function MessagesWorkspace({ role = "customer" }) {
       : "Reply to customers and keep each conversation in one place.";
 
   const contextualThread =
-    activeThread && freelancerId && activeThread.counterpartId === freelancerId;
+    activeThread &&
+    ((role === "customer" &&
+      freelancerId &&
+      activeThread.counterpartId === freelancerId) ||
+      (role === "freelancer" &&
+        customerId &&
+        activeThread.counterpartId === customerId));
 
   return (
     <>
@@ -183,7 +197,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
                 title="No conversations yet"
                 actionLabel={browseLabel}
                 onAction={() => navigate(browsePath)}
-                className="messagesEmpty messagesEmpty--threads"
+                className="messagesEmpty messagesEmpty--threads messagesEmpty--spacious"
               />
             ) : (
               <div className="messagesThreadList">
@@ -212,7 +226,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
                 }
                 actionLabel={browseLabel}
                 onAction={() => navigate(browsePath)}
-                className="messagesEmpty messagesEmpty--conversation"
+                className="messagesEmpty messagesEmpty--conversation messagesEmpty--spacious"
               />
             ) : (
               <>
@@ -241,9 +255,9 @@ export default function MessagesWorkspace({ role = "customer" }) {
                     </div>
                   </div>
 
-                  {contextualThread && serviceTitle ? (
+                  {contextualThread && (serviceTitle || requestTitle) ? (
                     <div className="messagesConversation__context">
-                      About {serviceTitle}
+                      About {serviceTitle || requestTitle}
                     </div>
                   ) : null}
                 </div>

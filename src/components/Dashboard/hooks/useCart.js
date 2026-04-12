@@ -69,6 +69,13 @@ async function fetchCartItems(userId) {
       `
       id,
       service_id,
+      selected_package_id,
+      selected_package_name,
+      selected_package_summary,
+      selected_package_price,
+      selected_package_delivery_time_days,
+      selected_package_revisions,
+      selected_package_included_items,
       created_at,
       services (
         id,
@@ -96,6 +103,57 @@ async function fetchCartItems(userId) {
 
   if (error) throw error;
   return data || [];
+}
+
+function normalizePackageSnapshot(selectedPackage) {
+  if (!selectedPackage) {
+    return {
+      selected_package_id: null,
+      selected_package_name: null,
+      selected_package_summary: null,
+      selected_package_price: null,
+      selected_package_delivery_time_days: null,
+      selected_package_revisions: null,
+      selected_package_included_items: null,
+    };
+  }
+
+  const includedItems = Array.isArray(selectedPackage.includedItems)
+    ? selectedPackage.includedItems
+        .map((item) => String(item || "").trim())
+        .filter(Boolean)
+    : [];
+
+  return {
+    selected_package_id: selectedPackage.id || null,
+    selected_package_name: String(selectedPackage.name || "").trim() || null,
+    selected_package_summary:
+      String(selectedPackage.summary || "").trim() || null,
+    selected_package_price: Number.isFinite(Number(selectedPackage.price))
+      ? Number(selectedPackage.price)
+      : null,
+    selected_package_delivery_time_days: Number.isFinite(
+      Number(selectedPackage.deliveryTimeDays)
+    )
+      ? Number(selectedPackage.deliveryTimeDays)
+      : null,
+    selected_package_revisions: Number.isFinite(Number(selectedPackage.revisions))
+      ? Number(selectedPackage.revisions)
+      : null,
+    selected_package_included_items:
+      includedItems.length > 0 ? includedItems : null,
+  };
+}
+
+function packageSnapshotMatches(item, snapshot) {
+  return (
+    String(item?.selected_package_id || "") ===
+      String(snapshot?.selected_package_id || "") &&
+    String(item?.selected_package_name || "") ===
+      String(snapshot?.selected_package_name || "") &&
+    Number(item?.selected_package_price || 0) ===
+      Number(snapshot?.selected_package_price || 0)
+  );
 }
 
 export function useCart() {
@@ -206,7 +264,11 @@ export function useCart() {
   }, [reload]);
 
   const addItem = useCallback(
-    async (service) => {
+    async (input, options = {}) => {
+      const service = input?.service || input;
+      const selectedPackage =
+        input?.selectedPackage || options.selectedPackage || null;
+
       if (!service?.id) {
         throw new Error("This service listing cannot be added to the cart.");
       }
@@ -225,26 +287,42 @@ export function useCart() {
 
       setUserId(session.user.id);
 
-      const alreadyInCart = items.some((item) => item.service_id === service.id);
-      if (alreadyInCart) {
-        emitCartUpdated({ serviceId: service.id, action: "duplicate" });
-        return { duplicate: true };
+      const snapshot = normalizePackageSnapshot(selectedPackage);
+      const existingItem = items.find((item) => item.service_id === service.id);
+
+      if (existingItem) {
+        if (packageSnapshotMatches(existingItem, snapshot)) {
+          emitCartUpdated({ serviceId: service.id, action: "duplicate" });
+          return { duplicate: true, updated: false };
+        }
+
+        const { error: updateError } = await supabase
+          .from("cart_items")
+          .update(snapshot)
+          .eq("user_id", session.user.id)
+          .eq("service_id", service.id);
+
+        if (updateError) throw updateError;
+
+        emitCartUpdated({ serviceId: service.id, action: "update" });
+        return { duplicate: false, updated: true };
       }
 
       const { error: insertError } = await supabase.from("cart_items").insert({
         user_id: session.user.id,
         service_id: service.id,
+        ...snapshot,
       });
 
       if (insertError && insertError.code === "23505") {
         emitCartUpdated({ serviceId: service.id, action: "duplicate" });
-        return { duplicate: true };
+        return { duplicate: true, updated: false };
       }
 
       if (insertError) throw insertError;
 
       emitCartUpdated({ serviceId: service.id, action: "add" });
-      return { duplicate: false };
+      return { duplicate: false, updated: false };
     },
     [items]
   );
