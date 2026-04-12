@@ -399,11 +399,11 @@ export function useCustomerAccountSettings() {
     ).trim();
 
     if (!preferredPaymentMethod) {
-      throw new Error("Choose QRPh to continue.");
+      throw new Error("Choose a payment method to continue.");
     }
 
-    if (preferredPaymentMethod !== "qrph") {
-      throw new Error("Choose QRPh to continue.");
+    if (!["qrph", "card"].includes(preferredPaymentMethod)) {
+      throw new Error("Choose a valid payment method to continue.");
     }
 
     try {
@@ -415,10 +415,22 @@ export function useCustomerAccountSettings() {
         throw new Error("You need to be signed in to update billing information.");
       }
 
+      if (
+        preferredPaymentMethod === "card" &&
+        !(
+          billingProfile.defaultCardBrand &&
+          billingProfile.defaultCardLast4 &&
+          billingProfile.defaultCardExpMonth &&
+          billingProfile.defaultCardExpYear
+        )
+      ) {
+        throw new Error("Complete one card payment first before saving card as your default.");
+      }
+
       const payload = {
         customer_id: session.user.id,
         preferred_payment_method: preferredPaymentMethod,
-        wallet_provider: "QRPh",
+        wallet_provider: preferredPaymentMethod === "qrph" ? "QRPh" : null,
         wallet_phone_number: null,
       };
 
@@ -439,7 +451,7 @@ export function useCustomerAccountSettings() {
         friendlySettingsMessage(error, "We couldn't save your billing information.")
       );
     }
-  }, []);
+  }, [billingProfile]);
 
   const deleteAccount = useCallback(async (confirmation) => {
     const normalizedConfirmation = String(confirmation || "").trim();

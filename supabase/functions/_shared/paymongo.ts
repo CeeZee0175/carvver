@@ -10,20 +10,24 @@ export function toCentavos(amount: number) {
   return Math.round(Number(amount || 0) * 100);
 }
 
-export async function createCheckoutSession({
+async function paymongoRequest({
   secretKey,
+  path,
+  method = "GET",
   payload,
 }: {
   secretKey: string;
-  payload: Record<string, unknown>;
+  path: string;
+  method?: string;
+  payload?: Record<string, unknown>;
 }) {
-  const response = await fetch(`${PAYMONGO_API_BASE}/checkout_sessions`, {
-    method: "POST",
+  const response = await fetch(`${PAYMONGO_API_BASE}${path}`, {
+    method,
     headers: {
       Authorization: `Basic ${btoa(`${secretKey}:`)}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(payload),
+    body: payload ? JSON.stringify(payload) : undefined,
   });
 
   const data = await response.json().catch(() => null);
@@ -32,11 +36,86 @@ export async function createCheckoutSession({
     const message =
       data?.errors?.[0]?.detail ||
       data?.errors?.[0]?.code ||
-      "PayMongo checkout session creation failed.";
+      "PayMongo request failed.";
     throw new Error(message);
   }
 
   return data?.data;
+}
+
+export async function createCheckoutSession({
+  secretKey,
+  payload,
+}: {
+  secretKey: string;
+  payload: Record<string, unknown>;
+}) {
+  return paymongoRequest({
+    secretKey,
+    path: "/checkout_sessions",
+    method: "POST",
+    payload,
+  });
+}
+
+export async function createPaymentIntent({
+  secretKey,
+  payload,
+}: {
+  secretKey: string;
+  payload: Record<string, unknown>;
+}) {
+  return paymongoRequest({
+    secretKey,
+    path: "/payment_intents",
+    method: "POST",
+    payload,
+  });
+}
+
+export async function createPaymentMethod({
+  secretKey,
+  payload,
+}: {
+  secretKey: string;
+  payload: Record<string, unknown>;
+}) {
+  return paymongoRequest({
+    secretKey,
+    path: "/payment_methods",
+    method: "POST",
+    payload,
+  });
+}
+
+export async function attachPaymentIntent({
+  secretKey,
+  paymentIntentId,
+  payload,
+}: {
+  secretKey: string;
+  paymentIntentId: string;
+  payload: Record<string, unknown>;
+}) {
+  return paymongoRequest({
+    secretKey,
+    path: `/payment_intents/${paymentIntentId}/attach`,
+    method: "POST",
+    payload,
+  });
+}
+
+export async function retrievePaymentIntent({
+  secretKey,
+  paymentIntentId,
+}: {
+  secretKey: string;
+  paymentIntentId: string;
+}) {
+  return paymongoRequest({
+    secretKey,
+    path: `/payment_intents/${paymentIntentId}`,
+  });
 }
 
 export async function verifyPaymongoSignature({

@@ -1,6 +1,13 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
 import { verifyPaymongoSignature } from "../_shared/paymongo.ts";
+import {
+  extractCardMetadata,
+  finalizeSuccessfulCheckoutSession,
+  loadCheckoutSessionByRemoteReference,
+  unixToIso,
+  updateCheckoutSession,
+} from "../_shared/checkoutSessions.ts";
 
 function getEnv(name: string) {
   const value = Deno.env.get(name);
@@ -8,52 +15,6 @@ function getEnv(name: string) {
     throw new Error(`Missing environment variable: ${name}`);
   }
   return value;
-}
-
-function unixToIso(value: number | null | undefined) {
-  if (!value) return null;
-  return new Date(value * 1000).toISOString();
-}
-
-function extractCardMetadata(payment: any) {
-  const source = payment?.attributes?.source || {};
-  const paymentMethodDetails =
-    payment?.attributes?.payment_method_details ||
-    payment?.attributes?.payment_method?.details ||
-    source?.details ||
-    {};
-  const card =
-    paymentMethodDetails?.card ||
-    source?.card ||
-    source?.details?.card ||
-    payment?.attributes?.card ||
-    {};
-  const brand = card?.brand || paymentMethodDetails?.brand || null;
-  const last4 = card?.last4 || paymentMethodDetails?.last4 || null;
-  const expMonth = card?.exp_month || paymentMethodDetails?.exp_month || null;
-  const expYear = card?.exp_year || paymentMethodDetails?.exp_year || null;
-  const paymentMethodId =
-    payment?.attributes?.payment_method_id ||
-    payment?.attributes?.payment_method?.id ||
-    null;
-  const customerId =
-    payment?.attributes?.customer_id ||
-    payment?.attributes?.payment_method?.customer_id ||
-    null;
-
-  if (!brand || !last4 || !expMonth || !expYear) {
-    return null;
-  }
-
-  return {
-    default_card_payment_method_id: paymentMethodId,
-    default_card_brand: String(brand),
-    default_card_last4: String(last4),
-    default_card_exp_month: Number(expMonth),
-    default_card_exp_year: Number(expYear),
-    paymongo_customer_id: customerId ? String(customerId) : null,
-    preferred_payment_method: "card",
-  };
 }
 
 Deno.serve(async (request: Request) => {
@@ -86,142 +47,120 @@ Deno.serve(async (request: Request) => {
     }
 
     const eventType = payload?.data?.attributes?.type;
-    if (eventType !== "checkout_session.payment.paid") {
-      return jsonResponse({ received: true, ignored: true });
-    }
-
-    const checkoutPayload = payload?.data?.attributes?.data;
-    const checkoutAttributes = checkoutPayload?.attributes || {};
-    const payment = checkoutAttributes?.payments?.[0];
-    const paymentReference =
-      payment?.id ||
-      payment?.attributes?.payment_intent_id ||
-      checkoutAttributes?.payment_intent?.id ||
-      null;
-    const paidAt =
-      unixToIso(payment?.attributes?.paid_at) ||
-      unixToIso(checkoutAttributes?.paid_at) ||
-      new Date().toISOString();
-    const cardMetadata = extractCardMetadata(payment);
-
+    const eventData = payload?.data?.attributes?.data;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const { data: checkoutSession, error: checkoutSessionError } = await supabase
-      .from("customer_checkout_sessions")
-      .select("id, user_id, status")
-      .eq("paymongo_checkout_id", checkoutPayload?.id)
-      .maybeSingle();
-
-    if (checkoutSessionError) {
-      throw checkoutSessionError;
-    }
-
-    if (!checkoutSession) {
-      return jsonResponse({ received: true, missing: true }, 202);
-    }
-
-    if (checkoutSession.status === "paid") {
-      return jsonResponse({ received: true, duplicate: true });
-    }
-
-    const { data: checkoutItems, error: checkoutItemsError } = await supabase
-      .from("customer_checkout_items")
-      .select(
-        `
-        service_id,
-        freelancer_id,
-        selected_package_id,
-        selected_package_name,
-        selected_package_summary,
-        selected_package_delivery_time_days,
-        selected_package_revisions,
-        selected_package_included_items,
-        unit_price,
-        platform_fee,
-        freelancer_net
-      `
-      )
-      .eq("checkout_session_id", checkoutSession.id);
-
-    if (checkoutItemsError || !checkoutItems || checkoutItems.length === 0) {
-      throw checkoutItemsError || new Error("Checkout items are missing.");
-    }
-
-    const orderRows = checkoutItems.map((item) => ({
-      checkout_session_id: checkoutSession.id,
-      service_id: item.service_id,
-      customer_id: checkoutSession.user_id,
-      freelancer_id: item.freelancer_id,
-      status: "pending",
-      total_price: item.unit_price,
-      selected_package_id: item.selected_package_id,
-      selected_package_name: item.selected_package_name,
-      selected_package_summary: item.selected_package_summary,
-      selected_package_delivery_time_days: item.selected_package_delivery_time_days,
-      selected_package_revisions: item.selected_package_revisions,
-      selected_package_included_items: item.selected_package_included_items,
-      gross_amount: item.unit_price,
-      platform_fee: item.platform_fee,
-      freelancer_net: item.freelancer_net,
-      payment_provider: "paymongo",
-      payment_reference: paymentReference,
-      escrow_status: "held",
-      paid_at: paidAt,
-    }));
-
-    const { error: orderInsertError } = await supabase
-      .from("orders")
-      .upsert(orderRows, {
-        onConflict: "checkout_session_id,service_id,customer_id",
+    if (eventType === "checkout_session.payment.paid") {
+      const checkoutPayload = eventData;
+      const checkoutAttributes = checkoutPayload?.attributes || {};
+      const payment = checkoutAttributes?.payments?.[0];
+      const paymentReference =
+        payment?.id ||
+        payment?.attributes?.payment_intent_id ||
+        checkoutAttributes?.payment_intent?.id ||
+        null;
+      const paidAt =
+        unixToIso(payment?.attributes?.paid_at) ||
+        unixToIso(checkoutAttributes?.paid_at) ||
+        new Date().toISOString();
+      const checkoutSession = await loadCheckoutSessionByRemoteReference(supabase, {
+        paymongoCheckoutId: checkoutPayload?.id,
       });
 
-    if (orderInsertError) {
-      throw orderInsertError;
-    }
-
-    const { error: sessionUpdateError } = await supabase
-      .from("customer_checkout_sessions")
-      .update({
-        status: "paid",
-        payment_reference: paymentReference,
-        paid_at: paidAt,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", checkoutSession.id);
-
-    if (sessionUpdateError) {
-      throw sessionUpdateError;
-    }
-
-    if (cardMetadata) {
-      const { error: billingProfileError } = await supabase
-        .from("customer_billing_profiles")
-        .upsert(
-          {
-            customer_id: checkoutSession.user_id,
-            ...cardMetadata,
-          },
-          { onConflict: "customer_id" }
-        );
-
-      if (billingProfileError) {
-        throw billingProfileError;
+      if (!checkoutSession) {
+        return jsonResponse({ received: true, missing: true }, 202);
       }
+
+      if (String(checkoutSession.status || "").toLowerCase() === "paid") {
+        return jsonResponse({ received: true, duplicate: true });
+      }
+
+      await finalizeSuccessfulCheckoutSession({
+        supabase,
+        checkoutSession,
+        paymentReference,
+        paidAt,
+        cardMetadata: extractCardMetadata(payment),
+      });
+
+      return jsonResponse({ received: true, processed: true });
     }
 
-    const serviceIds = checkoutItems.map((item) => item.service_id);
+    if (eventType === "payment.paid") {
+      const payment = eventData;
+      const paymentIntentId =
+        payment?.attributes?.payment_intent_id ||
+        payment?.attributes?.payment_intent?.id ||
+        null;
+      const checkoutSession = await loadCheckoutSessionByRemoteReference(supabase, {
+        paymongoPaymentIntentId: paymentIntentId,
+      });
 
-    const { error: cartDeleteError } = await supabase
-      .from("cart_items")
-      .delete()
-      .eq("user_id", checkoutSession.user_id)
-      .in("service_id", serviceIds);
+      if (!checkoutSession) {
+        return jsonResponse({ received: true, missing: true }, 202);
+      }
 
-    if (cartDeleteError) {
-      throw cartDeleteError;
+      if (String(checkoutSession.status || "").toLowerCase() === "paid") {
+        return jsonResponse({ received: true, duplicate: true });
+      }
+
+      await finalizeSuccessfulCheckoutSession({
+        supabase,
+        checkoutSession,
+        paymentReference: payment?.id || paymentIntentId || null,
+        paidAt: unixToIso(payment?.attributes?.paid_at) || new Date().toISOString(),
+        cardMetadata: extractCardMetadata(payment),
+      });
+
+      return jsonResponse({ received: true, processed: true });
     }
 
-    return jsonResponse({ received: true, processed: true });
+    if (eventType === "payment.failed") {
+      const payment = eventData;
+      const paymentIntentId =
+        payment?.attributes?.payment_intent_id ||
+        payment?.attributes?.payment_intent?.id ||
+        null;
+      const checkoutSession = await loadCheckoutSessionByRemoteReference(supabase, {
+        paymongoPaymentIntentId: paymentIntentId,
+      });
+
+      if (!checkoutSession) {
+        return jsonResponse({ received: true, missing: true }, 202);
+      }
+
+      await updateCheckoutSession(supabase, checkoutSession.id, {
+        status: "failed",
+        failed_at: new Date().toISOString(),
+      });
+
+      return jsonResponse({ received: true, processed: true });
+    }
+
+    if (eventType === "qrph.expired") {
+      const qrPayload = eventData;
+      const paymentIntentId =
+        qrPayload?.attributes?.payment_intent_id ||
+        qrPayload?.attributes?.payment_intent?.id ||
+        qrPayload?.attributes?.payment?.payment_intent_id ||
+        null;
+      const checkoutSession = await loadCheckoutSessionByRemoteReference(supabase, {
+        paymongoPaymentIntentId: paymentIntentId,
+      });
+
+      if (!checkoutSession) {
+        return jsonResponse({ received: true, missing: true }, 202);
+      }
+
+      await updateCheckoutSession(supabase, checkoutSession.id, {
+        status: "expired",
+        expired_at: new Date().toISOString(),
+      });
+
+      return jsonResponse({ received: true, processed: true });
+    }
+
+    return jsonResponse({ received: true, ignored: true });
   } catch (error) {
     return jsonResponse(
       {

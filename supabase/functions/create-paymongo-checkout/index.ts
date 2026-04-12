@@ -1,8 +1,18 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders, jsonResponse } from "../_shared/http.ts";
-import { createCheckoutSession, toCentavos } from "../_shared/paymongo.ts";
+import {
+  attachPaymentIntent,
+  createCheckoutSession,
+  createPaymentIntent,
+  createPaymentMethod,
+  toCentavos,
+} from "../_shared/paymongo.ts";
+import { updateCheckoutSession } from "../_shared/checkoutSessions.ts";
 
 const COMMISSION_RATE = 0.05;
+const QR_LIFETIME_MS = 30 * 60 * 1000;
+
+type PaymentMethod = "qrph" | "card";
 
 type CartService = {
   id: string;
@@ -73,6 +83,43 @@ function resolveReturnUrl(baseUrl: string, candidate: unknown, fallback: string)
   return new URL(nextPath, baseUrl).toString();
 }
 
+function assertPaymentMethod(value: unknown): PaymentMethod {
+  if (value === "card") return "card";
+  return "qrph";
+}
+
+async function createCartSnapshotHash(items: any[]) {
+  const encoder = new TextEncoder();
+  const payload = JSON.stringify(
+    items.map((item) => ({
+      serviceId: item.service.id,
+      packageId: item.packageSnapshot.id,
+      packageName: item.packageSnapshot.name,
+      price: item.unitPrice,
+    }))
+  );
+  const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(payload));
+
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function buildSessionResponse(checkoutSession: any, extras: Record<string, unknown> = {}) {
+  return {
+    sessionId: checkoutSession.id,
+    method: checkoutSession.local_payment_method,
+    status: checkoutSession.status,
+    subtotal: Number(checkoutSession.subtotal || 0),
+    currency: checkoutSession.currency || "PHP",
+    checkoutUrl: checkoutSession.checkout_url || null,
+    qrImageUrl: checkoutSession.qr_image_url || null,
+    qrExpiresAt: checkoutSession.qr_expires_at || null,
+    resumed: false,
+    ...extras,
+  };
+}
+
 Deno.serve(async (request: Request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -111,16 +158,7 @@ Deno.serve(async (request: Request) => {
     }
 
     const body = await request.json().catch(() => ({}));
-    const successUrl = resolveReturnUrl(
-      appBaseUrl,
-      body?.successPath,
-      "/dashboard/customer/cart?checkout=success"
-    );
-    const cancelUrl = resolveReturnUrl(
-      appBaseUrl,
-      body?.cancelPath,
-      "/dashboard/customer/cart?checkout=cancelled"
-    );
+    const method = assertPaymentMethod(body?.method);
 
     const { data: cartItems, error: cartError } = await supabase
       .from("cart_items")
@@ -175,62 +213,73 @@ Deno.serve(async (request: Request) => {
     const subtotal = roundCurrency(
       validItems.reduce((total, item) => total + Number(item.unitPrice || 0), 0)
     );
+    const cartSnapshotHash = await createCartSnapshotHash(validItems);
+    const now = Date.now();
 
-    const paymongoPayload = {
-      data: {
-        attributes: {
-          billing: {
-            email: user.email,
-            name: user.user_metadata?.full_name || user.email || "Carvver customer",
-          },
-          description: `Carvver service checkout (${validItems.length} listing${
-            validItems.length === 1 ? "" : "s"
-          })`,
-          line_items: validItems.map((item) => ({
-            currency: "PHP",
-            amount: toCentavos(Number(item.unitPrice || 0)),
-            name: item.packageSnapshot.name
-              ? `${item.service.title} - ${item.packageSnapshot.name}`
-              : item.service.title,
-            quantity: 1,
-            description:
-              item.packageSnapshot.summary ||
-              item.service.category ||
-              item.service.description ||
-              "Carvver service listing",
-          })),
-          payment_method_types: ["qrph"],
-          send_email_receipt: true,
-          show_description: true,
-          show_line_items: true,
-          success_url: successUrl,
-          cancel_url: cancelUrl,
-        },
-      },
-    };
+    const { data: activeSessions, error: activeSessionsError } = await supabase
+      .from("customer_checkout_sessions")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("cart_snapshot_hash", cartSnapshotHash)
+      .eq("local_payment_method", method)
+      .in("status", ["draft", "pending"])
+      .order("created_at", { ascending: false })
+      .limit(1);
 
-    const paymongoCheckout = await createCheckoutSession({
-      secretKey: paymongoSecretKey,
-      payload: paymongoPayload,
-    });
+    if (activeSessionsError) {
+      throw activeSessionsError;
+    }
+
+    const existingSession = activeSessions?.[0] || null;
+
+    if (
+      method === "qrph" &&
+      existingSession?.qr_image_url &&
+      existingSession?.qr_expires_at &&
+      new Date(existingSession.qr_expires_at).getTime() > now
+    ) {
+      return jsonResponse({
+        ...buildSessionResponse(existingSession, {
+          resumed: true,
+          itemCount: validItems.length,
+        }),
+      });
+    }
+
+    if (method === "card" && existingSession?.checkout_url) {
+      return jsonResponse({
+        ...buildSessionResponse(existingSession, {
+          resumed: true,
+          itemCount: validItems.length,
+        }),
+      });
+    }
+
+    await supabase
+      .from("customer_checkout_sessions")
+      .update({
+        status: "superseded",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", user.id)
+      .in("status", ["draft", "pending"]);
 
     const { data: checkoutSession, error: checkoutSessionError } = await supabase
       .from("customer_checkout_sessions")
       .insert({
         user_id: user.id,
-        paymongo_checkout_id: paymongoCheckout.id,
-        status: "pending",
+        paymongo_checkout_id: null,
+        status: "draft",
         subtotal,
         currency: "PHP",
-        checkout_url: paymongoCheckout.attributes?.checkout_url || null,
-        redirect_success_url: successUrl,
-        redirect_cancel_url: cancelUrl,
+        local_payment_method: method,
+        cart_snapshot_hash: cartSnapshotHash,
       })
-      .select("id")
+      .select("*")
       .single();
 
     if (checkoutSessionError || !checkoutSession) {
-      throw checkoutSessionError || new Error("Couldn't create a checkout session record.");
+      throw checkoutSessionError || new Error("Couldn't create a payment session.");
     }
 
     const checkoutRows = validItems.map((item) => {
@@ -266,11 +315,135 @@ Deno.serve(async (request: Request) => {
       throw checkoutItemsError;
     }
 
+    const customerName =
+      user.user_metadata?.full_name || user.email || "Carvver customer";
+
+    if (method === "qrph") {
+      const qrExpiresAt = new Date(now + QR_LIFETIME_MS).toISOString();
+
+      const paymentIntent = await createPaymentIntent({
+        secretKey: paymongoSecretKey,
+        payload: {
+          data: {
+            attributes: {
+              amount: toCentavos(subtotal),
+              currency: "PHP",
+              capture_type: "automatic",
+              payment_method_allowed: ["qrph"],
+              description: `Carvver service payment (${validItems.length} listing${
+                validItems.length === 1 ? "" : "s"
+              })`,
+              statement_descriptor: "CARVVER",
+            },
+          },
+        },
+      });
+
+      const paymentMethod = await createPaymentMethod({
+        secretKey: paymongoSecretKey,
+        payload: {
+          data: {
+            attributes: {
+              type: "qrph",
+              billing: {
+                email: user.email,
+                name: customerName,
+              },
+            },
+          },
+        },
+      });
+
+      const attachedIntent = await attachPaymentIntent({
+        secretKey: paymongoSecretKey,
+        paymentIntentId: paymentIntent.id,
+        payload: {
+          data: {
+            attributes: {
+              payment_method: paymentMethod.id,
+            },
+          },
+        },
+      });
+
+      const qrImageUrl =
+        attachedIntent?.attributes?.next_action?.code?.image_url ||
+        attachedIntent?.attributes?.next_action?.display_qr_code?.image_url ||
+        null;
+
+      const nextSession = await updateCheckoutSession(supabase, checkoutSession.id, {
+        status: "pending",
+        paymongo_payment_intent_id: paymentIntent.id,
+        qr_image_url: qrImageUrl,
+        qr_expires_at: qrExpiresAt,
+      });
+
+      return jsonResponse({
+        ...buildSessionResponse(nextSession, {
+          itemCount: validItems.length,
+        }),
+      });
+    }
+
+    const successUrl = resolveReturnUrl(
+      appBaseUrl,
+      body?.successPath,
+      `/dashboard/customer/payment?method=card&state=success&session=${checkoutSession.id}`
+    );
+    const cancelUrl = resolveReturnUrl(
+      appBaseUrl,
+      body?.cancelPath,
+      `/dashboard/customer/payment?method=card&state=cancelled&session=${checkoutSession.id}`
+    );
+
+    const paymongoCheckout = await createCheckoutSession({
+      secretKey: paymongoSecretKey,
+      payload: {
+        data: {
+          attributes: {
+            billing: {
+              email: user.email,
+              name: customerName,
+            },
+            description: `Carvver service checkout (${validItems.length} listing${
+              validItems.length === 1 ? "" : "s"
+            })`,
+            line_items: validItems.map((item) => ({
+              currency: "PHP",
+              amount: toCentavos(Number(item.unitPrice || 0)),
+              name: item.packageSnapshot.name
+                ? `${item.service.title} - ${item.packageSnapshot.name}`
+                : item.service.title,
+              quantity: 1,
+              description:
+                item.packageSnapshot.summary ||
+                item.service.category ||
+                item.service.description ||
+                "Carvver service listing",
+            })),
+            payment_method_types: ["card"],
+            send_email_receipt: true,
+            show_description: true,
+            show_line_items: true,
+            success_url: successUrl,
+            cancel_url: cancelUrl,
+          },
+        },
+      },
+    });
+
+    const nextSession = await updateCheckoutSession(supabase, checkoutSession.id, {
+      status: "pending",
+      paymongo_checkout_id: paymongoCheckout.id,
+      checkout_url: paymongoCheckout.attributes?.checkout_url || null,
+      redirect_success_url: successUrl,
+      redirect_cancel_url: cancelUrl,
+    });
+
     return jsonResponse({
-      checkoutUrl: paymongoCheckout.attributes?.checkout_url,
-      sessionId: checkoutSession.id,
-      subtotal,
-      itemCount: validItems.length,
+      ...buildSessionResponse(nextSession, {
+        itemCount: validItems.length,
+      }),
     });
   } catch (error) {
     return jsonResponse(
@@ -278,7 +451,7 @@ Deno.serve(async (request: Request) => {
         error:
           error instanceof Error
             ? error.message
-            : "Couldn't create a PayMongo checkout session.",
+            : "Couldn't create a PayMongo payment session.",
       },
       500
     );

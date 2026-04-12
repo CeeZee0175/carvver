@@ -47,21 +47,6 @@ function friendlyCartMessage(error, fallback) {
   return fallback;
 }
 
-async function parseFunctionError(error) {
-  if (!error) return null;
-
-  if (typeof error.context?.json === "function") {
-    try {
-      const payload = await error.context.json();
-      return payload?.error || payload?.message || error.message;
-    } catch {
-      return error.message;
-    }
-  }
-
-  return error.message;
-}
-
 async function fetchCartItems(userId) {
   const { data, error } = await supabase
     .from("cart_items")
@@ -161,7 +146,6 @@ export function useCart() {
   const [userId, setUserId] = useState(null);
   const [items, setItems] = useState([]);
   const [error, setError] = useState("");
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const requestIdRef = useRef(0);
 
   const syncCartForSession = useCallback(async (session) => {
@@ -383,40 +367,6 @@ export function useCart() {
     [userId]
   );
 
-  const startCheckout = useCallback(async () => {
-    setCheckoutLoading(true);
-
-    try {
-      const { data, error: invokeError } = await supabase.functions.invoke(
-        "create-paymongo-checkout",
-        {
-          body: {
-            successPath: "/dashboard/customer/cart?checkout=success",
-            cancelPath: "/dashboard/customer/cart?checkout=cancelled",
-          },
-        }
-      );
-
-      if (invokeError) {
-        const nextMessage = await parseFunctionError(invokeError);
-        throw new Error(nextMessage || invokeError.message);
-      }
-
-      if (!data?.checkoutUrl) {
-        throw new Error("We couldn't open checkout.");
-      }
-
-      window.location.assign(data.checkoutUrl);
-      return data;
-    } catch (nextError) {
-      throw new Error(
-        friendlyCartMessage(nextError, "We couldn't start checkout. Please try again.")
-      );
-    } finally {
-      setCheckoutLoading(false);
-    }
-  }, []);
-
   const count = items.length;
   const serviceIds = useMemo(
     () => items.map((item) => item.service_id).filter(Boolean),
@@ -425,7 +375,6 @@ export function useCart() {
 
   return {
     loading,
-    checkoutLoading,
     error,
     items,
     count,
@@ -434,6 +383,5 @@ export function useCart() {
     removeItem,
     clearCart,
     reload,
-    startCheckout,
   };
 }

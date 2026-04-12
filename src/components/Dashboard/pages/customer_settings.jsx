@@ -228,7 +228,10 @@ export default function CustomerSettings() {
 
   const startBillingEdit = () => {
     setBillingValues({
-      preferredPaymentMethod: "qrph",
+      preferredPaymentMethod:
+        billingProfile.preferredPaymentMethod === "card" && hasSavedCard
+          ? "card"
+          : "qrph",
     });
     resetBillingState();
     setBillingEditing(true);
@@ -237,7 +240,10 @@ export default function CustomerSettings() {
   const cancelBillingEdit = () => {
     setBillingEditing(false);
     setBillingValues({
-      preferredPaymentMethod: "qrph",
+      preferredPaymentMethod:
+        billingProfile.preferredPaymentMethod === "card" && hasSavedCard
+          ? "card"
+          : "qrph",
     });
     resetBillingState();
   };
@@ -657,7 +663,7 @@ export default function CustomerSettings() {
             <div className="customerSettingsSectionIntro">
               <h2 className="profileSection__title">Billing</h2>
               <p className="customerSettingsSectionIntro__copy">
-                Use QRPh for checkout and keep your recent payment activity in view.
+                Keep GCash or Maya scan ready for QR checkout, with card available once a completed payment has returned saved card details.
               </p>
             </div>
           </div>
@@ -698,13 +704,31 @@ export default function CustomerSettings() {
                           }))
                         }
                       >
-                        QRPh
+                        GCash or Maya scan
                       </button>
+
+                      {hasSavedCard ? (
+                        <button
+                          type="button"
+                          className={`customerSettingsChoice ${
+                            billingValues.preferredPaymentMethod === "card"
+                              ? "customerSettingsChoice--active"
+                              : ""
+                          }`}
+                          onClick={() =>
+                            setBillingValues((prev) => ({
+                              ...prev,
+                              preferredPaymentMethod: "card",
+                            }))
+                          }
+                        >
+                          Card
+                        </button>
+                      ) : null}
                     </div>
 
                     <div className="customerSettingsCompactNote">
-                      Checkout now opens with QRPh, which matches the active wallet channel on
-                      your PayMongo account.
+                      GCash and Maya both scan through the same QR checkout, while card stays available once PayMongo has already returned saved card details.
                     </div>
 
                     <AnimatePresence mode="wait">
@@ -731,7 +755,7 @@ export default function CustomerSettings() {
                         {billingState.pending ? (
                           <LoaderCircle className="customerSettingsAction__spinner" />
                         ) : null}
-                        <span>Save QRPh</span>
+                        <span>Save payment method</span>
                       </motion.button>
 
                       <motion.button
@@ -753,22 +777,24 @@ export default function CustomerSettings() {
                       label="Checkout method"
                       value={
                         billingProfile.preferredPaymentMethod === "card"
-                          ? "Saved card details on file"
+                          ? "Card"
                           : hasSavedWallet
-                            ? "QRPh"
+                            ? "GCash or Maya scan"
                             : "Not set"
                       }
                     />
                     {hasSavedCard ? (
                       <DetailRow label="Saved card" value={cardSummary} wrap />
                     ) : null}
-                    {hasSavedWallet ? <DetailRow label="Wallet channel" value="QRPh" /> : null}
+                    {hasSavedWallet ? (
+                      <DetailRow label="QR checkout" value="GCash or Maya scan" />
+                    ) : null}
                   </div>
                 ) : (
                   <EmptySurface
                     hideIcon
                     title="No payment method saved yet"
-                    actionLabel="Set up QRPh"
+                    actionLabel="Set up GCash or Maya scan"
                     onAction={startBillingEdit}
                     className="customerSettingsBillingEmpty"
                     actionButtonClassName="customerSettingsBillingEmpty__btn"

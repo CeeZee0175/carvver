@@ -169,13 +169,11 @@ export default function CartPage() {
   const location = useLocation();
   const {
     loading,
-    checkoutLoading,
     error,
     items,
     clearCart,
     removeItem,
     reload,
-    startCheckout,
   } = useCart();
   const [removingId, setRemovingId] = React.useState("");
   const searchParams = useMemo(
@@ -259,11 +257,7 @@ export default function CartPage() {
   };
 
   const handleCheckout = async () => {
-    try {
-      await startCheckout();
-    } catch (nextError) {
-      toast.error(nextError.message || "Couldn't start checkout.");
-    }
+    navigate("/dashboard/customer/payment");
   };
 
   return (
@@ -479,18 +473,16 @@ export default function CartPage() {
                 <motion.button
                   type="button"
                   className="cartCheckoutBtn"
-                  whileHover={checkoutLoading ? {} : { y: -3, scale: 1.008 }}
-                  whileTap={checkoutLoading ? {} : { scale: 0.992 }}
+                  whileHover={{ y: -3, scale: 1.008 }}
+                  whileTap={{ scale: 0.992 }}
                   transition={CART_ACTION_SPRING}
-                  disabled={
-                    checkoutLoading || validItems.length === 0 || invalidItems.length > 0
-                  }
+                  disabled={validItems.length === 0 || invalidItems.length > 0}
                   onClick={handleCheckout}
                 >
                   <span className="cartCheckoutBtn__copy">
                     <span className="cartCheckoutBtn__eyebrow">Checkout</span>
                     <strong className="cartCheckoutBtn__title">
-                      {checkoutLoading ? "Opening checkout..." : "Continue to payment"}
+                      Continue to payment
                     </strong>
                   </span>
                   <span className="cartCheckoutBtn__iconWrap" aria-hidden="true">

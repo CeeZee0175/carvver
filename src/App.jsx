@@ -54,6 +54,7 @@ const CustomerServiceDetail = lazy(() =>
 );
 const FavBook = lazy(() => import("./components/Dashboard/pages/favBook"));
 const CartPage = lazy(() => import("./components/Dashboard/pages/cart_page"));
+const CustomerPayment = lazy(() => import("./components/Dashboard/pages/customer_payment"));
 const PostRequest = lazy(() => import("./components/Dashboard/pages/post_request"));
 const NotifPage = lazy(() => import("./components/Dashboard/pages/notifPage"));
 const Profile = lazy(() => import("./components/Dashboard/pages/profile"));
@@ -541,6 +542,16 @@ function AppRoutes() {
           <Suspense fallback={<RouteFallback />}>
             <CustomerRoute>
               <CartPage />
+            </CustomerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/customer/payment"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <CustomerRoute>
+              <CustomerPayment />
             </CustomerRoute>
           </Suspense>
         }
