@@ -13,14 +13,11 @@ import {
 } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  ArrowRight,
   Bookmark,
   Check,
   ChevronDown,
   Heart,
   ShieldCheck,
-  MapPin,
-  ShoppingCart,
   SlidersHorizontal,
   Sparkles,
   Star,
@@ -310,12 +307,16 @@ function createPinIcon(className) {
   });
 }
 
-const regionPinIcon = createPinIcon("browseLeafletPin browseLeafletPin--region");
+const regionPinIcon = createPinIcon(
+  "browseLeafletPin browseLeafletPin--region",
+);
 const cityPinIcon = createPinIcon("browseLeafletPin browseLeafletPin--city");
 
 function getPublicServiceMediaUrl(path) {
   if (!path) return "";
-  const { data } = supabase.storage.from(SERVICE_MEDIA_BUCKET).getPublicUrl(path);
+  const { data } = supabase.storage
+    .from(SERVICE_MEDIA_BUCKET)
+    .getPublicUrl(path);
   return data?.publicUrl || "";
 }
 
@@ -333,7 +334,9 @@ function ScrollReveal({ children, delay = 0, y = 20, className }) {
       ref={ref}
       className={className}
       initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y }}
-      animate={inView || reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y }}
+      animate={
+        inView || reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y }
+      }
       transition={{
         duration: 0.52,
         ease: [0.22, 1, 0.36, 1],
@@ -411,7 +414,34 @@ function MapViewportController({ focusTarget }) {
 
   return null;
 }
+function RatingStars({ rating = 0 }) {
+  const normalized = Math.max(0, Math.min(5, Number(rating) || 0));
+  const fullStars = Math.floor(normalized);
+  const hasHalf = normalized - fullStars >= 0.5;
 
+  return (
+    <div
+      className="browseServiceCard__stars"
+      aria-label={`${normalized.toFixed(1)} out of 5 stars`}
+    >
+      {Array.from({ length: 5 }).map((_, index) => {
+        const isFull = index < fullStars;
+        const isHalf = index === fullStars && hasHalf;
+
+        return (
+          <span
+            key={index}
+            className={`browseServiceCard__star ${
+              isFull ? "browseServiceCard__star--filled" : ""
+            } ${isHalf ? "browseServiceCard__star--half" : ""}`.trim()}
+          >
+            <Star className="browseServiceCard__starSvg" />
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 /* ────────────────────────────────────────────────────────────────────────── */
 /* Category Modal                                                            */
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -444,7 +474,7 @@ function CategoryModal({
 
   const toggleCategory = (item) => {
     setDraftCategories((prev) =>
-      prev.includes(item) ? prev.filter((v) => v !== item) : [...prev, item]
+      prev.includes(item) ? prev.filter((v) => v !== item) : [...prev, item],
     );
   };
 
@@ -462,15 +492,21 @@ function CategoryModal({
 
           <motion.div
             className="browseCategoryModal"
-            initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18, scale: 0.98 }}
+            initial={
+              reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18, scale: 0.98 }
+            }
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.98 }}
+            exit={
+              reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.98 }
+            }
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="browseCategoryModal__header">
               <div>
-                <h2 className="browseCategoryModal__title">Service Categories</h2>
+                <h2 className="browseCategoryModal__title">
+                  Service Categories
+                </h2>
                 <p className="browseCategoryModal__sub">
                   Choose one or more categories to narrow down your results.
                 </p>
@@ -490,7 +526,9 @@ function CategoryModal({
               <div className="browseCategoryModal__grid">
                 {CATEGORY_GROUPS.map((group) => (
                   <section key={group.label} className="browseCategoryGroup">
-                    <h3 className="browseCategoryGroup__title">{group.label}</h3>
+                    <h3 className="browseCategoryGroup__title">
+                      {group.label}
+                    </h3>
 
                     <div className="browseCategoryGroup__items">
                       {group.items.map((item) => {
@@ -503,10 +541,23 @@ function CategoryModal({
                             className={`browseCategoryOption ${checked ? "browseCategoryOption--checked" : ""}`}
                             onClick={() => toggleCategory(item)}
                           >
-                            <span className="browseCategoryOption__box" aria-hidden="true">
-                              {checked && <Check style={{ width: 11, height: 11, color: "#fff" }} />}
+                            <span
+                              className="browseCategoryOption__box"
+                              aria-hidden="true"
+                            >
+                              {checked && (
+                                <Check
+                                  style={{
+                                    width: 11,
+                                    height: 11,
+                                    color: "#fff",
+                                  }}
+                                />
+                              )}
                             </span>
-                            <span className="browseCategoryOption__text">{item}</span>
+                            <span className="browseCategoryOption__text">
+                              {item}
+                            </span>
                           </button>
                         );
                       })}
@@ -522,13 +573,16 @@ function CategoryModal({
                   onClick={() => setDraftIncludeOthers((prev) => !prev)}
                 >
                   <span className="browseCategoryOther__box" aria-hidden="true">
-                    {draftIncludeOthers && <Check style={{ width: 11, height: 11, color: "#fff" }} />}
+                    {draftIncludeOthers && (
+                      <Check style={{ width: 11, height: 11, color: "#fff" }} />
+                    )}
                   </span>
                   <span className="browseCategoryOther__text">Others</span>
                 </button>
 
                 <p className="browseCategoryOther__sub">
-                  Include services that do not fall under the listed categories above.
+                  Include services that do not fall under the listed categories
+                  above.
                 </p>
               </section>
             </div>
@@ -581,8 +635,13 @@ function LocationMapModal({
 
   const [activeRegion, setActiveRegion] = useState(selectedRegion);
   const [activeCity, setActiveCity] = useState(selectedCity);
-  const [expandedRegion, setExpandedRegion] = useState(selectedRegion || "NCR / Metro Manila");
-  const [focusTarget, setFocusTarget] = useState({ type: "country", coords: PH_CENTER });
+  const [expandedRegion, setExpandedRegion] = useState(
+    selectedRegion || "NCR / Metro Manila",
+  );
+  const [focusTarget, setFocusTarget] = useState({
+    type: "country",
+    coords: PH_CENTER,
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -636,15 +695,21 @@ function LocationMapModal({
 
           <motion.div
             className="browseLocationModal"
-            initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18, scale: 0.98 }}
+            initial={
+              reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18, scale: 0.98 }
+            }
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.98 }}
+            exit={
+              reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.98 }
+            }
             transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="browseLocationModal__header">
               <div>
-                <h2 className="browseLocationModal__title">Location Services</h2>
+                <h2 className="browseLocationModal__title">
+                  Location Services
+                </h2>
                 <p className="browseLocationModal__sub">
                   Select a region or city to discover nearby service providers.
                 </p>
@@ -664,11 +729,17 @@ function LocationMapModal({
               <div className="browseLocationModal__mapCard">
                 <div className="browseLocationModal__mapTop">
                   <div>
-                    <span className="browseLocationModal__mapEyebrow">Map Preview</span>
-                    <h3 className="browseLocationModal__mapTitle">{selectedLabel}</h3>
+                    <span className="browseLocationModal__mapEyebrow">
+                      Map Preview
+                    </span>
+                    <h3 className="browseLocationModal__mapTitle">
+                      {selectedLabel}
+                    </h3>
                   </div>
 
-                  <span className="browseLocationModal__selectedPill">{selectedLabel}</span>
+                  <span className="browseLocationModal__selectedPill">
+                    {selectedLabel}
+                  </span>
                 </div>
 
                 <div className="browseLocationModal__leafletWrap">
@@ -701,15 +772,25 @@ function LocationMapModal({
                             setExpandedRegion(region.name);
                             setActiveRegion(region.name);
                             setActiveCity(null);
-                            setFocusTarget({ type: "region", coords: region.coords });
+                            setFocusTarget({
+                              type: "region",
+                              coords: region.coords,
+                            });
                           },
                         }}
                       >
-                        <Popup className="browseLeafletPopup" closeButton={false}>
+                        <Popup
+                          className="browseLeafletPopup"
+                          closeButton={false}
+                        >
                           <div className="browseLeafletPopup__card">
                             <div>
-                              <h4 className="browseLeafletPopup__title">{region.name}</h4>
-                              <p className="browseLeafletPopup__sub">{region.cities.length} cities available</p>
+                              <h4 className="browseLeafletPopup__title">
+                                {region.name}
+                              </h4>
+                              <p className="browseLeafletPopup__sub">
+                                {region.cities.length} cities available
+                              </p>
                             </div>
 
                             <button
@@ -719,7 +800,10 @@ function LocationMapModal({
                                 setExpandedRegion(region.name);
                                 setActiveRegion(region.name);
                                 setActiveCity(null);
-                                setFocusTarget({ type: "region", coords: region.coords });
+                                setFocusTarget({
+                                  type: "region",
+                                  coords: region.coords,
+                                });
                               }}
                             >
                               Open Region
@@ -730,7 +814,9 @@ function LocationMapModal({
                     ))}
 
                     {(() => {
-                      const region = PHILIPPINES_REGIONS.find((r) => r.name === expandedRegion);
+                      const region = PHILIPPINES_REGIONS.find(
+                        (r) => r.name === expandedRegion,
+                      );
                       if (!region) return null;
 
                       return region.cities.map((city) => (
@@ -742,15 +828,25 @@ function LocationMapModal({
                             click: () => {
                               setActiveRegion(region.name);
                               setActiveCity(city.name);
-                              setFocusTarget({ type: "city", coords: city.coords });
+                              setFocusTarget({
+                                type: "city",
+                                coords: city.coords,
+                              });
                             },
                           }}
                         >
-                          <Popup className="browseLeafletPopup" closeButton={false}>
+                          <Popup
+                            className="browseLeafletPopup"
+                            closeButton={false}
+                          >
                             <div className="browseLeafletPopup__card">
                               <div>
-                                <h4 className="browseLeafletPopup__title">{city.name}</h4>
-                                <p className="browseLeafletPopup__sub">{region.name}</p>
+                                <h4 className="browseLeafletPopup__title">
+                                  {city.name}
+                                </h4>
+                                <p className="browseLeafletPopup__sub">
+                                  {region.name}
+                                </p>
                               </div>
 
                               <button
@@ -759,7 +855,10 @@ function LocationMapModal({
                                 onClick={() => {
                                   setActiveRegion(region.name);
                                   setActiveCity(city.name);
-                                  setFocusTarget({ type: "city", coords: city.coords });
+                                  setFocusTarget({
+                                    type: "city",
+                                    coords: city.coords,
+                                  });
                                 }}
                               >
                                 Use City
@@ -803,7 +902,8 @@ function LocationMapModal({
 
               {PHILIPPINES_REGIONS.map((region) => {
                 const expanded = expandedRegion === region.name;
-                const regionActive = activeRegion === region.name && !activeCity;
+                const regionActive =
+                  activeRegion === region.name && !activeCity;
 
                 return (
                   <div
@@ -814,13 +914,22 @@ function LocationMapModal({
                       type="button"
                       className="browseRegionCard__header"
                       onClick={() => {
-                        setExpandedRegion((prev) => (prev === region.name ? null : region.name));
-                        setFocusTarget({ type: "region", coords: region.coords });
+                        setExpandedRegion((prev) =>
+                          prev === region.name ? null : region.name,
+                        );
+                        setFocusTarget({
+                          type: "region",
+                          coords: region.coords,
+                        });
                       }}
                     >
                       <div className="browseRegionCard__headerLeft">
-                        <span className="browseRegionCard__title">{region.name}</span>
-                        <span className="browseRegionCard__count">{region.cities.length} cities</span>
+                        <span className="browseRegionCard__title">
+                          {region.name}
+                        </span>
+                        <span className="browseRegionCard__count">
+                          {region.cities.length} cities
+                        </span>
                       </div>
 
                       <ChevronDown
@@ -843,7 +952,10 @@ function LocationMapModal({
                             onClick={() => {
                               setActiveRegion(region.name);
                               setActiveCity(null);
-                              setFocusTarget({ type: "region", coords: region.coords });
+                              setFocusTarget({
+                                type: "region",
+                                coords: region.coords,
+                              });
                             }}
                           >
                             Use all cities in {region.name}
@@ -861,7 +973,10 @@ function LocationMapModal({
                                   onClick={() => {
                                     setActiveRegion(region.name);
                                     setActiveCity(city.name);
-                                    setFocusTarget({ type: "city", coords: city.coords });
+                                    setFocusTarget({
+                                      type: "city",
+                                      coords: city.coords,
+                                    });
                                   }}
                                 >
                                   {city.name}
@@ -933,7 +1048,9 @@ function ServiceCard({
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.1 });
   const saved = savedIds.includes(service.id);
-  const favoriteFreelancer = favoriteFreelancerIds.includes(service.freelancer_id);
+  const favoriteFreelancer = favoriteFreelancerIds.includes(
+    service.freelancer_id,
+  );
   const inCart = cartServiceIds.includes(service.id);
   const colors = ACCENT_COLORS[index % ACCENT_COLORS.length];
   const Icon = getCategoryIcon(service.category);
@@ -941,6 +1058,19 @@ function ServiceCard({
   const creatorName = service.profiles
     ? `${service.profiles.first_name} ${service.profiles.last_name}`
     : "Unknown Creator";
+  const trustSignals = [
+    service.is_verified ? "Verified creator" : null,
+    service.is_pro ? "Carvver Pro" : null,
+  ].filter(Boolean);
+  const summaryText = service.description?.trim()
+    ? service.description
+    : "Review packages, delivery time, and listing details.";
+  const packageLabel =
+    service.packageCount > 0
+      ? `${service.packageCount} package${
+          service.packageCount === 1 ? "" : "s"
+        } available`
+      : "Custom pricing";
 
   const initials = service.profiles
     ? `${service.profiles.first_name?.charAt(0) || ""}${service.profiles.last_name?.charAt(0) || ""}`.toUpperCase()
@@ -979,12 +1109,16 @@ function ServiceCard({
           )
         ) : (
           <div className="browseServiceCard__mediaBg">
-            <span className="browseServiceCard__mediaIconWrap" aria-hidden="true">
+            <span
+              className="browseServiceCard__mediaIconWrap"
+              aria-hidden="true"
+            >
               <Icon className="browseServiceCard__mediaIcon" />
             </span>
             {service.packageCount > 0 ? (
-              <span className="browseServiceCard__packageMeta">
-                {service.packageCount} package{service.packageCount === 1 ? "" : "s"}
+              <span className="browseServiceCard__mediaMeta">
+                {service.packageCount} package
+                {service.packageCount === 1 ? "" : "s"}
               </span>
             ) : null}
           </div>
@@ -1008,16 +1142,16 @@ function ServiceCard({
               transition={{ duration: 0.22 }}
               style={{ display: "inline-grid", placeItems: "center" }}
             >
-              <Bookmark style={{ width: 15, height: 15 }} fill={saved ? "currentColor" : "none"} />
+              <Bookmark
+                style={{ width: 15, height: 15 }}
+                fill={saved ? "currentColor" : "none"}
+              />
             </motion.span>
           </motion.button>
         </div>
 
         {service.is_pro && (
-          <div className="browseServiceCard__proBadge">
-            <BadgeCheck style={{ width: 12, height: 12 }} />
-            Pro
-          </div>
+          <div className="browseServiceCard__proBadge">Pro</div>
         )}
       </div>
 
@@ -1025,7 +1159,27 @@ function ServiceCard({
         <div className="browseServiceCard__creatorRow">
           <div className="browseServiceCard__creatorMain">
             <div className="browseServiceCard__avatar">{initials}</div>
-            <span className="browseServiceCard__creator">{creatorName}</span>
+
+            <div className="browseServiceCard__creatorBlock">
+              <span className="browseServiceCard__creator">{creatorName}</span>
+
+              {trustSignals.length ? (
+                <div className="browseServiceCard__trustRow">
+                  {trustSignals.map((signal) => (
+                    <span
+                      key={signal}
+                      className={`browseServiceCard__trustChip ${
+                        signal === "Verified creator"
+                          ? "browseServiceCard__trustChip--verified"
+                          : "browseServiceCard__trustChip--pro"
+                      }`}
+                    >
+                      {signal}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           </div>
 
           {service.freelancer_id ? (
@@ -1058,6 +1212,36 @@ function ServiceCard({
 
         <h3 className="browseServiceCard__title">{service.title}</h3>
 
+        <p className="browseServiceCard__summary">{summaryText}</p>
+
+        <div className="browseServiceCard__metaStack">
+          <div className="browseServiceCard__ratingRow">
+            <RatingStars rating={service.average_rating || 0} />
+            <span className="browseServiceCard__rating">
+              {service.average_rating
+                ? Number(service.average_rating).toFixed(1)
+                : "New"}
+            </span>
+            <span className="browseServiceCard__reviewCount">
+              {service.review_count
+                ? `(${Number(service.review_count)} review${
+                    Number(service.review_count) === 1 ? "" : "s"
+                  })`
+                : "(No reviews yet)"}
+            </span>
+          </div>
+
+          {service.location ? (
+            <div className="browseServiceCard__locationRow">
+              <span className="browseServiceCard__locationText">
+                {service.location}
+              </span>
+            </div>
+          ) : null}
+        </div>
+
+        <h3 className="browseServiceCard__title">{service.title}</h3>
+
         <div className="browseServiceCard__ratingRow">
           <Star className="browseServiceCard__starIcon" />
           <span className="browseServiceCard__rating">—</span>
@@ -1065,10 +1249,15 @@ function ServiceCard({
         </div>
 
         <div className="browseServiceCard__bottom">
-          <div className="browseServiceCard__priceWrap">
-            <span className="browseServiceCard__priceFrom">Starting at</span>
-            <span className="browseServiceCard__price">
-              ₱{Number(service.price).toLocaleString()}
+          <div className="browseServiceCard__offerRow">
+            <div className="browseServiceCard__priceWrap">
+              <span className="browseServiceCard__priceFrom">Starting at</span>
+              <span className="browseServiceCard__price">
+                ₱{Number(service.price).toLocaleString()}
+              </span>
+            </div>
+            <span className="browseServiceCard__packageMeta">
+              {packageLabel}
             </span>
           </div>
 
@@ -1090,13 +1279,12 @@ function ServiceCard({
                 onOpenServiceDetail(service.id);
               }}
             >
-              <ShoppingCart className="browseServiceCard__cartIcon" />
               <span>{inCart ? "In cart" : "Choose package"}</span>
             </motion.button>
 
             <motion.button
               type="button"
-              className="browseServiceCard__btn browseServiceCard__btn--ghost"
+              className="browseServiceCard__btn browseServiceCard__btn--subtle"
               whileHover={{ x: 1 }}
               whileTap={{ scale: 0.96 }}
               transition={cardTransition}
@@ -1111,14 +1299,13 @@ function ServiceCard({
 
             <motion.button
               type="button"
-              className="browseServiceCard__btn"
-              whileHover={{ x: 2 }}
+              className="browseServiceCard__btn browseServiceCard__btn--ghost"
+              whileHover={{ x: 1 }}
               whileTap={{ scale: 0.96 }}
               transition={cardTransition}
               onClick={() => onViewFreelancer(service.freelancer_id)}
             >
               Freelancer
-              <ArrowRight style={{ width: 13, height: 13 }} />
             </motion.button>
           </div>
         </div>
@@ -1205,9 +1392,13 @@ function FilterDropdown({ label, icon: Icon, open, onToggle, children, wide }) {
         {open && (
           <motion.div
             className={`browseFilterMenu ${wide ? "browseFilterMenu--wide" : "browseFilterMenu--small"}`}
-            initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 8, scale: 0.97 }}
+            initial={
+              reduceMotion ? { opacity: 1 } : { opacity: 0, y: 8, scale: 0.97 }
+            }
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.97 }}
+            exit={
+              reduceMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.97 }
+            }
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
           >
             {children}
@@ -1236,7 +1427,7 @@ export default function BrowseCategories() {
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
 
   const [selectedCategories, setSelectedCategories] = useState(() =>
-    initialCategoryIntent ? [initialCategoryIntent] : []
+    initialCategoryIntent ? [initialCategoryIntent] : [],
   );
   const [includeOthers, setIncludeOthers] = useState(false);
 
@@ -1258,9 +1449,10 @@ export default function BrowseCategories() {
   const [currentPage, setCurrentPage] = useState(1);
   const [savedIds, setSavedIds] = useState([]);
   const { serviceIds: cartServiceIds } = useCart();
-  const { favoriteIds, toggleFavoriteFreelancer } = useCustomerFavoriteFreelancers({
-    includeProfiles: false,
-  });
+  const { favoriteIds, toggleFavoriteFreelancer } =
+    useCustomerFavoriteFreelancers({
+      includeProfiles: false,
+    });
 
   const filterRef = useRef(null);
 
@@ -1282,7 +1474,9 @@ export default function BrowseCategories() {
       try {
         const { data, error } = await supabase
           .from("services")
-          .select("id, title, category, price, location, description, created_at, freelancer_id, is_published, is_pro, is_verified, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline)")
+          .select(
+            "id, title, category, price, location, description, created_at, freelancer_id, is_published, is_pro, is_verified, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline)",
+          )
           .eq("is_published", true)
           .order("created_at", { ascending: false });
 
@@ -1302,7 +1496,9 @@ export default function BrowseCategories() {
           ] = await Promise.all([
             supabase
               .from("service_media")
-              .select("service_id, bucket_path, media_kind, is_cover, sort_order")
+              .select(
+                "service_id, bucket_path, media_kind, is_cover, sort_order",
+              )
               .in("service_id", serviceIds)
               .order("is_cover", { ascending: false })
               .order("sort_order", { ascending: true }),
@@ -1336,20 +1532,24 @@ export default function BrowseCategories() {
             nextServices.map((item) => ({
               ...item,
               price: (() => {
-                const prices = (packageMap.get(item.id) || []).filter((value) => value > 0);
+                const prices = (packageMap.get(item.id) || []).filter(
+                  (value) => value > 0,
+                );
                 return prices.length > 0
                   ? Math.min(...prices)
                   : Number(item.price || 0);
               })(),
               startingPrice: (() => {
-                const prices = (packageMap.get(item.id) || []).filter((value) => value > 0);
+                const prices = (packageMap.get(item.id) || []).filter(
+                  (value) => value > 0,
+                );
                 return prices.length > 0
                   ? Math.min(...prices)
                   : Number(item.price || 0);
               })(),
               packageCount: (packageMap.get(item.id) || []).length,
               previewMedia: previewMap.get(item.id) || null,
-            }))
+            })),
           );
         } catch {
           setServices(nextServices);
@@ -1364,10 +1564,12 @@ export default function BrowseCategories() {
     load();
   }, []);
 
-    // ── Load user's saved service IDs on mount ──
+  // ── Load user's saved service IDs on mount ──
   useEffect(() => {
     async function loadSavedIds() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (!session) return;
 
       const { data } = await supabase
@@ -1414,7 +1616,8 @@ export default function BrowseCategories() {
     if (selectedCategories.length > 0 || includeOthers) {
       list = list.filter((s) => {
         const inSelected = selectedCategories.includes(s.category);
-        const isOther = includeOthers && !ALL_CATEGORY_ITEMS.includes(s.category);
+        const isOther =
+          includeOthers && !ALL_CATEGORY_ITEMS.includes(s.category);
         return inSelected || isOther;
       });
     }
@@ -1437,15 +1640,15 @@ export default function BrowseCategories() {
 
     if (selectedCity) {
       list = list.filter((s) =>
-        s.location?.toLowerCase().includes(selectedCity.toLowerCase())
+        s.location?.toLowerCase().includes(selectedCity.toLowerCase()),
       );
     } else if (selectedRegion) {
       const region = PHILIPPINES_REGIONS.find((r) => r.name === selectedRegion);
       if (region) {
         list = list.filter((s) =>
           region.cities.some((city) =>
-            s.location?.toLowerCase().includes(city.name.toLowerCase())
-          )
+            s.location?.toLowerCase().includes(city.name.toLowerCase()),
+          ),
         );
       }
     }
@@ -1465,13 +1668,39 @@ export default function BrowseCategories() {
     }
 
     return list;
-  }, [services, selectedCategories, includeOthers, deliveryDays, minBudget, maxBudget, proOnly, verifiedOnly, selectedRegion, selectedCity, sortBy]);
+  }, [
+    services,
+    selectedCategories,
+    includeOthers,
+    deliveryDays,
+    minBudget,
+    maxBudget,
+    proOnly,
+    verifiedOnly,
+    selectedRegion,
+    selectedCity,
+    sortBy,
+  ]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategories, includeOthers, deliveryDays, minBudget, maxBudget, proOnly, verifiedOnly, selectedRegion, selectedCity, sortBy]);
+  }, [
+    selectedCategories,
+    includeOthers,
+    deliveryDays,
+    minBudget,
+    maxBudget,
+    proOnly,
+    verifiedOnly,
+    selectedRegion,
+    selectedCity,
+    sortBy,
+  ]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredServices.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredServices.length / ITEMS_PER_PAGE),
+  );
 
   const paginatedServices = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -1493,45 +1722,52 @@ export default function BrowseCategories() {
     setSortBy("best");
   }, []);
 
-  const handleToggleSave = useCallback(async (serviceId) => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      toast.error("Please sign in to save services.");
-      return;
-    }
-
-    const userId = session.user.id;
-    const isSaved = savedIds.includes(serviceId);
-
-    // optimistic update
-    setSavedIds((prev) =>
-      isSaved ? prev.filter((id) => id !== serviceId) : [...prev, serviceId]
-    );
-
-    try {
-      if (isSaved) {
-        const { error } = await supabase
-          .from("saved_services")
-          .delete()
-          .eq("user_id", userId)
-          .eq("service_id", serviceId);
-        if (error) throw error;
-        toast("Removed from saved", { duration: 1800 });
-      } else {
-        const { error } = await supabase
-          .from("saved_services")
-          .insert([{ user_id: userId, service_id: serviceId }]);
-        if (error) throw error;
-        toast("Saved!", { duration: 1800 });
+  const handleToggleSave = useCallback(
+    async (serviceId) => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please sign in to save services.");
+        return;
       }
-    } catch {
-      // rollback on failure
+
+      const userId = session.user.id;
+      const isSaved = savedIds.includes(serviceId);
+
+      // optimistic update
       setSavedIds((prev) =>
-        isSaved ? [...prev, serviceId] : prev.filter((id) => id !== serviceId)
+        isSaved ? prev.filter((id) => id !== serviceId) : [...prev, serviceId],
       );
-      toast.error("Something went wrong. Please try again.");
-    }
-  }, [savedIds]);
+
+      try {
+        if (isSaved) {
+          const { error } = await supabase
+            .from("saved_services")
+            .delete()
+            .eq("user_id", userId)
+            .eq("service_id", serviceId);
+          if (error) throw error;
+          toast("Removed from saved", { duration: 1800 });
+        } else {
+          const { error } = await supabase
+            .from("saved_services")
+            .insert([{ user_id: userId, service_id: serviceId }]);
+          if (error) throw error;
+          toast("Saved!", { duration: 1800 });
+        }
+      } catch {
+        // rollback on failure
+        setSavedIds((prev) =>
+          isSaved
+            ? [...prev, serviceId]
+            : prev.filter((id) => id !== serviceId),
+        );
+        toast.error("Something went wrong. Please try again.");
+      }
+    },
+    [savedIds],
+  );
 
   const handleOpenCart = useCallback(() => {
     navigate("/dashboard/customer/cart");
@@ -1546,7 +1782,7 @@ export default function BrowseCategories() {
 
       navigate(`/dashboard/customer/browse-services/${serviceId}`);
     },
-    [navigate]
+    [navigate],
   );
 
   const handleToggleFavoriteFreelancer = useCallback(
@@ -1556,13 +1792,13 @@ export default function BrowseCategories() {
         toast.success(
           result.favorite
             ? `${snapshot?.display_name || snapshot?.first_name || "This freelancer"} is now in your favorites.`
-            : `${snapshot?.display_name || snapshot?.first_name || "This freelancer"} was removed from your favorites.`
+            : `${snapshot?.display_name || snapshot?.first_name || "This freelancer"} was removed from your favorites.`,
         );
       } catch (error) {
         toast.error(error.message || "We couldn't update your favorites.");
       }
     },
-    [toggleFavoriteFreelancer]
+    [toggleFavoriteFreelancer],
   );
 
   const handleViewFreelancer = useCallback(
@@ -1573,7 +1809,7 @@ export default function BrowseCategories() {
       }
       navigate(`/dashboard/customer/freelancers/${freelancerId}`);
     },
-    [navigate]
+    [navigate],
   );
 
   const handleOpenMessage = useCallback(
@@ -1592,19 +1828,19 @@ export default function BrowseCategories() {
 
       navigate(`/dashboard/customer/messages?${params.toString()}`);
     },
-    [navigate]
+    [navigate],
   );
 
   const categoriesLabel =
     selectedCategories.length === 0 && !includeOthers
       ? "Categories"
       : includeOthers && selectedCategories.length === 0
-      ? "Others"
-      : includeOthers
-      ? `${selectedCategories.length + 1} selected`
-      : selectedCategories.length === 1
-      ? selectedCategories[0]
-      : `${selectedCategories.length} selected`;
+        ? "Others"
+        : includeOthers
+          ? `${selectedCategories.length + 1} selected`
+          : selectedCategories.length === 1
+            ? selectedCategories[0]
+            : `${selectedCategories.length} selected`;
 
   const budgetLabel =
     minBudget || maxBudget
@@ -1612,10 +1848,12 @@ export default function BrowseCategories() {
       : "Budget";
 
   const deliveryLabel = deliveryDays
-    ? DELIVERY_OPTIONS.find((o) => o.value === deliveryDays)?.label || "Delivery"
+    ? DELIVERY_OPTIONS.find((o) => o.value === deliveryDays)?.label ||
+      "Delivery"
     : "Delivery time";
 
-  const sortLabel = SORT_OPTIONS.find((o) => o.value === sortBy)?.label || "Sort by";
+  const sortLabel =
+    SORT_OPTIONS.find((o) => o.value === sortBy)?.label || "Sort by";
 
   const locationLabel = selectedCity || selectedRegion || "Location Services";
 
@@ -1692,7 +1930,6 @@ export default function BrowseCategories() {
                 />
               </motion.svg>
             </div>
-
           </section>
         </ScrollReveal>
 
@@ -1709,7 +1946,10 @@ export default function BrowseCategories() {
               >
                 <SlidersHorizontal style={{ width: 14, height: 14 }} />
                 <span>{categoriesLabel}</span>
-                <ChevronDown className={`browseFilterTrigger__chevron ${categoryModalOpen ? "browseFilterTrigger__chevron--open" : ""}`} style={{ width: 14, height: 14 }} />
+                <ChevronDown
+                  className={`browseFilterTrigger__chevron ${categoryModalOpen ? "browseFilterTrigger__chevron--open" : ""}`}
+                  style={{ width: 14, height: 14 }}
+                />
               </motion.button>
 
               <FilterDropdown
@@ -1723,7 +1963,9 @@ export default function BrowseCategories() {
               >
                 <div className="browseBudgetMenu">
                   <div className="browseBudgetMenu__field">
-                    <label className="browseBudgetMenu__label">Minimum Price</label>
+                    <label className="browseBudgetMenu__label">
+                      Minimum Price
+                    </label>
                     <div className="browseBudgetMenu__inputWrap">
                       <span className="browseBudgetMenu__peso">₱</span>
                       <input
@@ -1738,7 +1980,9 @@ export default function BrowseCategories() {
                   </div>
 
                   <div className="browseBudgetMenu__field">
-                    <label className="browseBudgetMenu__label">Maximum Price</label>
+                    <label className="browseBudgetMenu__label">
+                      Maximum Price
+                    </label>
                     <div className="browseBudgetMenu__inputWrap">
                       <span className="browseBudgetMenu__peso">₱</span>
                       <input
@@ -1789,7 +2033,11 @@ export default function BrowseCategories() {
                 label={deliveryLabel}
                 icon={Clock}
                 open={openMenu === "delivery"}
-                onToggle={() => setOpenMenu((prev) => (prev === "delivery" ? null : "delivery"))}
+                onToggle={() =>
+                  setOpenMenu((prev) =>
+                    prev === "delivery" ? null : "delivery",
+                  )
+                }
               >
                 <div className="browseSimpleMenu">
                   {DELIVERY_OPTIONS.map((opt) => (
@@ -1802,7 +2050,9 @@ export default function BrowseCategories() {
                         setOpenMenu(null);
                       }}
                     >
-                      {deliveryDays === opt.value && <Check style={{ width: 13, height: 13 }} />}
+                      {deliveryDays === opt.value && (
+                        <Check style={{ width: 13, height: 13 }} />
+                      )}
                       {opt.label}
                     </button>
                   ))}
@@ -1811,7 +2061,7 @@ export default function BrowseCategories() {
 
               <motion.button
                 type="button"
-                className={`browseFilterTrigger browseFilterTrigger--location ${(selectedRegion || selectedCity) ? "browseFilterTrigger--open" : ""}`}
+                className={`browseFilterTrigger browseFilterTrigger--location ${selectedRegion || selectedCity ? "browseFilterTrigger--open" : ""}`}
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.97 }}
                 transition={cardTransition}
@@ -1865,7 +2115,9 @@ export default function BrowseCategories() {
                 label={`Sort: ${sortLabel}`}
                 icon={ArrowUpDown}
                 open={openMenu === "sort"}
-                onToggle={() => setOpenMenu((prev) => (prev === "sort" ? null : "sort"))}
+                onToggle={() =>
+                  setOpenMenu((prev) => (prev === "sort" ? null : "sort"))
+                }
               >
                 <div className="browseSimpleMenu">
                   {SORT_OPTIONS.map((opt) => (
@@ -1878,7 +2130,9 @@ export default function BrowseCategories() {
                         setOpenMenu(null);
                       }}
                     >
-                      {sortBy === opt.value && <Check style={{ width: 13, height: 13 }} />}
+                      {sortBy === opt.value && (
+                        <Check style={{ width: 13, height: 13 }} />
+                      )}
                       {opt.label}
                     </button>
                   ))}
@@ -1913,8 +2167,8 @@ export default function BrowseCategories() {
                       selectedCity
                         ? ` in ${selectedCity}`
                         : selectedRegion
-                        ? ` in ${selectedRegion}`
-                        : ""
+                          ? ` in ${selectedRegion}`
+                          : ""
                     }`}
               </p>
             </div>
@@ -1943,7 +2197,10 @@ export default function BrowseCategories() {
               />
             ))
           ) : (
-            <EmptyState hasFilters={!!hasFilters} onClearFilters={clearAllFilters} />
+            <EmptyState
+              hasFilters={!!hasFilters}
+              onClearFilters={clearAllFilters}
+            />
           )}
         </section>
 
@@ -1963,7 +2220,10 @@ export default function BrowseCategories() {
                       transition={cardTransition}
                       onClick={() => {
                         setCurrentPage(page);
-                        window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+                        window.scrollTo({
+                          top: 0,
+                          behavior: reduceMotion ? "auto" : "smooth",
+                        });
                       }}
                     >
                       {page}
