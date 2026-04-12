@@ -130,6 +130,7 @@ export default function CustomerPayment() {
   const [sessionError, setSessionError] = useState("");
   const [cardActionLoading, setCardActionLoading] = useState(false);
   const [countdownNow, setCountdownNow] = useState(Date.now());
+  const [pollPaused, setPollPaused] = useState(false);
   const initializedRef = useRef(false);
   const cancelMarkedRef = useRef(false);
 
@@ -169,6 +170,7 @@ export default function CustomerPayment() {
   const startPaymentSession = useCallback(async (method, options = {}) => {
     setSessionLoading(true);
     setSessionError("");
+    setPollPaused(false);
 
     try {
       const { data, error } = await supabase.functions.invoke("create-paymongo-checkout", {
@@ -210,7 +212,6 @@ export default function CustomerPayment() {
     if (!sessionId) return null;
 
     setSessionLoading(true);
-    setSessionError("");
 
     try {
       const { data, error } = await supabase.functions.invoke("get-paymongo-payment-session", {
@@ -228,6 +229,8 @@ export default function CustomerPayment() {
       if (data?.method === "card" || data?.method === "qrph") {
         setSelectedMethod(data.method);
       }
+      setSessionError("");
+      setPollPaused(false);
       return data;
     } catch (error) {
       const message = await readFunctionError(
@@ -235,6 +238,7 @@ export default function CustomerPayment() {
         "We couldn't load this payment session."
       );
       setSessionError(message);
+      setPollPaused(true);
       return null;
     } finally {
       setSessionLoading(false);
@@ -304,6 +308,7 @@ export default function CustomerPayment() {
 
   useEffect(() => {
     if (!paymentSession?.sessionId) return;
+    if (pollPaused) return;
 
     const status = String(paymentSession.status || "").toLowerCase();
     const shouldPollQr = paymentSession.method === "qrph" && status === "pending";
@@ -324,6 +329,7 @@ export default function CustomerPayment() {
     paymentSession?.method,
     paymentSession?.sessionId,
     paymentSession?.status,
+    pollPaused,
     returnState,
   ]);
 
@@ -541,6 +547,23 @@ export default function CustomerPayment() {
                           {paymentSession?.qrImageUrl ? "Generate new QR" : "Generate QR"}
                         </span>
                       </motion.button>
+
+                      {pollPaused && paymentSession?.sessionId ? (
+                        <motion.button
+                          type="button"
+                          className="profileEditor__btn profileEditor__btn--ghost customerPaymentAction customerPaymentAction--ghost"
+                          whileHover={{ y: -1.5 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={PROFILE_SPRING}
+                          onClick={() => loadPaymentSession(paymentSession.sessionId)}
+                          disabled={sessionLoading}
+                        >
+                          {sessionLoading ? (
+                            <LoaderCircle className="customerPaymentSpinner" />
+                          ) : null}
+                          <span>Retry status</span>
+                        </motion.button>
+                      ) : null}
 
                       {showPaidState ? (
                         <motion.button

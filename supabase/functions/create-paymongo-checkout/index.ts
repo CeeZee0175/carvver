@@ -3,6 +3,7 @@ import {
   corsHeaders,
   extractBearerToken,
   jsonResponse,
+  serializeError,
 } from "../_shared/http.ts";
 import {
   attachPaymentIntent,
@@ -446,12 +447,17 @@ Deno.serve(async (request: Request) => {
       }),
     });
   } catch (error) {
+    const serialized = serializeError(error, "Couldn't create a PayMongo payment session.");
+    console.error(JSON.stringify({
+      scope: "create-paymongo-checkout",
+      stage: "request.error",
+      error: serialized,
+    }));
+
     return jsonResponse(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Couldn't create a PayMongo payment session.",
+        error: serialized.message,
+        debug: serialized.kind === "object" ? serialized.details : undefined,
       },
       500
     );

@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { corsHeaders, jsonResponse } from "../_shared/http.ts";
+import { corsHeaders, jsonResponse, serializeError } from "../_shared/http.ts";
 import { verifyPaymongoSignature } from "../_shared/paymongo.ts";
 import {
   extractCardMetadata,
@@ -162,12 +162,17 @@ Deno.serve(async (request: Request) => {
 
     return jsonResponse({ received: true, ignored: true });
   } catch (error) {
+    const serialized = serializeError(error, "Couldn't process the PayMongo webhook.");
+    console.error(JSON.stringify({
+      scope: "paymongo-webhook",
+      stage: "request.error",
+      error: serialized,
+    }));
+
     return jsonResponse(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Couldn't process the PayMongo webhook.",
+        error: serialized.message,
+        debug: serialized.kind === "object" ? serialized.details : undefined,
       },
       500
     );
