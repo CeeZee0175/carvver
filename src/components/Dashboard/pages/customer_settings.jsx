@@ -404,6 +404,10 @@ export default function CustomerSettings() {
                 />
               </motion.svg>
             </div>
+
+            <p className="profileHero__sub">
+              Manage account details, billing preferences, and customer-side security from one place.
+            </p>
           </div>
         </section>
       </Reveal>
@@ -411,7 +415,12 @@ export default function CustomerSettings() {
       <Reveal delay={0.08}>
         <section className="profileSection customerSettingsSection">
           <div className="profileSection__head customerSettingsSection__head">
-            <h2 className="profileSection__title">Account Overview</h2>
+            <div className="customerSettingsSectionIntro">
+              <h2 className="profileSection__title">Account Overview</h2>
+              <p className="customerSettingsSectionIntro__copy">
+                Review the core details attached to your customer account.
+              </p>
+            </div>
           </div>
 
           <div className="customerSettingsOverview">
@@ -551,7 +560,12 @@ export default function CustomerSettings() {
       <Reveal delay={0.16}>
         <section className="profileSection customerSettingsSection">
           <div className="profileSection__head customerSettingsSection__head">
-            <h2 className="profileSection__title">Email</h2>
+            <div className="customerSettingsSectionIntro">
+              <h2 className="profileSection__title">Email</h2>
+              <p className="customerSettingsSectionIntro__copy">
+                Keep your sign-in address current and confirm changes through email.
+              </p>
+            </div>
           </div>
 
           {emailEditing ? (
@@ -648,7 +662,12 @@ export default function CustomerSettings() {
       <Reveal delay={0.2}>
         <section className="profileSection customerSettingsSection">
           <div className="profileSection__head customerSettingsSection__head">
-            <h2 className="profileSection__title">Billing</h2>
+            <div className="customerSettingsSectionIntro">
+              <h2 className="profileSection__title">Billing</h2>
+              <p className="customerSettingsSectionIntro__copy">
+                Manage payment preferences and review your recent charges in one place.
+              </p>
+            </div>
           </div>
 
           {billingAvailable ? (

@@ -388,8 +388,10 @@ export default function FreelancerPostListing() {
             <section className="profileSection">
               <div className="freelancerListingSection__head">
                 <div>
-                  <span className="freelancerListingSection__eyebrow">Listing</span>
                   <h2 className="freelancerListingSection__title">Core details</h2>
+                  <p className="profileSection__sub">
+                    Set the main information customers will use to understand this listing.
+                  </p>
                 </div>
               </div>
 
@@ -461,8 +463,10 @@ export default function FreelancerPostListing() {
             <section className="profileSection">
               <div className="freelancerListingSection__head">
                 <div>
-                  <span className="freelancerListingSection__eyebrow">Packages</span>
                   <h2 className="freelancerListingSection__title">Pricing and delivery</h2>
+                  <p className="profileSection__sub">
+                    Shape the package options, delivery timing, and revision structure.
+                  </p>
                 </div>
               </div>
 
@@ -536,8 +540,10 @@ export default function FreelancerPostListing() {
             <section className="profileSection">
               <div className="freelancerListingSection__head">
                 <div>
-                  <span className="freelancerListingSection__eyebrow">Media</span>
                   <h2 className="freelancerListingSection__title">Cover and gallery</h2>
+                  <p className="profileSection__sub">
+                    Add the media customers will see first when they open this listing.
+                  </p>
                 </div>
               </div>
 

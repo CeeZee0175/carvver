@@ -10,15 +10,19 @@
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: #fff;
+  background: #f9fafb;
 }
 
-.signInPage__shadow{
+.signInPage__ambient{
   position: fixed;
   inset: 0;
   z-index: 0;
-  opacity: 0.92;
   pointer-events: none;
+  background:
+    radial-gradient(520px 300px at 14% 18%, rgba(255,255,255,0.82), transparent 70%),
+    radial-gradient(600px 360px at 82% 16%, rgba(124,58,237,0.09), transparent 68%),
+    radial-gradient(560px 340px at 78% 84%, rgba(245,158,11,0.12), transparent 70%);
+  filter: blur(10px);
 }
 
 .signInPage__bg{
@@ -26,9 +30,9 @@
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(900px 520px at 30% 10%, rgba(124,58,237,0.10), transparent 60%),
-    radial-gradient(900px 520px at 80% 40%, rgba(242,193,78,0.12), transparent 62%),
-    radial-gradient(900px 520px at 30% 85%, rgba(42,20,80,0.08), transparent 65%);
+    radial-gradient(880px 520px at 30% 10%, rgba(124,58,237,0.08), transparent 60%),
+    radial-gradient(900px 520px at 80% 40%, rgba(245,158,11,0.10), transparent 62%),
+    radial-gradient(860px 520px at 30% 85%, rgba(17,24,39,0.04), transparent 65%);
 }
 
 .signInPage__center{
@@ -45,12 +49,10 @@
   width: min(520px, 92vw);
   padding: 30px 28px 26px;
   border-radius: 30px;
-  border: 1px solid rgba(42,20,80,0.14);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.90), rgba(255,255,255,0.76));
-  backdrop-filter: blur(14px);
+  border: 1px solid rgba(17,24,39,0.08);
+  background: rgba(255,255,255,0.96);
   box-shadow:
-    0 26px 90px rgba(12,7,18,0.12),
+    0 26px 90px rgba(15,23,42,0.08),
     inset 0 1px 0 rgba(255,255,255,0.74);
   overflow: hidden;
 }
@@ -180,11 +182,10 @@
   position: relative;
   height: 56px;
   border-radius: 18px;
-  border: 1px solid rgba(42,20,80,0.14);
-  background: rgba(255,255,255,0.76);
-  backdrop-filter: blur(10px);
+  border: 1px solid #d1d5db;
+  background: #ffffff;
   box-shadow:
-    0 12px 36px rgba(12,7,18,0.04),
+    0 10px 28px rgba(15,23,42,0.04),
     inset 0 1px 0 rgba(255,255,255,0.65);
   transition:
     border-color 220ms ease,
@@ -193,15 +194,15 @@
 }
 
 .signField:hover{
-  border-color: rgba(124,58,237,0.18);
+  border-color: rgba(109,40,217,0.24);
 }
 
 .signField:focus-within{
-  border-color: rgba(124,58,237,0.26);
-  background: rgba(255,255,255,0.90);
+  border-color: rgba(109,40,217,0.58);
+  background: #ffffff;
   box-shadow:
-    0 18px 46px rgba(12,7,18,0.08),
-    0 0 0 4px rgba(124,58,237,0.08),
+    0 18px 46px rgba(15,23,42,0.08),
+    0 0 0 4px rgba(109,40,217,0.10),
     inset 0 1px 0 rgba(255,255,255,0.74);
 }
 
@@ -524,9 +525,8 @@
   min-height: 50px;
   padding: 0 12px;
   border-radius: 16px;
-  border: 1px solid rgba(42,20,80,0.14);
-  background: rgba(255,255,255,0.70);
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(17,24,39,0.08);
+  background: rgba(255,255,255,0.94);
   box-shadow: 0 12px 34px rgba(12,7,18,0.04);
 
   display: inline-flex;
@@ -676,6 +676,10 @@
 
   .signPrimaryBtn__spinner{
     animation: none !important;
+  }
+
+  .signInPage__ambient{
+    filter: none;
   }
 }
 

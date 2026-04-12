@@ -153,6 +153,9 @@ export default function CustomerOrders() {
           <div className="profileSection__head">
             <div>
               <h2 className="profileSection__title">Status</h2>
+              <p className="profileSection__sub">
+                Narrow the order view before you scan the full history below.
+              </p>
             </div>
             <motion.button
               type="button"
@@ -189,6 +192,9 @@ export default function CustomerOrders() {
           <div className="profileSection__head">
             <div>
               <h2 className="profileSection__title">Your order history</h2>
+              <p className="profileSection__sub">
+                Review each booked listing together with its current package snapshot.
+              </p>
             </div>
             <div className="profileSection__sideNote">
               {filteredOrders.length} shown

@@ -36,17 +36,14 @@ export default function DashboardFreelancer() {
   const quickLinks = [
     {
       label: "Profile",
-      desc: "Keep your public details polished and ready to send.",
       action: () => navigate("/dashboard/freelancer/profile"),
     },
     {
       label: "Settings",
-      desc: "Manage your account details and session preferences.",
       action: () => navigate("/dashboard/freelancer/settings"),
     },
     {
       label: "Messages",
-      desc: "Stay close to customer conversations and follow-ups.",
       action: () => navigate("/dashboard/freelancer/messages"),
     },
   ];
@@ -192,6 +189,15 @@ export default function DashboardFreelancer() {
         <>
           <Reveal delay={0.08}>
             <section className="profileSection freelancerDashboardQuickLinks">
+              <div className="profileSection__head freelancerDashboardSection__head">
+                <div>
+                  <h2 className="profileSection__title">Quick access</h2>
+                  <p className="profileSection__sub">
+                    Move between the freelancer pages you open most often.
+                  </p>
+                </div>
+              </div>
+
               <div className="freelancerDashboardQuickLinks__grid">
                 {quickLinks.map((item) => (
                   <motion.button
@@ -202,7 +208,6 @@ export default function DashboardFreelancer() {
                     onClick={item.action}
                   >
                     <span className="freelancerDashboardQuickLinks__label">{item.label}</span>
-                    <span className="freelancerDashboardQuickLinks__desc">{item.desc}</span>
                   </motion.button>
                 ))}
               </div>
@@ -214,6 +219,9 @@ export default function DashboardFreelancer() {
               <div className="profileSection__head freelancerDashboardSection__head">
                 <div>
                   <h2 className="profileSection__title">Your workspace</h2>
+                  <p className="profileSection__sub">
+                    Keep your listings, request browsing, and inbox connected in one place.
+                  </p>
                 </div>
               </div>
 
@@ -244,6 +252,9 @@ export default function DashboardFreelancer() {
               <div className="profileSection__head freelancerDashboardSection__head">
                 <div>
                   <h2 className="profileSection__title">Browse request listings</h2>
+                  <p className="profileSection__sub">
+                    Review recent customer briefs and open the ones that fit your work.
+                  </p>
                 </div>
 
                 <motion.button
@@ -352,6 +363,9 @@ export default function DashboardFreelancer() {
               <div className="profileSection__head freelancerDashboardSection__head">
                 <div>
                   <h2 className="profileSection__title">Explore Carvver</h2>
+                  <p className="profileSection__sub">
+                    Keep the wider platform pages close while you work inside the dashboard.
+                  </p>
                 </div>
               </div>
 

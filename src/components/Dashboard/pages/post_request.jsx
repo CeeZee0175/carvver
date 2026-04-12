@@ -719,7 +719,7 @@ export default function PostRequest() {
               <input
                 className="requestField__input"
                 type="text"
-                placeholder="Optional"
+                placeholder="City, town, or area if relevant"
                 value={formValues.location}
                 onChange={(event) => updateField("location", event.target.value)}
                 disabled={submitting}

@@ -183,7 +183,6 @@ export default function CustomerFreelancerProfile() {
       <Reveal delay={0.04}>
         <section className="customerFreelancerHero">
           <div className="customerFreelancerHero__identity">
-            <span className="customerFreelancerHero__eyebrow">Freelancer Profile</span>
             <div className="customerFreelancerHero__titleWrap">
               <div className="customerFreelancerHero__avatar" aria-hidden="true">
                 {profile?.avatar_url ? (
@@ -307,10 +306,10 @@ export default function CustomerFreelancerProfile() {
             <section className="customerFreelancerSection">
               <div className="customerFreelancerSection__head">
                 <div>
-                  <p className="customerFreelancerSection__eyebrow">At a glance</p>
-                  <h2 className="customerFreelancerSection__title">
-                    The details this freelancer already shared
-                  </h2>
+                  <h2 className="customerFreelancerSection__title">At a glance</h2>
+                  <p className="customerFreelancerSection__sub">
+                    The key details this freelancer already shared with customers.
+                  </p>
                 </div>
               </div>
 
@@ -335,8 +334,10 @@ export default function CustomerFreelancerProfile() {
             <section className="customerFreelancerSection">
               <div className="customerFreelancerSection__head">
                 <div>
-                  <p className="customerFreelancerSection__eyebrow">About</p>
-                  <h2 className="customerFreelancerSection__title">What they offer</h2>
+                  <h2 className="customerFreelancerSection__title">About</h2>
+                  <p className="customerFreelancerSection__sub">
+                    A quick look at how this freelancer describes their work and specialties.
+                  </p>
                 </div>
               </div>
 
@@ -370,17 +371,16 @@ export default function CustomerFreelancerProfile() {
             <section className="customerFreelancerSection">
               <div className="customerFreelancerSection__head">
                 <div>
-                  <p className="customerFreelancerSection__eyebrow">Published work</p>
-                  <h2 className="customerFreelancerSection__title">
-                    Listings already available from this freelancer
-                  </h2>
+                  <h2 className="customerFreelancerSection__title">Published work</h2>
+                  <p className="customerFreelancerSection__sub">
+                    Browse the listings this freelancer already has live for customers.
+                  </p>
                 </div>
               </div>
 
               {services.length === 0 ? (
                 <EmptySurface
                   title="No published services yet"
-                  description="Once this freelancer publishes a listing, it will show up here."
                   actionLabel="Back to services"
                   onAction={() => navigate("/dashboard/customer/browse-services")}
                   className="customerFreelancerEmpty"

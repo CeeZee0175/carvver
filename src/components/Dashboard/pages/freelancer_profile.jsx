@@ -41,7 +41,7 @@ function StatMiniCard({ label, value, hint }) {
     <div className="profileMiniStat">
       <span className="profileMiniStat__label">{label}</span>
       <strong className="profileMiniStat__value">{value}</strong>
-      <span className="profileMiniStat__hint">{hint}</span>
+      {hint ? <span className="profileMiniStat__hint">{hint}</span> : null}
     </div>
   );
 }
@@ -263,12 +263,10 @@ export default function FreelancerProfile() {
     {
       label: "Profile",
       value: loading ? "..." : `${completion.percent}%`,
-      hint: `${completion.completed} of ${completion.total} key details saved`,
     },
     {
       label: "Headline",
       value: loading ? "..." : headline ? "Set" : "Missing",
-      hint: headline || "Add a one-line summary of your work",
     },
     {
       label: "Specialties",
@@ -281,7 +279,6 @@ export default function FreelancerProfile() {
     {
       label: "Portfolio",
       value: loading ? "..." : portfolioUrl ? "Ready" : "Missing",
-      hint: portfolioUrl ? "Link saved on your profile" : "Add a working portfolio link",
     },
   ];
 
@@ -297,7 +294,6 @@ export default function FreelancerProfile() {
       <Reveal delay={0.04}>
         <section className="profileHero">
           <div className="profileHero__heading">
-            <p className="profileHero__eyebrow">Freelancer Profile</p>
             <div className="profileHero__titleWrap">
               <h1 className="profileHero__title">
                 <TypewriterHeading text="Profile" />
@@ -332,7 +328,6 @@ export default function FreelancerProfile() {
                 key={card.label}
                 label={card.label}
                 value={card.value}
-                hint={card.hint}
               />
             ))}
           </div>
@@ -398,7 +393,6 @@ export default function FreelancerProfile() {
             </div>
 
             <div className="profileIdentity__copy">
-              <p className="profileIdentity__eyebrow">Public display name</p>
               <h2 className="profileIdentity__name">{displayName}</h2>
               <p className="profileIdentity__email">
                 {profile?.email || "Signed-in freelancer"}
@@ -425,7 +419,6 @@ export default function FreelancerProfile() {
           <form className="profileEditor" onSubmit={handleSave}>
             <div className="profileEditor__head">
               <div>
-                <p className="profileEditor__eyebrow">Editable details</p>
                 <h3 className="profileEditor__title">Keep your work easy to read</h3>
               </div>
 
@@ -786,7 +779,6 @@ export default function FreelancerProfile() {
           >
             <UserRound className="profileNavBand__icon" />
             <span className="profileNavBand__label">Dashboard</span>
-            <span className="profileNavBand__desc">Return to your freelancer home</span>
           </motion.button>
 
           <motion.button
@@ -799,7 +791,6 @@ export default function FreelancerProfile() {
           >
             <MessageCircle className="profileNavBand__icon" />
             <span className="profileNavBand__label">Messages</span>
-            <span className="profileNavBand__desc">Open your inbox view</span>
           </motion.button>
 
           <motion.button
@@ -812,7 +803,6 @@ export default function FreelancerProfile() {
           >
             <Settings className="profileNavBand__icon" />
             <span className="profileNavBand__label">Settings</span>
-            <span className="profileNavBand__desc">Review account details and actions</span>
           </motion.button>
         </section>
       </Reveal>
@@ -821,8 +811,10 @@ export default function FreelancerProfile() {
         <section className="profileSection">
           <div className="profileSection__head">
             <div>
-              <p className="profileSection__eyebrow">Profile progress</p>
-              <h2 className="profileSection__title">What still makes the page stronger</h2>
+              <h2 className="profileSection__title">Profile progress</h2>
+              <p className="profileSection__sub">
+                Check which freelancer details are already in place and what still strengthens the page.
+              </p>
             </div>
             <div className="profileProgress__meta">
               <strong>{completion.completed}</strong>

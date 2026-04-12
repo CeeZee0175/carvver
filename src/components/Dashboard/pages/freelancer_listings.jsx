@@ -194,6 +194,15 @@ export default function FreelancerListings() {
 
       <Reveal delay={0.08}>
         <section className="profileSection freelancerDashboardSection">
+          <div className="profileSection__head">
+            <div>
+              <h2 className="profileSection__title">Listing views</h2>
+              <p className="profileSection__sub">
+                Switch between drafts and published listings without leaving the page.
+              </p>
+            </div>
+          </div>
+
           <div className="profileFilterGroup">
             {TABS.map((tab) => (
               <button
@@ -213,6 +222,19 @@ export default function FreelancerListings() {
 
       <Reveal delay={0.12}>
         <section className="profileSection freelancerDashboardSection">
+          <div className="profileSection__head">
+            <div>
+              <h2 className="profileSection__title">
+                {activeTab === "published" ? "Published listings" : "Draft listings"}
+              </h2>
+              <p className="profileSection__sub">
+                {activeTab === "published"
+                  ? "Review the listings customers can already open in the marketplace."
+                  : "Pick up unfinished listings and move them toward publish-ready work."}
+              </p>
+            </div>
+          </div>
+
           {loading ? (
             <div className="freelancerListingsGrid">
               {Array.from({ length: 4 }).map((_, index) => (

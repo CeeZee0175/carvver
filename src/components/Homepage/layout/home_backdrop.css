@@ -10,60 +10,64 @@
 .homeBackdrop__base{
   position: absolute;
   inset: 0;
-  background: #fff;
+  background: linear-gradient(180deg, #fbfbfc 0%, #f8f6f2 58%, #f6f1eb 100%);
 }
 
-/* full animated desktop layer */
-.homeBackdrop__shadow{
+.homeBackdrop__ambient{
   position: absolute;
-  inset: 0;
-  opacity: 0.92;
+  border-radius: 999px;
+  filter: blur(28px);
+  opacity: 0.7;
+  animation: homeBackdropFloat 18s ease-in-out infinite;
 }
 
-/* static mobile fallback */
-.homeBackdrop__staticGlow{
-  position: absolute;
-  inset: -6%;
-  opacity: 0.82;
-  filter: blur(26px);
-  background:
-    radial-gradient(42% 30% at 20% 12%, rgba(124,58,237,0.12), transparent 70%),
-    radial-gradient(38% 28% at 82% 34%, rgba(242,193,78,0.14), transparent 72%),
-    radial-gradient(44% 30% at 30% 86%, rgba(42,20,80,0.10), transparent 74%);
+.homeBackdrop__ambient--one{
+  top: -8%;
+  left: -4%;
+  width: 42vw;
+  height: 28vw;
+  background: radial-gradient(circle at center, rgba(124,58,237,0.12), transparent 70%);
 }
 
-/* same homepage gradients */
+.homeBackdrop__ambient--two{
+  top: 12%;
+  right: -6%;
+  width: 38vw;
+  height: 24vw;
+  background: radial-gradient(circle at center, rgba(245,158,11,0.13), transparent 70%);
+  animation-delay: -6s;
+}
+
+.homeBackdrop__ambient--three{
+  bottom: -10%;
+  left: 18%;
+  width: 44vw;
+  height: 28vw;
+  background: radial-gradient(circle at center, rgba(17,24,39,0.08), transparent 72%);
+  animation-delay: -10s;
+}
+
 .homeBackdrop__bg{
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(900px 520px at 30% 10%, rgba(124,58,237,0.10), transparent 60%),
-    radial-gradient(900px 520px at 80% 40%, rgba(242,193,78,0.12), transparent 62%),
-    radial-gradient(900px 520px at 30% 85%, rgba(42,20,80,0.08), transparent 65%);
+    radial-gradient(900px 520px at 30% 10%, rgba(124,58,237,0.08), transparent 60%),
+    radial-gradient(900px 520px at 80% 40%, rgba(245,158,11,0.09), transparent 62%),
+    radial-gradient(900px 520px at 30% 85%, rgba(42,20,80,0.06), transparent 65%);
 }
 
-/* subtle soft layer to keep mobile from feeling too flat */
 .homeBackdrop__veil{
   position: absolute;
   inset: 0;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0) 26%, rgba(255,255,255,0.05) 100%);
-  opacity: 0.75;
-}
-
-/* lite mode tuning */
-.homeBackdrop--lite .homeBackdrop__bg{
-  opacity: 0.96;
-  background:
-    radial-gradient(700px 420px at 28% 10%, rgba(124,58,237,0.08), transparent 60%),
-    radial-gradient(700px 420px at 80% 38%, rgba(242,193,78,0.10), transparent 62%),
-    radial-gradient(700px 420px at 32% 84%, rgba(42,20,80,0.07), transparent 65%);
+  opacity: 0.8;
 }
 
 @media (max-width: 820px){
-  .homeBackdrop__staticGlow{
-    inset: -8%;
-    opacity: 0.78;
+  .homeBackdrop__ambient{
+    width: 68vw;
+    height: 48vw;
     filter: blur(22px);
   }
 
@@ -76,12 +80,16 @@
 }
 
 @media (prefers-reduced-motion: reduce){
-  .homeBackdrop__shadow{
-    display: none;
+  .homeBackdrop__ambient{
+    animation: none !important;
   }
+}
 
-  .homeBackdrop__staticGlow{
-    opacity: 0.78;
-    filter: blur(20px);
+@keyframes homeBackdropFloat{
+  0%, 100%{
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50%{
+    transform: translate3d(0, 16px, 0) scale(1.04);
   }
 }

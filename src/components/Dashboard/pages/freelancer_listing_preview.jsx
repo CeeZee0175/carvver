@@ -195,8 +195,10 @@ export default function FreelancerListingPreview() {
           <section className="profileSection freelancerRequestDetailLayout">
             <div className="freelancerRequestDetailMain">
               <article className="freelancerRequestDetailCard">
-                <span className="freelancerRequestDetail__label">Preview</span>
                 <h2 className="freelancerRequestDetail__title">Gallery</h2>
+                <p className="profileSection__sub">
+                  Review the media sequence customers will see on this published listing.
+                </p>
 
                 <div className="freelancerRequestDetail__media">
                   {activeMedia ? (
@@ -248,8 +250,10 @@ export default function FreelancerListingPreview() {
               </article>
 
               <article className="freelancerRequestDetailCard">
-                <span className="freelancerRequestDetail__label">Overview</span>
                 <h2 className="freelancerRequestDetail__title">What customers will see</h2>
+                <p className="profileSection__sub">
+                  Check the overview and highlights before you return to editing.
+                </p>
                 <p className="freelancerRequestDetail__desc">
                   {listing.listing_overview || listing.description}
                 </p>
@@ -268,8 +272,10 @@ export default function FreelancerListingPreview() {
 
             <aside className="freelancerRequestDetailSide">
               <article className="freelancerRequestDetailCard">
-                <span className="freelancerRequestDetail__label">Packages</span>
                 <h2 className="freelancerRequestDetail__title">Current package lineup</h2>
+                <p className="profileSection__sub">
+                  Compare the package structure customers can choose from right now.
+                </p>
                 <div className="freelancerPreviewPackages">
                   {listing.packages.map((item) => (
                     <div key={item.id || item.name} className="freelancerPreviewPackage">

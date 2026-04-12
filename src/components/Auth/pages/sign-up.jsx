@@ -4,7 +4,6 @@ import { Eye, EyeOff, Lock, Mail, ArrowRight, User, LoaderCircle } from "lucide-
 import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import "./sign-up.css";
-import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
 import SearchableCombobox from "../../Shared/searchable_combobox";
 import { signInWithOAuth, signUp } from "../../../lib/supabase/auth";
 import { PH_REGION_OPTIONS } from "../../../lib/phLocations";
@@ -387,16 +386,8 @@ export default function SignUp() {
     <div className="signUpPage">
       <Toaster position="top-center" />
       <div className="signUpPage__base" />
-      <div className="signUpPage__shadow" aria-hidden="true">
-        <EtheralShadow
-          sizing="fill"
-          color="rgba(0,0,0,0.55)"
-          animation={{ scale: 45, speed: 35 }}
-          noise={{ opacity: 0.1, scale: 1 }}
-          performanceMode="auto"
-        />
-      </div>
       <div className="signUpPage__bg" aria-hidden="true" />
+      <div className="signUpPage__ambient" aria-hidden="true" />
 
       <main className="signUpPage__center" ref={ref}>
         <motion.section

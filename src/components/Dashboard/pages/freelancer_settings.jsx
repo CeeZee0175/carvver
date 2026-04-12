@@ -40,7 +40,6 @@ export default function FreelancerSettings() {
       <Reveal delay={0.04}>
         <section className="profileHero">
           <div className="profileHero__heading">
-            <p className="profileHero__eyebrow">Account Settings</p>
             <div className="profileHero__titleWrap">
               <h1 className="profileHero__title">
                 <TypewriterHeading text="Settings" />
@@ -75,7 +74,6 @@ export default function FreelancerSettings() {
               <strong className="profileMiniStat__value" style={{ fontSize: "24px" }}>
                 {displayName}
               </strong>
-              <span className="profileMiniStat__hint">Your public freelancer name</span>
             </div>
 
             <div className="profileMiniStat">
@@ -83,7 +81,6 @@ export default function FreelancerSettings() {
               <strong className="profileMiniStat__value" style={{ fontSize: "24px" }}>
                 {locationLabel === "No location added yet" ? "Missing" : "Set"}
               </strong>
-              <span className="profileMiniStat__hint">{locationLabel}</span>
             </div>
           </div>
         </section>
@@ -104,8 +101,10 @@ export default function FreelancerSettings() {
         <section className="profileSection">
           <div className="profileSection__head">
             <div>
-              <p className="profileSection__eyebrow">Account details</p>
-              <h2 className="profileSection__title">What is already saved</h2>
+              <h2 className="profileSection__title">Account details</h2>
+              <p className="profileSection__sub">
+                Review the freelancer account details that are already saved here.
+              </p>
             </div>
           </div>
 
@@ -115,17 +114,11 @@ export default function FreelancerSettings() {
               <strong className="freelancerDataValue--strong">
                 {profile?.email || "No email available"}
               </strong>
-              <p className="freelancerSettingsCard__desc">
-                This is the email connected to your current account.
-              </p>
             </article>
 
             <article className="freelancerSettingsCard">
               <span className="freelancerDataLabel">Role</span>
               <strong className="freelancerDataValue--strong">Freelancer</strong>
-              <p className="freelancerSettingsCard__desc">
-                This account is set up as a freelancer account.
-              </p>
             </article>
 
             <article className="freelancerSettingsCard">
@@ -133,9 +126,6 @@ export default function FreelancerSettings() {
               <strong className="freelancerDataValue--strong">
                 {profile?.freelancer_onboarding_completed_at ? "Completed" : "Incomplete"}
               </strong>
-              <p className="freelancerSettingsCard__desc">
-                Your onboarding details are already saved to your profile.
-              </p>
             </article>
 
             <article className="freelancerSettingsCard">
@@ -143,9 +133,6 @@ export default function FreelancerSettings() {
               <strong className="freelancerDataValue--strong">
                 {profile?.freelancer_primary_category || "Not set yet"}
               </strong>
-              <p className="freelancerSettingsCard__desc">
-                Keep this updated so people can place your work quickly.
-              </p>
             </article>
           </div>
         </section>
@@ -163,7 +150,6 @@ export default function FreelancerSettings() {
           >
             <UserRound className="profileNavBand__icon" />
             <span className="profileNavBand__label">Profile</span>
-            <span className="profileNavBand__desc">Edit your freelancer details</span>
           </motion.button>
 
           <motion.button
@@ -176,7 +162,6 @@ export default function FreelancerSettings() {
           >
             <MessageCircle className="profileNavBand__icon" />
             <span className="profileNavBand__label">Messages</span>
-            <span className="profileNavBand__desc">Open your inbox view</span>
           </motion.button>
 
           <motion.button
@@ -189,7 +174,6 @@ export default function FreelancerSettings() {
           >
             <Sparkles className="profileNavBand__icon" />
             <span className="profileNavBand__label">Carvver Pro</span>
-            <span className="profileNavBand__desc">Review pricing and platform extras</span>
           </motion.button>
         </section>
       </Reveal>
@@ -198,8 +182,10 @@ export default function FreelancerSettings() {
         <section className="profileSection">
           <div className="profileSection__head">
             <div>
-              <p className="profileSection__eyebrow">Session</p>
               <h2 className="profileSection__title">Account actions</h2>
+              <p className="profileSection__sub">
+                Sign out when you are done working on this device.
+              </p>
             </div>
           </div>
 
@@ -207,9 +193,6 @@ export default function FreelancerSettings() {
             <article className="freelancerSettingsCard">
               <span className="freelancerDataLabel">Sign out</span>
               <strong className="freelancerDataValue--strong">End this session</strong>
-              <p className="freelancerSettingsCard__desc">
-                Sign out of your account when you are finished using this device.
-              </p>
               <motion.button
                 type="button"
                 className="profileEditor__btn profileEditor__btn--primary"

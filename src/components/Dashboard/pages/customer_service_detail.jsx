@@ -370,8 +370,10 @@ export default function CustomerServiceDetail() {
             <div className="serviceDetailMain">
               <article className="serviceDetailCard">
                 <div className="serviceDetailCard__head">
-                  <span className="serviceDetailSection__eyebrow">Preview</span>
                   <h2 className="serviceDetailSection__title">Gallery</h2>
+                  <p className="serviceDetailSection__sub">
+                    Browse the cover and extra media before you choose a package.
+                  </p>
                 </div>
 
                 {activeMedia ? (
@@ -422,8 +424,10 @@ export default function CustomerServiceDetail() {
               </article>
 
               <article className="serviceDetailCard">
-                <span className="serviceDetailSection__eyebrow">Overview</span>
                 <h2 className="serviceDetailSection__title">What this listing covers</h2>
+                <p className="serviceDetailSection__sub">
+                  Review the overview and highlights the freelancer shared for this listing.
+                </p>
                 <p className="serviceDetail__bodyText">{service.overview}</p>
 
                 {service.highlights.length > 0 ? (
@@ -441,8 +445,10 @@ export default function CustomerServiceDetail() {
               </article>
 
               <article className="serviceDetailCard">
-                <span className="serviceDetailSection__eyebrow">Packages</span>
                 <h2 className="serviceDetailSection__title">Choose your package</h2>
+                <p className="serviceDetailSection__sub">
+                  Pick one package at a time before you send this listing to cart.
+                </p>
                 <div className="serviceDetailPackages">
                   {service.packages.map((item) => {
                     const active = String(item.id || item.name) === selectedPackageId;
@@ -505,7 +511,10 @@ export default function CustomerServiceDetail() {
 
             <aside className="serviceDetailSide">
               <article className="serviceDetailFreelancer">
-                <span className="serviceDetailSection__eyebrow">Freelancer</span>
+                <h2 className="serviceDetailSection__title">Freelancer</h2>
+                <p className="serviceDetailSection__sub">
+                  Review the creator behind this listing and open a conversation if needed.
+                </p>
                 <div className="serviceDetailFreelancer__top">
                   <div className="serviceDetailFreelancer__avatar" aria-hidden="true">
                     {service.freelancer.avatarUrl ? (
@@ -573,8 +582,10 @@ export default function CustomerServiceDetail() {
               </article>
 
               <article className="serviceDetailPackage">
-                <span className="serviceDetailSection__eyebrow">Selected package</span>
                 <h2 className="serviceDetailSection__title">{selectedPackage?.name}</h2>
+                <p className="serviceDetailSection__sub">
+                  This summary follows the package you currently have selected.
+                </p>
                 {selectedPackage?.summary ? (
                   <p className="serviceDetailPackage__summary">{selectedPackage.summary}</p>
                 ) : null}

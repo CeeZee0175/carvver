@@ -394,6 +394,10 @@ export default function Profile() {
                 />
               </motion.svg>
             </div>
+
+            <p className="profileHero__sub">
+              Keep your identity, progress, and earned trust signals together in one place.
+            </p>
           </div>
 
           <div className="profileHero__stats profileHero__stats--open">
@@ -864,6 +868,9 @@ export default function Profile() {
           <div className="profileSection__head">
             <div>
               <h2 className="profileSection__title">Account progress</h2>
+              <p className="profileSection__sub">
+                See which customer details are already complete and what still strengthens the page.
+              </p>
             </div>
             <div className="profileProgress__meta">
               <strong>{profileCompletion.completed}</strong>
@@ -904,6 +911,9 @@ export default function Profile() {
           <div className="profileSection__head">
             <div>
               <h2 className="profileSection__title">Freelancer reviews</h2>
+              <p className="profileSection__sub">
+                Read the feedback freelancers left after working with you.
+              </p>
             </div>
             {metrics.reviewCount > 0 && (
               <div className="profileReviewSummary">
@@ -975,6 +985,9 @@ export default function Profile() {
           <div className="profileSection__head">
             <div>
               <h2 className="profileSection__title">Achievements</h2>
+              <p className="profileSection__sub">
+                Review the badges you earned and jump into the full catalog when needed.
+              </p>
             </div>
             <motion.button
               type="button"

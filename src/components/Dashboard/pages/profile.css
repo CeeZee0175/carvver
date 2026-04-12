@@ -457,6 +457,15 @@
   color: rgba(27, 16, 46, 0.96);
 }
 
+.profileSection__sub {
+  margin: 0;
+  max-width: 62ch;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.68;
+  color: rgba(27, 16, 46, 0.64);
+}
+
 .profileNotice__desc,
 .profileEmpty__desc,
 .profileTask__detail,
@@ -781,6 +790,11 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 14px;
+}
+
+.profileEditor__head > div,
+.profileSection__head > div {
+  min-width: 0;
 }
 
 .profileEditor__actions {

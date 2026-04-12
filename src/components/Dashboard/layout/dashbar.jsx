@@ -157,9 +157,24 @@ export default function DashBar() {
     setOpenNotifications(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (location.pathname === "/dashboard/customer/search") {
+      const params = new URLSearchParams(location.search);
+      setQuery(params.get("q") || "");
+      return;
+    }
+
+    setQuery("");
+  }, [location.pathname, location.search]);
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    toast("Search isn't available yet.");
+    const normalizedQuery = query.trim();
+    navigate(
+      normalizedQuery
+        ? `/dashboard/customer/search?q=${encodeURIComponent(normalizedQuery)}`
+        : "/dashboard/customer/search"
+    );
   };
 
   const toggleProfile = () => {
@@ -182,25 +197,9 @@ export default function DashBar() {
     });
   };
 
-  const handleProfileMenuClick = (label) => {
+  const handleProfileMenuNavigate = (path) => {
     setOpenProfile(false);
-
-    if (label === "View Profile") {
-      navigate("/dashboard/customer/profile");
-      return;
-    }
-
-    if (label === "Account Settings") {
-      navigate("/dashboard/customer/settings");
-      return;
-    }
-
-    if (label === "My Orders") {
-      navigate("/dashboard/customer/orders");
-      return;
-    }
-
-    toast(`${label} isn't available yet.`);
+    navigate(path);
   };
 
   const handleSignOut = async () => {
@@ -279,7 +278,7 @@ export default function DashBar() {
               <input
                 className="dashbarSearch__input"
                 type="text"
-                placeholder="Search services, listings, creators..."
+                placeholder="Search services or freelancers..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
@@ -500,7 +499,7 @@ export default function DashBar() {
                     type="button"
                     className="dashbarProfileMenu__item"
                     role="menuitem"
-                    onClick={() => handleProfileMenuClick("View Profile")}
+                    onClick={() => handleProfileMenuNavigate("/dashboard/customer/profile")}
                   >
                     <UserRound className="dashbarProfileMenu__itemIcon" />
                     <span>View Profile</span>
@@ -509,7 +508,7 @@ export default function DashBar() {
                     type="button"
                     className="dashbarProfileMenu__item"
                     role="menuitem"
-                    onClick={() => handleProfileMenuClick("Account Settings")}
+                    onClick={() => handleProfileMenuNavigate("/dashboard/customer/settings")}
                   >
                     <Settings className="dashbarProfileMenu__itemIcon" />
                     <span>Account Settings</span>
@@ -518,7 +517,7 @@ export default function DashBar() {
                     type="button"
                     className="dashbarProfileMenu__item"
                     role="menuitem"
-                    onClick={() => handleProfileMenuClick("My Orders")}
+                    onClick={() => handleProfileMenuNavigate("/dashboard/customer/orders")}
                   >
                     <ShoppingBag className="dashbarProfileMenu__itemIcon" />
                     <span>My Orders</span>
@@ -527,10 +526,7 @@ export default function DashBar() {
                     type="button"
                     className="dashbarProfileMenu__item"
                     role="menuitem"
-                    onClick={() => {
-                      setOpenProfile(false);
-                      navigate("/dashboard/customer/saved");
-                    }}
+                    onClick={() => handleProfileMenuNavigate("/dashboard/customer/saved")}
                   >
                     <Bookmark className="dashbarProfileMenu__itemIcon" />
                     <span>Saved Listings</span>

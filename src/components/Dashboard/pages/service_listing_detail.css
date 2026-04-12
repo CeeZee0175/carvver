@@ -162,6 +162,15 @@
   color: rgba(27, 16, 46, 0.96);
 }
 
+.serviceDetailSection__sub {
+  margin: 0;
+  max-width: 58ch;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.66;
+  color: rgba(27, 16, 46, 0.62);
+}
+
 .serviceDetailLayout {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.78fr);
@@ -195,6 +204,11 @@
 .serviceDetailCard {
   display: grid;
   gap: 16px;
+}
+
+.serviceDetailCard__head {
+  display: grid;
+  gap: 8px;
 }
 
 .serviceDetailMediaStage {

@@ -100,7 +100,6 @@ export default function ProfileAchievements() {
       <Reveal delay={0.04}>
         <section className="profileHero">
           <div className="profileHero__heading">
-            <p className="profileHero__eyebrow">Achievement Catalog</p>
             <div className="profileHero__titleWrap">
               <h1 className="profileHero__title">
                 <TypewriterHeading text="Achievements" />
@@ -133,24 +132,20 @@ export default function ProfileAchievements() {
             <div className="profileMiniStat">
               <span className="profileMiniStat__label">Catalog</span>
               <strong className="profileMiniStat__value">{achievementStates.length}</strong>
-              <span className="profileMiniStat__hint">Total customer achievements</span>
             </div>
             <div className="profileMiniStat">
               <span className="profileMiniStat__label">Earned</span>
               <strong className="profileMiniStat__value">{earnedAchievements.length}</strong>
-              <span className="profileMiniStat__hint">Unlocked so far</span>
             </div>
             <div className="profileMiniStat">
               <span className="profileMiniStat__label">Legendary</span>
               <strong className="profileMiniStat__value">
                 {achievementStates.filter((achievement) => achievement.legendary).length}
               </strong>
-              <span className="profileMiniStat__hint">Theme-hinting reward tier</span>
             </div>
             <div className="profileMiniStat">
               <span className="profileMiniStat__label">Displayed</span>
               <strong className="profileMiniStat__value">{showcaseIds.length}</strong>
-              <span className="profileMiniStat__hint">Badges shown on your profile</span>
             </div>
           </div>
         </section>
@@ -176,8 +171,10 @@ export default function ProfileAchievements() {
         <section className="profileSection">
           <div className="profileSection__head">
             <div>
-              <p className="profileSection__eyebrow">Filters</p>
               <h2 className="profileSection__title">Browse the full reward map</h2>
+              <p className="profileSection__sub">
+                Filter the catalog and keep track of which earned badges you display.
+              </p>
             </div>
             <motion.button
               type="button"
@@ -239,8 +236,10 @@ export default function ProfileAchievements() {
         <section className="profileSection">
           <div className="profileSection__head">
             <div>
-              <p className="profileSection__eyebrow">All Possible Achievements</p>
-              <h2 className="profileSection__title">Each achievement maps to one badge</h2>
+              <h2 className="profileSection__title">All possible achievements</h2>
+              <p className="profileSection__sub">
+                Every achievement in the customer catalog and the badge it maps to.
+              </p>
             </div>
             <div className="profileSection__sideNote">
               {filteredAchievements.length} shown

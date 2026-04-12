@@ -4,7 +4,6 @@ import { Eye, EyeOff, Lock, Mail, ArrowRight, LoaderCircle } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import "./sign-in.css";
-import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
 import {
   ensureProfileForSession,
   signIn,
@@ -329,16 +328,8 @@ export default function SignIn() {
     <div className="signInPage">
       <Toaster position="top-center" />
       <div className="signInPage__base" />
-      <div className="signInPage__shadow" aria-hidden="true">
-        <EtheralShadow
-          sizing="fill"
-          color="rgba(0,0,0,0.55)"
-          animation={{ scale: 45, speed: 35 }}
-          noise={{ opacity: 0.1, scale: 1 }}
-          performanceMode="auto"
-        />
-      </div>
       <div className="signInPage__bg" aria-hidden="true" />
+      <div className="signInPage__ambient" aria-hidden="true" />
 
       <main className="signInPage__center" ref={ref}>
         <motion.section

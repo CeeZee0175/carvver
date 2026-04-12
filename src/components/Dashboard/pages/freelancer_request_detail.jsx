@@ -152,13 +152,19 @@ export default function FreelancerRequestDetail() {
                   <span className="freelancerRequestDetail__chip">{request.budgetLabel}</span>
                   <span className="freelancerRequestDetail__chip">{request.deadlineLabel}</span>
                 </div>
-                <span className="freelancerRequestDetail__label">Description</span>
+                <h2 className="freelancerRequestDetail__title">Description</h2>
+                <p className="profileSection__sub">
+                  Review the full customer brief before you decide how to respond.
+                </p>
                 <p className="freelancerRequestDetail__desc">{request.description}</p>
               </article>
 
               {request.media.length > 0 ? (
                 <article className="freelancerRequestDetailCard">
-                  <span className="freelancerRequestDetail__label">Attached references</span>
+                  <h2 className="freelancerRequestDetail__title">Attached references</h2>
+                  <p className="profileSection__sub">
+                    Browse any photos or video the customer included with the request.
+                  </p>
                   <div className="freelancerRequestGrid">
                     {request.media.map((item) => (
                       <div key={item.id} className="freelancerRequestDetail__media">
@@ -176,7 +182,10 @@ export default function FreelancerRequestDetail() {
 
             <aside className="freelancerRequestDetailSide">
               <article className="freelancerRequestDetailCard freelancerRequestDetail__customer">
-                <span className="freelancerRequestDetail__label">Customer</span>
+                <h2 className="freelancerRequestDetail__title">Customer</h2>
+                <p className="profileSection__sub">
+                  Check who posted the request and start the conversation from here.
+                </p>
                 <div className="freelancerRequestDetail__customerTop">
                   <div className="freelancerRequestDetail__avatar" aria-hidden="true">
                     {request.customer.avatarUrl ? (
@@ -214,7 +223,10 @@ export default function FreelancerRequestDetail() {
               </article>
 
               <article className="freelancerRequestDetailCard">
-                <span className="freelancerRequestDetail__label">Request summary</span>
+                <h2 className="freelancerRequestDetail__title">Request summary</h2>
+                <p className="profileSection__sub">
+                  Keep the main facts visible while you review the rest of the brief.
+                </p>
                 <div className="freelancerRequestDetail__facts">
                   <span className="freelancerRequestDetail__customerMeta">{request.locationLabel}</span>
                   <span className="freelancerRequestDetail__customerMeta">{request.deadlineLabel}</span>

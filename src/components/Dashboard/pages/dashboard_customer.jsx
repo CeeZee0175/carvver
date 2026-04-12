@@ -348,6 +348,9 @@ export default function DashboardCustomer() {
           <div className="dashLandingSection__head">
             <div>
               <h2 className="dashLandingSection__title">Quick board</h2>
+              <p className="dashLandingSection__desc">
+                Keep your main customer actions within reach.
+              </p>
             </div>
           </div>
 
@@ -384,6 +387,9 @@ export default function DashboardCustomer() {
           <div className="dashLandingSection__head">
             <div>
               <h2 className="dashLandingSection__title">Recent requests</h2>
+              <p className="dashLandingSection__desc">
+                Track the briefs you posted and reopen the ones still moving.
+              </p>
             </div>
 
             <motion.button
@@ -461,6 +467,9 @@ export default function DashboardCustomer() {
           <div className="dashLandingSection__head">
             <div>
               <h2 className="dashLandingSection__title">Recommended picks</h2>
+              <p className="dashLandingSection__desc">
+                Browse published listings that are ready for your next project.
+              </p>
             </div>
 
             <motion.button
@@ -574,6 +583,9 @@ export default function DashboardCustomer() {
           <div className="dashLandingSection__head">
             <div>
               <h2 className="dashLandingSection__title">Categories</h2>
+              <p className="dashLandingSection__desc">
+                Jump into the service areas you browse most often.
+              </p>
             </div>
           </div>
 
@@ -612,6 +624,9 @@ export default function DashboardCustomer() {
           <div className="dashLandingSection__head">
             <div>
               <h2 className="dashLandingSection__title">Favorite freelancers</h2>
+              <p className="dashLandingSection__desc">
+                Revisit the freelancers you chose to keep close for future work.
+              </p>
             </div>
           </div>
 

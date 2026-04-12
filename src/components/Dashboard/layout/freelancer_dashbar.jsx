@@ -92,9 +92,24 @@ export default function FreelancerDashBar() {
     setOpenProfile(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (location.pathname === "/dashboard/freelancer/search") {
+      const params = new URLSearchParams(location.search);
+      setQuery(params.get("q") || "");
+      return;
+    }
+
+    setQuery("");
+  }, [location.pathname, location.search]);
+
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    toast("Search isn't available yet.");
+    const normalizedQuery = query.trim();
+    navigate(
+      normalizedQuery
+        ? `/dashboard/freelancer/search?q=${encodeURIComponent(normalizedQuery)}`
+        : "/dashboard/freelancer/search"
+    );
   };
 
   const handleSignOut = async () => {
@@ -143,7 +158,7 @@ export default function FreelancerDashBar() {
               <input
                 className="dashbarSearch__input"
                 type="text"
-                placeholder="Search your profile, tools, and pages..."
+                placeholder="Search request listings or your listings..."
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />

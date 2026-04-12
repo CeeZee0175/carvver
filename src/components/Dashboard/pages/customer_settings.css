@@ -31,6 +31,11 @@
   padding-bottom: 14px;
 }
 
+.customerSettingsHero .profileHero__sub {
+  margin-top: 10px;
+  max-width: 58ch;
+}
+
 .customerSettingsHero__titleWrap {
   position: relative;
   display: inline-block;

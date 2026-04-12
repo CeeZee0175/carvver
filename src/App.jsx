@@ -63,11 +63,17 @@ const CustomerOrders = lazy(() => import("./components/Dashboard/pages/customerO
 const CustomerMessages = lazy(() =>
   import("./components/Dashboard/pages/customer_messages")
 );
+const CustomerSearch = lazy(() =>
+  import("./components/Dashboard/pages/customer_search")
+);
 const FreelancerListings = lazy(() =>
   import("./components/Dashboard/pages/freelancer_listings")
 );
 const FreelancerListingPreview = lazy(() =>
   import("./components/Dashboard/pages/freelancer_listing_preview")
+);
+const FreelancerSearch = lazy(() =>
+  import("./components/Dashboard/pages/freelancer_search")
 );
 const CustomerFreelancerProfile = lazy(() =>
   import("./components/Dashboard/pages/customer_freelancer_profile")
@@ -370,11 +376,31 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/dashboard/customer/search"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <CustomerRoute>
+              <CustomerSearch />
+            </CustomerRoute>
+          </Suspense>
+        }
+      />
+      <Route
         path="/dashboard/freelancer"
         element={
           <Suspense fallback={<RouteFallback />}>
             <FreelancerRoute>
               <DashboardFreelancer />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer/search"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerSearch />
             </FreelancerRoute>
           </Suspense>
         }

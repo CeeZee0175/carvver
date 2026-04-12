@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./auth-callback.css";
-import { Component as EtheralShadow } from "../../StartUp/shared/etheral-shadow";
 import {
   ensureProfileForSession,
   exchangeCodeForSession,
@@ -133,16 +132,8 @@ export default function AuthCallback() {
   return (
     <div className="authCallbackPage">
       <div className="authCallbackPage__base" />
-      <div className="authCallbackPage__shadow" aria-hidden="true">
-        <EtheralShadow
-          sizing="fill"
-          color="rgba(0,0,0,0.55)"
-          animation={{ scale: 45, speed: 35 }}
-          noise={{ opacity: 0.1, scale: 1 }}
-          performanceMode="auto"
-        />
-      </div>
       <div className="authCallbackPage__bg" aria-hidden="true" />
+      <div className="authCallbackPage__ambient" aria-hidden="true" />
 
       <main className="authCallbackPage__center">
         <motion.section

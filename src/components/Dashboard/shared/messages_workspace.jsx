@@ -174,7 +174,12 @@ export default function MessagesWorkspace({ role = "customer" }) {
         <section className="messagesWorkspace">
           <div className="messagesWorkspace__threads">
             <div className="messagesWorkspace__sectionHead">
-              <h2 className="messagesWorkspace__sectionTitle">Conversations</h2>
+              <div>
+                <h2 className="messagesWorkspace__sectionTitle">Conversations</h2>
+                <p className="messagesWorkspace__sectionSub">
+                  Open the thread you want to continue without leaving the inbox.
+                </p>
+              </div>
             </div>
 
             {loading ? (

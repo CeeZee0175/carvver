@@ -250,6 +250,15 @@ export default function FreelancerBrowseRequests() {
 
       <Reveal delay={0.12}>
         <section className="profileSection">
+          <div className="profileSection__head">
+            <div>
+              <h2 className="profileSection__title">Request listings</h2>
+              <p className="profileSection__sub">
+                Browse the customer briefs that are currently visible after your filters.
+              </p>
+            </div>
+          </div>
+
           {loading ? (
             <div className="freelancerRequestGrid">
               {Array.from({ length: 6 }).map((_, index) => (

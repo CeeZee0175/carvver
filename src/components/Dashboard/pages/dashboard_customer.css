@@ -330,9 +330,9 @@
   width: 42px;
   height: 42px;
   border-radius: 14px;
-  background: rgba(124, 58, 237, 0.08);
+  background: rgba(124, 58, 237, 0.05);
   border: 1px solid rgba(42, 20, 80, 0.08);
-  color: rgba(87, 34, 182, 0.92);
+  color: rgba(87, 34, 182, 0.78);
 }
 
 .dashLandingQuickCard__icon {
@@ -550,9 +550,9 @@
   width: 42px;
   height: 42px;
   border-radius: 14px;
-  background: rgba(124, 58, 237, 0.08);
+  background: rgba(124, 58, 237, 0.05);
   border: 1px solid rgba(42, 20, 80, 0.08);
-  color: rgba(42, 20, 80, 0.92);
+  color: rgba(42, 20, 80, 0.8);
 }
 
 .dashLandingCategoryCard__icon {

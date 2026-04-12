@@ -10,15 +10,19 @@
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: #fff;
+  background: #f9fafb;
 }
 
-.authCallbackPage__shadow{
+.authCallbackPage__ambient{
   position: fixed;
   inset: 0;
   z-index: 0;
-  opacity: 0.92;
   pointer-events: none;
+  background:
+    radial-gradient(540px 320px at 16% 18%, rgba(255,255,255,0.84), transparent 70%),
+    radial-gradient(620px 380px at 82% 14%, rgba(109,40,217,0.08), transparent 68%),
+    radial-gradient(560px 340px at 74% 82%, rgba(245,158,11,0.12), transparent 72%);
+  filter: blur(10px);
 }
 
 .authCallbackPage__bg{
@@ -26,9 +30,9 @@
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(900px 520px at 30% 10%, rgba(124,58,237,0.10), transparent 60%),
-    radial-gradient(900px 520px at 80% 40%, rgba(242,193,78,0.12), transparent 62%),
-    radial-gradient(900px 520px at 30% 85%, rgba(42,20,80,0.08), transparent 65%);
+    radial-gradient(900px 520px at 30% 10%, rgba(109,40,217,0.08), transparent 60%),
+    radial-gradient(900px 520px at 80% 40%, rgba(245,158,11,0.10), transparent 62%),
+    radial-gradient(860px 520px at 30% 85%, rgba(17,24,39,0.04), transparent 65%);
 }
 
 .authCallbackPage__center{
@@ -45,11 +49,10 @@
   width: min(520px, 92vw);
   padding: 34px 30px;
   border-radius: 30px;
-  border: 1px solid rgba(42,20,80,0.14);
-  background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.78));
-  backdrop-filter: blur(14px);
+  border: 1px solid rgba(17,24,39,0.08);
+  background: rgba(255,255,255,0.96);
   box-shadow:
-    0 26px 90px rgba(12,7,18,0.12),
+    0 26px 90px rgba(15,23,42,0.08),
     inset 0 1px 0 rgba(255,255,255,0.74);
   overflow: hidden;
 }
@@ -203,5 +206,9 @@
   .authCallbackCard__shine,
   .authCallbackCard__dot{
     animation: none !important;
+  }
+
+  .authCallbackPage__ambient{
+    filter: none;
   }
 }
