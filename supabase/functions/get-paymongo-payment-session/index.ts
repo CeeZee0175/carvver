@@ -1,5 +1,9 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { corsHeaders, jsonResponse } from "../_shared/http.ts";
+import {
+  corsHeaders,
+  extractBearerToken,
+  jsonResponse,
+} from "../_shared/http.ts";
 import { retrievePaymentIntent } from "../_shared/paymongo.ts";
 import {
   extractCardMetadata,
@@ -47,22 +51,18 @@ Deno.serve(async (request: Request) => {
     const paymongoSecretKey = getEnv("PAYMONGO_SECRET_KEY");
 
     const authHeader = request.headers.get("Authorization");
-    if (!authHeader) {
+    const accessToken = extractBearerToken(authHeader);
+
+    if (!accessToken) {
       return jsonResponse({ error: "Missing authorization header." }, 401);
     }
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey, {
-      global: {
-        headers: {
-          Authorization: authHeader,
-        },
-      },
-    });
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const {
       data: { user },
       error: userError,
-    } = await supabase.auth.getUser();
+    } = await supabase.auth.getUser(accessToken);
 
     if (userError || !user) {
       return jsonResponse({ error: "Unauthorized." }, 401);

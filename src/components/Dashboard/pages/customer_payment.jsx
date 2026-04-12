@@ -18,6 +18,19 @@ import "./customer_payment.css";
 
 const supabase = createClient();
 
+async function readFunctionError(error, fallback) {
+  if (typeof error?.context?.json === "function") {
+    try {
+      const payload = await error.context.json();
+      return payload?.error || payload?.message || error?.message || fallback;
+    } catch {
+      return error?.message || fallback;
+    }
+  }
+
+  return error?.message || fallback;
+}
+
 function formatCountdown(target) {
   if (!target) return "";
   const remainingMs = Math.max(new Date(target).getTime() - Date.now(), 0);
@@ -185,7 +198,7 @@ export default function CustomerPayment() {
 
       return data;
     } catch (error) {
-      const message = error?.message || "We couldn't prepare payment.";
+      const message = await readFunctionError(error, "We couldn't prepare payment.");
       setSessionError(message);
       throw new Error(message);
     } finally {
@@ -217,7 +230,10 @@ export default function CustomerPayment() {
       }
       return data;
     } catch (error) {
-      const message = error?.message || "We couldn't load this payment session.";
+      const message = await readFunctionError(
+        error,
+        "We couldn't load this payment session."
+      );
       setSessionError(message);
       return null;
     } finally {

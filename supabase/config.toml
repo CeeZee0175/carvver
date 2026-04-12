@@ -1,0 +1,8 @@
+[functions.create-paymongo-checkout]
+verify_jwt = false
+
+[functions.get-paymongo-payment-session]
+verify_jwt = false
+
+[functions.paymongo-webhook]
+verify_jwt = false
