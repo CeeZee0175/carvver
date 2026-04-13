@@ -3,8 +3,10 @@
 .homeFour{
   position: relative;
   width: 100%;
+  max-width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: hidden;
   background: transparent;
 }
 
@@ -12,7 +14,9 @@
   position: relative;
   z-index: 2;
 
-  width: min(1040px, 92vw);
+  width: min(1040px, calc(100% - 40px));
+  max-width: calc(100% - 40px);
+  min-width: 0;
   height: 100%;
   margin: 0 auto;
   padding: clamp(28px, 4vw, 56px) 0;
@@ -62,6 +66,7 @@
   margin: 0;
   min-height: 3.2em;
   max-width: 62ch;
+  width: min(62ch, 100%);
 
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: clamp(15px, 1.55vw, 18px);
@@ -76,7 +81,9 @@
 }
 
 .homeFour__inputWrap{
-  width: min(740px, 92vw);
+  width: min(740px, 100%);
+  max-width: 100%;
+  min-width: 0;
 }
 
 .homeFourForm{
@@ -449,7 +456,8 @@
 
 @media (max-width: 860px){
   .homeFour__inner{
-    width: min(94vw, 94vw);
+    width: calc(100% - 24px);
+    max-width: calc(100% - 24px);
   }
 
   .homeFour__desc{

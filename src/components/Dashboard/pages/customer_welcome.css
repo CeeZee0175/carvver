@@ -2,7 +2,7 @@
   position: relative;
   min-height: 100vh;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: visible;
   background:
     radial-gradient(circle at top left, rgba(176, 145, 255, 0.16), transparent 34%),
     radial-gradient(circle at 88% 20%, rgba(255, 209, 130, 0.16), transparent 28%),

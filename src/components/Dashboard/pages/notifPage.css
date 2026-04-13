@@ -11,8 +11,7 @@
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-y: visible;
 }
 
 .notifPage__base{
@@ -42,7 +41,7 @@
 .notifPage__main{
   position: relative;
   z-index: 2;
-  width: min(1180px, 100vw);
+  width: min(1180px, calc(100% - 36px));
   margin: 0 auto;
   padding: 24px clamp(18px, 2vw, 28px) 44px;
   display: grid;
@@ -54,9 +53,8 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 50%;
-  width: 100vw;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
   z-index: -1;
   border-radius: 0;
   border: 0;
@@ -699,6 +697,7 @@
 
 @media (max-width: 640px){
   .notifPage__main{
+    width: calc(100% - 20px);
     padding: 18px 14px 38px;
     gap: 18px;
   }

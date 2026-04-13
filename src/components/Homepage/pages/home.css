@@ -9,39 +9,26 @@
   }
 }
 
-html, body{
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
 .homeScroll{
-  height: var(--home-snap-h);
-  min-height: var(--home-snap-h);
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  scroll-snap-type: y proximity;
-  scroll-behavior: smooth;
-
-  scroll-padding-top: 0;
-
-  overscroll-behavior-y: contain;
-  -webkit-overflow-scrolling: touch;
-
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   position: relative;
   z-index: 1;
+  overflow-x: clip;
 }
 
 .homeSnap{
-  height: var(--home-snap-h);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: var(--home-snap-h);
-  scroll-snap-align: start;
-  scroll-snap-stop: normal;
+  scroll-margin-top: var(--nav-h);
 
   background: transparent;
   position: relative;
   z-index: 1;
+  overflow-x: clip;
 }
 
 .homeSnap + .homeSnap{
@@ -49,11 +36,14 @@ html, body{
 }
 
 .homeFooterSection{
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: clamp(340px, 48vh, 520px);
   padding: 0;
-  scroll-snap-align: start;
-  scroll-snap-stop: normal;
+  scroll-margin-top: var(--nav-h);
   background: transparent;
   position: relative;
   z-index: 1;
+  overflow-x: clip;
 }

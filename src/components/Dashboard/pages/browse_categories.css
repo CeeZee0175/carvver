@@ -8,8 +8,7 @@
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-y: visible;
 }
 
 .browseCategories__base {

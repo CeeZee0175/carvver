@@ -1,10 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;1,500&display=swap");
 
-html, body, #root{
-  height: 100%;
-  margin: 0;
-}
-
 :root{
   --gold: #f2c14e;
   --whiteStroke: rgba(243, 238, 252, 0.95);

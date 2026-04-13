@@ -93,6 +93,38 @@ const CustomerFreelancerProfile = lazy(() =>
 );
 const supabase = createClient();
 
+function resolveRouteShellFamily(pathname) {
+  if (pathname.startsWith("/dashboard")) {
+    return "dashboard";
+  }
+
+  if (
+    pathname === "/sign-in" ||
+    pathname === "/sign-up" ||
+    pathname === "/auth/callback" ||
+    pathname.startsWith("/recover-password")
+  ) {
+    return "auth";
+  }
+
+  return "brand";
+}
+
+function useRouteShellFamily(pathname) {
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+
+    const shellFamily = resolveRouteShellFamily(pathname);
+    document.body.dataset.shellFamily = shellFamily;
+    document.documentElement.dataset.shellFamily = shellFamily;
+
+    return () => {
+      delete document.body.dataset.shellFamily;
+      delete document.documentElement.dataset.shellFamily;
+    };
+  }, [pathname]);
+}
+
 function useCustomerBrandShell() {
   const [shellState, setShellState] = useState({
     resolved: false,
@@ -239,6 +271,7 @@ function PricingPage() {
 
 function AppRoutes() {
   const location = useLocation();
+  useRouteShellFamily(location.pathname);
 
   const [splashDone, setSplashDone] = useState(location.pathname !== "/");
   const [showSplash, setShowSplash] = useState(location.pathname === "/" && !splashDone);
