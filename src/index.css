@@ -186,13 +186,3 @@ body {
 body {
   overflow-x: hidden;
 }
-
-body {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-body::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}

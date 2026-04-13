@@ -1,0 +1,169 @@
+import React from "react";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import "./profile.css";
+import "./workflow_pages.css";
+import {
+  FreelancerDashboardFrame,
+  DashboardBreadcrumbs,
+  EmptySurface,
+  Reveal,
+  TypewriterHeading,
+} from "../shared/customerProfileShared";
+import { PROFILE_SPRING } from "../shared/customerProfileConfig";
+import { useFreelancerOrders } from "../hooks/useMarketplaceWorkflow";
+
+export default function FreelancerOrders() {
+  const navigate = useNavigate();
+  const { loading, orders, summary, payoutMethod, error, reload } = useFreelancerOrders();
+
+  return (
+    <FreelancerDashboardFrame mainClassName="profilePage profilePage--details workflowPage">
+      <Reveal>
+        <DashboardBreadcrumbs items={[{ label: "Orders" }]} homePath="/dashboard/freelancer" />
+      </Reveal>
+
+      <Reveal delay={0.04}>
+        <section className="workflowHero">
+          <div className="workflowHero__top">
+            <div className="workflowHero__copy">
+              <div className="workflowHero__titleWrap">
+                <h1 className="workflowHero__title">
+                  <TypewriterHeading text="Orders" />
+                </h1>
+                <motion.svg className="workflowHero__line" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
+                  <motion.path
+                    d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1.05, ease: "easeInOut", delay: 0.14 }}
+                  />
+                </motion.svg>
+              </div>
+              <p className="workflowHero__sub">
+                Track held earnings, released amounts, and the customer orders already moving through your workflow.
+              </p>
+            </div>
+          </div>
+
+          <div className="workflowMeta">
+            <div className="workflowMeta__item">
+              <span className="workflowMeta__label">Held</span>
+              <strong className="workflowMeta__value">{summary.heldLabel}</strong>
+            </div>
+            <div className="workflowMeta__item">
+              <span className="workflowMeta__label">Released</span>
+              <strong className="workflowMeta__value">{summary.releasedLabel}</strong>
+            </div>
+            <div className="workflowMeta__item">
+              <span className="workflowMeta__label">Total earned</span>
+              <strong className="workflowMeta__value">{summary.totalLabel}</strong>
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal delay={0.08}>
+        <section className="profileSection workflowLayout">
+          <div className="workflowMain">
+            <article className="workflowCard">
+              <div className="profileSection__head">
+                <div>
+                  <h2 className="profileSection__title">Your orders</h2>
+                  <p className="profileSection__sub">
+                    Open any order to send an update, review payment state, or continue the conversation.
+                  </p>
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="workflowCard" style={{ minHeight: 220 }} />
+              ) : error ? (
+                <EmptySurface hideIcon title="We couldn't load your orders" description={error} actionLabel="Try again" onAction={reload} />
+              ) : orders.length === 0 ? (
+                <EmptySurface hideIcon title="No freelancer orders yet" className="messagesEmpty messagesEmpty--conversation" />
+              ) : (
+                <div className="workflowProposalList">
+                  {orders.map((order) => (
+                    <article key={order.id} className="workflowProposalCard">
+                      <div className="workflowProposalCard__top">
+                        <div>
+                          <div className="workflowProposalCard__name">
+                            {order.services?.title || "Service order"}
+                          </div>
+                          <p className="workflowCard__copy">
+                            {order.customerName} · {order.createdAtLabel}
+                          </p>
+                        </div>
+                        <span className="workflowChip">{order.escrow_status || "held"}</span>
+                      </div>
+
+                      <div className="workflowActions">
+                        {order.selected_package_name ? (
+                          <span className="workflowChip">{order.selected_package_name}</span>
+                        ) : null}
+                        <span className="workflowChip">{order.freelancerNetLabel}</span>
+                        <span className="workflowChip">{order.status}</span>
+                      </div>
+
+                      <div className="workflowActions">
+                        <motion.button
+                          type="button"
+                          className="workflowActionBtn workflowActionBtn--primary"
+                          whileHover={{ y: -1.5 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={PROFILE_SPRING}
+                          onClick={() => navigate(`/dashboard/freelancer/orders/${order.id}`)}
+                        >
+                          Open order
+                        </motion.button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </article>
+          </div>
+
+          <aside className="workflowSide">
+            <article className="workflowSummaryCard workflowPayoutCard">
+              <h2 className="workflowCard__title">Payout destination</h2>
+              <div className="workflowPayoutCard__summary">
+                <p className="workflowSummaryCard__copy">
+                  Released earnings are tied to the payout destination saved in freelancer settings.
+                </p>
+                <div className="workflowSummaryCard__row">
+                  <span>Method</span>
+                  <strong className="workflowSummaryCard__value">
+                    {payoutMethod.payoutMethod || "Not set"}
+                  </strong>
+                </div>
+                <div className="workflowSummaryCard__row">
+                  <span>Reference</span>
+                  <strong className="workflowSummaryCard__value">
+                    {payoutMethod.accountReference || "Not set"}
+                  </strong>
+                </div>
+              </div>
+
+              <motion.button
+                type="button"
+                className="workflowActionBtn workflowActionBtn--ghost"
+                whileHover={{ y: -1.5 }}
+                whileTap={{ scale: 0.98 }}
+                transition={PROFILE_SPRING}
+                onClick={() => navigate("/dashboard/freelancer/settings")}
+              >
+                Update payout details
+              </motion.button>
+            </article>
+          </aside>
+        </section>
+      </Reveal>
+    </FreelancerDashboardFrame>
+  );
+}

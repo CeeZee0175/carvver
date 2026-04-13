@@ -126,7 +126,8 @@ export default function CustomerPayment() {
     searchParams.get("method") === "card" ? "card" : "qrph"
   );
   const [paymentSession, setPaymentSession] = useState(null);
-  const [sessionLoading, setSessionLoading] = useState(false);
+  const [creatingSession, setCreatingSession] = useState(false);
+  const [readingSession, setReadingSession] = useState(false);
   const [sessionError, setSessionError] = useState("");
   const [cardActionLoading, setCardActionLoading] = useState(false);
   const [countdownNow, setCountdownNow] = useState(Date.now());
@@ -168,7 +169,7 @@ export default function CustomerPayment() {
   );
 
   const startPaymentSession = useCallback(async (method, options = {}) => {
-    setSessionLoading(true);
+    setCreatingSession(true);
     setSessionError("");
     setPollPaused(false);
 
@@ -204,14 +205,16 @@ export default function CustomerPayment() {
       setSessionError(message);
       throw new Error(message);
     } finally {
-      setSessionLoading(false);
+      setCreatingSession(false);
     }
   }, [updateSearch]);
 
   const loadPaymentSession = useCallback(async (sessionId, options = {}) => {
     if (!sessionId) return null;
 
-    setSessionLoading(true);
+    if (!options.silent) {
+      setReadingSession(true);
+    }
 
     try {
       const { data, error } = await supabase.functions.invoke("get-paymongo-payment-session", {
@@ -241,7 +244,9 @@ export default function CustomerPayment() {
       setPollPaused(true);
       return null;
     } finally {
-      setSessionLoading(false);
+      if (!options.silent) {
+        setReadingSession(false);
+      }
     }
   }, []);
 
@@ -320,7 +325,7 @@ export default function CustomerPayment() {
     if (!shouldPollQr && !shouldPollCard) return;
 
     const intervalId = window.setInterval(() => {
-      loadPaymentSession(paymentSession.sessionId);
+      loadPaymentSession(paymentSession.sessionId, { silent: true });
     }, shouldPollCard ? 3500 : 5000);
 
     return () => window.clearInterval(intervalId);
@@ -430,7 +435,7 @@ export default function CustomerPayment() {
                     selectedMethod === "qrph" ? "customerPaymentMethod--active" : ""
                   }`}
                   onClick={() => handleMethodChange("qrph")}
-                  disabled={sessionLoading}
+                  disabled={creatingSession || cardActionLoading}
                 >
                   <span className="customerPaymentMethod__title">GCash or Maya</span>
                   <span className="customerPaymentMethod__copy">Scan the same secure QR code</span>
@@ -442,7 +447,7 @@ export default function CustomerPayment() {
                     selectedMethod === "card" ? "customerPaymentMethod--active" : ""
                   }`}
                   onClick={() => handleMethodChange("card")}
-                  disabled={sessionLoading}
+                  disabled={creatingSession || cardActionLoading}
                 >
                   <span className="customerPaymentMethod__title">Card</span>
                   <span className="customerPaymentMethod__copy">Open PayMongo card checkout</span>
@@ -496,7 +501,7 @@ export default function CustomerPayment() {
                 <div className="customerPaymentQrLayout">
                   <div className="customerPaymentQrCard">
                     <div className="customerPaymentQrCard__eyebrow">Scan in GCash or Maya</div>
-                    {sessionLoading && !paymentSession?.qrImageUrl ? (
+                    {creatingSession && !paymentSession?.qrImageUrl ? (
                       <div className="customerPaymentQrCard__loading">
                         <LoaderCircle className="customerPaymentSpinner" />
                         <span>Preparing your QR code...</span>
@@ -538,9 +543,9 @@ export default function CustomerPayment() {
                         whileTap={{ scale: 0.98 }}
                         transition={PROFILE_SPRING}
                         onClick={() => startPaymentSession("qrph")}
-                        disabled={sessionLoading}
+                        disabled={creatingSession}
                       >
-                        {sessionLoading ? (
+                        {creatingSession ? (
                           <LoaderCircle className="customerPaymentSpinner" />
                         ) : null}
                         <span>
@@ -556,9 +561,9 @@ export default function CustomerPayment() {
                           whileTap={{ scale: 0.98 }}
                           transition={PROFILE_SPRING}
                           onClick={() => loadPaymentSession(paymentSession.sessionId)}
-                          disabled={sessionLoading}
+                          disabled={readingSession}
                         >
-                          {sessionLoading ? (
+                          {readingSession ? (
                             <LoaderCircle className="customerPaymentSpinner" />
                           ) : null}
                           <span>Retry status</span>
@@ -612,7 +617,7 @@ export default function CustomerPayment() {
                         whileTap={{ scale: 0.98 }}
                         transition={PROFILE_SPRING}
                         onClick={handleCardCheckout}
-                        disabled={cardActionLoading || sessionLoading}
+                        disabled={cardActionLoading || creatingSession}
                       >
                         {cardActionLoading ? (
                           <LoaderCircle className="customerPaymentSpinner" />

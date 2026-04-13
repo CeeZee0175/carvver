@@ -296,13 +296,6 @@ export default function FreelancerListingPreview() {
                               } delivery`
                             : "Flexible delivery"}
                         </span>
-                        <span>
-                          {item.revisions === null
-                            ? "Revisions on request"
-                            : `${item.revisions} revision${
-                                item.revisions === 1 ? "" : "s"
-                              }`}
-                        </span>
                       </div>
                       {item.includedItems?.length > 0 ? (
                         <div className="freelancerRequestDetail__facts">

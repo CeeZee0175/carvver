@@ -53,8 +53,59 @@ function buildCounterpartMeta(profile, role) {
 
 function buildMessagePreview(message, currentUserId) {
   if (!message) return "No messages yet";
+  if (message.message_type === "proposal") {
+    const amount = Number(message?.metadata?.offeredPrice || 0);
+    const deliveryDays = Number(message?.metadata?.deliveryDays || 0);
+    const bits = [];
+    if (amount > 0) bits.push(`PHP ${amount.toLocaleString()}`);
+    if (deliveryDays > 0) bits.push(`${deliveryDays} day${deliveryDays === 1 ? "" : "s"}`);
+    return `${message.sender_id === currentUserId ? "You: " : ""}Proposal${bits.length ? ` · ${bits.join(" · ")}` : ""}`;
+  }
+  if (message.message_type === "order_update") {
+    return `${message.sender_id === currentUserId ? "You: " : ""}${message?.metadata?.title || "Order update"}`;
+  }
   const prefix = message.sender_id === currentUserId ? "You: " : "";
   return `${prefix}${message.body}`;
+}
+
+function normalizeMessageRow(row) {
+  return {
+    id: row.id,
+    thread_id: row.thread_id,
+    sender_id: row.sender_id,
+    sender_role: row.sender_role,
+    body: row.body,
+    created_at: row.created_at,
+    message_type: String(row.message_type || "text").trim() || "text",
+    metadata:
+      row.metadata && typeof row.metadata === "object" ? row.metadata : {},
+  };
+}
+
+async function fetchThreadMessages(threadId) {
+  const primary = await supabase
+    .from("customer_freelancer_messages")
+    .select("id, thread_id, sender_id, sender_role, body, created_at, message_type, metadata")
+    .eq("thread_id", threadId)
+    .order("created_at", { ascending: true });
+
+  if (!primary.error) {
+    return (primary.data || []).map(normalizeMessageRow);
+  }
+
+  const message = String(primary.error?.message || "");
+  if (!/message_type|metadata|column .* does not exist/i.test(message)) {
+    throw primary.error;
+  }
+
+  const fallback = await supabase
+    .from("customer_freelancer_messages")
+    .select("id, thread_id, sender_id, sender_role, body, created_at")
+    .eq("thread_id", threadId)
+    .order("created_at", { ascending: true });
+
+  if (fallback.error) throw fallback.error;
+  return (fallback.data || []).map(normalizeMessageRow);
 }
 
 export function formatConversationTime(value) {
@@ -189,14 +240,8 @@ export function useMessagesInbox(role = "customer") {
     setLoadingMessages(true);
 
     try {
-      const { data, error: messagesError } = await supabase
-        .from("customer_freelancer_messages")
-        .select("id, thread_id, sender_id, sender_role, body, created_at")
-        .eq("thread_id", threadId)
-        .order("created_at", { ascending: true });
-
-      if (messagesError) throw messagesError;
-      setMessages(data || []);
+      const nextMessages = await fetchThreadMessages(threadId);
+      setMessages(nextMessages);
     } catch (nextError) {
       setError(nextError.message || "We couldn't load this conversation.");
       setMessages([]);
@@ -257,9 +302,21 @@ export function useMessagesInbox(role = "customer") {
           const changedThreadId =
             payload.new?.thread_id || payload.old?.thread_id || activeThreadIdRef.current;
           await refreshThreads();
-          if (changedThreadId && changedThreadId === activeThreadIdRef.current) {
-            await loadMessages(changedThreadId);
+          if (!changedThreadId || changedThreadId !== activeThreadIdRef.current) {
+            return;
           }
+
+          if (payload.eventType === "INSERT" && payload.new) {
+            const nextMessage = normalizeMessageRow(payload.new);
+            setMessages((current) =>
+              current.some((entry) => entry.id === nextMessage.id)
+                ? current
+                : [...current, nextMessage]
+            );
+            return;
+          }
+
+          await loadMessages(changedThreadId);
         }
       )
       .subscribe();
@@ -371,7 +428,9 @@ export function useMessagesInbox(role = "customer") {
       try {
         await cleanupExpiredThreads();
 
-        const { error: insertError } = await supabase
+        let insertError = null;
+
+        const primaryInsert = await supabase
           .from("customer_freelancer_messages")
           .insert([
             {
@@ -379,8 +438,27 @@ export function useMessagesInbox(role = "customer") {
               sender_id: userId,
               sender_role: role,
               body: trimmedBody,
+              message_type: "text",
+              metadata: null,
             },
           ]);
+
+        insertError = primaryInsert.error;
+
+        if (insertError && /message_type|metadata|column .* does not exist/i.test(String(insertError.message || ""))) {
+          const fallbackInsert = await supabase
+            .from("customer_freelancer_messages")
+            .insert([
+              {
+                thread_id: activeThreadId,
+                sender_id: userId,
+                sender_role: role,
+                body: trimmedBody,
+              },
+            ]);
+
+          insertError = fallbackInsert.error;
+        }
 
         if (insertError) throw insertError;
 

@@ -206,7 +206,8 @@
 }
 
 .messagesThread__time,
-.messagesBubble__meta {
+.messagesBubble__metaBelow,
+.messagesSystemRow {
   font-family: Inter, system-ui, sans-serif;
   font-size: 11px;
   font-weight: 800;
@@ -215,7 +216,10 @@
   color: rgba(87, 34, 182, 0.72);
 }
 
-.messagesThread__subtitle,
+.messagesThread__time {
+  flex-shrink: 0;
+}
+
 .messagesConversation__subtitle {
   font-family: Inter, system-ui, sans-serif;
   font-size: 13px;
@@ -226,9 +230,10 @@
 .messagesThread__preview {
   font-family: Inter, system-ui, sans-serif;
   font-size: 13.5px;
-  line-height: 1.6;
+  line-height: 1.58;
   color: rgba(27, 16, 46, 0.72);
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -248,7 +253,7 @@
 }
 
 .messagesThreadSkeleton {
-  min-height: 112px;
+  min-height: 100px;
 }
 
 .messagesConversationSkeleton {
@@ -269,6 +274,14 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
+}
+
+.messagesConversation__headActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .messagesConversation__context {
@@ -285,6 +298,39 @@
   color: rgba(27, 16, 46, 0.74);
 }
 
+.messagesConversation__menu {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 10px 28px rgba(12, 7, 18, 0.04);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.messagesConversation__menu:hover {
+  border-color: rgba(124, 58, 237, 0.22);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 14px 34px rgba(12, 7, 18, 0.06);
+  transform: translateY(-1px);
+}
+
+.messagesConversation__menuDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(42, 20, 80, 0.72);
+}
+
 .messagesConversation__body {
   min-height: 360px;
   display: grid;
@@ -297,6 +343,16 @@
   align-content: start;
 }
 
+.messagesBubbleWrap {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+
+.messagesBubbleWrap--own {
+  justify-items: end;
+}
+
 .messagesBubble {
   max-width: min(78%, 540px);
   padding: 14px 16px;
@@ -304,12 +360,9 @@
   border: 1px solid rgba(42, 20, 80, 0.08);
   background: rgba(255, 255, 255, 0.84);
   box-shadow: 0 12px 30px rgba(12, 7, 18, 0.04);
-  display: grid;
-  gap: 8px;
 }
 
 .messagesBubble--own {
-  margin-left: auto;
   background: rgba(42, 20, 80, 0.92);
   border-color: rgba(42, 20, 80, 0.92);
 }
@@ -323,12 +376,56 @@
   overflow-wrap: anywhere;
 }
 
+.messagesBubble__body--card {
+  display: grid;
+  gap: 8px;
+}
+
+.messagesBubble__cardLabel {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(87, 34, 182, 0.72);
+}
+
+.messagesBubble__cardTitle {
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 800;
+  color: inherit;
+}
+
+.messagesBubble__cardFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: inherit;
+}
+
 .messagesBubble--own .messagesBubble__body {
   color: #ffffff;
 }
 
-.messagesBubble--own .messagesBubble__meta {
+.messagesBubble--own .messagesBubble__cardLabel {
   color: rgba(242, 193, 78, 0.88);
+}
+
+.messagesBubble__metaBelow {
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.messagesBubbleWrap--own .messagesBubble__metaBelow {
+  color: rgba(242, 193, 78, 0.88);
+}
+
+.messagesSystemRow {
+  justify-self: center;
+  padding: 0 12px;
+  color: rgba(42, 20, 80, 0.56);
 }
 
 .messagesBubbleSkeleton {
@@ -439,8 +536,12 @@
 }
 
 @keyframes messagesShimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @media (max-width: 1080px) {
@@ -467,6 +568,11 @@
     flex-direction: column;
   }
 
+  .messagesConversation__headActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .messagesBubble {
     max-width: 100%;
   }
@@ -486,6 +592,7 @@
   .messagesComposer__control,
   .messagesComposer__submit,
   .messagesBubble,
+  .messagesConversation__menu,
   .messagesThreadSkeleton,
   .messagesConversationSkeleton,
   .messagesBubbleSkeleton {

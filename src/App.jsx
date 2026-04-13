@@ -61,8 +61,14 @@ const Profile = lazy(() => import("./components/Dashboard/pages/profile"));
 const CustomerSettings = lazy(() => import("./components/Dashboard/pages/customer_settings"));
 const ProfileAchievements = lazy(() => import("./components/Dashboard/pages/profileAchievements"));
 const CustomerOrders = lazy(() => import("./components/Dashboard/pages/customerOrders"));
+const CustomerOrderDetail = lazy(() =>
+  import("./components/Dashboard/pages/customer_order_detail")
+);
 const CustomerMessages = lazy(() =>
   import("./components/Dashboard/pages/customer_messages")
+);
+const CustomerRequestDetail = lazy(() =>
+  import("./components/Dashboard/pages/customer_request_detail")
 );
 const CustomerSearch = lazy(() =>
   import("./components/Dashboard/pages/customer_search")
@@ -75,6 +81,12 @@ const FreelancerListingPreview = lazy(() =>
 );
 const FreelancerSearch = lazy(() =>
   import("./components/Dashboard/pages/freelancer_search")
+);
+const FreelancerOrders = lazy(() =>
+  import("./components/Dashboard/pages/freelancer_orders")
+);
+const FreelancerOrderDetail = lazy(() =>
+  import("./components/Dashboard/pages/freelancer_order_detail")
 );
 const CustomerFreelancerProfile = lazy(() =>
   import("./components/Dashboard/pages/customer_freelancer_profile")
@@ -497,6 +509,26 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/dashboard/freelancer/orders"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerOrders />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer/orders/:orderId"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerOrderDetail />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
         path="/dashboard/customer/about-us"
         element={
           <Suspense fallback={<RouteFallback />}>
@@ -567,6 +599,16 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/dashboard/customer/requests/:requestId"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <CustomerRoute>
+              <CustomerRequestDetail />
+            </CustomerRoute>
+          </Suspense>
+        }
+      />
+      <Route
         path="/dashboard/customer/notifications"
         element={
           <Suspense fallback={<RouteFallback />}>
@@ -612,6 +654,16 @@ function AppRoutes() {
           <Suspense fallback={<RouteFallback />}>
             <CustomerRoute>
               <CustomerOrders />
+            </CustomerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/customer/orders/:orderId"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <CustomerRoute>
+              <CustomerOrderDetail />
             </CustomerRoute>
           </Suspense>
         }

@@ -27,10 +27,6 @@ function normalizePackage(row) {
     summary: String(row.package_summary || "").trim(),
     price: Number(row.price || 0),
     deliveryTimeDays: Number(row.delivery_time_days || 0),
-    revisions:
-      row.revisions === null || row.revisions === undefined
-        ? null
-        : Number(row.revisions),
     includedItems: Array.isArray(row.included_items)
       ? row.included_items.map((item) => String(item || "").trim()).filter(Boolean)
       : [],
@@ -52,10 +48,6 @@ function buildFallbackPackage(serviceRow) {
     summary: String(serviceRow.description || "").trim(),
     price: Number(serviceRow.price || 0),
     deliveryTimeDays: Number(serviceRow.delivery_time_days || 0),
-    revisions:
-      serviceRow.revisions === null || serviceRow.revisions === undefined
-        ? null
-        : Number(serviceRow.revisions),
     includedItems,
     priceLabel: formatPeso(serviceRow.price),
     derived: true,
@@ -94,7 +86,7 @@ export function useServiceListingDetail(serviceId) {
       const { data: serviceRow, error: serviceError } = await supabase
         .from("services")
         .select(
-          "id, freelancer_id, title, category, price, location, description, listing_overview, listing_highlights, delivery_time_days, revisions, is_published, is_pro, is_verified, created_at, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline, freelancer_portfolio_url)"
+          "id, freelancer_id, title, category, price, location, description, listing_overview, listing_highlights, delivery_time_days, is_published, is_pro, is_verified, created_at, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline, freelancer_portfolio_url)"
         )
         .eq("id", serviceId)
         .eq("is_published", true)
@@ -108,7 +100,7 @@ export function useServiceListingDetail(serviceId) {
           supabase
             .from("service_packages")
             .select(
-              "id, service_id, sort_order, package_name, package_summary, price, delivery_time_days, revisions, included_items"
+              "id, service_id, sort_order, package_name, package_summary, price, delivery_time_days, included_items"
             )
             .eq("service_id", serviceId)
             .order("sort_order", { ascending: true }),

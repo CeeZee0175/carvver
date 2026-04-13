@@ -39,10 +39,6 @@ function CartLineItem({ item, onRemove, removing }) {
   const packageName = String(item.selected_package_name || "").trim();
   const packageSummary = String(item.selected_package_summary || "").trim();
   const packageDeliveryDays = Number(item.selected_package_delivery_time_days || 0);
-  const packageRevisions =
-    item.selected_package_revisions === null || item.selected_package_revisions === undefined
-      ? null
-      : Number(item.selected_package_revisions);
 
   return (
     <article
@@ -86,9 +82,6 @@ function CartLineItem({ item, onRemove, removing }) {
             )}
             {packageDeliveryDays > 0 ? (
               <span>{packageDeliveryDays} day{packageDeliveryDays === 1 ? "" : "s"} delivery</span>
-            ) : null}
-            {packageRevisions !== null ? (
-              <span>{packageRevisions} revision{packageRevisions === 1 ? "" : "s"}</span>
             ) : null}
           </div>
 

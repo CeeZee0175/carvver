@@ -236,14 +236,21 @@ export default function CustomerOrders() {
                 const packageDeliveryDays = Number(
                   order.selected_package_delivery_time_days || 0
                 );
-                const packageRevisions =
-                  order.selected_package_revisions === null ||
-                  order.selected_package_revisions === undefined
-                    ? null
-                    : Number(order.selected_package_revisions);
 
                 return (
-                  <article key={order.id} className="profileOrderCard">
+                  <article
+                    key={order.id}
+                    className="profileOrderCard"
+                    onClick={() => navigate(`/dashboard/customer/orders/${order.id}`)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        navigate(`/dashboard/customer/orders/${order.id}`);
+                      }
+                    }}
+                  >
                     <div className="profileOrderCard__top">
                       <div>
                         <span className={`profileOrderStatus profileOrderStatus--${meta.tone}`}>
@@ -281,11 +288,6 @@ export default function CustomerOrders() {
                                 packageDeliveryDays === 1 ? "" : "s"
                               }`
                             : packageName}
-                          {packageRevisions !== null
-                            ? ` · ${packageRevisions} revision${
-                                packageRevisions === 1 ? "" : "s"
-                              }`
-                            : ""}
                         </span>
                       ) : null}
                       <span className="profileOrderCard__metaItem">

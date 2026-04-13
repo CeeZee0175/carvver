@@ -1,0 +1,865 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { createClient } from "../../../lib/supabase/client";
+import { getProfile } from "../../../lib/supabase/auth";
+import { buildPhilippinesLocationLabel } from "../../../lib/phLocations";
+import { REQUEST_MEDIA_BUCKET } from "./useCustomerRequests";
+
+const supabase = createClient();
+
+function normalizeText(value) {
+  return String(value || "").trim();
+}
+
+function friendlyWorkflowMessage(error, fallback) {
+  const message = String(error?.message || "");
+
+  if (/row-level security|permission denied/i.test(message)) {
+    return "That action isn't available right now.";
+  }
+
+  if (/customer_request_proposals|order_updates|freelancer_payout_methods/i.test(message)) {
+    return "Run the latest workflow SQL before using this page.";
+  }
+
+  return fallback;
+}
+
+function getPublicUrl(bucket, path) {
+  if (!path) return "";
+  const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+  return data?.publicUrl || "";
+}
+
+function formatPeso(value) {
+  const amount = Number(value || 0);
+  return `PHP ${amount.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function formatDate(value, options = {}) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("en-PH", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    ...options,
+  }).format(date);
+}
+
+function formatLongDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("en-PH", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function formatDeadline(value) {
+  const normalized = normalizeText(value);
+  if (!normalized) return "No deadline yet";
+  return formatDate(`${normalized}T00:00:00`) || normalized;
+}
+
+function buildProfileName(profile, fallback = "User") {
+  if (!profile) return fallback;
+
+  const displayName = normalizeText(profile.display_name);
+  if (displayName) return displayName;
+
+  const fullName = [profile.first_name, profile.last_name]
+    .map(normalizeText)
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
+  return fullName || fallback;
+}
+
+function buildProfileInitials(profile, fallback = "U") {
+  const initials = [profile?.first_name, profile?.last_name]
+    .map((part) => normalizeText(part).charAt(0))
+    .join("")
+    .toUpperCase();
+
+  return initials || buildProfileName(profile, fallback).charAt(0).toUpperCase() || fallback;
+}
+
+function normalizeRequestMedia(rows = [], requestTitle = "Request") {
+  return rows.map((item) => ({
+    ...item,
+    publicUrl: getPublicUrl(REQUEST_MEDIA_BUCKET, item.bucket_path),
+    originalName: normalizeText(item.original_name) || requestTitle,
+  }));
+}
+
+function normalizeProposal(row) {
+  const freelancer = row.freelancer || row.profiles || null;
+  return {
+    id: row.id,
+    requestId: row.request_id,
+    freelancerId: row.freelancer_id,
+    threadId: row.thread_id,
+    pitch: normalizeText(row.pitch),
+    offeredPrice: Number(row.offered_price || 0),
+    offeredPriceLabel: formatPeso(row.offered_price || 0),
+    deliveryDays: Number(row.delivery_days || 0),
+    status: normalizeText(row.status) || "pending",
+    createdAt: row.created_at || null,
+    updatedAt: row.updated_at || null,
+    acceptedAt: row.accepted_at || null,
+    freelancer: {
+      id: freelancer?.id || row.freelancer_id,
+      displayName: buildProfileName(freelancer, "Freelancer"),
+      initials: buildProfileInitials(freelancer, "F"),
+      avatarUrl: normalizeText(freelancer?.avatar_url),
+      headline: normalizeText(freelancer?.freelancer_headline),
+      location:
+        buildPhilippinesLocationLabel({
+          region: freelancer?.region,
+          city: freelancer?.city,
+          barangay: freelancer?.barangay,
+        }) || "Philippines",
+    },
+  };
+}
+
+function normalizeOrderUpdate(row) {
+  return {
+    id: row.id,
+    orderId: row.order_id,
+    authorId: row.author_id,
+    authorRole: normalizeText(row.author_role) || "freelancer",
+    updateKind: normalizeText(row.update_kind) || "progress",
+    title: normalizeText(row.title),
+    body: normalizeText(row.body),
+    createdAt: row.created_at || null,
+    createdAtLabel: formatLongDateTime(row.created_at),
+  };
+}
+
+function normalizePayoutMethod(row) {
+  return {
+    payoutMethod: normalizeText(row?.payout_method),
+    accountName: normalizeText(row?.account_name),
+    accountReference: normalizeText(row?.account_reference),
+  };
+}
+
+async function getSignedInProfile() {
+  const profile = await getProfile();
+  if (!profile?.id) {
+    throw new Error("You need to be signed in to continue.");
+  }
+  return profile;
+}
+
+async function ensureThread({ customerId, freelancerId }) {
+  const { data: existing, error: existingError } = await supabase
+    .from("customer_freelancer_threads")
+    .select("id, customer_id, freelancer_id, created_at, updated_at, last_message_at")
+    .eq("customer_id", customerId)
+    .eq("freelancer_id", freelancerId)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+  if (existing?.id) return existing;
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("customer_freelancer_threads")
+    .insert([
+      {
+        customer_id: customerId,
+        freelancer_id: freelancerId,
+      },
+    ])
+    .select("id, customer_id, freelancer_id, created_at, updated_at, last_message_at")
+    .single();
+
+  if (insertError) throw insertError;
+  return inserted;
+}
+
+async function insertThreadMessage({
+  threadId,
+  senderId,
+  senderRole,
+  body,
+  messageType = "text",
+  metadata = null,
+}) {
+  const payload = {
+    thread_id: threadId,
+    sender_id: senderId,
+    sender_role: senderRole,
+    body,
+    message_type: messageType,
+    metadata,
+  };
+
+  const { error } = await supabase.from("customer_freelancer_messages").insert([payload]);
+  if (error) throw error;
+}
+
+export async function fetchCustomerRequestDetail(requestId) {
+  const profile = await getSignedInProfile();
+
+  const { data: requestRow, error: requestError } = await supabase
+    .from("customer_requests")
+    .select("id, customer_id, title, category, description, budget_amount, location, timeline, status, created_at, updated_at")
+    .eq("id", requestId)
+    .eq("customer_id", profile.id)
+    .maybeSingle();
+
+  if (requestError) throw requestError;
+  if (!requestRow) throw new Error("We couldn't find that request.");
+
+  const [{ data: mediaRows, error: mediaError }, { data: proposalRows, error: proposalError }] =
+    await Promise.all([
+      supabase
+        .from("customer_request_media")
+        .select("id, request_id, bucket_path, media_kind, mime_type, original_name, sort_order")
+        .eq("request_id", requestId)
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("customer_request_proposals")
+        .select(
+          `
+          id,
+          request_id,
+          freelancer_id,
+          thread_id,
+          pitch,
+          offered_price,
+          delivery_days,
+          status,
+          created_at,
+          updated_at,
+          accepted_at,
+          freelancer:profiles!customer_request_proposals_freelancer_id_fkey (
+            id,
+            first_name,
+            last_name,
+            display_name,
+            avatar_url,
+            freelancer_headline,
+            region,
+            city,
+            barangay
+          )
+        `
+        )
+        .eq("request_id", requestId)
+        .order("created_at", { ascending: false }),
+    ]);
+
+  if (mediaError) throw mediaError;
+  if (proposalError) throw proposalError;
+
+  const media = normalizeRequestMedia(mediaRows || [], requestRow.title);
+  const proposals = (proposalRows || []).map(normalizeProposal);
+
+  return {
+    ...requestRow,
+    budgetLabel: requestRow.budget_amount ? formatPeso(requestRow.budget_amount) : "Budget not set",
+    deadlineLabel: formatDeadline(requestRow.timeline),
+    createdAtLabel: formatDate(requestRow.created_at),
+    media,
+    proposals,
+  };
+}
+
+export async function createRequestProposal({ requestId, pitch, offeredPrice, deliveryDays }) {
+  const profile = await getSignedInProfile();
+  const normalizedPitch = normalizeText(pitch);
+  const numericPrice = Number(offeredPrice || 0);
+  const numericDeliveryDays = Number(deliveryDays || 0);
+
+  if (!normalizedPitch) {
+    throw new Error("Add a short proposal before sending it.");
+  }
+  if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+    throw new Error("Enter a valid offered price.");
+  }
+  if (!Number.isFinite(numericDeliveryDays) || numericDeliveryDays <= 0) {
+    throw new Error("Enter a valid delivery time in days.");
+  }
+
+  const { data: requestRow, error: requestError } = await supabase
+    .from("customer_requests")
+    .select("id, customer_id, title, status")
+    .eq("id", requestId)
+    .maybeSingle();
+
+  if (requestError) throw requestError;
+  if (!requestRow) throw new Error("We couldn't find that request.");
+  if (!["open", "matched"].includes(normalizeText(requestRow.status))) {
+    throw new Error("This request is no longer accepting proposals.");
+  }
+
+  const thread = await ensureThread({
+    customerId: requestRow.customer_id,
+    freelancerId: profile.id,
+  });
+
+  const { data: existingProposal, error: existingError } = await supabase
+    .from("customer_request_proposals")
+    .select("id, status")
+    .eq("request_id", requestId)
+    .eq("freelancer_id", profile.id)
+    .in("status", ["pending", "accepted"])
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+
+  let proposalId = existingProposal?.id || "";
+
+  if (proposalId && existingProposal.status === "pending") {
+    const { error: updateError } = await supabase
+      .from("customer_request_proposals")
+      .update({
+        thread_id: thread.id,
+        pitch: normalizedPitch,
+        offered_price: numericPrice,
+        delivery_days: numericDeliveryDays,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", proposalId);
+
+    if (updateError) throw updateError;
+  } else if (!proposalId) {
+    const { data: insertedProposal, error: insertError } = await supabase
+      .from("customer_request_proposals")
+      .insert([
+        {
+          request_id: requestId,
+          freelancer_id: profile.id,
+          thread_id: thread.id,
+          pitch: normalizedPitch,
+          offered_price: numericPrice,
+          delivery_days: numericDeliveryDays,
+          status: "pending",
+        },
+      ])
+      .select("id")
+      .single();
+
+    if (insertError) throw insertError;
+    proposalId = insertedProposal.id;
+  } else {
+    throw new Error("This request already has an accepted proposal from you.");
+  }
+
+  await insertThreadMessage({
+    threadId: thread.id,
+    senderId: profile.id,
+    senderRole: "freelancer",
+    body: normalizedPitch,
+    messageType: "proposal",
+    metadata: {
+      proposalId,
+      requestId,
+      requestTitle: requestRow.title,
+      offeredPrice: numericPrice,
+      deliveryDays: numericDeliveryDays,
+    },
+  });
+
+  return proposalId;
+}
+
+export async function acceptRequestProposal({ requestId, proposalId }) {
+  const profile = await getSignedInProfile();
+
+  const { data: requestRow, error: requestError } = await supabase
+    .from("customer_requests")
+    .select("id, customer_id, title")
+    .eq("id", requestId)
+    .eq("customer_id", profile.id)
+    .maybeSingle();
+
+  if (requestError) throw requestError;
+  if (!requestRow) throw new Error("We couldn't open this request.");
+
+  const { data: proposalRow, error: proposalError } = await supabase
+    .from("customer_request_proposals")
+    .select("id, request_id, freelancer_id, thread_id, status")
+    .eq("id", proposalId)
+    .eq("request_id", requestId)
+    .maybeSingle();
+
+  if (proposalError) throw proposalError;
+  if (!proposalRow) throw new Error("We couldn't find that proposal.");
+
+  const now = new Date().toISOString();
+
+  const { error: acceptError } = await supabase
+    .from("customer_request_proposals")
+    .update({
+      status: "accepted",
+      accepted_at: now,
+      updated_at: now,
+    })
+    .eq("id", proposalId);
+
+  if (acceptError) throw acceptError;
+
+  const { error: rejectOthersError } = await supabase
+    .from("customer_request_proposals")
+    .update({
+      status: "rejected",
+      updated_at: now,
+    })
+    .eq("request_id", requestId)
+    .neq("id", proposalId)
+    .eq("status", "pending");
+
+  if (rejectOthersError) throw rejectOthersError;
+
+  const { error: requestUpdateError } = await supabase
+    .from("customer_requests")
+    .update({
+      status: "matched",
+      updated_at: now,
+    })
+    .eq("id", requestId);
+
+  if (requestUpdateError) throw requestUpdateError;
+
+  if (proposalRow.thread_id) {
+    await insertThreadMessage({
+      threadId: proposalRow.thread_id,
+      senderId: profile.id,
+      senderRole: "customer",
+      body: `Accepted the proposal for ${requestRow.title}.`,
+      messageType: "proposal",
+      metadata: {
+        proposalId,
+        requestId,
+        requestTitle: requestRow.title,
+        status: "accepted",
+      },
+    });
+  }
+
+  return true;
+}
+
+async function fetchOrderDetail(orderId, column, ownerId) {
+  const { data: orderRow, error: orderError } = await supabase
+    .from("orders")
+    .select(
+      `
+      id,
+      service_id,
+      customer_id,
+      freelancer_id,
+      status,
+      total_price,
+      selected_package_id,
+      selected_package_name,
+      selected_package_summary,
+      selected_package_delivery_time_days,
+      selected_package_revisions,
+      selected_package_included_items,
+      gross_amount,
+      platform_fee,
+      freelancer_net,
+      payment_provider,
+      payment_reference,
+      escrow_status,
+      paid_at,
+      completed_at,
+      released_at,
+      created_at,
+      services (
+        id,
+        title,
+        category,
+        location
+      ),
+      customer:profiles!orders_customer_id_fkey (
+        id,
+        first_name,
+        last_name,
+        display_name,
+        avatar_url,
+        region,
+        city,
+        barangay
+      ),
+      freelancer:profiles!orders_freelancer_id_fkey (
+        id,
+        first_name,
+        last_name,
+        display_name,
+        avatar_url,
+        freelancer_headline,
+        region,
+        city,
+        barangay
+      )
+    `
+    )
+    .eq("id", orderId)
+    .eq(column, ownerId)
+    .maybeSingle();
+
+  if (orderError) throw orderError;
+  if (!orderRow) throw new Error("We couldn't find that order.");
+
+  const { data: updateRows, error: updateError } = await supabase
+    .from("order_updates")
+    .select("id, order_id, author_id, author_role, update_kind, title, body, created_at")
+    .eq("order_id", orderId)
+    .order("created_at", { ascending: true });
+
+  if (updateError) throw updateError;
+
+  return {
+    ...orderRow,
+    totalLabel: formatPeso(orderRow.total_price),
+    grossLabel: formatPeso(orderRow.gross_amount || orderRow.total_price),
+    platformFeeLabel: formatPeso(orderRow.platform_fee || 0),
+    freelancerNetLabel: formatPeso(orderRow.freelancer_net || 0),
+    createdAtLabel: formatLongDateTime(orderRow.created_at),
+    paidAtLabel: formatLongDateTime(orderRow.paid_at),
+    completedAtLabel: formatLongDateTime(orderRow.completed_at),
+    releasedAtLabel: formatLongDateTime(orderRow.released_at),
+    customerName: buildProfileName(orderRow.customer, "Customer"),
+    freelancerName: buildProfileName(orderRow.freelancer, "Freelancer"),
+    updates: (updateRows || []).map(normalizeOrderUpdate),
+  };
+}
+
+export async function fetchCustomerOrderDetail(orderId) {
+  const profile = await getSignedInProfile();
+  return fetchOrderDetail(orderId, "customer_id", profile.id);
+}
+
+export async function fetchFreelancerOrderDetail(orderId) {
+  const profile = await getSignedInProfile();
+  return fetchOrderDetail(orderId, "freelancer_id", profile.id);
+}
+
+export async function confirmOrderCompletion(orderId) {
+  const profile = await getSignedInProfile();
+  const order = await fetchOrderDetail(orderId, "customer_id", profile.id);
+  const now = new Date().toISOString();
+
+  const { error: orderError } = await supabase
+    .from("orders")
+    .update({
+      status: "completed",
+      escrow_status: "released",
+      completed_at: now,
+      released_at: now,
+    })
+    .eq("id", orderId)
+    .eq("customer_id", profile.id);
+
+  if (orderError) throw orderError;
+
+  const { data: insertedUpdate, error: updateError } = await supabase
+    .from("order_updates")
+    .insert([
+      {
+        order_id: orderId,
+        author_id: profile.id,
+        author_role: "customer",
+        update_kind: "status",
+        title: "Order completed",
+        body: "The customer marked this order as completed and the held amount is now released.",
+      },
+    ])
+    .select("id")
+    .single();
+
+  if (updateError) throw updateError;
+
+  const thread = await ensureThread({
+    customerId: order.customer_id,
+    freelancerId: order.freelancer_id,
+  });
+
+  await insertThreadMessage({
+    threadId: thread.id,
+    senderId: profile.id,
+    senderRole: "customer",
+    body: "Marked the order as completed and released the held payment.",
+    messageType: "order_update",
+    metadata: {
+      orderId,
+      updateId: insertedUpdate.id,
+      updateKind: "status",
+      title: "Order completed",
+    },
+  });
+
+  return true;
+}
+
+export async function createFreelancerOrderUpdate({
+  orderId,
+  updateKind,
+  title,
+  body,
+}) {
+  const profile = await getSignedInProfile();
+  const normalizedTitle = normalizeText(title);
+  const normalizedBody = normalizeText(body);
+  const normalizedKind = normalizeText(updateKind) || "progress";
+
+  if (!normalizedTitle) throw new Error("Add a short update title.");
+  if (!normalizedBody) throw new Error("Add the update details before sending.");
+
+  const order = await fetchOrderDetail(orderId, "freelancer_id", profile.id);
+
+  const { data: insertedUpdate, error: updateError } = await supabase
+    .from("order_updates")
+    .insert([
+      {
+        order_id: orderId,
+        author_id: profile.id,
+        author_role: "freelancer",
+        update_kind: normalizedKind,
+        title: normalizedTitle,
+        body: normalizedBody,
+      },
+    ])
+    .select("id")
+    .single();
+
+  if (updateError) throw updateError;
+
+  const thread = await ensureThread({
+    customerId: order.customer_id,
+    freelancerId: order.freelancer_id,
+  });
+
+  await insertThreadMessage({
+    threadId: thread.id,
+    senderId: profile.id,
+    senderRole: "freelancer",
+    body: normalizedBody,
+    messageType: "order_update",
+    metadata: {
+      orderId,
+      updateId: insertedUpdate.id,
+      updateKind: normalizedKind,
+      title: normalizedTitle,
+    },
+  });
+
+  return true;
+}
+
+export async function listFreelancerOrders() {
+  const profile = await getSignedInProfile();
+
+  const { data, error } = await supabase
+    .from("orders")
+    .select(
+      `
+      id,
+      service_id,
+      customer_id,
+      freelancer_id,
+      status,
+      total_price,
+      gross_amount,
+      platform_fee,
+      freelancer_net,
+      escrow_status,
+      paid_at,
+      created_at,
+      selected_package_name,
+      selected_package_summary,
+      selected_package_delivery_time_days,
+      services (
+        id,
+        title,
+        category,
+        location
+      ),
+      customer:profiles!orders_customer_id_fkey (
+        id,
+        first_name,
+        last_name,
+        display_name,
+        avatar_url,
+        region,
+        city,
+        barangay
+      )
+    `
+    )
+    .eq("freelancer_id", profile.id)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return (data || []).map((row) => ({
+    ...row,
+    customerName: buildProfileName(row.customer, "Customer"),
+    totalLabel: formatPeso(row.total_price),
+    freelancerNetLabel: formatPeso(row.freelancer_net || 0),
+    createdAtLabel: formatDate(row.created_at),
+  }));
+}
+
+export async function fetchFreelancerPayoutMethod() {
+  const profile = await getSignedInProfile();
+  const { data, error } = await supabase
+    .from("freelancer_payout_methods")
+    .select("payout_method, account_name, account_reference")
+    .eq("freelancer_id", profile.id)
+    .maybeSingle();
+
+  if (error) throw error;
+  return normalizePayoutMethod(data);
+}
+
+export async function saveFreelancerPayoutMethod(values) {
+  const profile = await getSignedInProfile();
+  const payoutMethod = normalizeText(values?.payoutMethod);
+  const accountName = normalizeText(values?.accountName);
+  const accountReference = normalizeText(values?.accountReference);
+
+  if (!payoutMethod) throw new Error("Choose a payout method.");
+  if (!accountName) throw new Error("Add the account name.");
+  if (!accountReference) throw new Error("Add the payout account reference.");
+
+  const { data, error } = await supabase
+    .from("freelancer_payout_methods")
+    .upsert(
+      [
+        {
+          freelancer_id: profile.id,
+          payout_method: payoutMethod,
+          account_name: accountName,
+          account_reference: accountReference,
+        },
+      ],
+      { onConflict: "freelancer_id" }
+    )
+    .select("payout_method, account_name, account_reference")
+    .single();
+
+  if (error) throw error;
+  return normalizePayoutMethod(data);
+}
+
+export function useCustomerRequestDetail(requestId) {
+  const [loading, setLoading] = useState(true);
+  const [request, setRequest] = useState(null);
+  const [error, setError] = useState("");
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const nextRequest = await fetchCustomerRequestDetail(requestId);
+      setRequest(nextRequest);
+    } catch (nextError) {
+      setRequest(null);
+      setError(
+        friendlyWorkflowMessage(nextError, "We couldn't open this request.")
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [requestId]);
+
+  useEffect(() => {
+    if (!requestId) {
+      setLoading(false);
+      setRequest(null);
+      return;
+    }
+    load();
+  }, [load, requestId]);
+
+  return {
+    loading,
+    request,
+    error,
+    reload: load,
+  };
+}
+
+export function useFreelancerOrders() {
+  const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState([]);
+  const [payoutMethod, setPayoutMethod] = useState(normalizePayoutMethod(null));
+  const [error, setError] = useState("");
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const [nextOrders, nextPayoutMethod] = await Promise.all([
+        listFreelancerOrders(),
+        fetchFreelancerPayoutMethod().catch(() => normalizePayoutMethod(null)),
+      ]);
+
+      setOrders(nextOrders);
+      setPayoutMethod(nextPayoutMethod);
+    } catch (nextError) {
+      setOrders([]);
+      setPayoutMethod(normalizePayoutMethod(null));
+      setError(
+        friendlyWorkflowMessage(nextError, "We couldn't load your freelancer orders.")
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const summary = useMemo(() => {
+    const held = orders
+      .filter((order) => normalizeText(order.escrow_status) === "held")
+      .reduce((sum, order) => sum + Number(order.freelancer_net || 0), 0);
+    const released = orders
+      .filter((order) => normalizeText(order.escrow_status) === "released")
+      .reduce((sum, order) => sum + Number(order.freelancer_net || 0), 0);
+
+    return {
+      held,
+      heldLabel: formatPeso(held),
+      released,
+      releasedLabel: formatPeso(released),
+      totalLabel: formatPeso(held + released),
+      activeCount: orders.filter((order) => ["pending", "active"].includes(order.status)).length,
+      completedCount: orders.filter((order) => order.status === "completed").length,
+    };
+  }, [orders]);
+
+  return {
+    loading,
+    orders,
+    payoutMethod,
+    summary,
+    error,
+    reload: load,
+  };
+}
+

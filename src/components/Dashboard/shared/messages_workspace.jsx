@@ -1,7 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { EmptySurface, Reveal, DashboardBreadcrumbs, TypewriterHeading } from "./customerProfileShared";
+import {
+  EmptySurface,
+  Reveal,
+  DashboardBreadcrumbs,
+  TypewriterHeading,
+} from "./customerProfileShared";
 import { PROFILE_SPRING } from "./customerProfileConfig";
 import { formatConversationTime, useMessagesInbox } from "../hooks/useMessagesInbox";
 import "./messages_workspace.css";
@@ -35,12 +40,127 @@ function MessageThreadButton({ thread, active, onSelect }) {
             {formatConversationTime(thread.previewTime)}
           </span>
         </span>
-        {thread.counterpart.subtitle ? (
-          <span className="messagesThread__subtitle">{thread.counterpart.subtitle}</span>
-        ) : null}
+
         <span className="messagesThread__preview">{thread.preview}</span>
       </span>
     </motion.button>
+  );
+}
+
+function formatConversationStarted(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("en-PH", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+function MessageHeaderActionButton() {
+  return (
+    <button
+      type="button"
+      className="messagesConversation__menu"
+      aria-label="Conversation actions"
+      title="Conversation actions"
+    >
+      <span className="messagesConversation__menuDot" />
+      <span className="messagesConversation__menuDot" />
+      <span className="messagesConversation__menuDot" />
+    </button>
+  );
+}
+
+function MessageBubble({ message, ownMessage }) {
+  const bubbleClassName = `messagesBubble ${ownMessage ? "messagesBubble--own" : ""}`.trim();
+  const metaText = formatConversationTime(message.created_at);
+
+  if (message.message_type === "proposal") {
+    const offeredPrice = Number(message?.metadata?.offeredPrice || 0);
+    const deliveryDays = Number(message?.metadata?.deliveryDays || 0);
+    const requestTitle = String(message?.metadata?.requestTitle || "").trim();
+    const status = String(message?.metadata?.status || "").trim();
+
+    return (
+      <motion.div
+        className={`messagesBubbleWrap ${
+          ownMessage ? "messagesBubbleWrap--own" : ""
+        }`.trim()}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className={bubbleClassName}>
+          <div className="messagesBubble__body messagesBubble__body--card">
+            <div className="messagesBubble__cardLabel">Proposal</div>
+
+            {requestTitle ? (
+              <div className="messagesBubble__cardTitle">{requestTitle}</div>
+            ) : null}
+
+            <div className="messagesBubble__cardFacts">
+              {offeredPrice > 0 ? <span>PHP {offeredPrice.toLocaleString()}</span> : null}
+              {deliveryDays > 0 ? (
+                <span>
+                  {deliveryDays} day{deliveryDays === 1 ? "" : "s"}
+                </span>
+              ) : null}
+              {status ? <span>{status}</span> : null}
+            </div>
+
+            {message.body ? <div>{message.body}</div> : null}
+          </div>
+        </div>
+
+        <div className="messagesBubble__metaBelow">{metaText}</div>
+      </motion.div>
+    );
+  }
+
+  if (message.message_type === "order_update") {
+    const title = String(message?.metadata?.title || "").trim() || "Order update";
+    const kind = String(message?.metadata?.updateKind || "").trim();
+
+    return (
+      <motion.div
+        className={`messagesBubbleWrap ${
+          ownMessage ? "messagesBubbleWrap--own" : ""
+        }`.trim()}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className={bubbleClassName}>
+          <div className="messagesBubble__body messagesBubble__body--card">
+            <div className="messagesBubble__cardLabel">{kind || "Order update"}</div>
+            <div className="messagesBubble__cardTitle">{title}</div>
+            {message.body ? <div>{message.body}</div> : null}
+          </div>
+        </div>
+
+        <div className="messagesBubble__metaBelow">{metaText}</div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      className={`messagesBubbleWrap ${
+        ownMessage ? "messagesBubbleWrap--own" : ""
+      }`.trim()}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div className={bubbleClassName}>
+        <div className="messagesBubble__body">{message.body}</div>
+      </div>
+
+      <div className="messagesBubble__metaBelow">{metaText}</div>
+    </motion.div>
   );
 }
 
@@ -48,11 +168,14 @@ export default function MessagesWorkspace({ role = "customer" }) {
   const navigate = useNavigate();
   const location = useLocation();
   const composerRef = useRef(null);
+
   const searchParams = useMemo(
     () => new URLSearchParams(location.search),
     [location.search]
   );
+
   const [draft, setDraft] = useState("");
+
   const {
     loading,
     loadingMessages,
@@ -68,15 +191,14 @@ export default function MessagesWorkspace({ role = "customer" }) {
     ensureThreadForCustomer,
   } = useMessagesInbox(role);
 
-  const homePath =
-    role === "customer" ? "/dashboard/customer" : "/dashboard/freelancer";
-  const currentLabel = role === "customer" ? "Messages" : "Messages";
+  const homePath = role === "customer" ? "/dashboard/customer" : "/dashboard/freelancer";
+  const currentLabel = "Messages";
   const browsePath =
     role === "customer"
       ? "/dashboard/customer/browse-services"
       : "/dashboard/freelancer/browse-requests";
-  const browseLabel =
-    role === "customer" ? "Browse services" : "Browse requests";
+  const browseLabel = role === "customer" ? "Browse services" : "Browse requests";
+
   const freelancerId = String(searchParams.get("freelancer") || "").trim();
   const customerId = String(searchParams.get("customer") || "").trim();
   const serviceTitle = String(searchParams.get("serviceTitle") || "").trim();
@@ -106,7 +228,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
     }
   };
 
-  const titleText = role === "customer" ? "Messages" : "Messages";
+  const titleText = "Messages";
   const heroSubtext =
     role === "customer"
       ? "Keep service questions and project details in one conversation."
@@ -134,6 +256,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
               <h1 className="messagesHero__title">
                 <TypewriterHeading text={titleText} />
               </h1>
+
               <motion.svg
                 className="messagesHero__line"
                 viewBox="0 0 250 20"
@@ -152,6 +275,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
                 />
               </motion.svg>
             </div>
+
             <p className="messagesHero__sub">{heroSubtext}</p>
           </div>
 
@@ -160,11 +284,10 @@ export default function MessagesWorkspace({ role = "customer" }) {
               <span className="profileMiniStat__label">Threads</span>
               <strong className="profileMiniStat__value">{threads.length}</strong>
             </div>
+
             <div className="profileMiniStat profileMiniStat--open">
               <span className="profileMiniStat__label">Active</span>
-              <strong className="profileMiniStat__value">
-                {activeThread ? "1" : "0"}
-              </strong>
+              <strong className="profileMiniStat__value">{activeThread ? "1" : "0"}</strong>
             </div>
           </div>
         </section>
@@ -248,10 +371,12 @@ export default function MessagesWorkspace({ role = "customer" }) {
                         activeThread.counterpart.initials
                       )}
                     </div>
+
                     <div className="messagesConversation__copy">
                       <h2 className="messagesConversation__title">
                         {activeThread.counterpart.title}
                       </h2>
+
                       {activeThread.counterpart.subtitle ? (
                         <p className="messagesConversation__subtitle">
                           {activeThread.counterpart.subtitle}
@@ -260,11 +385,15 @@ export default function MessagesWorkspace({ role = "customer" }) {
                     </div>
                   </div>
 
-                  {contextualThread && (serviceTitle || requestTitle) ? (
-                    <div className="messagesConversation__context">
-                      About {serviceTitle || requestTitle}
-                    </div>
-                  ) : null}
+                  <div className="messagesConversation__headActions">
+                    {contextualThread && (serviceTitle || requestTitle) ? (
+                      <div className="messagesConversation__context">
+                        About {serviceTitle || requestTitle}
+                      </div>
+                    ) : null}
+
+                    <MessageHeaderActionButton />
+                  </div>
                 </div>
 
                 <div className="messagesConversation__body">
@@ -282,73 +411,64 @@ export default function MessagesWorkspace({ role = "customer" }) {
                     />
                   ) : (
                     <div className="messagesBubbleList">
-                      {messages.map((message) => {
-                        const ownMessage = message.sender_role === role;
+                      <div className="messagesSystemRow">
+                        Conversation started {formatConversationStarted(activeThread?.created_at)}
+                      </div>
 
-                        return (
-                          <motion.div
-                            key={message.id}
-                            className={`messagesBubble ${
-                              ownMessage ? "messagesBubble--own" : ""
-                            }`.trim()}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-                          >
-                            <div className="messagesBubble__body">{message.body}</div>
-                            <div className="messagesBubble__meta">
-                              {formatConversationTime(message.created_at)}
-                            </div>
-                          </motion.div>
-                        );
-                      })}
+                      <AnimatePresence initial={false}>
+                        {messages.map((message) => {
+                          const ownMessage = message.sender_role === role;
+                          return (
+                            <MessageBubble
+                              key={message.id}
+                              message={message}
+                              ownMessage={ownMessage}
+                            />
+                          );
+                        })}
+                      </AnimatePresence>
                     </div>
                   )}
                 </div>
 
                 <form className="messagesComposer" onSubmit={handleSubmit}>
-                  <label className="messagesComposer__field">
-                    <span className="messagesComposer__label">Message</span>
+                  <div className="messagesComposer__field">
+                    <label className="messagesComposer__label" htmlFor="messages-composer">
+                      Reply
+                    </label>
+
                     <textarea
+                      id="messages-composer"
                       ref={composerRef}
                       className="messagesComposer__control"
                       value={draft}
                       onChange={(event) => setDraft(event.target.value)}
                       placeholder={
-                        role === "customer"
-                          ? "Ask about the service or share the details you need."
-                          : "Reply with the details the customer needs."
+                        startingThread
+                          ? "Opening your thread..."
+                          : "Type your message here..."
                       }
-                      rows={3}
+                      disabled={sending || startingThread || !activeThread}
                     />
-                  </label>
+                  </div>
 
                   <div className="messagesComposer__actions">
-                    <AnimatePresence mode="wait">
-                      {error ? (
-                        <motion.p
-                          key={error}
-                          className="messagesComposer__error"
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -6 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {error}
-                        </motion.p>
-                      ) : null}
-                    </AnimatePresence>
+                    <p className="messagesComposer__error" role="status" aria-live="polite">
+                      {error ? error : "\u00A0"}
+                    </p>
 
-                    <motion.button
+                    <button
                       type="submit"
                       className="messagesComposer__submit"
-                      whileHover={sending ? {} : { y: -1.5 }}
-                      whileTap={sending ? {} : { scale: 0.98 }}
-                      transition={PROFILE_SPRING}
-                      disabled={sending || startingThread || !draft.trim()}
+                      disabled={
+                        sending ||
+                        startingThread ||
+                        !activeThread ||
+                        !String(draft || "").trim()
+                      }
                     >
-                      {sending ? "Sending..." : "Send"}
-                    </motion.button>
+                      {sending ? "Sending..." : "Send message"}
+                    </button>
                   </div>
                 </form>
               </>

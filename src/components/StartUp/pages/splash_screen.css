@@ -38,9 +38,12 @@ html, body, #root{
   place-items: center;
   opacity: 1;
   background:
-    radial-gradient(900px 560px at 65% 25%, rgba(245, 158, 11, 0.08), transparent 60%),
-    radial-gradient(900px 600px at 35% 75%, rgba(167, 126, 255, 0.12), transparent 62%),
-    linear-gradient(180deg, #0f0b17, #181126 45%, #23183a);
+    radial-gradient(980px 620px at 18% 14%, rgba(167, 126, 255, 0.18), transparent 58%),
+    radial-gradient(860px 540px at 82% 18%, rgba(245, 158, 11, 0.16), transparent 56%),
+    radial-gradient(980px 600px at 50% 82%, rgba(109, 40, 217, 0.18), transparent 60%),
+    linear-gradient(130deg, #0d0916 0%, #1a1028 35%, #2a1840 68%, #160f25 100%);
+  background-size: 120% 120%, 120% 120%, 135% 135%, 150% 150%;
+  animation: splashGradientShift 18s ease-in-out infinite alternate;
 }
 
 .splash__glow{
@@ -267,6 +270,18 @@ html, body, #root{
 
 @keyframes autoFadeOut{ to{ opacity: 0; visibility: hidden; } }
 @keyframes clickFadeOut{ to{ opacity: 0; visibility: hidden; } }
+
+@keyframes splashGradientShift{
+  0%{
+    background-position: 0% 0%, 100% 0%, 50% 100%, 0% 0%;
+  }
+  50%{
+    background-position: 14% 8%, 86% 16%, 50% 86%, 48% 42%;
+  }
+  100%{
+    background-position: 8% 18%, 92% 10%, 46% 78%, 100% 100%;
+  }
+}
 
 @keyframes draw{
   0%{ stroke-dashoffset: 1; opacity: 0; }

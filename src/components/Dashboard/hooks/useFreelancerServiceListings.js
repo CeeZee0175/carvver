@@ -27,7 +27,6 @@ const SERVICE_COLUMNS_BASE = `
   listing_overview,
   listing_highlights,
   delivery_time_days,
-  revisions,
   price,
   is_published,
   created_at
@@ -100,7 +99,7 @@ function normalizePackage(item, index, fallbackIncludedItems = []) {
     summary: normalizeText(item?.summary || item?.package_summary),
     price: Number(item?.price || 0),
     deliveryTimeDays: Number(item?.deliveryTimeDays || item?.delivery_time_days || 0),
-    revisions: Number(item?.revisions || 0),
+    revisions: null,
     includedItems: Array.isArray(includedItems)
       ? includedItems.map((entry) => normalizeText(entry)).filter(Boolean)
       : [],
@@ -125,10 +124,6 @@ function buildServicePayload({
     .map((item) => item.deliveryTimeDays)
     .filter((value) => Number.isFinite(value) && value > 0)
     .sort((a, b) => a - b);
-  const sortedRevisions = validPackages
-    .map((item) => item.revisions)
-    .filter((value) => Number.isFinite(value) && value >= 0)
-    .sort((a, b) => a - b);
 
   return {
     base: {
@@ -151,7 +146,7 @@ function buildServicePayload({
       listing_overview: description,
       listing_highlights: highlights,
       delivery_time_days: sortedDelivery[0] || null,
-      revisions: sortedRevisions[0] ?? null,
+      revisions: null,
     },
     packages: validPackages,
   };
@@ -538,7 +533,7 @@ export async function saveFreelancerServiceListing({
       package_summary: item.summary || null,
       price: item.price,
       delivery_time_days: item.deliveryTimeDays || null,
-      revisions: Number.isFinite(item.revisions) ? item.revisions : null,
+      revisions: null,
       included_items:
         item.includedItems.length > 0 ? item.includedItems : normalizedHighlights,
     }));

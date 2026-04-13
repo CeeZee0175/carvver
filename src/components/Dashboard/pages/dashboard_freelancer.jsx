@@ -36,14 +36,17 @@ export default function DashboardFreelancer() {
   const quickLinks = [
     {
       label: "Profile",
+      description: "Update the way customers see your name, bio, and location.",
       action: () => navigate("/dashboard/freelancer/profile"),
     },
     {
       label: "Settings",
+      description: "Manage your account details, billing, and sign-in controls.",
       action: () => navigate("/dashboard/freelancer/settings"),
     },
     {
       label: "Messages",
+      description: "Pick up customer conversations and reply without losing context.",
       action: () => navigate("/dashboard/freelancer/messages"),
     },
   ];
@@ -72,6 +75,12 @@ export default function DashboardFreelancer() {
       description: "Jump straight into customer conversations without leaving your workspace.",
       action: () => navigate("/dashboard/freelancer/messages"),
       cta: "Open inbox",
+    },
+    {
+      title: "Orders",
+      description: "Track held and released earnings while keeping customer work moving.",
+      action: () => navigate("/dashboard/freelancer/orders"),
+      cta: "View orders",
     },
   ];
 
@@ -208,6 +217,7 @@ export default function DashboardFreelancer() {
                     onClick={item.action}
                   >
                     <span className="freelancerDashboardQuickLinks__label">{item.label}</span>
+                    <p className="freelancerDashboardQuickLinks__desc">{item.description}</p>
                   </motion.button>
                 ))}
               </div>

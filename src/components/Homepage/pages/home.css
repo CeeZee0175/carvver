@@ -31,12 +31,6 @@ html, body{
 
   position: relative;
   z-index: 1;
-
-  scrollbar-width: none;
-}
-.homeScroll::-webkit-scrollbar{
-  width: 0;
-  height: 0;
 }
 
 .homeSnap{

@@ -12,6 +12,7 @@ import {
   TypewriterHeading,
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
+import SearchableCombobox from "../../Shared/searchable_combobox";
 import {
   useFreelancerRequestFilters,
   useFreelancerRequestMarketplace,
@@ -215,29 +216,28 @@ export default function FreelancerBrowseRequests() {
               onChange={(event) => setSearch(event.target.value)}
             />
 
-            <select
-              className="freelancerMarketplaceSelect"
+            <SearchableCombobox
               value={category}
-              onChange={(event) => setCategory(event.target.value)}
-            >
-              {categoryOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+              onSelect={(nextValue) => setCategory(nextValue || "All")}
+              options={categoryOptions}
+              placeholder="Filter category"
+              searchHint="Browse categories"
+              noResultsText="No category matches"
+              ariaLabel="Filter requests by category"
+            />
 
-            <select
-              className="freelancerMarketplaceSelect"
-              value={sort}
-              onChange={(event) => setSort(event.target.value)}
-            >
-              {SORT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <SearchableCombobox
+              value={SORT_OPTIONS.find((option) => option.value === sort)?.label || "Newest"}
+              onSelect={(nextValue) => {
+                const matched = SORT_OPTIONS.find((option) => option.label === nextValue);
+                setSort(matched?.value || "newest");
+              }}
+              options={SORT_OPTIONS.map((option) => option.label)}
+              placeholder="Sort requests"
+              searchHint="Choose sorting"
+              noResultsText="No sort options"
+              ariaLabel="Sort request listings"
+            />
           </div>
 
           <p className="freelancerMarketplaceCount">

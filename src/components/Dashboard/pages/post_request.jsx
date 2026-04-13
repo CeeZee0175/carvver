@@ -7,6 +7,7 @@ import {
   ChevronRight,
   LoaderCircle,
 } from "lucide-react";
+import SearchableCombobox from "../../Shared/searchable_combobox";
 import "./profile.css";
 import "./post_request.css";
 import {
@@ -21,6 +22,11 @@ import {
   useCustomerRequests,
 } from "../hooks/useCustomerRequests";
 import {
+  buildPhilippinesLocationLabel,
+  getCitiesByRegion,
+  PH_REGION_OPTIONS,
+} from "../../../lib/phLocations";
+import {
   CustomerDashboardFrame,
   DashboardBreadcrumbs,
   Reveal,
@@ -33,7 +39,8 @@ const INITIAL_FORM = {
   category: "",
   description: "",
   budgetAmount: "",
-  location: "",
+  region: "",
+  city: "",
   timeline: "",
 };
 
@@ -212,6 +219,10 @@ export default function PostRequest() {
     const videos = attachments.filter((item) => item.kind === "video").length;
     return { images, videos };
   }, [attachments]);
+  const cityOptions = useMemo(
+    () => getCitiesByRegion(formValues.region),
+    [formValues.region]
+  );
 
   const selectedCategoryLabel =
     CATEGORY_OPTIONS.find((option) => option === formValues.category) || "";
@@ -296,12 +307,16 @@ export default function PostRequest() {
     const category = formValues.category.trim();
     const description = formValues.description.trim();
     const timeline = formValues.timeline.trim();
+    const region = formValues.region.trim();
+    const city = formValues.city.trim();
     const budgetAmount = formValues.budgetAmount;
 
     if (!title) return void setError("Please add a short title for your request.");
     if (!category) return void setError("Please choose a category.");
     if (!description) return void setError("Please describe what you want clearly.");
     if (!budgetAmount) return void setError("Please enter your budget amount.");
+    if (!region) return void setError("Please choose your region.");
+    if (!city) return void setError("Please choose your city.");
     if (!timeline) return void setError("Please choose a deadline date.");
 
     const numericBudget = Number(budgetAmount);
@@ -313,11 +328,14 @@ export default function PostRequest() {
       return void setError("Please choose a deadline that is today or later.");
     }
 
+    const location = buildPhilippinesLocationLabel({ region, city });
+
     try {
       setSubmitting(true);
       setError("");
       const created = await createCustomerRequest({
         ...formValues,
+        location,
         attachments: attachments.map((item) => item.file),
       });
 
@@ -362,6 +380,19 @@ export default function PostRequest() {
     setCategoryOpen(false);
     setCategoryFocusIndex(-1);
     categoryButtonRef.current?.focus();
+  };
+
+  const handleRegionSelect = (value) => {
+    setFormValues((prev) => ({
+      ...prev,
+      region: value,
+      city: value === prev.region ? prev.city : "",
+    }));
+    if (error) setError("");
+  };
+
+  const handleCitySelect = (value) => {
+    updateField("city", value);
   };
 
   const handleCategoryTriggerKeyDown = (event) => {
@@ -714,17 +745,31 @@ export default function PostRequest() {
               />
             </label>
 
-            <label className="requestField">
-              <span className="requestField__label">Location</span>
-              <input
-                className="requestField__input"
-                type="text"
-                placeholder="City, town, or area if relevant"
-                value={formValues.location}
-                onChange={(event) => updateField("location", event.target.value)}
+            <div className="requestField">
+              <span className="requestField__label">Region</span>
+              <SearchableCombobox
+                value={formValues.region}
+                onSelect={handleRegionSelect}
+                options={PH_REGION_OPTIONS}
+                placeholder="Choose your region"
+                searchHint="Search regions"
+                ariaLabel="Choose your region"
                 disabled={submitting}
               />
-            </label>
+            </div>
+
+            <div className="requestField">
+              <span className="requestField__label">City</span>
+              <SearchableCombobox
+                value={formValues.city}
+                onSelect={handleCitySelect}
+                options={cityOptions}
+                placeholder={formValues.region ? "Choose your city" : "Choose a region first"}
+                searchHint="Search cities"
+                ariaLabel="Choose your city"
+                disabled={submitting || !formValues.region}
+              />
+            </div>
 
             <label className="requestField requestField--full">
               <span className="requestField__label">Description</span>

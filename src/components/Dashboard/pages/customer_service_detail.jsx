@@ -485,12 +485,6 @@ export default function CustomerServiceDetail() {
                                 : "Flexible"}
                             </span>
                           </div>
-                          <div className="serviceDetailPackage__fact">
-                            <span className="serviceDetailPackage__factLabel">Revisions</span>
-                            <span className="serviceDetailPackage__factValue">
-                              {item.revisions === null ? "Ask freelancer" : item.revisions}
-                            </span>
-                          </div>
                         </div>
 
                         {item.includedItems.length > 0 ? (

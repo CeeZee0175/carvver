@@ -4,17 +4,12 @@
 /* ── Page Shell ── */
 .browseCategories {
   position: relative;
-  height: 100vh;
+  min-height: 100vh;
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.browseCategories::-webkit-scrollbar {
-  display: none;
 }
 
 .browseCategories__base {

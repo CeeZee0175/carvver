@@ -220,6 +220,46 @@
   color: rgba(27, 16, 46, 0.38);
 }
 
+.requestField .searchableCombo__controlWrap {
+  min-height: 3.15rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 14px 34px rgba(12, 7, 18, 0.04);
+}
+
+.requestField .searchableCombo__controlWrap:hover {
+  transform: translateY(-1px);
+}
+
+.requestField .searchableCombo__controlWrap:focus-within {
+  border-color: rgba(124, 58, 237, 0.24);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 18px 38px rgba(12, 7, 18, 0.06),
+    0 0 0 4px rgba(124, 58, 237, 0.08);
+}
+
+.requestField .searchableCombo__control {
+  min-height: 3.15rem;
+  padding: 0 1rem;
+  font-size: 0.94rem;
+}
+
+.requestField .searchableCombo__toggle {
+  margin-right: 0.5rem;
+}
+
+.requestField .searchableCombo__menu {
+  border-radius: 1.15rem;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 250, 242, 0.94));
+  box-shadow:
+    0 22px 48px rgba(12, 7, 18, 0.1),
+    0 0 0 1px rgba(242, 193, 78, 0.05);
+}
+
 .requestDropdown {
   position: relative;
 }

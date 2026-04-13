@@ -1,5 +1,5 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { LogOut, MessageCircle, Sparkles, UserRound } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -12,12 +12,39 @@ import {
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import { useFreelancerProfileData } from "../hooks/useFreelancerProfileData";
+import {
+  fetchFreelancerPayoutMethod,
+  saveFreelancerPayoutMethod,
+} from "../hooks/useMarketplaceWorkflow";
 import "./profile.css";
 import "./freelancer_pages.css";
+import "./customer_settings.css";
 
 export default function FreelancerSettings() {
   const navigate = useNavigate();
   const { profile, displayName, locationLabel, warning } = useFreelancerProfileData();
+  const [payoutValues, setPayoutValues] = useState({
+    payoutMethod: "",
+    accountName: "",
+    accountReference: "",
+  });
+  const [payoutState, setPayoutState] = useState({
+    pending: false,
+    error: "",
+    success: "",
+  });
+
+  useEffect(() => {
+    fetchFreelancerPayoutMethod()
+      .then((next) => {
+        setPayoutValues({
+          payoutMethod: next.payoutMethod || "",
+          accountName: next.accountName || "",
+          accountReference: next.accountReference || "",
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -25,6 +52,31 @@ export default function FreelancerSettings() {
       navigate("/sign-in", { replace: true });
     } catch {
       toast.error("Failed to sign out. Please try again.");
+    }
+  };
+
+  const handlePayoutSave = async (event) => {
+    event.preventDefault();
+    setPayoutState({ pending: true, error: "", success: "" });
+
+    try {
+      const saved = await saveFreelancerPayoutMethod(payoutValues);
+      setPayoutValues({
+        payoutMethod: saved.payoutMethod,
+        accountName: saved.accountName,
+        accountReference: saved.accountReference,
+      });
+      setPayoutState({
+        pending: false,
+        error: "",
+        success: "Payout destination saved.",
+      });
+    } catch (error) {
+      setPayoutState({
+        pending: false,
+        error: error.message || "We couldn't save your payout destination.",
+        success: "",
+      });
     }
   };
 
@@ -179,6 +231,117 @@ export default function FreelancerSettings() {
       </Reveal>
 
       <Reveal delay={0.18}>
+        <section className="profileSection">
+          <div className="profileSection__head">
+            <div>
+              <h2 className="profileSection__title">Payout destination</h2>
+              <p className="profileSection__sub">
+                Released earnings use these details as the payout destination for manual release handling.
+              </p>
+            </div>
+          </div>
+
+          <form className="customerSettingsForm" onSubmit={handlePayoutSave}>
+            <div className="customerSettingsForm__row">
+              <label className="customerSettingsField">
+                <span className="customerSettingsField__label">Payout method</span>
+                <input
+                  className="customerSettingsField__control"
+                  type="text"
+                  placeholder="gcash, maya, or bank_transfer"
+                  value={payoutValues.payoutMethod}
+                  onChange={(event) =>
+                    setPayoutValues((prev) => ({
+                      ...prev,
+                      payoutMethod: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+
+              <label className="customerSettingsField">
+                <span className="customerSettingsField__label">Account name</span>
+                <input
+                  className="customerSettingsField__control"
+                  type="text"
+                  placeholder="Name on the payout account"
+                  value={payoutValues.accountName}
+                  onChange={(event) =>
+                    setPayoutValues((prev) => ({
+                      ...prev,
+                      accountName: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+            </div>
+
+            <label className="customerSettingsField">
+              <span className="customerSettingsField__label">Account reference</span>
+              <input
+                className="customerSettingsField__control"
+                type="text"
+                placeholder="Account number, wallet number, or bank reference"
+                value={payoutValues.accountReference}
+                onChange={(event) =>
+                  setPayoutValues((prev) => ({
+                    ...prev,
+                    accountReference: event.target.value,
+                  }))
+                }
+              />
+            </label>
+
+            <AnimatePresence mode="wait">
+              {payoutState.error ? (
+                <motion.div
+                  className="customerSettingsStatus customerSettingsStatus--danger"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                >
+                  {payoutState.error}
+                </motion.div>
+              ) : payoutState.success ? (
+                <motion.div
+                  className="customerSettingsStatus customerSettingsStatus--success"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                >
+                  {payoutState.success}
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+
+            <div className="customerSettingsActionsRow">
+              <motion.button
+                type="submit"
+                className="profileEditor__btn profileEditor__btn--primary customerSettingsAction"
+                whileHover={{ y: -1.5 }}
+                whileTap={{ scale: 0.98 }}
+                transition={PROFILE_SPRING}
+                disabled={payoutState.pending}
+              >
+                <span>{payoutState.pending ? "Saving..." : "Save payout method"}</span>
+              </motion.button>
+
+              <motion.button
+                type="button"
+                className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
+                whileHover={{ y: -1.5 }}
+                whileTap={{ scale: 0.98 }}
+                transition={PROFILE_SPRING}
+                onClick={() => navigate("/dashboard/freelancer/orders")}
+              >
+                Open orders
+              </motion.button>
+            </div>
+          </form>
+        </section>
+      </Reveal>
+
+      <Reveal delay={0.22}>
         <section className="profileSection">
           <div className="profileSection__head">
             <div>

@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import { LoaderCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import "./profile.css";
+import "./workflow_pages.css";
 import "./freelancer_pages.css";
 import "./freelancer_marketplace.css";
 import {
@@ -12,12 +15,28 @@ import {
   TypewriterHeading,
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
+import { createRequestProposal } from "../hooks/useMarketplaceWorkflow";
 import { useFreelancerRequestDetail } from "../hooks/useFreelancerRequestMarketplace";
+
+function InlineStatus({ tone = "neutral", message }) {
+  if (!message) return null;
+  return <div className={`workflowStatus workflowStatus--${tone}`}>{message}</div>;
+}
 
 export default function FreelancerRequestDetail() {
   const navigate = useNavigate();
   const { requestId = "" } = useParams();
   const { loading, request, error, reload } = useFreelancerRequestDetail(requestId);
+  const [proposalValues, setProposalValues] = useState({
+    pitch: "",
+    offeredPrice: "",
+    deliveryDays: "",
+  });
+  const [proposalState, setProposalState] = useState({
+    pending: false,
+    error: "",
+    success: "",
+  });
 
   const openConversation = () => {
     if (!request?.customer?.id) return;
@@ -26,6 +45,34 @@ export default function FreelancerRequestDetail() {
     params.set("customer", request.customer.id);
     params.set("requestTitle", request.title);
     navigate(`/dashboard/freelancer/messages?${params.toString()}`);
+  };
+
+  const handleProposalSubmit = async (event) => {
+    event.preventDefault();
+    setProposalState({ pending: true, error: "", success: "" });
+
+    try {
+      await createRequestProposal({
+        requestId,
+        ...proposalValues,
+      });
+      setProposalValues({
+        pitch: "",
+        offeredPrice: "",
+        deliveryDays: "",
+      });
+      setProposalState({
+        pending: false,
+        error: "",
+        success: "Proposal sent. The customer can now review it and reply in chat.",
+      });
+    } catch (nextError) {
+      setProposalState({
+        pending: false,
+        error: nextError.message || "We couldn't send that proposal.",
+        success: "",
+      });
+    }
   };
 
   return (
@@ -220,6 +267,92 @@ export default function FreelancerRequestDetail() {
                 >
                   Start conversation
                 </motion.button>
+              </article>
+
+              <article className="freelancerRequestDetailCard">
+                <h2 className="freelancerRequestDetail__title">Send proposal</h2>
+                <p className="profileSection__sub">
+                  Share your approach, your price, and how quickly you can deliver.
+                </p>
+
+                <AnimatePresence mode="wait">
+                  {proposalState.error ? (
+                    <InlineStatus tone="danger" message={proposalState.error} />
+                  ) : proposalState.success ? (
+                    <InlineStatus tone="success" message={proposalState.success} />
+                  ) : null}
+                </AnimatePresence>
+
+                <form className="workflowForm" onSubmit={handleProposalSubmit}>
+                  <div className="workflowForm__grid">
+                    <label className="workflowField">
+                      <span className="workflowField__label">Offered price</span>
+                      <input
+                        className="workflowField__control"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={proposalValues.offeredPrice}
+                        onChange={(event) =>
+                          setProposalValues((prev) => ({
+                            ...prev,
+                            offeredPrice: event.target.value,
+                          }))
+                        }
+                        placeholder="2500"
+                      />
+                    </label>
+
+                    <label className="workflowField">
+                      <span className="workflowField__label">Delivery in days</span>
+                      <input
+                        className="workflowField__control"
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={proposalValues.deliveryDays}
+                        onChange={(event) =>
+                          setProposalValues((prev) => ({
+                            ...prev,
+                            deliveryDays: event.target.value,
+                          }))
+                        }
+                        placeholder="7"
+                      />
+                    </label>
+                  </div>
+
+                  <label className="workflowField workflowField--wide">
+                    <span className="workflowField__label">Proposal</span>
+                    <textarea
+                      className="workflowField__textarea"
+                      value={proposalValues.pitch}
+                      onChange={(event) =>
+                        setProposalValues((prev) => ({
+                          ...prev,
+                          pitch: event.target.value,
+                        }))
+                      }
+                      placeholder="Explain how you would take this on, what the customer can expect, and any important delivery notes."
+                    />
+                  </label>
+
+                  <div className="workflowActions">
+                    <motion.button
+                      type="submit"
+                      className="workflowActionBtn workflowActionBtn--primary"
+                      whileHover={{ y: -1.5 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={PROFILE_SPRING}
+                      disabled={proposalState.pending}
+                    >
+                      {proposalState.pending ? (
+                        <LoaderCircle className="customerSettingsAction__spinner" />
+                      ) : null}
+                      <span>Send proposal</span>
+                    </motion.button>
+                  </div>
+                </form>
               </article>
 
               <article className="freelancerRequestDetailCard">

@@ -430,6 +430,9 @@ export default function DashboardCustomer() {
                   key={request.id}
                   className="dashLandingRequestCard"
                   {...SURFACE_BUTTON_MOTION}
+                  onClick={() =>
+                    navigate(`/dashboard/customer/requests/${request.id}`)
+                  }
                 >
                   <div className="dashLandingRequestCard__top">
                     <div className="dashLandingRequestCard__meta">

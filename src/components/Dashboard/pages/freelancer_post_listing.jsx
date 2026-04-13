@@ -14,6 +14,7 @@ import {
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import { ALL_SERVICE_CATEGORIES } from "../../../lib/serviceCategories";
+import SearchableCombobox from "../../Shared/searchable_combobox";
 import {
   fetchFreelancerListingForEdit,
   saveFreelancerServiceListing,
@@ -25,9 +26,9 @@ import {
 } from "../hooks/useFreelancerServiceListings";
 
 const INITIAL_PACKAGES = [
-  { id: null, name: "Basic", summary: "", price: "", deliveryTimeDays: "", revisions: "" },
-  { id: null, name: "Standard", summary: "", price: "", deliveryTimeDays: "", revisions: "" },
-  { id: null, name: "Premium", summary: "", price: "", deliveryTimeDays: "", revisions: "" },
+  { id: null, name: "Basic", summary: "", price: "", deliveryTimeDays: "" },
+  { id: null, name: "Standard", summary: "", price: "", deliveryTimeDays: "" },
+  { id: null, name: "Premium", summary: "", price: "", deliveryTimeDays: "" },
 ];
 
 function buildMediaError(file) {
@@ -51,7 +52,6 @@ function normalizePackagesForForm(packages = []) {
     summary: item.summary || "",
     price: item.price ?? "",
     deliveryTimeDays: item.deliveryTimeDays ?? "",
-    revisions: item.revisions ?? "",
   }));
 }
 
@@ -410,18 +410,15 @@ export default function FreelancerPostListing() {
 
                 <label className="freelancerListingField">
                   <span className="freelancerListingField__label">Category</span>
-                  <select
-                    className="freelancerListingField__input"
+                  <SearchableCombobox
                     value={category}
-                    onChange={(event) => setCategory(event.target.value)}
-                  >
-                    <option value="">Choose a category</option>
-                    {ALL_SERVICE_CATEGORIES.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
+                    onSelect={setCategory}
+                    options={ALL_SERVICE_CATEGORIES}
+                    placeholder="Choose a category"
+                    searchHint="Browse categories"
+                    noResultsText="No categories found"
+                    ariaLabel="Choose listing category"
+                  />
                 </label>
 
                 <label className="freelancerListingField">
@@ -465,7 +462,7 @@ export default function FreelancerPostListing() {
                 <div>
                   <h2 className="freelancerListingSection__title">Pricing and delivery</h2>
                   <p className="profileSection__sub">
-                    Shape the package options, delivery timing, and revision structure.
+                    Shape the package options and delivery timing customers can choose from.
                   </p>
                 </div>
               </div>
@@ -514,21 +511,6 @@ export default function FreelancerPostListing() {
                         value={item.deliveryTimeDays}
                         onChange={(event) =>
                           updatePackage(index, "deliveryTimeDays", event.target.value)
-                        }
-                      />
-                    </label>
-
-                    <label className="freelancerListingField">
-                      <span className="freelancerListingField__label">Revisions</span>
-                      <input
-                        className="freelancerListingField__input"
-                        type="number"
-                        min="0"
-                        step="1"
-                        placeholder="2"
-                        value={item.revisions}
-                        onChange={(event) =>
-                          updatePackage(index, "revisions", event.target.value)
                         }
                       />
                     </label>
