@@ -10,8 +10,8 @@ create table public.service_packages (
   included_items text[] null,
   created_at timestamp with time zone not null default timezone ('utc'::text, now()),
   constraint service_packages_pkey primary key (id),
-  constraint service_packages_service_id_fkey foreign KEY (service_id) references services (id) on delete CASCADE,
-  constraint service_packages_service_sort_key unique (service_id, sort_order)
+  constraint service_packages_service_sort_key unique (service_id, sort_order),
+  constraint service_packages_service_id_fkey foreign KEY (service_id) references services (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
-create index IF not exists service_packages_service_idx on public.service_packages using btree (service_id, sort_order asc) TABLESPACE pg_default;
+create index IF not exists service_packages_service_idx on public.service_packages using btree (service_id, sort_order) TABLESPACE pg_default;

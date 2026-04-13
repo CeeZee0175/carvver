@@ -36,16 +36,6 @@ import { useFreelancerProfileData } from "../hooks/useFreelancerProfileData";
 import "./profile.css";
 import "./freelancer_pages.css";
 
-function StatMiniCard({ label, value, hint }) {
-  return (
-    <div className="profileMiniStat">
-      <span className="profileMiniStat__label">{label}</span>
-      <strong className="profileMiniStat__value">{value}</strong>
-      {hint ? <span className="profileMiniStat__hint">{hint}</span> : null}
-    </div>
-  );
-}
-
 export default function FreelancerProfile() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -133,7 +123,7 @@ export default function FreelancerProfile() {
   const specialties = Array.isArray(profile?.freelancer_specialties)
     ? profile.freelancer_specialties.filter(Boolean)
     : [];
-  const portfolioUrl = String(profile?.freelancer_portfolio_url || "").trim();
+  const showProfileProgress = !loading && completion.completed < completion.total;
 
   const resetEditor = () => {
     const normalizedLocation = coercePhilippinesLocation({
@@ -259,29 +249,6 @@ export default function FreelancerProfile() {
     }
   };
 
-  const summaryCards = [
-    {
-      label: "Profile",
-      value: loading ? "..." : `${completion.percent}%`,
-    },
-    {
-      label: "Headline",
-      value: loading ? "..." : headline ? "Set" : "Missing",
-    },
-    {
-      label: "Specialties",
-      value: loading ? "..." : specialties.length || "0",
-      hint:
-        specialties.length > 0
-          ? specialties.slice(0, 2).join(" · ")
-          : "Choose up to five specialties",
-    },
-    {
-      label: "Portfolio",
-      value: loading ? "..." : portfolioUrl ? "Ready" : "Missing",
-    },
-  ];
-
   return (
     <FreelancerDashboardFrame mainClassName="profilePage profilePage--details freelancerPage">
       <Reveal>
@@ -320,16 +287,6 @@ export default function FreelancerProfile() {
               Keep your name, work, and location in one place so people can understand
               your profile without guessing.
             </p>
-          </div>
-
-          <div className="freelancerHero__stats">
-            {summaryCards.map((card) => (
-              <StatMiniCard
-                key={card.label}
-                label={card.label}
-                value={card.value}
-              />
-            ))}
           </div>
         </section>
       </Reveal>
@@ -628,12 +585,8 @@ export default function FreelancerProfile() {
                     ))}
                   </div>
                 ) : specialties.length > 0 ? (
-                  <div className="freelancerChipRow">
-                    {specialties.map((specialty) => (
-                      <span key={specialty} className="freelancerChip">
-                        {specialty}
-                      </span>
-                    ))}
+                  <div className="profileField__display">
+                    {specialties.join(", ")}
                   </div>
                 ) : (
                   <div className="profileField__display">No specialties added yet</div>
@@ -807,46 +760,48 @@ export default function FreelancerProfile() {
         </section>
       </Reveal>
 
-      <Reveal delay={0.18}>
-        <section className="profileSection">
-          <div className="profileSection__head">
-            <div>
-              <h2 className="profileSection__title">Profile progress</h2>
-              <p className="profileSection__sub">
-                Check which freelancer details are already in place and what still strengthens the page.
-              </p>
-            </div>
-            <div className="profileProgress__meta">
-              <strong>{completion.completed}</strong>
-              <span>/ {completion.total} complete</span>
-            </div>
-          </div>
-
-          <div className="profileProgress">
-            <div className="profileProgress__bar">
-              <span
-                className="profileProgress__barFill"
-                style={{ width: `${completion.percent}%` }}
-              />
+      {showProfileProgress ? (
+        <Reveal delay={0.18}>
+          <section className="profileSection">
+            <div className="profileSection__head">
+              <div>
+                <h2 className="profileSection__title">Profile progress</h2>
+                <p className="profileSection__sub">
+                  Check which freelancer details are already in place and what still strengthens the page.
+                </p>
+              </div>
+              <div className="profileProgress__meta">
+                <strong>{completion.completed}</strong>
+                <span>/ {completion.total} complete</span>
+              </div>
             </div>
 
-            <div className="profileProgress__grid">
-              {tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`profileTask ${task.complete ? "profileTask--complete" : ""}`}
-                >
-                  <span className="profileTask__status" aria-hidden="true" />
-                  <div className="profileTask__copy">
-                    <strong className="profileTask__label">{task.label}</strong>
-                    <p className="profileTask__detail">{task.detail}</p>
+            <div className="profileProgress">
+              <div className="profileProgress__bar">
+                <span
+                  className="profileProgress__barFill"
+                  style={{ width: `${completion.percent}%` }}
+                />
+              </div>
+
+              <div className="profileProgress__grid">
+                {tasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className={`profileTask ${task.complete ? "profileTask--complete" : ""}`}
+                  >
+                    <span className="profileTask__status" aria-hidden="true" />
+                    <div className="profileTask__copy">
+                      <strong className="profileTask__label">{task.label}</strong>
+                      <p className="profileTask__detail">{task.detail}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-      </Reveal>
+          </section>
+        </Reveal>
+      ) : null}
     </FreelancerDashboardFrame>
   );
 }

@@ -7,5 +7,4 @@ create table public.customer_favorite_freelancers (
   constraint customer_favorite_freelancers_freelancer_id_fkey foreign KEY (freelancer_id) references profiles (id) on delete CASCADE
 ) TABLESPACE pg_default;
 
-create index if not exists customer_favorite_freelancers_created_idx
-on public.customer_favorite_freelancers using btree (customer_id, created_at desc) TABLESPACE pg_default;
+create index IF not exists customer_favorite_freelancers_created_idx on public.customer_favorite_freelancers using btree (customer_id, created_at desc) TABLESPACE pg_default;

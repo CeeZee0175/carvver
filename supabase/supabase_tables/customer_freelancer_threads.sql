@@ -12,8 +12,10 @@ create table public.customer_freelancer_threads (
   constraint customer_freelancer_threads_distinct_users_check check ((customer_id <> freelancer_id))
 ) TABLESPACE pg_default;
 
-create index IF not exists customer_freelancer_threads_customer_last_message_idx
-on public.customer_freelancer_threads using btree (customer_id, last_message_at desc) TABLESPACE pg_default;
+create index IF not exists customer_freelancer_threads_customer_last_message_idx on public.customer_freelancer_threads using btree (customer_id, last_message_at desc) TABLESPACE pg_default;
 
-create index IF not exists customer_freelancer_threads_freelancer_last_message_idx
-on public.customer_freelancer_threads using btree (freelancer_id, last_message_at desc) TABLESPACE pg_default;
+create index IF not exists customer_freelancer_threads_freelancer_last_message_idx on public.customer_freelancer_threads using btree (freelancer_id, last_message_at desc) TABLESPACE pg_default;
+
+create trigger customer_freelancer_threads_set_updated_at BEFORE
+update on customer_freelancer_threads for EACH row
+execute FUNCTION set_customer_freelancer_threads_updated_at ();

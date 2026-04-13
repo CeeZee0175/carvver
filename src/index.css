@@ -149,9 +149,15 @@ html, body, #root {
 }
 
 html {
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
+  scrollbar-width: none; 
+  -ms-overflow-style: none;
   background: var(--app-shell-background, var(--background));
+}
+
+html::-webkit-scrollbar {
+  display: none;
 }
 
 body {
@@ -161,6 +167,11 @@ body {
   color: var(--foreground);
   background: transparent;
   overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
 
 #root {
