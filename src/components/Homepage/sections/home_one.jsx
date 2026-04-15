@@ -14,7 +14,6 @@ const partners = [
   "TikTok",
 ];
 
-// Duplicate for seamless scrolling
 const carouselPartners = [...partners, ...partners, ...partners];
 
 function PartnerItem({ name }) {
@@ -77,7 +76,6 @@ export default function HomeOne() {
         </div>
       </div>
 
-      {/* Fade stays behind content so it doesn't wash out the text */}
       <div className="hero__fadeOut" aria-hidden="true" />
     </section>
   );

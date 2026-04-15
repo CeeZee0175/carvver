@@ -29,7 +29,6 @@ export function BeamsBackground({ className, intensity = "strong" }) {
   const animationFrameRef  = useRef(0);
   const intensityRef       = useRef(intensity);
 
-  // Keep intensity ref in sync without re-running the effect
   useEffect(() => {
     intensityRef.current = intensity;
   }, [intensity]);
@@ -44,7 +43,6 @@ export function BeamsBackground({ className, intensity = "strong" }) {
     const MINIMUM_BEAMS = 20;
     const TOTAL_BEAMS   = Math.round(MINIMUM_BEAMS * 1.5);
 
-    /* ── Size canvas to viewport ── */
     const updateCanvasSize = () => {
       const dpr = window.devicePixelRatio || 1;
       const w   = window.innerWidth;
@@ -64,7 +62,6 @@ export function BeamsBackground({ className, intensity = "strong" }) {
     updateCanvasSize();
     window.addEventListener("resize", updateCanvasSize);
 
-    /* ── Reset a beam that scrolled off-screen ── */
     function resetBeam(beam, index) {
       const w       = canvas.width  / (window.devicePixelRatio || 1);
       const h       = canvas.height / (window.devicePixelRatio || 1);
@@ -80,7 +77,6 @@ export function BeamsBackground({ className, intensity = "strong" }) {
       return beam;
     }
 
-    /* ── Draw a single beam ── */
     function drawBeam(beam) {
       ctx.save();
       ctx.translate(beam.x, beam.y);
@@ -106,7 +102,6 @@ export function BeamsBackground({ className, intensity = "strong" }) {
       ctx.restore();
     }
 
-    /* ── Animation loop ── */
     function animate() {
       const w = canvas.width  / (window.devicePixelRatio || 1);
       const h = canvas.height / (window.devicePixelRatio || 1);
@@ -134,7 +129,7 @@ export function BeamsBackground({ className, intensity = "strong" }) {
       window.removeEventListener("resize", updateCanvasSize);
       cancelAnimationFrame(animationFrameRef.current);
     };
-  }, []); // runs once — intensity is read via ref
+  }, []);
 
   return (
     <div className={`beamsBackground__wrap${className ? ` ${className}` : ""}`}>
