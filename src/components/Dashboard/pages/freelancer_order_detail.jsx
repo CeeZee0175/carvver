@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LoaderCircle } from "lucide-react";
@@ -16,12 +15,12 @@ import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import {
   createFreelancerOrderUpdate,
   fetchFreelancerOrderDetail,
+  submitFreelancerOrderDelivery,
 } from "../hooks/useMarketplaceWorkflow";
 import SearchableCombobox from "../../Shared/searchable_combobox";
 
 const ORDER_UPDATE_TYPE_OPTIONS = [
   "progress",
-  "delivery",
   "revision",
   "status",
 ];
@@ -29,6 +28,132 @@ const ORDER_UPDATE_TYPE_OPTIONS = [
 function InlineStatus({ tone = "neutral", message }) {
   if (!message) return null;
   return <div className={`workflowStatus workflowStatus--${tone}`}>{message}</div>;
+}
+
+function formatFulfillmentLabel(value) {
+  return String(value || "").trim().toLowerCase() === "physical"
+    ? "Physical shipment"
+    : "Digital delivery";
+}
+
+function formatPayoutState(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "pending_release") return "Pending ops";
+  if (normalized === "released") return "Released";
+  if (normalized === "blocked") return "Blocked";
+  if (normalized === "failed") return "Failed";
+  if (normalized === "refunded") return "Refunded";
+  return "Held";
+}
+
+function DeliveryHistory({ order }) {
+  if (!order?.deliveries?.length) {
+    return (
+      <EmptySurface
+        hideIcon
+        title="No delivery submitted yet"
+        description="Once you submit a digital handoff or shipment details, it will appear here."
+        className="messagesEmpty messagesEmpty--conversation"
+      />
+    );
+  }
+
+  return (
+    <div className="workflowDeliveryList">
+      {order.deliveries.map((delivery) => (
+        <article key={delivery.id} className="workflowDeliveryCard">
+          <div className="workflowDeliveryCard__top">
+            <div>
+              <div className="workflowTimeline__title">
+                {delivery.fulfillmentType === "physical"
+                  ? "Shipment details"
+                  : "Digital delivery"}
+              </div>
+              <div className="workflowTimeline__kind">
+                {formatFulfillmentLabel(delivery.fulfillmentType)}
+              </div>
+            </div>
+            <span className="workflowChip">{delivery.createdAtLabel || "Just now"}</span>
+          </div>
+
+          <p className="workflowTimeline__body">{delivery.deliveryNote}</p>
+
+          <div className="workflowDeliveryCard__grid">
+            {delivery.fulfillmentType === "digital" ? (
+              <>
+                <div className="workflowDeliveryCard__fact">
+                  <span className="workflowDeliveryCard__label">Deliverable</span>
+                  <strong className="workflowDeliveryCard__value">
+                    {delivery.deliverableLabel || "Shared link"}
+                  </strong>
+                </div>
+                <div className="workflowDeliveryCard__fact">
+                  <span className="workflowDeliveryCard__label">Access link</span>
+                  <strong className="workflowDeliveryCard__value">
+                    {delivery.deliverableUrl ? (
+                      <a
+                        className="workflowLink"
+                        href={delivery.deliverableUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open deliverable
+                      </a>
+                    ) : (
+                      "Not added"
+                    )}
+                  </strong>
+                </div>
+                {delivery.accessCode ? (
+                  <div className="workflowDeliveryCard__fact">
+                    <span className="workflowDeliveryCard__label">Access code</span>
+                    <strong className="workflowDeliveryCard__value">{delivery.accessCode}</strong>
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <div className="workflowDeliveryCard__fact">
+                  <span className="workflowDeliveryCard__label">Courier</span>
+                  <strong className="workflowDeliveryCard__value">
+                    {delivery.courierName || "Not added"}
+                  </strong>
+                </div>
+                <div className="workflowDeliveryCard__fact">
+                  <span className="workflowDeliveryCard__label">Tracking/reference</span>
+                  <strong className="workflowDeliveryCard__value">
+                    {delivery.trackingReference || "Not added"}
+                  </strong>
+                </div>
+                {delivery.shipmentNote ? (
+                  <div className="workflowDeliveryCard__fact">
+                    <span className="workflowDeliveryCard__label">Shipment note</span>
+                    <strong className="workflowDeliveryCard__value">{delivery.shipmentNote}</strong>
+                  </div>
+                ) : null}
+                {delivery.proofUrl ? (
+                  <div className="workflowDeliveryCard__fact">
+                    <span className="workflowDeliveryCard__label">Proof</span>
+                    <strong className="workflowDeliveryCard__value">
+                      <a
+                        className="workflowLink"
+                        href={delivery.proofUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open proof
+                      </a>
+                    </strong>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+        </article>
+      ))}
+    </div>
+  );
 }
 
 export default function FreelancerOrderDetail() {
@@ -42,7 +167,22 @@ export default function FreelancerOrderDetail() {
     title: "",
     body: "",
   });
-  const [state, setState] = useState({ pending: false, error: "", success: "" });
+  const [deliveryValues, setDeliveryValues] = useState({
+    deliveryNote: "",
+    deliverableLabel: "",
+    deliverableUrl: "",
+    accessCode: "",
+    courierName: "",
+    trackingReference: "",
+    shipmentNote: "",
+    proofUrl: "",
+  });
+  const [updateState, setUpdateState] = useState({ pending: false, error: "", success: "" });
+  const [deliveryState, setDeliveryState] = useState({
+    pending: false,
+    error: "",
+    success: "",
+  });
 
   const load = async () => {
     setLoading(true);
@@ -64,7 +204,7 @@ export default function FreelancerOrderDetail() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setState({ pending: true, error: "", success: "" });
+    setUpdateState({ pending: true, error: "", success: "" });
     try {
       await createFreelancerOrderUpdate({
         orderId,
@@ -72,15 +212,52 @@ export default function FreelancerOrderDetail() {
       });
       setUpdateValues({ updateKind: "progress", title: "", body: "" });
       await load();
-      setState({
+      setUpdateState({
         pending: false,
         error: "",
         success: "Customer update sent successfully.",
       });
     } catch (nextError) {
-      setState({
+      setUpdateState({
         pending: false,
         error: nextError.message || "We couldn't send that update.",
+        success: "",
+      });
+    }
+  };
+
+  const handleDeliverySubmit = async (event) => {
+    event.preventDefault();
+    setDeliveryState({ pending: true, error: "", success: "" });
+
+    try {
+      await submitFreelancerOrderDelivery({
+        orderId,
+        ...deliveryValues,
+      });
+      setDeliveryValues({
+        deliveryNote: "",
+        deliverableLabel: "",
+        deliverableUrl: "",
+        accessCode: "",
+        courierName: "",
+        trackingReference: "",
+        shipmentNote: "",
+        proofUrl: "",
+      });
+      await load();
+      setDeliveryState({
+        pending: false,
+        error: "",
+        success:
+          order?.fulfillment_type === "physical"
+            ? "Shipment details shared with the customer."
+            : "Digital delivery shared with the customer.",
+      });
+    } catch (nextError) {
+      setDeliveryState({
+        pending: false,
+        error: nextError.message || "We couldn't submit that delivery.",
         success: "",
       });
     }
@@ -121,7 +298,7 @@ export default function FreelancerOrderDetail() {
               </div>
 
               <p className="workflowHero__sub">
-                Keep the customer updated with progress, delivery notes, and clear status changes while the payment stays traceable.
+                Keep the customer updated with progress and structured delivery details while the payout stays traceable.
               </p>
             </div>
 
@@ -148,8 +325,16 @@ export default function FreelancerOrderDetail() {
                 <strong className="workflowMeta__value">{order.customerName}</strong>
               </div>
               <div className="workflowMeta__item">
-                <span className="workflowMeta__label">Escrow</span>
-                <strong className="workflowMeta__value">{order.escrow_status || "held"}</strong>
+                <span className="workflowMeta__label">Payout state</span>
+                <strong className="workflowMeta__value">
+                  {formatPayoutState(order.escrow_status)}
+                </strong>
+              </div>
+              <div className="workflowMeta__item">
+                <span className="workflowMeta__label">Fulfillment</span>
+                <strong className="workflowMeta__value">
+                  {formatFulfillmentLabel(order.fulfillment_type)}
+                </strong>
               </div>
               <div className="workflowMeta__item">
                 <span className="workflowMeta__label">Your net</span>
@@ -195,6 +380,183 @@ export default function FreelancerOrderDetail() {
               <article className="workflowCard">
                 <div className="profileSection__head">
                   <div>
+                    <h2 className="profileSection__title">Submit delivery</h2>
+                    <p className="profileSection__sub">
+                      This structured delivery record becomes the source of truth for what you handed off.
+                    </p>
+                  </div>
+                </div>
+
+                <AnimatePresence mode="wait">
+                  {deliveryState.error ? (
+                    <InlineStatus tone="danger" message={deliveryState.error} />
+                  ) : deliveryState.success ? (
+                    <InlineStatus tone="success" message={deliveryState.success} />
+                  ) : null}
+                </AnimatePresence>
+
+                <form className="workflowForm" onSubmit={handleDeliverySubmit}>
+                  <label className="workflowField workflowField--wide">
+                    <span className="workflowField__label">Delivery note</span>
+                    <textarea
+                      className="workflowField__textarea"
+                      value={deliveryValues.deliveryNote}
+                      onChange={(event) =>
+                        setDeliveryValues((prev) => ({
+                          ...prev,
+                          deliveryNote: event.target.value,
+                        }))
+                      }
+                      placeholder={
+                        order.fulfillment_type === "physical"
+                          ? "Example: Your package was shipped today and is now in transit."
+                          : "Example: Your final files are ready in the shared folder below."
+                      }
+                    />
+                  </label>
+
+                  {order.fulfillment_type === "physical" ? (
+                    <>
+                      <div className="workflowForm__grid">
+                        <label className="workflowField">
+                          <span className="workflowField__label">Courier</span>
+                          <input
+                            className="workflowField__control"
+                            value={deliveryValues.courierName}
+                            onChange={(event) =>
+                              setDeliveryValues((prev) => ({
+                                ...prev,
+                                courierName: event.target.value,
+                              }))
+                            }
+                            placeholder="LBC, J&T, Ninja Van, etc."
+                          />
+                        </label>
+
+                        <label className="workflowField">
+                          <span className="workflowField__label">Tracking/reference</span>
+                          <input
+                            className="workflowField__control"
+                            value={deliveryValues.trackingReference}
+                            onChange={(event) =>
+                              setDeliveryValues((prev) => ({
+                                ...prev,
+                                trackingReference: event.target.value,
+                              }))
+                            }
+                            placeholder="Shipment or receipt reference"
+                          />
+                        </label>
+                      </div>
+
+                      <div className="workflowForm__grid">
+                        <label className="workflowField">
+                          <span className="workflowField__label">Shipment note</span>
+                          <input
+                            className="workflowField__control"
+                            value={deliveryValues.shipmentNote}
+                            onChange={(event) =>
+                              setDeliveryValues((prev) => ({
+                                ...prev,
+                                shipmentNote: event.target.value,
+                              }))
+                            }
+                            placeholder="Packaging notes or drop-off details"
+                          />
+                        </label>
+
+                        <label className="workflowField">
+                          <span className="workflowField__label">Proof image URL</span>
+                          <input
+                            className="workflowField__control"
+                            value={deliveryValues.proofUrl}
+                            onChange={(event) =>
+                              setDeliveryValues((prev) => ({
+                                ...prev,
+                                proofUrl: event.target.value,
+                              }))
+                            }
+                            placeholder="Optional public proof image link"
+                          />
+                        </label>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="workflowForm__grid">
+                        <label className="workflowField">
+                          <span className="workflowField__label">Deliverable label</span>
+                          <input
+                            className="workflowField__control"
+                            value={deliveryValues.deliverableLabel}
+                            onChange={(event) =>
+                              setDeliveryValues((prev) => ({
+                                ...prev,
+                                deliverableLabel: event.target.value,
+                              }))
+                            }
+                            placeholder="Final drive folder, Notion page, ZIP file"
+                          />
+                        </label>
+
+                        <label className="workflowField">
+                          <span className="workflowField__label">Deliverable URL</span>
+                          <input
+                            className="workflowField__control"
+                            value={deliveryValues.deliverableUrl}
+                            onChange={(event) =>
+                              setDeliveryValues((prev) => ({
+                                ...prev,
+                                deliverableUrl: event.target.value,
+                              }))
+                            }
+                            placeholder="Public or shared access link"
+                          />
+                        </label>
+                      </div>
+
+                      <label className="workflowField">
+                        <span className="workflowField__label">Access code</span>
+                        <input
+                          className="workflowField__control"
+                          value={deliveryValues.accessCode}
+                          onChange={(event) =>
+                            setDeliveryValues((prev) => ({
+                              ...prev,
+                              accessCode: event.target.value,
+                            }))
+                          }
+                          placeholder="Optional password or PIN"
+                        />
+                      </label>
+                    </>
+                  )}
+
+                  <div className="workflowActions">
+                    <motion.button
+                      type="submit"
+                      className="workflowActionBtn workflowActionBtn--primary"
+                      whileHover={{ y: -1.5 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={PROFILE_SPRING}
+                      disabled={deliveryState.pending}
+                    >
+                      {deliveryState.pending ? (
+                        <LoaderCircle className="customerSettingsAction__spinner" />
+                      ) : null}
+                      <span>
+                        {order.fulfillment_type === "physical"
+                          ? "Share shipment details"
+                          : "Share delivery"}
+                      </span>
+                    </motion.button>
+                  </div>
+                </form>
+              </article>
+
+              <article className="workflowCard">
+                <div className="profileSection__head">
+                  <div>
                     <h2 className="profileSection__title">Send customer update</h2>
                     <p className="profileSection__sub">
                       These updates appear both on the order timeline and inside the shared chat.
@@ -203,10 +565,10 @@ export default function FreelancerOrderDetail() {
                 </div>
 
                 <AnimatePresence mode="wait">
-                  {state.error ? (
-                    <InlineStatus tone="danger" message={state.error} />
-                  ) : state.success ? (
-                    <InlineStatus tone="success" message={state.success} />
+                  {updateState.error ? (
+                    <InlineStatus tone="danger" message={updateState.error} />
+                  ) : updateState.success ? (
+                    <InlineStatus tone="success" message={updateState.success} />
                   ) : null}
                 </AnimatePresence>
 
@@ -259,13 +621,28 @@ export default function FreelancerOrderDetail() {
                       whileHover={{ y: -1.5 }}
                       whileTap={{ scale: 0.98 }}
                       transition={PROFILE_SPRING}
-                      disabled={state.pending}
+                      disabled={updateState.pending}
                     >
-                      {state.pending ? <LoaderCircle className="customerSettingsAction__spinner" /> : null}
+                      {updateState.pending ? (
+                        <LoaderCircle className="customerSettingsAction__spinner" />
+                      ) : null}
                       <span>Send update</span>
                     </motion.button>
                   </div>
                 </form>
+              </article>
+
+              <article className="workflowCard">
+                <div className="profileSection__head">
+                  <div>
+                    <h2 className="profileSection__title">Delivery history</h2>
+                    <p className="profileSection__sub">
+                      Review the structured handoff records already shared with the customer.
+                    </p>
+                  </div>
+                </div>
+
+                <DeliveryHistory order={order} />
               </article>
 
               <article className="workflowTimelineCard">
@@ -315,7 +692,24 @@ export default function FreelancerOrderDetail() {
                     <span>Your net</span>
                     <strong className="workflowSummaryCard__value">{order.freelancerNetLabel}</strong>
                   </div>
+                  <div className="workflowSummaryCard__row">
+                    <span>Payout state</span>
+                    <strong className="workflowSummaryCard__value">
+                      {formatPayoutState(order.escrow_status)}
+                    </strong>
+                  </div>
+                  {order.payoutRelease?.requestedAtLabel ? (
+                    <div className="workflowSummaryCard__row">
+                      <span>Payout queued</span>
+                      <strong className="workflowSummaryCard__value">
+                        {order.payoutRelease.requestedAtLabel}
+                      </strong>
+                    </div>
+                  ) : null}
                 </div>
+                <p className="workflowSummaryNote">
+                  Customer completion only queues payout for ops release. Funds are marked released only after the payout request is processed successfully.
+                </p>
               </article>
             </aside>
           </section>

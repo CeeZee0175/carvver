@@ -13,6 +13,7 @@ create table public.orders (
   payment_provider text null,
   payment_reference text null,
   escrow_status text null,
+  fulfillment_type text not null default 'digital'::text,
   paid_at timestamp with time zone null,
   selected_package_id uuid null,
   selected_package_name text null,
@@ -46,11 +47,18 @@ create table public.orders (
       escrow_status = any (
         array[
           'held'::text,
+          'pending_release'::text,
           'released'::text,
+          'blocked'::text,
           'refunded'::text,
           'failed'::text
         ]
       )
+    )
+  ),
+  constraint orders_fulfillment_type_check check (
+    (
+      fulfillment_type = any (array['digital'::text, 'physical'::text])
     )
   )
 ) TABLESPACE pg_default;

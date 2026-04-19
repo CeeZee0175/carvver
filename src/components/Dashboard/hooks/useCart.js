@@ -69,6 +69,7 @@ async function fetchCartItems(userId) {
         category,
         price,
         location,
+        fulfillment_type,
         is_published,
         is_pro,
         is_verified,

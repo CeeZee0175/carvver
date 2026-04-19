@@ -143,6 +143,7 @@ export async function finalizeSuccessfulCheckoutSession({
       `
       service_id,
       freelancer_id,
+      fulfillment_type,
       selected_package_id,
       selected_package_name,
       selected_package_summary,
@@ -165,6 +166,10 @@ export async function finalizeSuccessfulCheckoutSession({
     service_id: item.service_id,
     customer_id: checkoutSession.user_id,
     freelancer_id: item.freelancer_id,
+    fulfillment_type:
+      String(item.fulfillment_type || "").trim().toLowerCase() === "physical"
+        ? "physical"
+        : "digital",
     status: "pending",
     total_price: item.unit_price,
     selected_package_id: item.selected_package_id,

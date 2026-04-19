@@ -78,7 +78,7 @@ export default function DashboardFreelancer() {
     },
     {
       title: "Orders",
-      description: "Track held and released earnings while keeping customer work moving.",
+      description: "Track held, queued, and released earnings while keeping customer work moving.",
       action: () => navigate("/dashboard/freelancer/orders"),
       cta: "View orders",
     },

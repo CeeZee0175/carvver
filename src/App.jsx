@@ -31,6 +31,7 @@ const PasswordRecoveryReset = lazy(() =>
 );
 const SignIn = lazy(() => import("./components/Auth/pages/sign-in"));
 const SignUp = lazy(() => import("./components/Auth/pages/sign-up"));
+const SignUpSuccess = lazy(() => import("./components/Auth/pages/sign-up-success"));
 const CustomerWelcome = lazy(() => import("./components/Dashboard/pages/customer_welcome"));
 const FreelancerWelcome = lazy(() => import("./components/Dashboard/pages/freelancer_welcome"));
 const DashboardCustomer = lazy(() => import("./components/Dashboard/pages/dashboard_customer"));
@@ -101,6 +102,7 @@ function resolveRouteShellFamily(pathname) {
   if (
     pathname === "/sign-in" ||
     pathname === "/sign-up" ||
+    pathname === "/sign-up/success" ||
     pathname === "/auth/callback" ||
     pathname.startsWith("/recover-password")
   ) {
@@ -386,6 +388,14 @@ function AppRoutes() {
             <PublicOnlyRoute>
               <SignUp />
             </PublicOnlyRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/sign-up/success"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <SignUpSuccess />
           </Suspense>
         }
       />

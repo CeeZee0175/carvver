@@ -3,6 +3,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getSession, signOut, updatePassword } from "../../../lib/supabase/auth";
 import {
+  getPasswordPolicyError,
+  PASSWORD_POLICY_HINT,
+} from "../../../lib/passwordPolicy";
+import {
   buildRecoveryPath,
   clearStoredRecoveryState,
   getRecoveryEmail,
@@ -33,12 +37,10 @@ export default function PasswordRecoveryReset() {
   });
 
   const validatePasswordFields = (nextValues) => ({
-    newPassword:
-      !nextValues.newPassword
-        ? "Enter a new password."
-        : String(nextValues.newPassword).length < 8
-        ? "Use at least 8 characters."
-        : "",
+    newPassword: getPasswordPolicyError(
+      nextValues.newPassword,
+      "Enter a new password."
+    ),
     confirmPassword:
       !nextValues.confirmPassword
         ? "Confirm your new password."
@@ -171,12 +173,27 @@ export default function PasswordRecoveryReset() {
                   }))
                 }
                 aria-invalid={fieldErrors.newPassword ? "true" : "false"}
+                aria-describedby={
+                  fieldErrors.newPassword
+                    ? "password-recovery-password-error"
+                    : "password-recovery-password-hint"
+                }
               />
               {fieldErrors.newPassword ? (
-                <span className="passwordRecoveryField__error">
+                <span
+                  className="passwordRecoveryField__error"
+                  id="password-recovery-password-error"
+                >
                   {fieldErrors.newPassword}
                 </span>
-              ) : null}
+              ) : (
+                <span
+                  className="passwordRecoveryField__meta"
+                  id="password-recovery-password-hint"
+                >
+                  {PASSWORD_POLICY_HINT}
+                </span>
+              )}
             </label>
 
             <label className="passwordRecoveryField">

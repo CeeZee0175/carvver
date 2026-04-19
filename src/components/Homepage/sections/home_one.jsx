@@ -1,46 +1,8 @@
 import React from "react";
-import useEmblaCarousel from "embla-carousel-react";
-import AutoScroll from "embla-carousel-auto-scroll";
 import "./home_one.css";
 import BeamsBackground from "./BeamsBackground";
 
-const partners = [
-  "Maya",
-  "GCash",
-  "PayPal",
-  "Facebook",
-  "Instagram",
-  "X",
-  "TikTok",
-];
-
-const carouselPartners = [...partners, ...partners, ...partners];
-
-function PartnerItem({ name }) {
-  return (
-    <span className="partnerItem">
-      <span className="partnerItem__name">{name}</span>
-    </span>
-  );
-}
-
 export default function HomeOne() {
-  const [emblaRef] = useEmblaCarousel(
-    {
-      loop: true,
-      dragFree: true,
-      align: "start",
-    },
-    [
-      AutoScroll({
-        playOnInit: true,
-        speed: 1.05,
-        stopOnInteraction: false,
-        stopOnMouseEnter: false,
-      }),
-    ]
-  );
-
   return (
     <section className="hero">
       <BeamsBackground className="hero__beams" intensity="medium" />
@@ -59,20 +21,6 @@ export default function HomeOne() {
           <h1 className="hero__title">
             Find trusted creators or start earning from what you love.
           </h1>
-        </div>
-
-        <div className="hero__partnersWrap">
-          <p className="hero__partnersLabel">Trusted Partners</p>
-
-          <div className="hero__carouselViewport" ref={emblaRef}>
-            <div className="hero__carouselTrack">
-              {carouselPartners.map((name, index) => (
-                <div className="hero__carouselSlide" key={`${name}-${index}`}>
-                  <PartnerItem name={name} />
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 

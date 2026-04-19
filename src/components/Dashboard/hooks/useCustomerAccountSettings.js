@@ -6,6 +6,10 @@ import {
   requestPasswordRecovery,
   signOut,
 } from "../../../lib/supabase/auth";
+import {
+  getPasswordPolicyError,
+  PASSWORD_POLICY_HINT,
+} from "../../../lib/passwordPolicy";
 import { emitProfileUpdated } from "../../../lib/profileSync";
 
 const supabase = createClient();
@@ -35,7 +39,7 @@ function friendlySettingsMessage(error, fallback) {
       message.includes("length") ||
       message.includes("characters"))
   ) {
-    return "Use a stronger password with at least 8 characters.";
+    return PASSWORD_POLICY_HINT;
   }
 
   if (
@@ -310,8 +314,13 @@ export function useCustomerAccountSettings() {
         throw new Error("Enter a new password.");
       }
 
-      if (trimmedNewPassword.length < 8) {
-        throw new Error("Use a password with at least 8 characters.");
+      const passwordError = getPasswordPolicyError(
+        trimmedNewPassword,
+        "Enter a new password."
+      );
+
+      if (passwordError) {
+        throw new Error(passwordError);
       }
 
       if (trimmedNewPassword !== trimmedConfirmPassword) {

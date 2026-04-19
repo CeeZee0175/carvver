@@ -2,15 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, User, LoaderCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
 import "./sign-up.css";
 import SearchableCombobox from "../../Shared/searchable_combobox";
-import { signInWithOAuth, signUp } from "../../../lib/supabase/auth";
-import { PH_REGION_OPTIONS } from "../../../lib/phLocations";
+import { signOut, signUp } from "../../../lib/supabase/auth";
 import {
-  buildOAuthCallbackUrl,
-  setAuthFlowIntent,
-} from "../../../lib/authFlowIntent";
+  getPasswordPolicyError,
+  PASSWORD_POLICY_HINT,
+} from "../../../lib/passwordPolicy";
+import { PH_REGION_OPTIONS } from "../../../lib/phLocations";
 import {
   buildCategoryPath,
   persistFeaturedCategoryFromSearch,
@@ -19,43 +18,19 @@ import {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="signUpSocial__icon">
-      <path d="M21.8 12.23c0-.76-.07-1.49-.2-2.18H12v4.13h5.49a4.7 4.7 0 0 1-2.04 3.08v2.56h3.3c1.93-1.78 3.05-4.4 3.05-7.59Z" fill="#4285F4" />
-      <path d="M12 22c2.76 0 5.07-.91 6.76-2.47l-3.3-2.56c-.91.61-2.08.98-3.46.98-2.66 0-4.91-1.8-5.72-4.21H2.87v2.64A10 10 0 0 0 12 22Z" fill="#34A853" />
-      <path d="M6.28 13.74A5.99 5.99 0 0 1 6 12c0-.61.1-1.2.28-1.74V7.62H2.87A10 10 0 0 0 2 12c0 1.61.39 3.14 1.07 4.38l3.21-2.64Z" fill="#FBBC05" />
-      <path d="M12 6.05c1.5 0 2.85.52 3.91 1.53l2.93-2.93C17.06 2.99 14.75 2 12 2a10 10 0 0 0-9.13 5.62l3.41 2.64C7.09 7.85 9.34 6.05 12 6.05Z" fill="#EA4335" />
-    </svg>
-  );
-}
-
-function FacebookIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="signUpSocial__icon">
-      <path fill="currentColor" d="M13.5 21v-7h2.35l.4-3h-2.75V9.13c0-.87.24-1.47 1.49-1.47H16.4V5a19.2 19.2 0 0 0-2.04-.1c-2.02 0-3.4 1.23-3.4 3.5V11H8.7v3h2.26v7h2.54Z" />
-    </svg>
-  );
-}
-
-function TwitterIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="signUpSocial__icon">
-      <path fill="currentColor" d="M18.9 2H22l-6.77 7.74L23 22h-6.1l-4.77-6.23L6.7 22H3.58l7.24-8.28L1 2h6.25l4.31 5.68L18.9 2Zm-1.07 18h1.69L6.32 3.9H4.5L17.83 20Z" />
-    </svg>
-  );
-}
-
 function TypewriterText({ text, active, speed = 85, initialDelay = 120, className = "", showCursor = true }) {
   const [displayText, setDisplayText] = useState("");
   const reduceMotion = useReducedMotion();
-  const startedRef = useRef(false);
 
   useEffect(() => {
-    if (!active || startedRef.current) return;
-    startedRef.current = true;
+    setDisplayText("");
 
-    if (reduceMotion) { setDisplayText(text); return; }
+    if (!active) return undefined;
+
+    if (reduceMotion) {
+      setDisplayText(text);
+      return undefined;
+    }
 
     let timeoutId;
     let index = 0;
@@ -161,9 +136,7 @@ function validateSignUpField(name, values, role) {
       if (!EMAIL_PATTERN.test(email)) return "Enter a valid email address.";
       return "";
     case "password":
-      if (!values.password) return "Password is required.";
-      if (values.password.length < 6) return "Password must be at least 6 characters.";
-      return "";
+      return getPasswordPolicyError(values.password, "Password is required.");
     case "confirmPassword":
       if (!values.confirmPassword) return "Please confirm your password.";
       if (values.password !== values.confirmPassword) return "Passwords do not match.";
@@ -198,31 +171,6 @@ function getSignUpErrors(values, role) {
   return nextErrors;
 }
 
-function getSocialSignUpErrors(values, role) {
-  const nextErrors = {};
-
-  ["region", "agreeTerms"].forEach((fieldName) => {
-    const error = validateSignUpField(fieldName, values, role);
-    if (error) {
-      nextErrors[fieldName] = error;
-    }
-  });
-
-  return nextErrors;
-}
-
-function SocialButton({ icon, label, onClick, disabled }) {
-  return (
-    <motion.button type="button" className="signUpSocial"
-      whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.97 }}
-      transition={{ type: "spring", stiffness: 360, damping: 24 }} onClick={onClick}
-      disabled={disabled}>
-      <span className="signUpSocial__iconWrap" aria-hidden="true">{icon}</span>
-      <span className="signUpSocial__text">{label}</span>
-    </motion.button>
-  );
-}
-
 export default function SignUp() {
   const ref = useRef(null);
   const inView = useInView(ref, { amount: 0.35, once: true });
@@ -233,7 +181,6 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [oauthProvider, setOauthProvider] = useState("");
   const [formValues, setFormValues] = useState({
     firstName: "",
     lastName: "",
@@ -246,7 +193,6 @@ export default function SignUp() {
   });
   const [fieldErrors, setFieldErrors] = useState({});
   const [formError, setFormError] = useState("");
-  const [socialError, setSocialError] = useState("");
   const categoryIntent = resolveFeaturedCategoryIntent(location.search);
 
   useEffect(() => {
@@ -289,7 +235,6 @@ export default function SignUp() {
     }
 
     if (formError) setFormError("");
-    if (socialError) setSocialError("");
   };
 
   const handleFieldBlur = (e) => {
@@ -312,7 +257,6 @@ export default function SignUp() {
     }
 
     if (formError) setFormError("");
-    if (socialError) setSocialError("");
   };
 
   const handleSubmit = async (e) => {
@@ -327,9 +271,8 @@ export default function SignUp() {
 
     try {
       setFormError("");
-      setSocialError("");
       setIsLoading(true);
-      await signUp({
+      const result = await signUp({
         firstName: formValues.firstName.trim(),
         lastName: formValues.lastName.trim(),
         email: formValues.email.trim(),
@@ -337,10 +280,12 @@ export default function SignUp() {
         role,
         region: formValues.region.trim(),
       });
-      toast.success("Account created! Please check your email to verify.");
-      if (categoryIntent) {
-        navigate(buildCategoryPath("/sign-in", categoryIntent), { replace: true });
+
+      if (result.session) {
+        await signOut();
       }
+
+      navigate(buildCategoryPath("/sign-up/success", categoryIntent), { replace: true });
     } catch (err) {
       setFormError(err.message || "Something went wrong. Please try again.");
     } finally {
@@ -348,43 +293,8 @@ export default function SignUp() {
     }
   };
 
-  const handleOAuth = async (provider) => {
-    const errors = getSocialSignUpErrors(formValues, role);
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        ...errors,
-      }));
-      return;
-    }
-
-    try {
-      setSocialError("");
-      setFormError("");
-      setOauthProvider(provider);
-
-      setAuthFlowIntent({
-        mode: "sign-up",
-        role,
-        region: role === "freelancer" ? formValues.region.trim() : "",
-        firstName: formValues.firstName.trim(),
-        lastName: formValues.lastName.trim(),
-        categoryIntent,
-      });
-
-      await signInWithOAuth({
-        provider,
-        redirectTo: buildOAuthCallbackUrl("sign-up"),
-      });
-    } catch (err) {
-      setOauthProvider("");
-      setSocialError(err.message || `We couldn't start ${provider} sign-up.`);
-    }
-  };
-
   return (
     <div className="signUpPage">
-      <Toaster position="top-center" />
       <div className="signUpPage__base" />
       <div className="signUpPage__bg" aria-hidden="true" />
       <div className="signUpPage__ambient" aria-hidden="true" />
@@ -410,6 +320,7 @@ export default function SignUp() {
 
             <p className="signUpCard__sub">
               <TypewriterText
+                key={role}
                 text={role === "customer"
                   ? "Enter your details below to create your customer account."
                   : "Enter your details below to create your freelancer account."}
@@ -492,7 +403,6 @@ export default function SignUp() {
                           );
                         }
                         if (formError) setFormError("");
-                        if (socialError) setSocialError("");
                       }}
                       options={PH_REGION_OPTIONS}
                       placeholder="Choose your region"
@@ -539,16 +449,20 @@ export default function SignUp() {
                   onChange={handleFieldChange}
                   onBlur={handleFieldBlur}
                   aria-invalid={fieldErrors.password ? "true" : "false"}
-                  aria-describedby={fieldErrors.password ? "sign-up-password-error" : undefined} />
+                  aria-describedby={fieldErrors.password ? "sign-up-password-error" : "sign-up-password-hint"} />
                 <button type="button" className="signUpField__toggle"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? "Hide password" : "Show password"}>
                   {showPassword ? <EyeOff className="signUpField__toggleIcon" /> : <Eye className="signUpField__toggleIcon" />}
                 </button>
               </div>
-              {fieldErrors.password && (
+              {fieldErrors.password ? (
                 <span className="signUpFieldBlock__error" id="sign-up-password-error">
                   {fieldErrors.password}
+                </span>
+              ) : (
+                <span className="signUpFieldBlock__hint" id="sign-up-password-hint">
+                  {PASSWORD_POLICY_HINT}
                 </span>
               )}
             </label>
@@ -647,42 +561,10 @@ export default function SignUp() {
             </motion.button>
           </motion.form>
 
-          <motion.div className="signUpDivider"
-            initial={{ opacity: 0 }}
-            animate={inView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.45, delay: 0.78 }}>
-            <span className="signUpDivider__text">Or continue with</span>
-          </motion.div>
-
-          <motion.div className="signUpSocials"
-            initial={{ opacity: 0, y: 8 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, ease: [0.2, 0.95, 0.2, 1], delay: 0.86 }}>
-            <SocialButton
-              icon={<GoogleIcon />}
-              label={oauthProvider === "google" ? "Connecting..." : "Google"}
-              onClick={() => handleOAuth("google")}
-              disabled={isLoading || Boolean(oauthProvider)}
-            />
-            <SocialButton
-              icon={<FacebookIcon />}
-              label={oauthProvider === "facebook" ? "Connecting..." : "Facebook"}
-              onClick={() => handleOAuth("facebook")}
-              disabled={isLoading || Boolean(oauthProvider)}
-            />
-            <SocialButton
-              icon={<TwitterIcon />}
-              label={oauthProvider === "twitter" ? "Connecting..." : "Twitter"}
-              onClick={() => handleOAuth("twitter")}
-              disabled={isLoading || Boolean(oauthProvider)}
-            />
-          </motion.div>
-          {socialError && <p className="signUpForm__error signUpForm__error--social">{socialError}</p>}
-
           <motion.div className="signUpBottomPrompt"
             initial={{ opacity: 0, y: 8 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1], delay: 0.94 }}>
+            transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1], delay: 0.84 }}>
             <span className="signUpBottomPrompt__text">Already have an account?</span>
             <button
               type="button"

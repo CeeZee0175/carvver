@@ -66,7 +66,7 @@
 
 .workflowMeta {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 18px 24px;
 }
 
@@ -198,13 +198,15 @@
 }
 
 .workflowProposalList,
-.workflowTimeline {
+.workflowTimeline,
+.workflowDeliveryList {
   display: grid;
   gap: 14px;
 }
 
 .workflowProposalCard,
-.workflowTimeline__item {
+.workflowTimeline__item,
+.workflowDeliveryCard {
   border-radius: 20px;
   border: 1px solid rgba(42, 20, 80, 0.1);
   background: rgba(255, 255, 255, 0.76);
@@ -220,7 +222,8 @@
 
 .workflowProposalCard__top,
 .workflowSummaryCard__top,
-.workflowTimeline__top {
+.workflowTimeline__top,
+.workflowDeliveryCard__top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -255,6 +258,41 @@
 .workflowForm {
   display: grid;
   gap: 14px;
+}
+
+.workflowDeliveryCard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.workflowDeliveryCard__fact {
+  display: grid;
+  gap: 4px;
+}
+
+.workflowDeliveryCard__label {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: rgba(87, 34, 182, 0.72);
+}
+
+.workflowDeliveryCard__value,
+.workflowLink {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.9);
+}
+
+.workflowLink {
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
 }
 
 .workflowForm__grid {
@@ -383,6 +421,14 @@
 .workflowPayoutCard__summary {
   display: grid;
   gap: 8px;
+}
+
+.workflowSummaryNote {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13.5px;
+  line-height: 1.62;
+  color: rgba(27, 16, 46, 0.64);
 }
 
 @media (max-width: 1080px) {

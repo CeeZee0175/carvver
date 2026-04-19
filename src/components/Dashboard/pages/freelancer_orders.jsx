@@ -13,6 +13,23 @@ import {
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import { useFreelancerOrders } from "../hooks/useMarketplaceWorkflow";
 
+function formatPayoutState(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "pending_release") return "Pending ops";
+  if (normalized === "released") return "Released";
+  if (normalized === "blocked") return "Blocked";
+  if (normalized === "failed") return "Failed";
+  if (normalized === "refunded") return "Refunded";
+  return "Held";
+}
+
+function formatFulfillmentLabel(value) {
+  return String(value || "").trim().toLowerCase() === "physical"
+    ? "Physical"
+    : "Digital";
+}
+
 export default function FreelancerOrders() {
   const navigate = useNavigate();
   const { loading, orders, summary, payoutMethod, error, reload } = useFreelancerOrders();
@@ -31,7 +48,12 @@ export default function FreelancerOrders() {
                 <h1 className="workflowHero__title">
                   <TypewriterHeading text="Orders" />
                 </h1>
-                <motion.svg className="workflowHero__line" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
+                <motion.svg
+                  className="workflowHero__line"
+                  viewBox="0 0 300 20"
+                  preserveAspectRatio="none"
+                  aria-hidden="true"
+                >
                   <motion.path
                     d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                     fill="none"
@@ -45,7 +67,7 @@ export default function FreelancerOrders() {
                 </motion.svg>
               </div>
               <p className="workflowHero__sub">
-                Track held earnings, released amounts, and the customer orders already moving through your workflow.
+                Track held earnings, queued payouts, blocked cases, and the customer orders already moving through your workflow.
               </p>
             </div>
           </div>
@@ -56,12 +78,16 @@ export default function FreelancerOrders() {
               <strong className="workflowMeta__value">{summary.heldLabel}</strong>
             </div>
             <div className="workflowMeta__item">
+              <span className="workflowMeta__label">Pending ops</span>
+              <strong className="workflowMeta__value">{summary.pendingReleaseLabel}</strong>
+            </div>
+            <div className="workflowMeta__item">
               <span className="workflowMeta__label">Released</span>
               <strong className="workflowMeta__value">{summary.releasedLabel}</strong>
             </div>
             <div className="workflowMeta__item">
-              <span className="workflowMeta__label">Total earned</span>
-              <strong className="workflowMeta__value">{summary.totalLabel}</strong>
+              <span className="workflowMeta__label">Blocked</span>
+              <strong className="workflowMeta__value">{summary.blockedLabel}</strong>
             </div>
           </div>
         </section>
@@ -75,7 +101,7 @@ export default function FreelancerOrders() {
                 <div>
                   <h2 className="profileSection__title">Your orders</h2>
                   <p className="profileSection__sub">
-                    Open any order to send an update, review payment state, or continue the conversation.
+                    Open any order to send an update, submit delivery, review payout state, or continue the conversation.
                   </p>
                 </div>
               </div>
@@ -83,9 +109,19 @@ export default function FreelancerOrders() {
               {loading ? (
                 <div className="workflowCard" style={{ minHeight: 220 }} />
               ) : error ? (
-                <EmptySurface hideIcon title="We couldn't load your orders" description={error} actionLabel="Try again" onAction={reload} />
+                <EmptySurface
+                  hideIcon
+                  title="We couldn't load your orders"
+                  description={error}
+                  actionLabel="Try again"
+                  onAction={reload}
+                />
               ) : orders.length === 0 ? (
-                <EmptySurface hideIcon title="No freelancer orders yet" className="messagesEmpty messagesEmpty--conversation" />
+                <EmptySurface
+                  hideIcon
+                  title="No freelancer orders yet"
+                  className="messagesEmpty messagesEmpty--conversation"
+                />
               ) : (
                 <div className="workflowProposalList">
                   {orders.map((order) => (
@@ -96,16 +132,21 @@ export default function FreelancerOrders() {
                             {order.services?.title || "Service order"}
                           </div>
                           <p className="workflowCard__copy">
-                            {order.customerName} · {order.createdAtLabel}
+                            {order.customerName} - {order.createdAtLabel}
                           </p>
                         </div>
-                        <span className="workflowChip">{order.escrow_status || "held"}</span>
+                        <span className="workflowChip">
+                          {formatPayoutState(order.escrow_status)}
+                        </span>
                       </div>
 
                       <div className="workflowActions">
                         {order.selected_package_name ? (
                           <span className="workflowChip">{order.selected_package_name}</span>
                         ) : null}
+                        <span className="workflowChip">
+                          {formatFulfillmentLabel(order.fulfillment_type)}
+                        </span>
                         <span className="workflowChip">{order.freelancerNetLabel}</span>
                         <span className="workflowChip">{order.status}</span>
                       </div>
@@ -134,7 +175,7 @@ export default function FreelancerOrders() {
               <h2 className="workflowCard__title">Payout destination</h2>
               <div className="workflowPayoutCard__summary">
                 <p className="workflowSummaryCard__copy">
-                  Released earnings are tied to the payout destination saved in freelancer settings.
+                  After customer confirmation, payouts are queued for ops release using the destination saved in freelancer settings.
                 </p>
                 <div className="workflowSummaryCard__row">
                   <span>Method</span>

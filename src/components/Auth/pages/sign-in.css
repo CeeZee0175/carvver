@@ -48,7 +48,7 @@
 .signInCard{
   position: relative;
   width: min(520px, 92vw);
-  padding: 30px 28px 26px;
+  padding: 32px 28px 30px;
   border-radius: 30px;
   border: 1px solid rgba(17,24,39,0.08);
   background: rgba(255,255,255,0.96);
@@ -154,7 +154,7 @@
 }
 
 .signInForm{
-  margin-top: 24px;
+  margin-top: 26px;
   display: grid;
   gap: 16px;
 }
@@ -301,9 +301,16 @@
   color: rgba(184,52,81,0.92);
 }
 
-.signInForm__error--social{
-  margin-top: 12px;
-  text-align: center;
+.signInForm__notice{
+  margin: -2px 0 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(90, 104, 128, 0.18);
+  background: rgba(247, 248, 252, 0.94);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 12.7px;
+  line-height: 1.55;
+  color: rgba(73, 85, 107, 0.96);
 }
 
 .signCheckbox{
@@ -487,98 +494,8 @@
   transform: translateX(4px);
 }
 
-.signInDivider{
-  margin: 22px 0 14px;
-  position: relative;
-  text-align: center;
-}
-
-.signInDivider::before{
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 1px;
-  background: rgba(42,20,80,0.10);
-}
-
-.signInDivider__text{
-  position: relative;
-  z-index: 1;
-  display: inline-block;
-  padding: 0 12px;
-  background: rgba(255,255,255,0.86);
-  color: rgba(27,16,46,0.52);
-
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 12.5px;
-  font-weight: 800;
-}
-
-.signInSocials{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.signInSocial{
-  min-height: 50px;
-  padding: 0 12px;
-  border-radius: 16px;
-  border: 1px solid rgba(17,24,39,0.08);
-  background: rgba(255,255,255,0.94);
-  box-shadow: 0 12px 34px rgba(12,7,18,0.04);
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-
-  cursor: pointer;
-  color: rgba(27,16,46,0.88);
-  transition:
-    border-color 220ms ease,
-    background 220ms ease,
-    box-shadow 220ms ease;
-}
-
-.signInSocial:hover{
-  border-color: rgba(124,58,237,0.24);
-  background: rgba(255,255,255,0.86);
-  box-shadow: 0 18px 46px rgba(12,7,18,0.08);
-}
-
-.signInSocial:disabled{
-  cursor: wait;
-  opacity: 0.7;
-  box-shadow: 0 10px 26px rgba(12,7,18,0.03);
-}
-
-.signInSocial__iconWrap{
-  width: 18px;
-  height: 18px;
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-  color: rgba(42,20,80,0.90);
-}
-
-.signInSocial__icon{
-  width: 18px;
-  height: 18px;
-  display: block;
-}
-
-.signInSocial__text{
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1;
-}
-
 .signInBottomPrompt{
-  margin-top: 18px;
+  margin-top: 24px;
   display: flex;
   align-items: center;
   justify-content: center;

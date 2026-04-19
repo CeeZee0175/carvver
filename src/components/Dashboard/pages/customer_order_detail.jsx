@@ -22,6 +22,132 @@ function InlineStatus({ tone = "neutral", message }) {
   return <div className={`workflowStatus workflowStatus--${tone}`}>{message}</div>;
 }
 
+function formatFulfillmentLabel(value) {
+  return String(value || "").trim().toLowerCase() === "physical"
+    ? "Physical shipment"
+    : "Digital delivery";
+}
+
+function formatPayoutState(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "pending_release") return "Pending ops";
+  if (normalized === "released") return "Released";
+  if (normalized === "blocked") return "Blocked";
+  if (normalized === "failed") return "Failed";
+  if (normalized === "refunded") return "Refunded";
+  return "Held";
+}
+
+function DeliverySummary({ order }) {
+  if (!order?.deliveries?.length) {
+    return (
+      <EmptySurface
+        hideIcon
+        title="No delivery submitted yet"
+        description="The freelancer has not submitted the structured delivery details for this order yet."
+        className="messagesEmpty messagesEmpty--conversation"
+      />
+    );
+  }
+
+  return (
+    <div className="workflowDeliveryList">
+      {order.deliveries.map((delivery) => (
+        <article key={delivery.id} className="workflowDeliveryCard">
+          <div className="workflowDeliveryCard__top">
+            <div>
+              <div className="workflowTimeline__title">
+                {delivery.fulfillmentType === "physical"
+                  ? "Shipment details"
+                  : "Digital delivery"}
+              </div>
+              <div className="workflowTimeline__kind">
+                {formatFulfillmentLabel(delivery.fulfillmentType)}
+              </div>
+            </div>
+            <span className="workflowChip">{delivery.createdAtLabel || "Just now"}</span>
+          </div>
+
+          <p className="workflowTimeline__body">{delivery.deliveryNote}</p>
+
+          <div className="workflowDeliveryCard__grid">
+            {delivery.fulfillmentType === "digital" ? (
+              <>
+                <div className="workflowDeliveryCard__fact">
+                  <span className="workflowDeliveryCard__label">Deliverable</span>
+                  <strong className="workflowDeliveryCard__value">
+                    {delivery.deliverableLabel || "Shared link"}
+                  </strong>
+                </div>
+                <div className="workflowDeliveryCard__fact">
+                  <span className="workflowDeliveryCard__label">Access link</span>
+                  <strong className="workflowDeliveryCard__value">
+                    {delivery.deliverableUrl ? (
+                      <a
+                        className="workflowLink"
+                        href={delivery.deliverableUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open deliverable
+                      </a>
+                    ) : (
+                      "Not added"
+                    )}
+                  </strong>
+                </div>
+                {delivery.accessCode ? (
+                  <div className="workflowDeliveryCard__fact">
+                    <span className="workflowDeliveryCard__label">Access code</span>
+                    <strong className="workflowDeliveryCard__value">{delivery.accessCode}</strong>
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <>
+                <div className="workflowDeliveryCard__fact">
+                  <span className="workflowDeliveryCard__label">Courier</span>
+                  <strong className="workflowDeliveryCard__value">
+                    {delivery.courierName || "Not added"}
+                  </strong>
+                </div>
+                <div className="workflowDeliveryCard__fact">
+                  <span className="workflowDeliveryCard__label">Tracking/reference</span>
+                  <strong className="workflowDeliveryCard__value">
+                    {delivery.trackingReference || "Not added"}
+                  </strong>
+                </div>
+                {delivery.shipmentNote ? (
+                  <div className="workflowDeliveryCard__fact">
+                    <span className="workflowDeliveryCard__label">Shipment note</span>
+                    <strong className="workflowDeliveryCard__value">{delivery.shipmentNote}</strong>
+                  </div>
+                ) : null}
+                {delivery.proofUrl ? (
+                  <div className="workflowDeliveryCard__fact">
+                    <span className="workflowDeliveryCard__label">Proof</span>
+                    <strong className="workflowDeliveryCard__value">
+                      <a
+                        className="workflowLink"
+                        href={delivery.proofUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open proof
+                      </a>
+                    </strong>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 export default function CustomerOrderDetail() {
   const navigate = useNavigate();
   const { orderId = "" } = useParams();
@@ -51,12 +177,12 @@ export default function CustomerOrderDetail() {
   const handleConfirm = async () => {
     setState({ pending: true, error: "", success: "" });
     try {
-      await confirmOrderCompletion(orderId);
+      const result = await confirmOrderCompletion(orderId);
       await load();
       setState({
         pending: false,
         error: "",
-        success: "Order completed and released successfully.",
+        success: result?.message || "Order completed successfully.",
       });
     } catch (nextError) {
       setState({
@@ -101,7 +227,7 @@ export default function CustomerOrderDetail() {
               </div>
 
               <p className="workflowHero__sub">
-                Review the package snapshot, order timeline, and completion state before you release the held amount.
+                Review the package snapshot, delivery details, and payout state before you confirm receipt.
               </p>
             </div>
 
@@ -126,8 +252,16 @@ export default function CustomerOrderDetail() {
                 <strong className="workflowMeta__value">{order.status}</strong>
               </div>
               <div className="workflowMeta__item">
-                <span className="workflowMeta__label">Escrow</span>
-                <strong className="workflowMeta__value">{order.escrow_status || "held"}</strong>
+                <span className="workflowMeta__label">Payout state</span>
+                <strong className="workflowMeta__value">
+                  {formatPayoutState(order.escrow_status)}
+                </strong>
+              </div>
+              <div className="workflowMeta__item">
+                <span className="workflowMeta__label">Fulfillment</span>
+                <strong className="workflowMeta__value">
+                  {formatFulfillmentLabel(order.fulfillment_type)}
+                </strong>
               </div>
               <div className="workflowMeta__item">
                 <span className="workflowMeta__label">Customer total</span>
@@ -179,12 +313,25 @@ export default function CustomerOrderDetail() {
                 ) : null}
               </article>
 
+              <article className="workflowCard">
+                <div className="profileSection__head">
+                  <div>
+                    <h2 className="profileSection__title">Delivery details</h2>
+                    <p className="profileSection__sub">
+                      Structured delivery details are the source of truth for what the freelancer submitted.
+                    </p>
+                  </div>
+                </div>
+
+                <DeliverySummary order={order} />
+              </article>
+
               <article className="workflowTimelineCard">
                 <div className="profileSection__head">
                   <div>
                     <h2 className="profileSection__title">Order updates</h2>
                     <p className="profileSection__sub">
-                      Follow progress and delivery notes from the freelancer here.
+                      Follow progress and system delivery updates from the freelancer here.
                     </p>
                   </div>
                 </div>
@@ -234,7 +381,24 @@ export default function CustomerOrderDetail() {
                     <span>Freelancer</span>
                     <strong className="workflowSummaryCard__value">{order.freelancerName}</strong>
                   </div>
+                  <div className="workflowSummaryCard__row">
+                    <span>Payout state</span>
+                    <strong className="workflowSummaryCard__value">
+                      {formatPayoutState(order.escrow_status)}
+                    </strong>
+                  </div>
+                  {order.payoutRelease?.requestedAtLabel ? (
+                    <div className="workflowSummaryCard__row">
+                      <span>Payout queued</span>
+                      <strong className="workflowSummaryCard__value">
+                        {order.payoutRelease.requestedAtLabel}
+                      </strong>
+                    </div>
+                  ) : null}
                 </div>
+                <p className="workflowSummaryNote">
+                  Confirming receipt marks the work complete and queues the freelancer payout for ops release. It does not mean the payout was already sent.
+                </p>
                 {["pending", "active"].includes(order.status) ? (
                   <motion.button
                     type="button"
@@ -246,7 +410,7 @@ export default function CustomerOrderDetail() {
                     disabled={state.pending}
                   >
                     {state.pending ? <LoaderCircle className="customerSettingsAction__spinner" /> : null}
-                    <span>Confirm completion</span>
+                    <span>Confirm receipt</span>
                   </motion.button>
                 ) : null}
               </article>

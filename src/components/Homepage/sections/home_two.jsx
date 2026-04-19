@@ -133,7 +133,6 @@ const FEATURED_CATEGORIES = [
   {
     id: 1,
     title: "Art & Illustration",
-    meta: "Featured Category",
     description:
       "Commission custom portraits, posters, digital art, merch visuals, and stylized illustration work from independent creators.",
     imageUrl:
@@ -142,7 +141,6 @@ const FEATURED_CATEGORIES = [
   {
     id: 2,
     title: "Photography",
-    meta: "Featured Category",
     description:
       "Book photographers for portraits, product shoots, events, and polished image editing that feels ready to publish.",
     imageUrl:
@@ -151,7 +149,6 @@ const FEATURED_CATEGORIES = [
   {
     id: 3,
     title: "Video Editing",
-    meta: "Featured Category",
     description:
       "Turn raw clips into scroll-stopping reels, explainers, cinematic edits, and clean content packages for your brand.",
     imageUrl:
@@ -160,7 +157,6 @@ const FEATURED_CATEGORIES = [
   {
     id: 4,
     title: "Voice Over",
-    meta: "Featured Category",
     description:
       "Find voice talent for ads, narration, character reads, social content, and studio-style audio with a human touch.",
     imageUrl:
@@ -169,7 +165,6 @@ const FEATURED_CATEGORIES = [
   {
     id: 5,
     title: "Social Media",
-    meta: "Featured Category",
     description:
       "Get help with post concepts, content calendars, short-form strategy, and visual assets that keep your feed moving.",
     imageUrl:
@@ -178,7 +173,6 @@ const FEATURED_CATEGORIES = [
   {
     id: 6,
     title: "Web Development",
-    meta: "Featured Category",
     description:
       "Launch landing pages, portfolio sites, and lightweight web builds that help your service or side project look credible fast.",
     imageUrl:
@@ -187,7 +181,6 @@ const FEATURED_CATEGORIES = [
   {
     id: 7,
     title: "Tutoring",
-    meta: "Featured Category",
     description:
       "Connect with tutors for academic support, creative coaching, language practice, and one-on-one learning sessions.",
     imageUrl:
@@ -405,7 +398,9 @@ export default function HomeTwo() {
                     <span className="homeTwoRail__cardShade" aria-hidden="true" />
 
                     <span className="homeTwoRail__cardLabel">
-                      <span className="homeTwoRail__cardMeta">{item.meta}</span>
+                      {item.meta ? (
+                        <span className="homeTwoRail__cardMeta">{item.meta}</span>
+                      ) : null}
                       <strong className="homeTwoRail__cardTitle">{item.title}</strong>
                     </span>
                   </motion.button>
@@ -425,7 +420,9 @@ export default function HomeTwo() {
                   exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, filter: "blur(6px)" }}
                   transition={{ duration: 0.28, ease: "easeOut" }}
                 >
-                  <span className="homeTwoRail__eyebrow">{activeItem.meta}</span>
+                  {activeItem.meta ? (
+                    <span className="homeTwoRail__eyebrow">{activeItem.meta}</span>
+                  ) : null}
                   <h3 className="homeTwoRail__activeTitle">{activeItem.title}</h3>
                   <p className="homeTwoRail__activeDesc">{activeItem.description}</p>
                 </motion.div>

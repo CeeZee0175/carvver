@@ -236,7 +236,7 @@ export default function FreelancerSettings() {
             <div>
               <h2 className="profileSection__title">Payout destination</h2>
               <p className="profileSection__sub">
-                Released earnings use these details as the payout destination for manual release handling.
+                After the customer confirms completion, payout is queued for ops release using these saved details.
               </p>
             </div>
           </div>

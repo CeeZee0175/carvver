@@ -4,11 +4,6 @@ function isBrowser() {
   return typeof window !== "undefined";
 }
 
-export function setAuthFlowIntent(intent) {
-  if (!isBrowser()) return;
-  window.sessionStorage.setItem(AUTH_FLOW_INTENT_KEY, JSON.stringify(intent));
-}
-
 export function getAuthFlowIntent() {
   if (!isBrowser()) return null;
 

@@ -24,6 +24,7 @@ type CartService = {
   title: string;
   description: string | null;
   category: string | null;
+  fulfillment_type: string | null;
   price: number | string;
   is_published: boolean | null;
   freelancer_id: string;
@@ -178,6 +179,7 @@ Deno.serve(async (request: Request) => {
           title,
           description,
           category,
+          fulfillment_type,
           price,
           is_published,
           freelancer_id
@@ -293,6 +295,10 @@ Deno.serve(async (request: Request) => {
         checkout_session_id: checkoutSession.id,
         service_id: service.id,
         freelancer_id: service.freelancer_id,
+        fulfillment_type:
+          String(service.fulfillment_type || "").trim().toLowerCase() === "physical"
+            ? "physical"
+            : "digital",
         title: service.title,
         category: service.category || null,
         description: service.description || null,

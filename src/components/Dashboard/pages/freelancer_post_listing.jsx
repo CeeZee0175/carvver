@@ -31,6 +31,11 @@ const INITIAL_PACKAGES = [
   { id: null, name: "Premium", summary: "", price: "", deliveryTimeDays: "" },
 ];
 
+const FULFILLMENT_OPTIONS = [
+  { value: "digital", label: "Digital delivery" },
+  { value: "physical", label: "Physical shipment" },
+];
+
 function buildMediaError(file) {
   const isVideo = String(file?.type || "").startsWith("video/");
   if (file.size > (isVideo ? SERVICE_MEDIA_MAX_VIDEO_BYTES : SERVICE_MEDIA_MAX_IMAGE_BYTES)) {
@@ -64,6 +69,7 @@ export default function FreelancerPostListing() {
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
+  const [fulfillmentType, setFulfillmentType] = useState("digital");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [highlightsText, setHighlightsText] = useState("");
@@ -106,6 +112,7 @@ export default function FreelancerPostListing() {
 
         setTitle(listing.title || "");
         setCategory(listing.category || "");
+        setFulfillmentType(listing.fulfillment_type || "digital");
         setLocation(listing.location || "");
         setDescription(listing.listing_overview || listing.description || "");
         setHighlightsText(
@@ -226,6 +233,7 @@ export default function FreelancerPostListing() {
         listingId,
         title,
         category,
+        fulfillmentType,
         description,
         location,
         highlights,
@@ -432,6 +440,24 @@ export default function FreelancerPostListing() {
                   />
                 </label>
 
+                <label className="freelancerListingField">
+                  <span className="freelancerListingField__label">Fulfillment</span>
+                  <SearchableCombobox
+                    value={FULFILLMENT_OPTIONS.find((item) => item.value === fulfillmentType)?.label || ""}
+                    onSelect={(nextLabel) => {
+                      const nextOption = FULFILLMENT_OPTIONS.find(
+                        (item) => item.label === nextLabel
+                      );
+                      setFulfillmentType(nextOption?.value || "digital");
+                    }}
+                    options={FULFILLMENT_OPTIONS.map((item) => item.label)}
+                    placeholder="Choose fulfillment type"
+                    searchHint="Choose fulfillment type"
+                    noResultsText="No fulfillment types found"
+                    ariaLabel="Choose fulfillment type"
+                  />
+                </label>
+
                 <label className="freelancerListingField freelancerListingField--wide">
                   <span className="freelancerListingField__label">Overview</span>
                   <textarea
@@ -454,6 +480,15 @@ export default function FreelancerPostListing() {
                     These lines become the highlights customers see across your listing and packages.
                   </p>
                 </label>
+
+                <div className="freelancerListingField freelancerListingField--wide">
+                  <span className="freelancerListingField__label">Order handoff</span>
+                  <p className="freelancerListingField__hint">
+                    {fulfillmentType === "physical"
+                      ? "Customers will expect shipment details like courier name and tracking reference before they confirm receipt."
+                      : "Customers will expect a structured digital delivery with a delivery note and a deliverable link before they confirm receipt."}
+                  </p>
+                </div>
               </div>
             </section>
 

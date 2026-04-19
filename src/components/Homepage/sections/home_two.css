@@ -218,7 +218,7 @@
   bottom: 18px;
   z-index: 2;
   display: grid;
-  gap: 7px;
+  gap: 4px;
   text-align: left;
   color: #fff;
   pointer-events: none;
@@ -262,7 +262,7 @@
 
 .homeTwoRail__copyInner{
   display: grid;
-  gap: 8px;
+  gap: 6px;
   max-width: min(760px, 100%);
 }
 

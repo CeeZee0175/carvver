@@ -23,6 +23,7 @@ const SERVICE_COLUMNS_BASE = `
   title,
   category,
   description,
+  fulfillment_type,
   location,
   listing_overview,
   listing_highlights,
@@ -37,6 +38,12 @@ const SERVICE_COLUMNS_WITH_UPDATED = `${SERVICE_COLUMNS_BASE},
 
 function normalizeText(value) {
   return String(value || "").trim();
+}
+
+function normalizeFulfillmentType(value) {
+  return String(value || "").trim().toLowerCase() === "physical"
+    ? "physical"
+    : "digital";
 }
 
 function sanitizeFileName(name) {
@@ -110,6 +117,7 @@ function buildServicePayload({
   freelancerId,
   title,
   category,
+  fulfillmentType,
   description,
   location,
   highlights,
@@ -131,6 +139,7 @@ function buildServicePayload({
       title,
       category,
       description,
+      fulfillment_type: fulfillmentType,
       location,
       price: sortedPrices[0] || 0,
       is_published: Boolean(publish),
@@ -140,6 +149,7 @@ function buildServicePayload({
       title,
       category,
       description,
+      fulfillment_type: fulfillmentType,
       location,
       price: sortedPrices[0] || 0,
       is_published: Boolean(publish),
@@ -349,6 +359,7 @@ function normalizeListingSummary(service, packageRows, mediaRows) {
 
   return {
     ...service,
+    fulfillment_type: normalizeFulfillmentType(service.fulfillment_type),
     updated_at: service.updated_at || service.created_at || null,
     packageCount: normalizedPackages.length,
     startingPrice,
@@ -472,6 +483,7 @@ export async function saveFreelancerServiceListing({
   listingId = "",
   title,
   category,
+  fulfillmentType = "digital",
   description,
   location,
   highlights = [],
@@ -482,6 +494,7 @@ export async function saveFreelancerServiceListing({
   const freelancerId = await getSignedInFreelancerId();
   const normalizedTitle = normalizeText(title);
   const normalizedCategory = normalizeText(category);
+  const normalizedFulfillmentType = normalizeFulfillmentType(fulfillmentType);
   const normalizedDescription = normalizeText(description);
   const normalizedLocation = normalizeText(location);
   const normalizedHighlights = Array.isArray(highlights)
@@ -490,6 +503,9 @@ export async function saveFreelancerServiceListing({
 
   if (!normalizedTitle) throw new Error("Please add a title for your listing.");
   if (!normalizedCategory) throw new Error("Please choose a category.");
+  if (!["digital", "physical"].includes(normalizedFulfillmentType)) {
+    throw new Error("Choose how this listing will be fulfilled.");
+  }
   if (!normalizedDescription) throw new Error("Please add an overview for your listing.");
   if (!normalizedLocation) throw new Error("Please add your location.");
 
@@ -497,6 +513,7 @@ export async function saveFreelancerServiceListing({
     freelancerId,
     title: normalizedTitle,
     category: normalizedCategory,
+    fulfillmentType: normalizedFulfillmentType,
     description: normalizedDescription,
     location: normalizedLocation,
     highlights: normalizedHighlights,

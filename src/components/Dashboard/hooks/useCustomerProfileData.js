@@ -113,6 +113,8 @@ async function fetchOrders(userId) {
       freelancer_id,
       status,
       total_price,
+      escrow_status,
+      fulfillment_type,
       selected_package_id,
       selected_package_name,
       selected_package_summary,

@@ -106,18 +106,6 @@ export async function signIn({ email, password, remember }) {
   return data;
 }
 
-export async function signInWithOAuth({ provider, redirectTo }) {
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider,
-    options: {
-      redirectTo,
-    },
-  });
-
-  if (error) throw error;
-  return data;
-}
-
 export async function requestPasswordRecovery(email, options = {}) {
   const normalizedEmail = String(email || "").trim();
 

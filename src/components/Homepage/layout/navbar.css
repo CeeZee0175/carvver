@@ -211,6 +211,13 @@
   gap: 10px;
 }
 
+.navInlineLinks{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .navGroup{
   position: relative;
 }
@@ -249,6 +256,37 @@
   color: var(--ink);
   border-color: rgba(124,58,237,0.25);
   background: rgba(124,58,237,0.08);
+}
+
+.navLinkPill{
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(42,20,80,0.12);
+  background: rgba(255,255,255,0.78);
+  color: var(--ink2);
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 650;
+  transition:
+    transform 150ms ease,
+    background 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 220ms ease;
+}
+
+.navLinkPill:hover{
+  color: var(--ink);
+  background: rgba(124,58,237,0.06);
+  border-color: rgba(124,58,237,0.22);
+  box-shadow: 0 14px 40px rgba(124,58,237,0.10);
+  transform: translateY(-1px);
 }
 
 .nav__chevron{
@@ -502,6 +540,12 @@
 
 .mobilePanel--open{ display: block; }
 
+.mobilePrimaryLinks{
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
 .mobileLinkBtn{
   width: 100%;
   text-align: left;
@@ -550,6 +594,52 @@
 }
 
 .navStartRow--mobile{ margin-top: 10px; }
+
+.navNotice{
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  z-index: 60;
+  width: min(360px, calc(100vw - 32px));
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background: rgba(255,255,255,0.96);
+  box-shadow: 0 26px 80px rgba(12,7,18,0.14);
+  backdrop-filter: blur(10px);
+  transform: translateX(-50%);
+  display: grid;
+  gap: 10px;
+}
+
+.navNotice__title{
+  color: rgba(27,16,46,0.94);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.navNotice__copy{
+  margin: 0;
+  color: rgba(27,16,46,0.68);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.navNotice__button{
+  justify-self: flex-start;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(42,20,80,0.14);
+  background: rgba(124,58,237,0.06);
+  color: rgba(27,16,46,0.88);
+  cursor: pointer;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+}
 
 @media (max-width: 860px){
   .navLinks{ display: none; }

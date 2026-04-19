@@ -17,7 +17,11 @@ function friendlyWorkflowMessage(error, fallback) {
     return "That action isn't available right now.";
   }
 
-  if (/customer_request_proposals|order_updates|freelancer_payout_methods/i.test(message)) {
+  if (
+    /customer_request_proposals|order_updates|freelancer_payout_methods|order_deliveries|payout_release_requests/i.test(
+      message
+    )
+  ) {
     return "Run the latest workflow SQL before using this page.";
   }
 
@@ -156,12 +160,106 @@ function normalizePayoutMethod(row) {
   };
 }
 
+function normalizeFulfillmentType(value) {
+  return String(value || "").trim().toLowerCase() === "physical"
+    ? "physical"
+    : "digital";
+}
+
+function normalizeEscrowStatus(value) {
+  const normalized = normalizeText(value).toLowerCase();
+  if (
+    ["held", "pending_release", "released", "blocked", "failed", "refunded"].includes(
+      normalized
+    )
+  ) {
+    return normalized;
+  }
+  return "held";
+}
+
+function normalizePayoutQueueStatus(value) {
+  const normalized = normalizeText(value).toLowerCase();
+  if (["pending", "blocked", "released", "failed"].includes(normalized)) {
+    return normalized;
+  }
+  return "pending";
+}
+
+function hasValidPayoutDestination(destination) {
+  return Boolean(
+    normalizeText(destination?.payoutMethod) &&
+      normalizeText(destination?.accountName) &&
+      normalizeText(destination?.accountReference)
+  );
+}
+
+function normalizeOrderDelivery(row) {
+  const fulfillmentType = normalizeFulfillmentType(row?.fulfillment_type);
+
+  return {
+    id: row?.id || "",
+    orderId: row?.order_id || "",
+    freelancerId: row?.freelancer_id || "",
+    fulfillmentType,
+    deliveryNote: normalizeText(row?.delivery_note),
+    deliverableLabel: normalizeText(row?.deliverable_label),
+    deliverableUrl: normalizeText(row?.deliverable_url),
+    accessCode: normalizeText(row?.access_code),
+    courierName: normalizeText(row?.courier_name),
+    trackingReference: normalizeText(row?.tracking_reference),
+    shipmentNote: normalizeText(row?.shipment_note),
+    proofUrl: normalizeText(row?.proof_url),
+    createdAt: row?.created_at || null,
+    createdAtLabel: formatLongDateTime(row?.created_at),
+  };
+}
+
+function normalizePayoutReleaseRequest(row) {
+  if (!row) return null;
+
+  return {
+    id: row.id,
+    orderId: row.order_id,
+    customerId: row.customer_id,
+    freelancerId: row.freelancer_id,
+    amount: Number(row.amount || 0),
+    amountLabel: formatPeso(row.amount || 0),
+    currency: normalizeText(row.currency) || "PHP",
+    status: normalizePayoutQueueStatus(row.status),
+    payoutMethod: normalizeText(row.destination_method),
+    accountName: normalizeText(row.destination_account_name),
+    accountReference: normalizeText(row.destination_account_reference),
+    providerReference: normalizeText(row.provider_reference),
+    opsNote: normalizeText(row.ops_note),
+    requestedAt: row.requested_at || null,
+    requestedAtLabel: formatLongDateTime(row.requested_at),
+    releasedAt: row.released_at || null,
+    releasedAtLabel: formatLongDateTime(row.released_at),
+    processedAt: row.processed_at || null,
+    processedAtLabel: formatLongDateTime(row.processed_at),
+  };
+}
+
 async function getSignedInProfile() {
   const profile = await getProfile();
   if (!profile?.id) {
     throw new Error("You need to be signed in to continue.");
   }
   return profile;
+}
+
+async function fetchFreelancerPayoutMethodByFreelancerId(freelancerId) {
+  if (!freelancerId) return normalizePayoutMethod(null);
+
+  const { data, error } = await supabase
+    .from("freelancer_payout_methods")
+    .select("payout_method, account_name, account_reference")
+    .eq("freelancer_id", freelancerId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return normalizePayoutMethod(data);
 }
 
 async function ensureThread({ customerId, freelancerId }) {
@@ -480,6 +578,7 @@ async function fetchOrderDetail(orderId, column, ownerId) {
       payment_provider,
       payment_reference,
       escrow_status,
+      fulfillment_type,
       paid_at,
       completed_at,
       released_at,
@@ -520,16 +619,45 @@ async function fetchOrderDetail(orderId, column, ownerId) {
   if (orderError) throw orderError;
   if (!orderRow) throw new Error("We couldn't find that order.");
 
-  const { data: updateRows, error: updateError } = await supabase
-    .from("order_updates")
-    .select("id, order_id, author_id, author_role, update_kind, title, body, created_at")
-    .eq("order_id", orderId)
-    .order("created_at", { ascending: true });
+  const [
+    { data: updateRows, error: updateError },
+    { data: deliveryRows, error: deliveryError },
+    { data: payoutRequestRows, error: payoutError },
+  ] = await Promise.all([
+    supabase
+      .from("order_updates")
+      .select("id, order_id, author_id, author_role, update_kind, title, body, created_at")
+      .eq("order_id", orderId)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("order_deliveries")
+      .select(
+        "id, order_id, freelancer_id, fulfillment_type, delivery_note, deliverable_label, deliverable_url, access_code, courier_name, tracking_reference, shipment_note, proof_url, created_at"
+      )
+      .eq("order_id", orderId)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("payout_release_requests")
+      .select(
+        "id, order_id, customer_id, freelancer_id, amount, currency, status, destination_method, destination_account_name, destination_account_reference, provider_reference, ops_note, requested_at, processed_at, released_at, created_at"
+      )
+      .eq("order_id", orderId)
+      .order("created_at", { ascending: false })
+      .limit(1),
+  ]);
 
   if (updateError) throw updateError;
+  if (deliveryError) throw deliveryError;
+  if (payoutError) throw payoutError;
+
+  const payoutRelease = normalizePayoutReleaseRequest((payoutRequestRows || [])[0] || null);
+  const escrowStatus = normalizeEscrowStatus(orderRow.escrow_status);
+  const fulfillmentType = normalizeFulfillmentType(orderRow.fulfillment_type);
 
   return {
     ...orderRow,
+    escrow_status: escrowStatus,
+    fulfillment_type: fulfillmentType,
     totalLabel: formatPeso(orderRow.total_price),
     grossLabel: formatPeso(orderRow.gross_amount || orderRow.total_price),
     platformFeeLabel: formatPeso(orderRow.platform_fee || 0),
@@ -541,6 +669,12 @@ async function fetchOrderDetail(orderId, column, ownerId) {
     customerName: buildProfileName(orderRow.customer, "Customer"),
     freelancerName: buildProfileName(orderRow.freelancer, "Freelancer"),
     updates: (updateRows || []).map(normalizeOrderUpdate),
+    deliveries: (deliveryRows || []).map(normalizeOrderDelivery),
+    latestDelivery:
+      (deliveryRows || []).length > 0
+        ? normalizeOrderDelivery(deliveryRows[deliveryRows.length - 1])
+        : null,
+    payoutRelease,
   };
 }
 
@@ -559,18 +693,69 @@ export async function confirmOrderCompletion(orderId) {
   const order = await fetchOrderDetail(orderId, "customer_id", profile.id);
   const now = new Date().toISOString();
 
+  if (normalizeEscrowStatus(order.escrow_status) === "released") {
+    return {
+      escrowStatus: "released",
+      payoutRequestStatus: "released",
+      message: "This order was already completed and the payout has already been released.",
+    };
+  }
+
+  const payoutDestination = await fetchFreelancerPayoutMethodByFreelancerId(order.freelancer_id);
+  const payoutDestinationReady = hasValidPayoutDestination(payoutDestination);
+  const nextPayoutRequestStatus = payoutDestinationReady ? "pending" : "blocked";
+  const nextEscrowStatus = payoutDestinationReady ? "pending_release" : "blocked";
+
+  const { data: payoutRequest, error: payoutError } = await supabase
+    .from("payout_release_requests")
+    .upsert(
+      [
+        {
+          order_id: orderId,
+          customer_id: profile.id,
+          freelancer_id: order.freelancer_id,
+          amount: Number(order.freelancer_net || 0),
+          currency: "PHP",
+          status: nextPayoutRequestStatus,
+          destination_method: payoutDestination.payoutMethod || null,
+          destination_account_name: payoutDestination.accountName || null,
+          destination_account_reference: payoutDestination.accountReference || null,
+          provider_reference: null,
+          ops_note: payoutDestinationReady
+            ? "Queued for ops release after customer confirmation."
+            : "Blocked because the freelancer payout destination is missing or incomplete.",
+          requested_at: now,
+          processed_at: payoutDestinationReady ? null : now,
+          released_at: null,
+          updated_at: now,
+        },
+      ],
+      { onConflict: "order_id" }
+    )
+    .select("id")
+    .single();
+
+  if (payoutError) throw payoutError;
+
   const { error: orderError } = await supabase
     .from("orders")
     .update({
       status: "completed",
-      escrow_status: "released",
-      completed_at: now,
-      released_at: now,
+      escrow_status: nextEscrowStatus,
+      completed_at: order.completed_at || now,
+      released_at: null,
     })
     .eq("id", orderId)
     .eq("customer_id", profile.id);
 
   if (orderError) throw orderError;
+
+  const updateTitle = payoutDestinationReady
+    ? "Order completed and payout queued"
+    : "Order completed but payout blocked";
+  const updateBody = payoutDestinationReady
+    ? "The customer marked this order as completed. The freelancer payout is now queued for ops release."
+    : "The customer marked this order as completed. The payout is blocked until the freelancer payout details are fixed.";
 
   const { data: insertedUpdate, error: updateError } = await supabase
     .from("order_updates")
@@ -580,8 +765,8 @@ export async function confirmOrderCompletion(orderId) {
         author_id: profile.id,
         author_role: "customer",
         update_kind: "status",
-        title: "Order completed",
-        body: "The customer marked this order as completed and the held amount is now released.",
+        title: updateTitle,
+        body: updateBody,
       },
     ])
     .select("id")
@@ -598,17 +783,26 @@ export async function confirmOrderCompletion(orderId) {
     threadId: thread.id,
     senderId: profile.id,
     senderRole: "customer",
-    body: "Marked the order as completed and released the held payment.",
+    body: payoutDestinationReady
+      ? "Confirmed receipt and queued the freelancer payout for ops release."
+      : "Confirmed receipt, but the payout is blocked until the freelancer payout details are fixed.",
     messageType: "order_update",
     metadata: {
       orderId,
       updateId: insertedUpdate.id,
+      payoutRequestId: payoutRequest.id,
       updateKind: "status",
-      title: "Order completed",
+      title: updateTitle,
     },
   });
 
-  return true;
+  return {
+    escrowStatus: nextEscrowStatus,
+    payoutRequestStatus: nextPayoutRequestStatus,
+    message: payoutDestinationReady
+      ? "Order completed. The freelancer payout is now queued for ops release."
+      : "Order completed. The payout is blocked until the freelancer updates their payout details.",
+  };
 }
 
 export async function createFreelancerOrderUpdate({
@@ -666,6 +860,143 @@ export async function createFreelancerOrderUpdate({
   return true;
 }
 
+export async function submitFreelancerOrderDelivery({
+  orderId,
+  deliveryNote,
+  deliverableLabel,
+  deliverableUrl,
+  accessCode,
+  courierName,
+  trackingReference,
+  shipmentNote,
+  proofUrl,
+}) {
+  const profile = await getSignedInProfile();
+  const order = await fetchOrderDetail(orderId, "freelancer_id", profile.id);
+
+  const fulfillmentType = normalizeFulfillmentType(order.fulfillment_type);
+  const normalizedDeliveryNote = normalizeText(deliveryNote);
+  const normalizedDeliverableLabel = normalizeText(deliverableLabel);
+  const normalizedDeliverableUrl = normalizeText(deliverableUrl);
+  const normalizedAccessCode = normalizeText(accessCode);
+  const normalizedCourierName = normalizeText(courierName);
+  const normalizedTrackingReference = normalizeText(trackingReference);
+  const normalizedShipmentNote = normalizeText(shipmentNote);
+  const normalizedProofUrl = normalizeText(proofUrl);
+
+  if (!normalizedDeliveryNote) {
+    throw new Error("Add a short delivery note before sending.");
+  }
+
+  if (fulfillmentType === "digital" && !normalizedDeliverableUrl) {
+    throw new Error("Add the delivery link or access URL for this digital order.");
+  }
+
+  if (fulfillmentType === "physical") {
+    if (!normalizedCourierName) {
+      throw new Error("Add the courier name before sending shipment details.");
+    }
+    if (!normalizedTrackingReference) {
+      throw new Error("Add the tracking or reference number before sending shipment details.");
+    }
+  }
+
+  const { data: insertedDelivery, error: deliveryError } = await supabase
+    .from("order_deliveries")
+    .insert([
+      {
+        order_id: orderId,
+        freelancer_id: profile.id,
+        fulfillment_type: fulfillmentType,
+        delivery_note: normalizedDeliveryNote,
+        deliverable_label: fulfillmentType === "digital" ? normalizedDeliverableLabel || null : null,
+        deliverable_url: fulfillmentType === "digital" ? normalizedDeliverableUrl || null : null,
+        access_code: fulfillmentType === "digital" ? normalizedAccessCode || null : null,
+        courier_name: fulfillmentType === "physical" ? normalizedCourierName || null : null,
+        tracking_reference:
+          fulfillmentType === "physical" ? normalizedTrackingReference || null : null,
+        shipment_note: fulfillmentType === "physical" ? normalizedShipmentNote || null : null,
+        proof_url: fulfillmentType === "physical" ? normalizedProofUrl || null : null,
+      },
+    ])
+    .select("id")
+    .single();
+
+  if (deliveryError) throw deliveryError;
+
+  if (normalizeText(order.status) === "pending") {
+    const { error: activateError } = await supabase
+      .from("orders")
+      .update({ status: "active" })
+      .eq("id", orderId)
+      .eq("freelancer_id", profile.id);
+
+    if (activateError) throw activateError;
+  }
+
+  const deliveryTitle =
+    fulfillmentType === "physical" ? "Shipment details shared" : "Digital delivery submitted";
+  const deliveryBody =
+    fulfillmentType === "physical"
+      ? [
+          normalizedDeliveryNote,
+          `Courier: ${normalizedCourierName}`,
+          `Tracking/reference: ${normalizedTrackingReference}`,
+          normalizedShipmentNote ? `Shipment note: ${normalizedShipmentNote}` : "",
+          normalizedProofUrl ? `Proof: ${normalizedProofUrl}` : "",
+        ]
+          .filter(Boolean)
+          .join(" ")
+      : [
+          normalizedDeliveryNote,
+          normalizedDeliverableLabel ? `Deliverable: ${normalizedDeliverableLabel}` : "",
+          `Access link: ${normalizedDeliverableUrl}`,
+          normalizedAccessCode ? `Access code: ${normalizedAccessCode}` : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+
+  const { data: insertedUpdate, error: updateError } = await supabase
+    .from("order_updates")
+    .insert([
+      {
+        order_id: orderId,
+        author_id: profile.id,
+        author_role: "freelancer",
+        update_kind: "delivery",
+        title: deliveryTitle,
+        body: deliveryBody,
+      },
+    ])
+    .select("id")
+    .single();
+
+  if (updateError) throw updateError;
+
+  const thread = await ensureThread({
+    customerId: order.customer_id,
+    freelancerId: order.freelancer_id,
+  });
+
+  await insertThreadMessage({
+    threadId: thread.id,
+    senderId: profile.id,
+    senderRole: "freelancer",
+    body: deliveryBody,
+    messageType: "order_update",
+    metadata: {
+      orderId,
+      deliveryId: insertedDelivery.id,
+      updateId: insertedUpdate.id,
+      updateKind: "delivery",
+      title: deliveryTitle,
+      fulfillmentType,
+    },
+  });
+
+  return true;
+}
+
 export async function listFreelancerOrders() {
   const profile = await getSignedInProfile();
 
@@ -683,6 +1014,7 @@ export async function listFreelancerOrders() {
       platform_fee,
       freelancer_net,
       escrow_status,
+      fulfillment_type,
       paid_at,
       created_at,
       selected_package_name,
@@ -713,6 +1045,8 @@ export async function listFreelancerOrders() {
 
   return (data || []).map((row) => ({
     ...row,
+    escrow_status: normalizeEscrowStatus(row.escrow_status),
+    fulfillment_type: normalizeFulfillmentType(row.fulfillment_type),
     customerName: buildProfileName(row.customer, "Customer"),
     totalLabel: formatPeso(row.total_price),
     freelancerNetLabel: formatPeso(row.freelancer_net || 0),
@@ -836,18 +1170,30 @@ export function useFreelancerOrders() {
 
   const summary = useMemo(() => {
     const held = orders
-      .filter((order) => normalizeText(order.escrow_status) === "held")
+      .filter((order) => normalizeEscrowStatus(order.escrow_status) === "held")
+      .reduce((sum, order) => sum + Number(order.freelancer_net || 0), 0);
+    const pendingRelease = orders
+      .filter((order) => normalizeEscrowStatus(order.escrow_status) === "pending_release")
       .reduce((sum, order) => sum + Number(order.freelancer_net || 0), 0);
     const released = orders
-      .filter((order) => normalizeText(order.escrow_status) === "released")
+      .filter((order) => normalizeEscrowStatus(order.escrow_status) === "released")
+      .reduce((sum, order) => sum + Number(order.freelancer_net || 0), 0);
+    const blocked = orders
+      .filter((order) =>
+        ["blocked", "failed"].includes(normalizeEscrowStatus(order.escrow_status))
+      )
       .reduce((sum, order) => sum + Number(order.freelancer_net || 0), 0);
 
     return {
       held,
       heldLabel: formatPeso(held),
+      pendingRelease,
+      pendingReleaseLabel: formatPeso(pendingRelease),
       released,
       releasedLabel: formatPeso(released),
-      totalLabel: formatPeso(held + released),
+      blocked,
+      blockedLabel: formatPeso(blocked),
+      totalLabel: formatPeso(held + pendingRelease + released + blocked),
       activeCount: orders.filter((order) => ["pending", "active"].includes(order.status)).length,
       completedCount: orders.filter((order) => order.status === "completed").length,
     };
@@ -862,4 +1208,3 @@ export function useFreelancerOrders() {
     reload: load,
   };
 }
-

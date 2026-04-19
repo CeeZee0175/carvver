@@ -6,6 +6,7 @@ create table public.customer_checkout_items (
   title text not null,
   category text null,
   description text null,
+  fulfillment_type text not null default 'digital'::text,
   unit_price numeric(10, 2) not null,
   platform_fee numeric(10, 2) not null,
   freelancer_net numeric(10, 2) not null,
@@ -20,7 +21,12 @@ create table public.customer_checkout_items (
   constraint customer_checkout_items_session_service_key unique (checkout_session_id, service_id),
   constraint customer_checkout_items_checkout_session_id_fkey foreign KEY (checkout_session_id) references customer_checkout_sessions (id) on delete CASCADE,
   constraint customer_checkout_items_freelancer_id_fkey foreign KEY (freelancer_id) references profiles (id) on delete RESTRICT,
-  constraint customer_checkout_items_service_id_fkey foreign KEY (service_id) references services (id) on delete RESTRICT
+  constraint customer_checkout_items_service_id_fkey foreign KEY (service_id) references services (id) on delete RESTRICT,
+  constraint customer_checkout_items_fulfillment_type_check check (
+    (
+      fulfillment_type = any (array['digital'::text, 'physical'::text])
+    )
+  )
 ) TABLESPACE pg_default;
 
 create index IF not exists customer_checkout_items_session_idx on public.customer_checkout_items using btree (checkout_session_id) TABLESPACE pg_default;

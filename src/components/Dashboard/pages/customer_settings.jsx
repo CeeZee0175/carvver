@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { LoaderCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
+import { PASSWORD_POLICY_HINT } from "../../../lib/passwordPolicy";
 import { signOut } from "../../../lib/supabase/auth";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import {
@@ -443,7 +444,7 @@ export default function CustomerSettings() {
             <div className="customerSettingsSectionIntro">
               <h2 className="profileSection__title">Security</h2>
               <p className="customerSettingsSectionIntro__copy">
-                Use at least 8 characters for your next password.
+                {PASSWORD_POLICY_HINT}
               </p>
             </div>
           </div>

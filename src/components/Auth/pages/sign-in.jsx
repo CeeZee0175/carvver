@@ -7,9 +7,8 @@ import "./sign-in.css";
 import {
   ensureProfileForSession,
   signIn,
-  signInWithOAuth,
 } from "../../../lib/supabase/auth";
-import { buildOAuthCallbackUrl, setAuthFlowIntent } from "../../../lib/authFlowIntent";
+import { PASSWORD_POLICY_NOTICE } from "../../../lib/passwordPolicy";
 import {
   CUSTOMER_WELCOME_PATH,
   DEFAULT_CUSTOMER_DESTINATION,
@@ -27,33 +26,6 @@ import {
 } from "../../../lib/featuredCategoryIntent";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function GoogleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="signInSocial__icon">
-      <path d="M21.8 12.23c0-.76-.07-1.49-.2-2.18H12v4.13h5.49a4.7 4.7 0 0 1-2.04 3.08v2.56h3.3c1.93-1.78 3.05-4.4 3.05-7.59Z" fill="#4285F4" />
-      <path d="M12 22c2.76 0 5.07-.91 6.76-2.47l-3.3-2.56c-.91.61-2.08.98-3.46.98-2.66 0-4.91-1.8-5.72-4.21H2.87v2.64A10 10 0 0 0 12 22Z" fill="#34A853" />
-      <path d="M6.28 13.74A5.99 5.99 0 0 1 6 12c0-.61.1-1.2.28-1.74V7.62H2.87A10 10 0 0 0 2 12c0 1.61.39 3.14 1.07 4.38l3.21-2.64Z" fill="#FBBC05" />
-      <path d="M12 6.05c1.5 0 2.85.52 3.91 1.53l2.93-2.93C17.06 2.99 14.75 2 12 2a10 10 0 0 0-9.13 5.62l3.41 2.64C7.09 7.85 9.34 6.05 12 6.05Z" fill="#EA4335" />
-    </svg>
-  );
-}
-
-function FacebookIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="signInSocial__icon">
-      <path fill="currentColor" d="M13.5 21v-7h2.35l.4-3h-2.75V9.13c0-.87.24-1.47 1.49-1.47H16.4V5a19.2 19.2 0 0 0-2.04-.1c-2.02 0-3.4 1.23-3.4 3.5V11H8.7v3h2.26v7h2.54Z" />
-    </svg>
-  );
-}
-
-function TwitterIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="signInSocial__icon">
-      <path fill="currentColor" d="M18.9 2H22l-6.77 7.74L23 22h-6.1l-4.77-6.23L6.7 22H3.58l7.24-8.28L1 2h6.25l4.31 5.68L18.9 2Zm-1.07 18h1.69L6.32 3.9H4.5L17.83 20Z" />
-    </svg>
-  );
-}
 
 function TypewriterText({ text, active, speed = 85, initialDelay = 120, className = "", showCursor = true }) {
   const [displayText, setDisplayText] = useState("");
@@ -141,23 +113,6 @@ function getSignInErrors(values) {
   };
 }
 
-function SocialButton({ icon, label, onClick, disabled }) {
-  return (
-    <motion.button
-      type="button"
-      className="signInSocial"
-      whileHover={{ y: -2, scale: 1.02 }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ type: "spring", stiffness: 360, damping: 24 }}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      <span className="signInSocial__iconWrap" aria-hidden="true">{icon}</span>
-      <span className="signInSocial__text">{label}</span>
-    </motion.button>
-  );
-}
-
 export default function SignIn() {
   const ref = useRef(null);
   const inView = useInView(ref, { amount: 0.35, once: true });
@@ -166,7 +121,6 @@ export default function SignIn() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [oauthProvider, setOauthProvider] = useState("");
   const [formValues, setFormValues] = useState({
     email: "",
     password: "",
@@ -174,7 +128,6 @@ export default function SignIn() {
   });
   const [fieldErrors, setFieldErrors] = useState({});
   const [formError, setFormError] = useState("");
-  const [socialError, setSocialError] = useState("");
   const categoryIntent = resolveFeaturedCategoryIntent(location.search);
 
   useEffect(() => {
@@ -226,7 +179,6 @@ export default function SignIn() {
     }
 
     if (formError) setFormError("");
-    if (socialError) setSocialError("");
   };
 
   const handleFieldBlur = (e) => {
@@ -246,7 +198,6 @@ export default function SignIn() {
 
     try {
       setFormError("");
-      setSocialError("");
       setIsLoading(true);
       const authResult = await signIn({
         email: formValues.email.trim(),
@@ -292,30 +243,8 @@ export default function SignIn() {
     }
   };
 
-  const handleOAuth = async (provider) => {
-    try {
-      setSocialError("");
-      setFormError("");
-      setOauthProvider(provider);
-
-      setAuthFlowIntent({
-        mode: "sign-in",
-        categoryIntent,
-      });
-
-      await signInWithOAuth({
-        provider,
-        redirectTo: buildOAuthCallbackUrl("sign-in"),
-      });
-    } catch (err) {
-      setOauthProvider("");
-      setSocialError(err.message || `We couldn't start ${provider} sign-in.`);
-    }
-  };
-
   const handleForgotPassword = async () => {
     setFormError("");
-    setSocialError("");
     const normalizedEmail = formValues.email.trim();
     navigate(
       normalizedEmail
@@ -453,6 +382,7 @@ export default function SignIn() {
               </button>
             </div>
 
+            <p className="signInForm__notice">{PASSWORD_POLICY_NOTICE}</p>
             {formError && <p className="signInForm__error">{formError}</p>}
 
             <motion.button type="submit" className={`signPrimaryBtn ${isLoading ? "signPrimaryBtn--loading" : ""}`}
@@ -473,42 +403,10 @@ export default function SignIn() {
             </motion.button>
           </motion.form>
 
-          <motion.div className="signInDivider"
-            initial={{ opacity: 0 }}
-            animate={inView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.45, delay: 0.72 }}>
-            <span className="signInDivider__text">Or continue with</span>
-          </motion.div>
-
-          <motion.div className="signInSocials"
-            initial={{ opacity: 0, y: 8 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, ease: [0.2, 0.95, 0.2, 1], delay: 0.8 }}>
-            <SocialButton
-              icon={<GoogleIcon />}
-              label={oauthProvider === "google" ? "Connecting..." : "Google"}
-              onClick={() => handleOAuth("google")}
-              disabled={isLoading || Boolean(oauthProvider)}
-            />
-            <SocialButton
-              icon={<FacebookIcon />}
-              label={oauthProvider === "facebook" ? "Connecting..." : "Facebook"}
-              onClick={() => handleOAuth("facebook")}
-              disabled={isLoading || Boolean(oauthProvider)}
-            />
-            <SocialButton
-              icon={<TwitterIcon />}
-              label={oauthProvider === "twitter" ? "Connecting..." : "Twitter"}
-              onClick={() => handleOAuth("twitter")}
-              disabled={isLoading || Boolean(oauthProvider)}
-            />
-          </motion.div>
-          {socialError && <p className="signInForm__error signInForm__error--social">{socialError}</p>}
-
           <motion.div className="signInBottomPrompt"
             initial={{ opacity: 0, y: 8 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1], delay: 0.9 }}>
+            transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1], delay: 0.8 }}>
             <span className="signInBottomPrompt__text">New to our platform?</span>
             <button
               type="button"
