@@ -10,6 +10,7 @@ import {
   isCustomerOnboardingComplete,
   resolveProfileRole,
 } from "./lib/customerOnboarding";
+import { scrollWindowToTop } from "./lib/publicNavigation";
 
 const SplashScreen = lazy(() => import("./components/StartUp/pages/splash_screen"));
 const NavBar = lazy(() => import("./components/Homepage/layout/navbar"));
@@ -18,6 +19,8 @@ const HomeFooter = lazy(() => import("./components/Homepage/layout/home_footer")
 const DashBar = lazy(() => import("./components/Dashboard/layout/dashbar"));
 const HomeAboutUs = lazy(() => import("./components/Homepage/pages/home_aboutUs"));
 const HomeCommunity = lazy(() => import("./components/Homepage/pages/home_community"));
+const FeaturesPageContent = lazy(() => import("./components/Homepage/pages/features_page"));
+const FaqPageContent = lazy(() => import("./components/Homepage/pages/faq_page"));
 const PricingPageContent = lazy(() => import("./components/Homepage/pages/pricing_page"));
 const AuthCallback = lazy(() => import("./components/Auth/pages/auth_callback"));
 const PasswordRecovery = lazy(() =>
@@ -210,7 +213,7 @@ function HomePage() {
   const shellState = useCustomerBrandShell();
 
   return (
-    <>
+    <div className="brandPageShell brandPageShell--home">
       {shellState.resolved ? (
         <Suspense
           fallback={<div className="brandPageShell__barPlaceholder" aria-hidden="true" />}
@@ -220,13 +223,28 @@ function HomePage() {
       ) : (
         <div className="brandPageShell__barPlaceholder" aria-hidden="true" />
       )}
-      <Home />
-    </>
+      <div className="brandPageShell__content brandPageShell__content--home">
+        <Home />
+      </div>
+    </div>
   );
 }
 
 function BrandPageShell({ children }) {
+  const location = useLocation();
   const shellState = useCustomerBrandShell();
+
+  useEffect(() => {
+    if (typeof window === "undefined" || location.hash) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      scrollWindowToTop({ behavior: "auto" });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [location.hash, location.pathname]);
 
   return (
     <div className="brandPageShell">
@@ -259,6 +277,22 @@ function CommunityPage() {
   return (
     <BrandPageShell>
       <HomeCommunity />
+    </BrandPageShell>
+  );
+}
+
+function FeaturesPage() {
+  return (
+    <BrandPageShell>
+      <FeaturesPageContent />
+    </BrandPageShell>
+  );
+}
+
+function FaqPage() {
+  return (
+    <BrandPageShell>
+      <FaqPageContent />
     </BrandPageShell>
   );
 }
@@ -326,6 +360,22 @@ function AppRoutes() {
         element={
           <Suspense fallback={<RouteFallback />}>
             <CommunityPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/features"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FeaturesPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/faq"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FaqPage />
           </Suspense>
         }
       />

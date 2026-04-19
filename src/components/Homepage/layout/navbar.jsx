@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion, useReducedMotion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createClient } from "../../../lib/supabase/client";
+import {
+  navigateToHomeSection,
+  navigateToPublicRoute,
+} from "../../../lib/publicNavigation";
 import "./navbar.css";
 
 const supabase = createClient();
@@ -96,10 +100,10 @@ function BriefcaseIcon() {
 export default function NavBar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const reduceMotion = useReducedMotion();
 
   const [openStart, setOpenStart] = useState(false);
   const [openMobile, setOpenMobile] = useState(false);
-  const [openFaqNotice, setOpenFaqNotice] = useState(false);
   const [ready, setReady] = useState(false);
 
   const rootRef = useRef(null);
@@ -107,7 +111,6 @@ export default function NavBar() {
   const closeAll = () => {
     setOpenStart(false);
     setOpenMobile(false);
-    setOpenFaqNotice(false);
   };
 
   useEffect(() => {
@@ -135,11 +138,7 @@ export default function NavBar() {
   }, []);
 
   const toggleStart = () => {
-    setOpenStart((v) => {
-      const next = !v;
-      if (next) setOpenFaqNotice(false);
-      return next;
-    });
+    setOpenStart((v) => !v);
   };
 
   const handleSignInClick = () => {
@@ -155,47 +154,72 @@ export default function NavBar() {
   const handleBrandClick = (e) => {
     e.preventDefault();
     closeAll();
-    navigate("/");
+    navigateToHomeSection({
+      navigate,
+      location,
+      targetId: "home-hero",
+      reduceMotion,
+    });
+  };
+
+  const handleHomeClick = () => {
+    closeAll();
+    navigateToHomeSection({
+      navigate,
+      location,
+      targetId: "home-hero",
+      reduceMotion,
+    });
   };
 
   const handleFeatureClick = () => {
     closeAll();
-    if (location.pathname !== "/") {
-      navigate("/#home-how");
-      return;
-    }
-
-    const element = document.getElementById("home-how");
-    if (!element) {
-      navigate("/#home-how");
-      return;
-    }
-
-    element.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
+    navigateToPublicRoute({
+      navigate,
+      location,
+      pathname: "/features",
+      reduceMotion,
     });
   };
 
   const handleFaqClick = () => {
-    setOpenStart(false);
-    setOpenMobile(false);
-    setOpenFaqNotice(true);
+    closeAll();
+    navigateToPublicRoute({
+      navigate,
+      location,
+      pathname: "/faq",
+      reduceMotion,
+    });
   };
 
   const handleAboutClick = () => {
     closeAll();
-    navigate("/about-us");
+    navigateToPublicRoute({
+      navigate,
+      location,
+      pathname: "/about-us",
+      reduceMotion,
+    });
   };
 
   const handleCommunityClick = () => {
     closeAll();
-    navigate("/community");
+    navigateToPublicRoute({
+      navigate,
+      location,
+      pathname: "/community",
+      reduceMotion,
+    });
   };
 
   const handlePricingClick = () => {
     closeAll();
-    navigate("/pricing");
+    navigateToPublicRoute({
+      navigate,
+      location,
+      pathname: "/pricing",
+      reduceMotion,
+    });
   };
 
   const handleClientStart = async () => {
@@ -283,6 +307,9 @@ export default function NavBar() {
           </div>
 
           <nav className="navCenter navEnter navEnter--2" aria-label="Primary">
+            <button className="navTextLink" type="button" onClick={handleHomeClick}>
+              Home
+            </button>
             <button className="navTextLink" type="button" onClick={handleAboutClick}>
               About Us
             </button>
@@ -301,16 +328,16 @@ export default function NavBar() {
           </nav>
 
           <div className="navActions navEnter navEnter--3">
-            <motion.button
+            <Motion.button
               whileTap={{ scale: 0.93 }}
               className="btn btn--ghost"
               type="button"
               onClick={handleSignInClick}
             >
               Sign In
-            </motion.button>
+            </Motion.button>
 
-            <motion.button
+            <Motion.button
               whileTap={{ scale: 0.93 }}
               className="btn btn--primary"
               type="button"
@@ -320,7 +347,7 @@ export default function NavBar() {
               <span className="btn__arrow" aria-hidden="true">
                 <ArrowIcon />
               </span>
-            </motion.button>
+            </Motion.button>
 
             <button
               className={`burger ${openMobile ? "burger--open" : ""}`}
@@ -337,10 +364,15 @@ export default function NavBar() {
         </div>
       </div>
 
-      <AnimateFaqPopup open={openFaqNotice} onClose={() => setOpenFaqNotice(false)} />
-
       <div className={`mobilePanel ${openMobile ? "mobilePanel--open" : ""}`}>
         <div className="mobilePrimaryLinks">
+          <button
+            className="mobilePrimaryLink"
+            type="button"
+            onClick={handleHomeClick}
+          >
+            Home
+          </button>
           <button
             className="mobilePrimaryLink"
             type="button"
@@ -399,16 +431,16 @@ export default function NavBar() {
         )}
 
         <div className="mobileActions">
-          <motion.button
+          <Motion.button
             whileTap={{ scale: 0.93 }}
             className="btn btn--ghost"
             type="button"
             onClick={handleSignInClick}
           >
             Sign In
-          </motion.button>
+          </Motion.button>
 
-          <motion.button
+          <Motion.button
             whileTap={{ scale: 0.93 }}
             className="btn btn--primary"
             type="button"
@@ -418,36 +450,9 @@ export default function NavBar() {
             <span className="btn__arrow" aria-hidden="true">
               <ArrowIcon />
             </span>
-          </motion.button>
+          </Motion.button>
         </div>
       </div>
     </header>
-  );
-}
-
-function AnimateFaqPopup({ open, onClose }) {
-  if (!open) return null;
-
-  return (
-    <motion.div
-      className="navNotice"
-      role="dialog"
-      aria-modal="false"
-      aria-labelledby="nav-faq-title"
-      initial={{ opacity: 0, y: 10, scale: 0.98, filter: "blur(8px)" }}
-      animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-      exit={{ opacity: 0, y: 8, scale: 0.98, filter: "blur(8px)" }}
-      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-    >
-      <strong id="nav-faq-title" className="navNotice__title">
-        FAQ is still under work
-      </strong>
-      <p className="navNotice__copy">
-        We are still building the FAQ section for Carvver. It will be available soon.
-      </p>
-      <button className="navNotice__button" type="button" onClick={onClose}>
-        Close
-      </button>
-    </motion.div>
   );
 }

@@ -148,30 +148,19 @@ function TypewriterTitle({ id, text = "How It Works", active }) {
             stroke="currentColor"
             strokeWidth="2.2"
             strokeLinecap="round"
-            d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+            d="M 0,10 L 300,10"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={
               active
                 ? {
                     pathLength: 1,
                     opacity: 1,
-                    d: [
-                      "M 0,10 Q 75,0 150,10 Q 225,20 300,10",
-                      "M 0,10 Q 75,18 150,10 Q 225,2 300,10",
-                      "M 0,10 Q 75,0 150,10 Q 225,20 300,10",
-                    ],
                   }
                 : { pathLength: 0, opacity: 0 }
             }
             transition={{
               pathLength: { duration: 1.1, ease: "easeInOut" },
               opacity: { duration: 0.35 },
-              d: {
-                duration: 2.8,
-                ease: "easeInOut",
-                repeat: Infinity,
-                repeatType: "mirror",
-              },
             }}
           />
         </motion.svg>

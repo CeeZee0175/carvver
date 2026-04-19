@@ -1,137 +1,132 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useInView, useReducedMotion } from "framer-motion";
-import {
-  ArrowRight,
-  BadgeCheck,
-  Check,
-  Compass,
-  Handshake,
-  LoaderCircle,
-  MapPin,
-  Megaphone,
-  MessageSquare,
-  Share2,
-  ShieldCheck,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { AnimatePresence, motion as Motion, useInView, useReducedMotion } from "framer-motion";
+import { ArrowLeft, ArrowRight, Check, ChevronDown, LoaderCircle } from "lucide-react";
 import { createClient } from "../../../lib/supabase/client";
 import "./home_community.css";
 
 const supabase = createClient();
 const NEWSLETTER_TABLE = "newsletter_signups";
 
-const heroSignals = [
+const meaningItems = [
   {
-    label: "Built for",
-    value: "Creators and customers",
-    note: "A calmer space for discovery, trust, and honest early feedback.",
-  },
-  {
-    label: "What matters here",
-    value: "Trust and visibility",
-    note: "Profiles, reviews, and clearer signals should feel easy to read.",
-  },
-  {
-    label: "How it grows",
-    value: "Together, not noisily",
-    note: "Community updates stay grounded in real progress and real participation.",
-  },
-];
-
-const activeNowCards = [
-  {
-    title: "Community waitlist",
+    id: "01",
+    title: "Achievements over leaderboard pressure",
     text:
-      "People who join early help shape how Carvver grows, what gets prioritized next, and how community touchpoints should work in practice.",
-    Icon: Sparkles,
+      "Carvver favors badges, milestones, and credibility signals that feel rewarding without turning growth into a constant public ranking contest.",
   },
   {
-    title: "Product updates worth following",
+    id: "02",
+    title: "Discovery that feels more local and more human",
     text:
-      "We are sharing progress around few-click posting, badges, verification signals, and safer transaction handling as the product sharpens.",
-    Icon: Megaphone,
+      "Location-aware browsing, clearer profiles, verified badges, and better feedback loops help both sides make calmer, more informed decisions.",
   },
   {
-    title: "Early feedback invites",
+    id: "03",
+    title: "Safer transactions stay part of the culture",
     text:
-      "Creators and customers both have a place here. The goal is not just to launch features, but to keep learning what actually reduces friction on both sides.",
-    Icon: MessageSquare,
-  },
-  {
-    title: "Creator spotlights in progress",
-    text:
-      "We want Carvver to make discovery feel more intentional, especially for Filipino makers and service providers who are still building visibility.",
-    Icon: Compass,
+      "Few-click posting and community growth matter, but the platform still has to protect trust at checkout through clearer expectations and escrow-backed handling.",
   },
 ];
 
 const participationLanes = [
   {
+    id: "lane-1",
     title: "Creators",
     text:
       "Join if you make handmade products, offer services, or want a cleaner home for your work than a scattered social feed.",
-    Icon: Share2,
+    imageUrl:
+      "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1400&auto=format&fit=crop",
   },
   {
+    id: "lane-2",
     title: "Customers",
     text:
       "Join if you want a better way to discover trustworthy providers, compare clearer signals, and help shape a safer service marketplace.",
-    Icon: Users,
+    imageUrl:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1400&auto=format&fit=crop",
   },
   {
+    id: "lane-3",
     title: "Early contributors",
     text:
       "Join if you like giving grounded feedback, testing early ideas, and helping a startup decide what is actually useful before it scales.",
-    Icon: Handshake,
+    imageUrl:
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1400&auto=format&fit=crop",
   },
 ];
 
 const standards = [
   {
+    id: "standard-1",
     title: "Useful over noisy",
     text:
       "Community participation should help someone make a better decision, improve a listing, or understand the product more clearly.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1400&auto=format&fit=crop",
   },
   {
+    id: "standard-2",
     title: "Trust is earned visibly",
     text:
       "Badges, reviews, verified signals, and respectful communication matter more here than empty hype or inflated status.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1516321165247-4aa89a48be28?q=80&w=1400&auto=format&fit=crop",
   },
   {
+    id: "standard-3",
     title: "Respect the people still growing",
     text:
       "Carvver is for people building momentum. That means we keep the tone welcoming to beginners without lowering the bar on honesty or quality.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1400&auto=format&fit=crop",
   },
   {
+    id: "standard-4",
     title: "Safer transactions stay central",
     text:
       "Escrow-backed handling, clearer expectations, and good communication are part of the culture, not just the checkout flow.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1400&auto=format&fit=crop",
   },
 ];
 
 const roadmapNotes = [
   {
+    id: "01",
     title: "Feedback circles",
     text:
       "Small, direct product conversations with early creators and customers as the platform matures.",
   },
   {
+    id: "02",
     title: "Creator spotlights",
     text:
       "More intentional ways to surface promising makers and service providers without turning the platform into a leaderboard race.",
   },
   {
+    id: "03",
     title: "Lightweight sessions",
     text:
       "Practical sharing around profile building, posting strategy, trust signals, and making the most of Carvver's tools.",
   },
   {
+    id: "04",
     title: "Future showcases",
     text:
       "A clearer place to celebrate progress, featured work, and community milestones once the foundation is ready for it.",
   },
 ];
+
+function wrapIndex(total, value) {
+  if (total <= 0) return 0;
+  return ((value % total) + total) % total;
+}
+
+function getSignedOffset(index, activeIndex, total) {
+  const raw = index - activeIndex;
+  const alt = raw > 0 ? raw - total : raw + total;
+  return Math.abs(alt) < Math.abs(raw) ? alt : raw;
+}
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
@@ -158,7 +153,7 @@ function Reveal({ children, className = "", delay = 0, amount = 0.24 }) {
   const active = inView || reduceMotion;
 
   return (
-    <motion.div
+    <Motion.div
       ref={ref}
       className={className}
       initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18, filter: "blur(10px)" }}
@@ -166,106 +161,253 @@ function Reveal({ children, className = "", delay = 0, amount = 0.24 }) {
       transition={{ duration: 0.58, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {typeof children === "function" ? children(active) : children}
-    </motion.div>
+    </Motion.div>
   );
 }
 
-function TypewriterTitle({ text, active, speed = 72, initialDelay = 120 }) {
-  const [displayText, setDisplayText] = useState("");
-  const reduceMotion = useReducedMotion();
-  const startedRef = useRef(false);
-
-  useEffect(() => {
-    if (!active || startedRef.current) return;
-    startedRef.current = true;
-
-    if (reduceMotion) {
-      setDisplayText(text);
-      return;
-    }
-
-    let timeoutId = null;
-    let index = 0;
-
-    const tick = () => {
-      index += 1;
-      setDisplayText(text.slice(0, index));
-
-      if (index < text.length) {
-        timeoutId = window.setTimeout(tick, speed);
-      }
-    };
-
-    timeoutId = window.setTimeout(tick, initialDelay);
-
-    return () => {
-      if (timeoutId) window.clearTimeout(timeoutId);
-    };
-  }, [active, initialDelay, reduceMotion, speed, text]);
-
-  return (
-    <span>
-      {displayText}
-      {!reduceMotion && displayText.length < text.length && (
-        <motion.span
-          className="communityPage__cursor"
-          aria-hidden="true"
-          animate={{ opacity: [1, 0, 1] }}
-          transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
-        >
-          |
-        </motion.span>
-      )}
-    </span>
-  );
+function AccentLine({ className }) {
+  return <span className={className} aria-hidden="true" />;
 }
 
-function SectionHeading({ eyebrow, title, sub }) {
+function SectionHeading({ title }) {
   return (
     <div className="communitySectionHead">
-      <p className="communitySectionHead__eyebrow">{eyebrow}</p>
       <div className="communitySectionHead__titleWrap">
         <h2 className="communitySectionHead__title">{title}</h2>
-        <motion.svg
-          className="communitySectionHead__line"
-          viewBox="0 0 300 20"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <motion.path
-            d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            initial={{ pathLength: 0, opacity: 0 }}
-            whileInView={{ pathLength: 1, opacity: 1 }}
-            viewport={{ once: true, amount: 0.75 }}
-            transition={{ duration: 0.95, ease: "easeInOut" }}
-          />
-        </motion.svg>
+        <AccentLine className="communitySectionHead__line" />
       </div>
-      <p className="communitySectionHead__sub">{sub}</p>
+    </div>
+  );
+}
+
+function AccordionItem({ item, open, onToggle, className = "" }) {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <Motion.article
+      layout
+      className={`communityAccordion__item ${open ? "communityAccordion__item--open" : ""} ${className}`}
+      transition={{ type: "spring", stiffness: 320, damping: 30 }}
+    >
+      <button type="button" className="communityAccordion__trigger" onClick={() => onToggle(item.id)}>
+        <span className="communityAccordion__index" aria-hidden="true">
+          {item.id}
+        </span>
+        <span className="communityAccordion__title">{item.title}</span>
+        <ChevronDown
+          className={`communityAccordion__chevron ${
+            open ? "communityAccordion__chevron--open" : ""
+          }`}
+        />
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open ? (
+          <Motion.div
+            key="content"
+            className="communityAccordion__content"
+            initial={reduceMotion ? { opacity: 1, height: "auto" } : { opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={reduceMotion ? { opacity: 0, height: 0 } : { opacity: 0, height: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <p className="communityAccordion__body">{item.text}</p>
+          </Motion.div>
+        ) : null}
+      </AnimatePresence>
+    </Motion.article>
+  );
+}
+
+function ParticipationStack({ items }) {
+  const reduceMotion = useReducedMotion();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeItem = items[activeIndex];
+
+  useEffect(() => {
+    if (reduceMotion || items.length <= 1) return undefined;
+
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => wrapIndex(items.length, current + 1));
+    }, 4800);
+
+    return () => window.clearInterval(timer);
+  }, [items.length, reduceMotion]);
+
+  return (
+    <div className="communityStack">
+      <div className="communityStack__stage">
+        {items.map((item, index) => {
+          const offset = getSignedOffset(index, activeIndex, items.length);
+          const absOffset = Math.abs(offset);
+          if (absOffset > 1) return null;
+
+          const isActive = offset === 0;
+
+          return (
+            <Motion.button
+              key={item.id}
+              type="button"
+              className={`communityStack__card ${
+                isActive ? "communityStack__card--active" : "communityStack__card--side"
+              }`}
+              onClick={() => setActiveIndex(index)}
+              initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+              whileInView={reduceMotion ? {} : { opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.45 }}
+              animate={{
+                x: offset * 160,
+                y: isActive ? 0 : 20,
+                rotate: offset * 8,
+                scale: isActive ? 1 : 0.9,
+                opacity: isActive ? 1 : 0.66,
+                zIndex: isActive ? 3 : 2 - absOffset,
+              }}
+              transition={{ type: "spring", stiffness: 240, damping: 24 }}
+            >
+              <img src={item.imageUrl} alt={item.title} className="communityStack__image" loading="lazy" />
+              <div className="communityStack__veil" aria-hidden="true" />
+              <div className="communityStack__content">
+                <h3 className="communityStack__title">{item.title}</h3>
+                <p className="communityStack__text">{item.text}</p>
+              </div>
+            </Motion.button>
+          );
+        })}
+      </div>
+
+      <div className="communityStack__footer">
+        <div className="communityStack__meta">
+          <p className="communityStack__activeLabel">{activeItem?.title}</p>
+          <div className="communityStack__dots communityStack__dots--panel">
+            {items.map((item, index) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`communityStack__dot ${
+                  index === activeIndex ? "communityStack__dot--active" : ""
+                }`}
+                onClick={() => setActiveIndex(index)}
+                aria-label={`Show ${item.title}`}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="communityStack__arrowRow">
+          <button
+            type="button"
+            className="communityStack__arrow"
+            onClick={() => setActiveIndex((current) => wrapIndex(items.length, current - 1))}
+            aria-label="Previous lane"
+          >
+            <ArrowLeft className="communityStack__arrowIcon" />
+          </button>
+
+          <button
+            type="button"
+            className="communityStack__arrow"
+            onClick={() => setActiveIndex((current) => wrapIndex(items.length, current + 1))}
+            aria-label="Next lane"
+          >
+            <ArrowRight className="communityStack__arrowIcon" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StandardsSpotlight({ items }) {
+  const reduceMotion = useReducedMotion();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeItem = items[activeIndex];
+
+  const showPrevious = () => {
+    setActiveIndex((current) => wrapIndex(items.length, current - 1));
+  };
+
+  const showNext = () => {
+    setActiveIndex((current) => wrapIndex(items.length, current + 1));
+  };
+
+  useEffect(() => {
+    if (reduceMotion || items.length <= 1) return undefined;
+
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => wrapIndex(items.length, current + 1));
+    }, 5200);
+
+    return () => window.clearInterval(timer);
+  }, [items.length, reduceMotion]);
+
+  return (
+    <div className="communityStandardsSpotlight">
+      <AnimatePresence mode="wait">
+        <Motion.article
+          key={activeItem.id}
+          className="communityStandardsSpotlight__panel"
+          initial={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.985, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.01, y: -8 }}
+          transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <img
+            src={activeItem.imageUrl}
+            alt={activeItem.title}
+            className="communityStandardsSpotlight__image"
+            loading="lazy"
+          />
+          <div className="communityStandardsSpotlight__veil" aria-hidden="true" />
+          <div className="communityStandardsSpotlight__content">
+            <p className="communityStandardsSpotlight__counter">
+              {String(activeIndex + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}
+            </p>
+            <h3 className="communityStandardsSpotlight__title">{activeItem.title}</h3>
+            <p className="communityStandardsSpotlight__text">{activeItem.text}</p>
+          </div>
+          <button
+            type="button"
+            className="communityStandardsSpotlight__arrow communityStandardsSpotlight__arrow--left"
+            onClick={showPrevious}
+            aria-label="Previous community standard"
+          >
+            <ArrowLeft className="communityStandardsSpotlight__arrowIcon" />
+          </button>
+          <button
+            type="button"
+            className="communityStandardsSpotlight__arrow communityStandardsSpotlight__arrow--right"
+            onClick={showNext}
+            aria-label="Next community standard"
+          >
+            <ArrowRight className="communityStandardsSpotlight__arrowIcon" />
+          </button>
+          <div className="communityStandardsSpotlight__pager" aria-label="Community standards navigation">
+            {items.map((item, index) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`communityStandardsSpotlight__dot ${
+                  index === activeIndex ? "communityStandardsSpotlight__dot--active" : ""
+                }`}
+                onClick={() => setActiveIndex(index)}
+                aria-label={`Show ${item.title}`}
+              />
+            ))}
+          </div>
+        </Motion.article>
+      </AnimatePresence>
     </div>
   );
 }
 
 export default function HomeCommunity() {
-  const reduceMotion = useReducedMotion();
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
-
-  const handleScrollTo = (id) => {
-    const element = document.getElementById(id);
-    if (!element) return;
-
-    element.scrollIntoView({
-      behavior: reduceMotion ? "auto" : "smooth",
-      block: "start",
-    });
-  };
+  const [openMeaning, setOpenMeaning] = useState("01");
+  const [openRoadmap, setOpenRoadmap] = useState("01");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -328,261 +470,77 @@ export default function HomeCommunity() {
         <section className="communityHero communityBand">
           <div className="communityWrap communityHero__layout">
             <Reveal className="communityHero__copy" amount={0.3}>
-              {(active) => (
-                <>
-                  <p className="communityHero__eyebrow">Community</p>
-                  <div className="communityHero__titleWrap">
-                    <h1 className="communityHero__title">
-                      <TypewriterTitle text="Community" active={active} />
-                    </h1>
-                    <motion.svg
-                      className="communityHero__line"
-                      viewBox="0 0 300 20"
-                      preserveAspectRatio="none"
-                      aria-hidden="true"
-                    >
-                      <motion.path
-                        d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        initial={{ pathLength: 0, opacity: 0 }}
-                        animate={{ pathLength: 1, opacity: 1 }}
-                        transition={{ duration: 1.02, ease: "easeInOut", delay: 0.2 }}
-                      />
-                    </motion.svg>
-                  </div>
-
-                  <p className="communityHero__sub">
-                    Follow the people, updates, and conversations helping Carvver grow into a
-                    more trustworthy place for creators and customers to work together.
-                  </p>
-
-                  <div className="communityHero__actions">
-                    <motion.button
-                      type="button"
-                      className="communityBtn communityBtn--primary"
-                      whileHover={{ y: -2, scale: 1.01 }}
-                      whileTap={{ scale: 0.985 }}
-                      transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                      onClick={() => handleScrollTo("community-cta")}
-                    >
-                      <span>Join the waitlist</span>
-                      <ArrowRight className="communityBtn__icon" />
-                    </motion.button>
-
-                    <motion.button
-                      type="button"
-                      className="communityBtn communityBtn--ghost"
-                      whileHover={{ y: -2, scale: 1.01 }}
-                      whileTap={{ scale: 0.985 }}
-                      transition={{ type: "spring", stiffness: 260, damping: 22 }}
-                      onClick={() => handleScrollTo("community-active")}
-                    >
-                      What's active now
-                    </motion.button>
-                  </div>
-                </>
-              )}
+              <>
+                <div className="communityHero__titleWrap">
+                  <h1 className="communityHero__title">Community</h1>
+                  <AccentLine className="communityHero__line" />
+                </div>
+                <p className="communityHero__sub">
+                  Follow the people, updates, and conversations helping Carvver grow into a more
+                  trustworthy place for creators and customers to work together.
+                </p>
+              </>
             </Reveal>
-
-            <Reveal className="communityHero__panel" delay={0.08}>
-              <div className="communityHero__signalStack">
-                {heroSignals.map((signal, index) => (
-                  <motion.article
-                    key={signal.label}
-                    className="communitySignal communitySignal--hero"
-                    initial={{ opacity: 0, y: 12 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.5 }}
-                    transition={{ duration: 0.5, delay: index * 0.08 }}
-                    whileHover={{ y: -3 }}
-                  >
-                    <p className="communitySignal__label">{signal.label}</p>
-                    <h2 className="communitySignal__value">{signal.value}</h2>
-                    <p className="communitySignal__note">{signal.note}</p>
-                  </motion.article>
-                ))}
-              </div>
-            </Reveal>
-          </div>
-        </section>
-
-        <section className="communityBand communitySection" id="community-active">
-          <div className="communityWrap">
-            <Reveal>
-              <SectionHeading
-                eyebrow="What's active now"
-                title="How the community starts in a grounded way"
-                sub="Right now the focus is simple: gather the right people early, keep feedback loops open, and make Carvver feel more useful with every iteration."
-              />
-            </Reveal>
-
-            <div className="communityCards">
-              {activeNowCards.map(({ title, text, Icon }, index) => (
-                <Reveal key={title} delay={0.05 * index}>
-                  <motion.article
-                    className="communityCard"
-                    whileHover={{ y: -4 }}
-                    transition={{ type: "spring", stiffness: 240, damping: 22 }}
-                  >
-                    <div className="communityCard__iconWrap" aria-hidden="true">
-                      <Icon className="communityCard__icon" />
-                    </div>
-                    <h3 className="communityCard__title">{title}</h3>
-                    <p className="communityCard__text">{text}</p>
-                  </motion.article>
-                </Reveal>
-              ))}
-            </div>
           </div>
         </section>
 
         <section className="communityBand communitySection">
           <div className="communityWrap communityMeaning">
             <Reveal>
-              <SectionHeading
-                eyebrow="What community means here"
-                title="A shared layer around trust, visibility, and learning"
-                sub="Carvver community is not just a place to announce things. It should help creators get seen more clearly, help customers understand the product better, and help the platform keep improving."
-              />
+              <SectionHeading title="What community means here" />
             </Reveal>
 
-            <div className="communityMeaning__grid">
-              <Reveal delay={0.04}>
-                <article className="communityMeaning__feature">
-                  <div className="communityMeaning__iconWrap" aria-hidden="true">
-                    <BadgeCheck className="communityMeaning__icon" />
-                  </div>
-                  <div>
-                    <h3 className="communityMeaning__title">
-                      Achievements over leaderboard pressure
-                    </h3>
-                    <p className="communityMeaning__text">
-                      Carvver favors badges, milestones, and credibility
-                      signals that feel rewarding without turning
-                      growth into a constant public ranking contest.
-                    </p>
-                  </div>
-                </article>
-              </Reveal>
-
-              <Reveal delay={0.1}>
-                <article className="communityMeaning__feature">
-                  <div className="communityMeaning__iconWrap" aria-hidden="true">
-                    <MapPin className="communityMeaning__icon" />
-                  </div>
-                  <div>
-                    <h3 className="communityMeaning__title">
-                      Discovery that feels more local and more human
-                    </h3>
-                    <p className="communityMeaning__text">
-                      Location-aware browsing, clearer profiles, verified badges,
-                      and better feedback loops help both sides make calmer,
-                      more informed decisions.
-                    </p>
-                  </div>
-                </article>
-              </Reveal>
-
-              <Reveal delay={0.16}>
-                <article className="communityMeaning__feature">
-                  <div className="communityMeaning__iconWrap" aria-hidden="true">
-                    <ShieldCheck className="communityMeaning__icon" />
-                  </div>
-                  <div>
-                    <h3 className="communityMeaning__title">
-                      Safer transactions stay part of the culture
-                    </h3>
-                    <p className="communityMeaning__text">
-                      Few-click posting and community growth matter, but the
-                      platform still has to protect trust at checkout through
-                      clearer expectations and escrow-backed handling.
-                    </p>
-                  </div>
-                </article>
-              </Reveal>
+            <div className="communityAccordion">
+              {meaningItems.map((item, index) => (
+                <Reveal key={item.id} delay={0.05 * index}>
+                  <AccordionItem
+                    item={item}
+                    open={openMeaning === item.id}
+                    onToggle={(id) => setOpenMeaning((current) => (current === id ? "" : id))}
+                  />
+                </Reveal>
+              ))}
             </div>
           </div>
         </section>
 
         <section className="communityBand communitySection">
-          <div className="communityWrap">
+          <div className="communityWrap communityParticipation">
             <Reveal>
-              <SectionHeading
-                eyebrow="Participation lanes"
-                title="Who can shape this early"
-                sub="We want community to serve the people offering work, the people buying work, and the people willing to help a young startup make sharper decisions."
-              />
+              <SectionHeading title="Where You Fit In" />
             </Reveal>
-
-            <div className="communityLanes">
-              {participationLanes.map(({ title, text, Icon }, index) => (
-                <Reveal key={title} delay={0.06 * index}>
-                  <article className="communityLane">
-                    <div className="communityLane__labelRow">
-                      <span className="communityLane__iconWrap" aria-hidden="true">
-                        <Icon className="communityLane__icon" />
-                      </span>
-                      <h3 className="communityLane__title">{title}</h3>
-                    </div>
-                    <p className="communityLane__text">{text}</p>
-                  </article>
-                </Reveal>
-              ))}
-            </div>
+            <Reveal delay={0.06}>
+              <ParticipationStack items={participationLanes} />
+            </Reveal>
           </div>
         </section>
 
         <section className="communityBand communitySection">
           <div className="communityWrap communityStandards">
             <Reveal>
-              <SectionHeading
-                eyebrow="Community standards"
-                title="The tone should stay respectful, useful, and real"
-                sub="Community should feel supportive without becoming vague, and honest without becoming hostile. That is especially important while the product is still early."
-              />
+              <SectionHeading title="Community standards" />
             </Reveal>
-
-            <div className="communityStandards__grid">
-              {standards.map((item, index) => (
-                <Reveal key={item.title} delay={0.05 * index}>
-                  <article className="communityStandard">
-                    <div className="communityStandard__top">
-                      <span className="communityStandard__dot" aria-hidden="true" />
-                      <h3 className="communityStandard__title">{item.title}</h3>
-                    </div>
-                    <p className="communityStandard__text">{item.text}</p>
-                  </article>
-                </Reveal>
-              ))}
-            </div>
+            <Reveal delay={0.06}>
+              <StandardsSpotlight items={standards} />
+            </Reveal>
           </div>
         </section>
 
         <section className="communityBand communitySection">
           <div className="communityWrap communityRoadmap">
             <Reveal>
-              <SectionHeading
-                eyebrow="What comes next"
-                title="A light roadmap, not overclaimed activity"
-                sub="We are keeping the roadmap honest. These are the kinds of community touchpoints that make sense as Carvver earns more traction."
-              />
+              <SectionHeading title="What comes next" />
             </Reveal>
 
-            <div className="communityRoadmap__list">
+            <div className="communityAccordion communityAccordion--roadmap">
               {roadmapNotes.map((item, index) => (
-                <Reveal key={item.title} delay={0.05 * index}>
-                  <article className="communityRoadmap__item">
-                    <span className="communityRoadmap__index">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <div className="communityRoadmap__copy">
-                      <h3 className="communityRoadmap__title">{item.title}</h3>
-                      <p className="communityRoadmap__text">{item.text}</p>
-                    </div>
-                  </article>
+                <Reveal key={item.id} delay={0.05 * index}>
+                  <AccordionItem
+                    item={item}
+                    open={openRoadmap === item.id}
+                    onToggle={(id) => setOpenRoadmap((current) => (current === id ? "" : id))}
+                    className="communityAccordion__item--soft"
+                  />
                 </Reveal>
               ))}
             </div>
@@ -594,41 +552,17 @@ export default function HomeCommunity() {
             <Reveal>
               <div className="communityCta">
                 <div className="communityCta__copy">
-                  <p className="communitySectionHead__eyebrow">Join early</p>
-                  <div className="communitySectionHead__titleWrap">
-                    <h2 className="communitySectionHead__title">
-                      Be part of the community while it is still taking shape
-                    </h2>
-                    <motion.svg
-                      className="communitySectionHead__line"
-                      viewBox="0 0 300 20"
-                      preserveAspectRatio="none"
-                      aria-hidden="true"
-                    >
-                      <motion.path
-                        d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        initial={{ pathLength: 0, opacity: 0 }}
-                        whileInView={{ pathLength: 1, opacity: 1 }}
-                        viewport={{ once: true, amount: 0.7 }}
-                        transition={{ duration: 0.95, ease: "easeInOut" }}
-                      />
-                    </motion.svg>
+                  <div className="communityCta__titleWrap">
+                    <h2 className="communityCta__title">Be part of the community while it is still taking shape</h2>
+                    <AccentLine className="communityCta__line" />
                   </div>
                   <p className="communityCta__text">
-                    Join the waitlist if you want early updates, future feedback
-                    invites, and a closer view of how Carvver grows.
+                    Join the waitlist if you want early updates, future feedback invites, and a
+                    closer view of how Carvver grows.
                   </p>
                 </div>
 
                 <form className="communityCta__form" onSubmit={handleSubmit} noValidate>
-                  <label className="communityCta__label" htmlFor="community-email">
-                    Email address
-                  </label>
-
                   <div
                     className={`communityCta__field ${
                       status === "error"
@@ -644,7 +578,7 @@ export default function HomeCommunity() {
                       inputMode="email"
                       autoComplete="email"
                       className="communityCta__input"
-                      placeholder="Enter your email"
+                      placeholder="Email address"
                       value={email}
                       onChange={(event) => {
                         setEmail(event.target.value);
@@ -657,7 +591,7 @@ export default function HomeCommunity() {
                       aria-invalid={status === "error"}
                     />
 
-                    <motion.button
+                    <Motion.button
                       type="submit"
                       className="communityBtn communityBtn--primary communityBtn--submit"
                       whileHover={isSubmitting ? {} : { y: -2, scale: 1.01 }}
@@ -665,9 +599,7 @@ export default function HomeCommunity() {
                       transition={{ type: "spring", stiffness: 260, damping: 22 }}
                       disabled={isSubmitting}
                     >
-                      <span>
-                        {isSubmitting ? "Joining..." : "Join the waitlist"}
-                      </span>
+                      <span>{isSubmitting ? "Joining..." : "Join the waitlist"}</span>
                       {isSubmitting ? (
                         <LoaderCircle className="communityBtn__icon communityBtn__icon--spin" />
                       ) : status === "success" ? (
@@ -675,21 +607,24 @@ export default function HomeCommunity() {
                       ) : (
                         <ArrowRight className="communityBtn__icon" />
                       )}
-                    </motion.button>
+                    </Motion.button>
                   </div>
 
-                  <p
-                    className={`communityCta__feedback ${
-                      status === "error"
-                        ? "communityCta__feedback--error"
-                        : status === "success"
-                        ? "communityCta__feedback--success"
-                        : ""
-                    }`}
-                    aria-live="polite"
-                  >
-                    {message || "We will only use this to send community and product updates."}
-                  </p>
+                  <div className="communityCta__feedbackWrap" aria-live="polite">
+                    {message ? (
+                      <p
+                        className={`communityCta__feedback ${
+                          status === "error"
+                            ? "communityCta__feedback--error"
+                            : status === "success"
+                            ? "communityCta__feedback--success"
+                            : ""
+                        }`}
+                      >
+                        {message}
+                      </p>
+                    ) : null}
+                  </div>
                 </form>
               </div>
             </Reveal>

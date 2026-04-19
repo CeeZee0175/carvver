@@ -1,17 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
-import {
-  ArrowLeft,
-  ArrowRight,
-  BadgeCheck,
-  ChevronDown,
-  Compass,
-  MapPin,
-  Share2,
-  ShieldCheck,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronDown } from "lucide-react";
 import founderCarl from "../../../assets/Carl Cardinal.jpg";
 import founderShaira from "../../../assets/Shaira Brillantes.jpg";
 import founderGeoff from "../../../assets/Geoff Montua.jpg";
@@ -20,51 +9,95 @@ import founderJhoanis from "../../../assets/Jhoanis Zuniga.jpg";
 import founderMark from "../../../assets/Mark Caraballe.jpg";
 import "./home_aboutUs.css";
 
-const SCRAMBLE_CHARS =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+const keepMotionReference = motion;
+void keepMotionReference;
 
-const storyCards = [
+const storySlides = [
   {
+    id: "story-1",
     title: "Built for Filipino creators still growing",
     text:
-      "Carvver was shaped for skilled hobbyists, handmade-product makers, and casual freelancers who are good enough to be hired, but often get overshadowed on larger global marketplaces.",
+      "Carvver is designed for hobbyists, handmade sellers, and early freelancers who need a clearer place to be seen before they look like a full studio.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1400&auto=format&fit=crop",
   },
   {
+    id: "story-2",
     title: "A calmer home than scattered social feeds",
     text:
-      "Instead of forcing creators and customers to bounce across several platforms, Carvver keeps listings, profiles, proof, reviews, and communication in one clearer place.",
+      "Listings, proof, reviews, and conversations live in one place so customers do not have to piece trust together across several apps.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1400&auto=format&fit=crop",
   },
   {
+    id: "story-3",
     title: "Progress should feel rewarding, not punishing",
     text:
-      "The platform favors achievements and badges over leaderboards so users can build credibility over time without feeling pushed into a constant public competition.",
+      "Badges and visible progress help creators earn credibility over time without turning growth into a noisy public competition.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1400&auto=format&fit=crop",
+  },
+];
+
+const differenceItems = [
+  {
+    id: "01",
+    title: "Portable visibility",
+    body:
+      "Carvver is meant to be the trusted home for a creator's offer, while still helping that offer travel outward through social channels instead of staying trapped in one closed feed.",
+  },
+  {
+    id: "02",
+    title: "Few-click posting",
+    body:
+      "Creators should set up a listing once, then reuse that work across the places where people already pay attention. Promotion should feel faster, not repetitive.",
+  },
+  {
+    id: "03",
+    title: "Trust people can read faster",
+    body:
+      "Profiles, proof, badges, reviews, and safer payment handling are meant to make credibility easier to understand before either side commits.",
+  },
+  {
+    id: "04",
+    title: "One clearer source of truth",
+    body:
+      "Instead of splitting the experience between social DMs, random posts, and separate payment chats, Carvver keeps the important parts of the transaction in one place.",
   },
 ];
 
 const pillars = [
   {
+    id: "pillar-1",
     title: "Few-click posting",
     text:
-      "Service providers can publish a listing once, then push that same offer outward to social platforms where their audience already pays attention.",
-    Icon: Share2,
+      "Creators can publish once, then extend that same offer outward to the channels where discovery already happens.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1400&auto=format&fit=crop",
   },
   {
+    id: "pillar-2",
     title: "Verified badges",
     text:
-      "Verification gives customers a quicker way to read legitimacy while helping honest providers earn trust without overexplaining themselves every time.",
-    Icon: BadgeCheck,
+      "Trust signals should help honest providers feel more legible without forcing them to over-explain themselves every time.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1400&auto=format&fit=crop",
   },
   {
+    id: "pillar-3",
     title: "Location services",
     text:
-      "Customers can narrow discovery around nearby providers, which matters especially for on-site work and any service where time and distance affect the experience.",
-    Icon: MapPin,
+      "Local discovery matters for on-site work, handmade delivery, and any service where distance changes the experience.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1400&auto=format&fit=crop",
   },
   {
+    id: "pillar-4",
     title: "Escrow-backed safety",
     text:
-      "Payments are held first, then released after the work is completed and confirmed, which lowers scam risk and makes refunds easier to handle when something goes wrong.",
-    Icon: ShieldCheck,
+      "Payments are held first so customers and creators move through the work with more protection and clearer review points.",
+    imageUrl:
+      "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1400&auto=format&fit=crop",
   },
 ];
 
@@ -72,45 +105,12 @@ const audienceLanes = [
   {
     title: "For service providers",
     text:
-      "Carvver gives skilled hobbyists and casual freelancers a dedicated place to showcase work, manage customers, build credibility, and promote themselves more efficiently.",
+      "A clearer place to showcase work, manage customers, and build credibility without getting buried under larger marketplaces.",
   },
   {
     title: "For customers",
     text:
-      "Customers get a simpler way to discover trustworthy people, compare real signals, read reviews, narrow by location, and pay through a safer escrow-style flow.",
-  },
-];
-
-const flowSteps = [
-  "Create a service listing once inside Carvver.",
-  "Push that same listing outward in a few clicks to the social platforms that already bring attention.",
-  "Bring customers back to one trusted home for reviews, chat, proof of work, and safer payment handling.",
-];
-
-const accordionItems = [
-  {
-    id: "01",
-    title: "Why beginners need a fairer starting point",
-    body:
-      "Carvver gives skilled hobbyists and casual freelancers a place to begin seriously without needing to compete head-to-head with large agencies or already established global sellers.",
-  },
-  {
-    id: "02",
-    title: "How trust becomes easier to read here",
-    body:
-      "Verified badges, visible achievements, clearer profiles, honest reviews, and proof-backed escrow handling help customers understand who feels credible before they commit.",
-  },
-  {
-    id: "03",
-    title: "Why promotion should take fewer steps",
-    body:
-      "Few-click posting exists because creators should not have to rewrite the same offer across multiple social platforms just to reach enough people to be discovered.",
-  },
-  {
-    id: "04",
-    title: "What customers gain more clearly",
-    body:
-      "Customers get quicker discovery, easier comparison, location-aware browsing, customer-side support, and a safer transaction flow that does not immediately release payment before the work is confirmed.",
+      "A faster way to discover trustworthy people, compare real signals, and pay through a safer workflow that feels easier to understand.",
   },
 ];
 
@@ -118,62 +118,50 @@ const founders = [
   {
     name: "Carl Edray N. Cardinal",
     role: "Founder & CEO",
-    quote:
-      "Carvver should be the place where talented hobbyists and casual freelancers feel taken seriously before the market expects them to look like a full studio.",
     bio:
-      "Carl anchors the vision of Carvver around creator opportunity, clearer trust, and a platform that helps Filipino providers grow without being buried by larger marketplaces.",
+      "Carl anchors the vision around creator opportunity, clearer trust, and a marketplace that helps Filipino providers grow without being buried by larger platforms.",
     imageSrc: founderCarl,
-    imagePosition: "center 18%",
+    imagePosition: "center center",
   },
   {
     name: "Shaira Brillantes",
     role: "Co-founder & Chief Product Officer",
-    quote:
-      "The product should feel welcoming from the first listing, but still structured enough that customers can trust what they are seeing.",
     bio:
-      "Shaira focuses on how the platform feels in use, making sure discovery, profile clarity, and milestone-driven credibility work together as one coherent customer and provider experience.",
+      "Shaira focuses on making discovery, profile clarity, and marketplace trust work together as one coherent experience.",
     imageSrc: founderShaira,
-    imagePosition: "center 20%",
+    imagePosition: "center center",
   },
   {
     name: "Geoff Montua",
     role: "Co-founder & Chief Technology Officer",
-    quote:
-      "A creator-first platform only works if the foundation is stable enough to support safer transactions, clearer proof, and smoother day-to-day use.",
     bio:
-      "Geoff helps shape the technical backbone behind Carvver, from the web experience itself to the features that make few-click posting and escrow-backed workflows viable at scale.",
+      "Geoff helps shape the technical backbone behind Carvver, from the web experience itself to the product systems that make trust and payout flow possible.",
     imageSrc: founderGeoff,
-    imagePosition: "center 16%",
+    imagePosition: "center 18%",
   },
   {
     name: "Angelo Nollano",
     role: "Co-founder & Chief Operations Officer",
-    quote:
-      "Trust cannot live in the interface alone; it also has to show up in how the platform is reviewed, moderated, and supported behind the scenes.",
     bio:
-      "Angelo represents the operational side of Carvver, helping define how moderation, verification flow, and smoother platform support can make the marketplace feel safer for both sides.",
+      "Angelo brings the operational lens that helps moderation, verification, and platform support feel steadier on both sides of the marketplace.",
     imageSrc: founderAngelo,
-    imagePosition: "center 20%",
+    imagePosition: "center center",
   },
   {
-    name: "Jhoanis Paulo Zu\u00f1iga",
+    name: "Jhoanis Paulo Zuniga",
     role: "Co-founder & Chief Growth & Marketing Officer",
-    quote:
-      "Growth should not depend on creators shouting louder than everyone else. The platform should help them travel further without losing clarity.",
     bio:
-      "Jhoanis Paulo shapes how Carvver reaches people, tying together social visibility, creator promotion, and few-click posting that expands discovery beyond one platform.",
+      "Jhoanis Paulo connects social visibility, creator promotion, and the few-click posting vision that helps discovery move beyond one platform.",
     imageSrc: founderJhoanis,
-    imagePosition: "center 18%",
+    imagePosition: "center center",
   },
   {
     name: "Mark Caraballe",
     role: "Co-founder & Community Partnerships Lead",
-    quote:
-      "A community-driven platform gets stronger when the people using it feel heard early, especially while the product is still learning what the market needs most.",
     bio:
-      "Mark brings the community and partnership lens, reinforcing Carvver's early-adopter energy through local outreach, user feedback, and collaborative work shaped by the concept paper.",
+      "Mark carries the community and partnership perspective, keeping feedback, outreach, and early-adopter energy close to the product direction.",
     imageSrc: founderMark,
-    imagePosition: "center 20%",
+    imagePosition: "center center",
   },
 ];
 
@@ -192,148 +180,20 @@ function getFounderInitials(name) {
     .toUpperCase();
 }
 
-function calculateFounderGap(width) {
-  const minWidth = 320;
-  const maxWidth = 820;
-  const minGap = 124;
-  const maxGap = 274;
-
-  if (width <= minWidth) return minGap;
-  if (width >= maxWidth) return maxGap;
-
-  return minGap + ((maxGap - minGap) * (width - minWidth)) / (maxWidth - minWidth);
-}
-
-function TypewriterText({
-  text,
-  speed = 80,
-  initialDelay = 120,
-  className = "",
-  showCursor = true,
-}) {
-  const [displayText, setDisplayText] = useState("");
+function AccentLine({ className, delay = 0 }) {
   const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (reduceMotion) {
-      setDisplayText(text);
-      return;
-    }
-
-    setDisplayText("");
-
-    let timeoutId = null;
-    let index = 0;
-    let cancelled = false;
-
-    const tick = () => {
-      if (cancelled) return;
-      index += 1;
-      setDisplayText(text.slice(0, index));
-
-      if (index < text.length) {
-        timeoutId = setTimeout(tick, speed);
-      }
-    };
-
-    timeoutId = setTimeout(tick, initialDelay);
-
-    return () => {
-      cancelled = true;
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [text, speed, initialDelay, reduceMotion]);
 
   return (
-    <span className={className}>
-      {displayText}
-      {!reduceMotion && showCursor && displayText.length < text.length && (
-        <motion.span
-          className="aboutUs__cursor"
-          aria-hidden="true"
-          animate={{ opacity: [1, 0, 1] }}
-          transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
-        >
-          |
-        </motion.span>
-      )}
-    </span>
+    <motion.span
+      className={className}
+      aria-hidden="true"
+      initial={reduceMotion ? { opacity: 1, scaleX: 1 } : { opacity: 0, scaleX: 0.2 }}
+      whileInView={{ opacity: 1, scaleX: 1 }}
+      viewport={{ once: true, amount: 0.75 }}
+      transition={{ duration: 0.75, delay, ease: [0.22, 1, 0.36, 1] }}
+      style={{ transformOrigin: "center" }}
+    />
   );
-}
-
-function TextScramble({
-  text,
-  duration = 0.82,
-  speed = 0.04,
-  characterSet = SCRAMBLE_CHARS,
-  className = "",
-  as: Component = "p",
-  trigger = true,
-  startDelay = 0,
-}) {
-  const reduceMotion = useReducedMotion();
-  const [displayText, setDisplayText] = useState(text);
-  const hasCompletedRef = useRef(false);
-
-  useEffect(() => {
-    if (reduceMotion) {
-      setDisplayText(text);
-      hasCompletedRef.current = true;
-      return;
-    }
-
-    if (!trigger || hasCompletedRef.current) return;
-
-    let intervalId = null;
-    let timeoutId = null;
-    let cancelled = false;
-    const totalSteps = Math.max(1, Math.ceil(duration / speed));
-
-    const start = () => {
-      let step = 0;
-
-      intervalId = setInterval(() => {
-        if (cancelled) return;
-
-        const progress = step / totalSteps;
-        let scrambled = "";
-
-        for (let i = 0; i < text.length; i += 1) {
-          if (text[i] === " ") {
-            scrambled += " ";
-            continue;
-          }
-
-          if (progress * text.length > i) {
-            scrambled += text[i];
-          } else {
-            scrambled += characterSet[Math.floor(Math.random() * characterSet.length)];
-          }
-        }
-
-        setDisplayText(scrambled);
-        step += 1;
-
-        if (step > totalSteps) {
-          clearInterval(intervalId);
-          intervalId = null;
-          setDisplayText(text);
-          hasCompletedRef.current = true;
-        }
-      }, speed * 1000);
-    };
-
-    setDisplayText(text);
-    timeoutId = setTimeout(start, startDelay);
-
-    return () => {
-      cancelled = true;
-      if (timeoutId) clearTimeout(timeoutId);
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [characterSet, duration, reduceMotion, speed, startDelay, text, trigger]);
-
-  return <Component className={className}>{displayText}</Component>;
 }
 
 function Reveal({ children, className = "", delay = 0, amount = 0.2 }) {
@@ -346,49 +206,123 @@ function Reveal({ children, className = "", delay = 0, amount = 0.2 }) {
     <motion.div
       ref={ref}
       className={className}
-      initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 20, filter: "blur(10px)" }}
+      initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18, filter: "blur(10px)" }}
       animate={isActive ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
-      transition={{ duration: 0.58, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {typeof children === "function" ? children(isActive) : children}
     </motion.div>
   );
 }
 
-function SectionHeading({ eyebrow, title, sub, trigger = true }) {
+function SectionHeading({ title }) {
   return (
     <div className="aboutUsSectionHead">
-      {eyebrow && <p className="aboutUsSectionHead__eyebrow">{eyebrow}</p>}
       <div className="aboutUsSectionHead__titleWrap">
         <h2 className="aboutUsSectionHead__title">{title}</h2>
-        <motion.svg
-          className="aboutUsSectionHead__line"
-          viewBox="0 0 300 20"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <motion.path
-            d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            initial={{ pathLength: 0, opacity: 0 }}
-            whileInView={{ pathLength: 1, opacity: 1 }}
-            viewport={{ once: true, amount: 0.75 }}
-            transition={{ duration: 0.95, ease: "easeInOut" }}
-          />
-        </motion.svg>
+        <AccentLine className="aboutUsSectionHead__line" />
       </div>
-      {sub && (
-        <TextScramble
-          as="p"
-          text={sub}
-          className="aboutUsSectionHead__sub"
-          trigger={trigger}
-          startDelay={90}
-        />
-      )}
+    </div>
+  );
+}
+
+function StoryProgressSlider({ items }) {
+  const reduceMotion = useReducedMotion();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if (reduceMotion || items.length <= 1) return undefined;
+
+    let frame = 0;
+    let startTime = performance.now();
+    const duration = 5200;
+
+    const animate = (now) => {
+      const elapsed = now - startTime;
+      const nextProgress = Math.min(100, (elapsed / duration) * 100);
+      setProgress(nextProgress);
+
+      if (nextProgress >= 100) {
+        setActiveIndex((current) => (current + 1) % items.length);
+        setProgress(0);
+        startTime = now;
+      }
+
+      frame = requestAnimationFrame(animate);
+    };
+
+    frame = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [activeIndex, items.length, reduceMotion]);
+
+  const activeSlide = items[activeIndex];
+
+  return (
+    <div className="aboutUsStorySlider">
+      <div className="aboutUsStorySlider__frame">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeSlide.id}
+            className="aboutUsStorySlider__media"
+            initial={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.985 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.015 }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <img
+              src={activeSlide.imageUrl}
+              alt={activeSlide.title}
+              className="aboutUsStorySlider__image"
+              loading="lazy"
+            />
+            <div className="aboutUsStorySlider__veil" aria-hidden="true" />
+            <div className="aboutUsStorySlider__content">
+              <h3 className="aboutUsStorySlider__title">{activeSlide.title}</h3>
+              <p className="aboutUsStorySlider__text">{activeSlide.text}</p>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <div className="aboutUsStorySlider__nav" role="tablist" aria-label="Our story">
+        {items.map((item, index) => (
+          <button
+            key={item.id}
+            type="button"
+            role="tab"
+            aria-selected={index === activeIndex}
+            className={`aboutUsStorySlider__tab ${
+              index === activeIndex ? "aboutUsStorySlider__tab--active" : ""
+            }`}
+            onClick={() => {
+              setActiveIndex(index);
+              setProgress(0);
+            }}
+          >
+            <span className="aboutUsStorySlider__tabNumber">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span className="aboutUsStorySlider__tabLine" aria-hidden="true">
+              <motion.span
+                className="aboutUsStorySlider__tabFill"
+                animate={{
+                  width:
+                    index === activeIndex
+                      ? reduceMotion
+                        ? "100%"
+                        : `${progress}%`
+                      : "0%",
+                }}
+                transition={{ duration: reduceMotion ? 0 : 0.18, ease: "linear" }}
+              />
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -400,26 +334,22 @@ function AccordionItem({ item, open, onToggle }) {
     <motion.article
       layout
       className={`aboutUsAccordion__item ${open ? "aboutUsAccordion__item--open" : ""}`}
-      transition={{ type: "spring", stiffness: 300, damping: 28 }}
+      transition={{ type: "spring", stiffness: 320, damping: 30 }}
     >
-      <motion.button
-        type="button"
-        className="aboutUsAccordion__trigger"
-        onClick={() => onToggle(item.id)}
-        whileHover={reduceMotion ? undefined : { x: 1.5 }}
-        whileTap={reduceMotion ? undefined : { scale: 0.99 }}
-      >
+      <button type="button" className="aboutUsAccordion__trigger" onClick={() => onToggle(item.id)}>
         <span className="aboutUsAccordion__index" aria-hidden="true">
           {item.id}
         </span>
         <span className="aboutUsAccordion__title">{item.title}</span>
         <ChevronDown
-          className={`aboutUsAccordion__chevron ${open ? "aboutUsAccordion__chevron--open" : ""}`}
+          className={`aboutUsAccordion__chevron ${
+            open ? "aboutUsAccordion__chevron--open" : ""
+          }`}
         />
-      </motion.button>
+      </button>
 
       <AnimatePresence initial={false}>
-        {open && (
+        {open ? (
           <motion.div
             key="content"
             className="aboutUsAccordion__content"
@@ -430,294 +360,215 @@ function AccordionItem({ item, open, onToggle }) {
           >
             <p className="aboutUsAccordion__body">{item.body}</p>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </motion.article>
   );
 }
 
-function FounderQuote({ text }) {
+function PillarsSpotlight({ items }) {
   const reduceMotion = useReducedMotion();
-
-  return (
-    <motion.p
-      className="aboutUsFounders__quote"
-      initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 10, filter: "blur(10px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, filter: "blur(10px)" }}
-      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {text.split(" ").map((word, index) => (
-        <motion.span
-          key={`${word}-${index}`}
-          className="aboutUsFounders__quoteWord"
-          initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 6, filter: "blur(8px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6, filter: "blur(8px)" }}
-          transition={{
-            duration: 0.22,
-            delay: reduceMotion ? 0 : index * 0.02,
-            ease: "easeOut",
-          }}
-        >
-          {word}&nbsp;
-        </motion.span>
-      ))}
-    </motion.p>
-  );
-}
-
-function FoundersBand() {
-  const reduceMotion = useReducedMotion();
-  const stageRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [stageWidth, setStageWidth] = useState(620);
-  const [imageFailures, setImageFailures] = useState({});
-
-  const totalFounders = founders.length;
-  const activeFounder = useMemo(() => founders[activeIndex], [activeIndex]);
-  const previousIndex = wrapIndex(totalFounders, activeIndex - 1);
-  const nextIndex = wrapIndex(totalFounders, activeIndex + 1);
-  const gap = useMemo(() => calculateFounderGap(stageWidth), [stageWidth]);
-  const sideScale = stageWidth < 560 ? 0.7 : 0.78;
-  const sideOpacity = stageWidth < 560 ? 0.56 : 0.76;
-  const sideBrightness = stageWidth < 560 ? 0.84 : 0.92;
-  const lift = Math.round(Math.min(46, gap * 0.14));
+  const activeItem = items[activeIndex];
 
   useEffect(() => {
-    const updateWidth = () => {
-      if (!stageRef.current) return;
-      setStageWidth(stageRef.current.offsetWidth);
-    };
+    if (reduceMotion || items.length <= 1) return undefined;
 
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % items.length);
+    }, 5600);
 
     return () => {
-      window.removeEventListener("resize", updateWidth);
+      window.clearInterval(timer);
     };
-  }, []);
-
-  const goToIndex = useCallback(
-    (index) => {
-      setActiveIndex(wrapIndex(totalFounders, index));
-    },
-    [totalFounders]
-  );
-
-  const handlePrev = useCallback(() => {
-    setActiveIndex((current) => wrapIndex(totalFounders, current - 1));
-  }, [totalFounders]);
-
-  const handleNext = useCallback(() => {
-    setActiveIndex((current) => wrapIndex(totalFounders, current + 1));
-  }, [totalFounders]);
-
-  useEffect(() => {
-    if (reduceMotion || totalFounders <= 1) return undefined;
-
-    const intervalId = window.setInterval(() => {
-      setActiveIndex((current) => wrapIndex(totalFounders, current + 1));
-    }, 5200);
-
-    return () => window.clearInterval(intervalId);
-  }, [activeIndex, reduceMotion, totalFounders]);
-
-  const handleCardKeyDown = (event) => {
-    if (event.key === "ArrowLeft") {
-      event.preventDefault();
-      handlePrev();
-    }
-
-    if (event.key === "ArrowRight") {
-      event.preventDefault();
-      handleNext();
-    }
-  };
-
-  const markImageFailed = useCallback((name) => {
-    setImageFailures((current) => {
-      if (current[name]) return current;
-      return { ...current, [name]: true };
-    });
-  }, []);
+  }, [items.length, reduceMotion]);
 
   return (
-    <div className="aboutUsFounders">
-      <Reveal>
-        {(active) => (
-          <SectionHeading
-            eyebrow="Founding Team"
-            title="The people shaping Carvver"
-            sub="This section puts the founders behind Carvver in focus: the team turning creator trust, safer transactions, and better discoverability into a real product."
-            trigger={active}
+    <div className="aboutUsPillars">
+      <AnimatePresence mode="wait">
+        <motion.article
+          key={activeItem.id}
+          className="aboutUsPillars__panel"
+          initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 16, filter: "blur(10px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -12, filter: "blur(10px)" }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <img
+            src={activeItem.imageUrl}
+            alt=""
+            className="aboutUsPillars__image"
+            loading="lazy"
           />
-        )}
-      </Reveal>
-
-      <div className="aboutUsFounders__layout">
-        <Reveal className="aboutUsFounders__media" delay={0.06}>
-          <div
-            className="aboutUsFounders__stage"
-            ref={stageRef}
-            tabIndex={0}
-            aria-label="Founders carousel"
-            onKeyDown={handleCardKeyDown}
-          >
-            {founders.map((founder, index) => {
-              const isActive = index === activeIndex;
-              const isPrevious = index === previousIndex;
-              const isNext = index === nextIndex;
-              const isVisible = isActive || isPrevious || isNext;
-              const showImage = Boolean(founder.imageSrc) && !imageFailures[founder.name];
-
-              return (
-                <motion.button
-                  key={founder.name}
-                  type="button"
-                  className={`aboutUsFounderCard ${
-                    isActive ? "aboutUsFounderCard--active" : ""
-                  }`}
-                  aria-label={`Open ${founder.name}`}
-                  aria-pressed={isActive}
-                  onClick={() => goToIndex(index)}
-                  whileHover={
-                    reduceMotion ? undefined : { scale: isActive ? 1.015 : sideScale + 0.03 }
-                  }
-                  whileTap={
-                    reduceMotion ? undefined : { scale: isActive ? 0.992 : sideScale - 0.02 }
-                  }
-                  animate={{
-                    x: isActive ? 0 : isPrevious ? -gap : isNext ? gap : 0,
-                    y: isActive ? 0 : -lift,
-                    scale: isActive ? 1 : sideScale,
-                    rotateY: isPrevious ? 15 : isNext ? -15 : 0,
-                    opacity: isActive ? 1 : isVisible ? sideOpacity : 0,
-                    filter: isActive
-                      ? "blur(0px) saturate(1) brightness(1)"
-                      : isVisible
-                      ? `blur(0px) saturate(0.94) brightness(${sideBrightness})`
-                      : "blur(12px) saturate(0.84) brightness(0.72)",
-                  }}
-                  transition={{ type: "spring", stiffness: 265, damping: 28, mass: 0.96 }}
-                  style={{
-                    zIndex: isActive ? 3 : isVisible ? 2 : 1,
-                    pointerEvents: isVisible ? "auto" : "none",
-                    transformStyle: "preserve-3d",
-                  }}
-                >
-                  <span className="aboutUsFounderCard__surface">
-                    {showImage ? (
-                      <img
-                        src={founder.imageSrc}
-                        alt={founder.name}
-                        className="aboutUsFounderCard__image"
-                        loading="lazy"
-                        decoding="async"
-                        style={{ objectPosition: founder.imagePosition || "center 20%" }}
-                        onError={() => markImageFailed(founder.name)}
-                      />
-                    ) : (
-                      <span className="aboutUsFounderCard__fallback" aria-hidden="true">
-                        <span className="aboutUsFounderCard__monogram">
-                          {getFounderInitials(founder.name)}
-                        </span>
-                        <span className="aboutUsFounderCard__pill">Founding team</span>
-                      </span>
-                    )}
-
-                    <span className="aboutUsFounderCard__veil" aria-hidden="true" />
-
-                    <span className="aboutUsFounderCard__meta">
-                      <span className="aboutUsFounderCard__name">{founder.name}</span>
-                      <span className="aboutUsFounderCard__role">{founder.role}</span>
-                    </span>
-                  </span>
-                </motion.button>
-              );
-            })}
+          <div className="aboutUsPillars__imageVeil" aria-hidden="true" />
+          <div className="aboutUsPillars__content">
+          <p className="aboutUsPillars__eyebrow">
+            {String(activeIndex + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}
+          </p>
+          <h3 className="aboutUsPillars__title">{activeItem.title}</h3>
+          <p className="aboutUsPillars__text">{activeItem.text}</p>
           </div>
-        </Reveal>
+        </motion.article>
+      </AnimatePresence>
 
-        <Reveal className="aboutUsFounders__copy" delay={0.1}>
-          <div className="aboutUsFounders__copyWrap">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeFounder.name}
-                className="aboutUsFounders__copyCard"
-                initial={
-                  reduceMotion ? { opacity: 1 } : { opacity: 0, y: 14, filter: "blur(10px)" }
-                }
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={
-                  reduceMotion ? { opacity: 0 } : { opacity: 0, y: -12, filter: "blur(10px)" }
-                }
-                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <div className="aboutUsFounders__copyTop">
-                  <p className="aboutUsFounders__eyebrow">Founder spotlight</p>
-                  <p className="aboutUsFounders__counter">
-                    {String(activeIndex + 1).padStart(2, "0")} /{" "}
-                    {String(totalFounders).padStart(2, "0")}
-                  </p>
-                </div>
-
-                <h3 className="aboutUsFounders__name">{activeFounder.name}</h3>
-                <p className="aboutUsFounders__role">{activeFounder.role}</p>
-                <FounderQuote text={activeFounder.quote} />
-                <p className="aboutUsFounders__bio">{activeFounder.bio}</p>
-              </motion.div>
-            </AnimatePresence>
-
-            <div className="aboutUsFounders__controls">
-              <div className="aboutUsFounders__arrowRow">
-                <motion.button
-                  type="button"
-                  className="aboutUsFounders__arrow"
-                  whileHover={reduceMotion ? undefined : { y: -1 }}
-                  whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-                  onClick={handlePrev}
-                  aria-label="Previous founder"
-                >
-                  <ArrowLeft className="aboutUsFounders__arrowIcon" />
-                </motion.button>
-
-                <motion.button
-                  type="button"
-                  className="aboutUsFounders__arrow"
-                  whileHover={reduceMotion ? undefined : { y: -1 }}
-                  whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-                  onClick={handleNext}
-                  aria-label="Next founder"
-                >
-                  <ArrowRight className="aboutUsFounders__arrowIcon" />
-                </motion.button>
-              </div>
-
-              <div className="aboutUsFounders__roster">
-                {founders.map((founder, index) => (
-                  <button
-                    key={founder.name}
-                    type="button"
-                    className={`aboutUsFounders__rosterBtn ${
-                      activeIndex === index ? "aboutUsFounders__rosterBtn--active" : ""
-                    }`}
-                    onClick={() => goToIndex(index)}
-                  >
-                    {founder.name.split(" ")[0]}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Reveal>
+      <div className="aboutUsPillars__pager" aria-label="Core pillars navigation">
+        {items.map((item, index) => (
+          <button
+            key={item.id}
+            type="button"
+            className={`aboutUsPillars__dot ${
+              index === activeIndex ? "aboutUsPillars__dot--active" : ""
+            }`}
+            onClick={() => setActiveIndex(index)}
+            aria-label={`Show ${item.title}`}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
-export default function HomeAboutUs() {
+function FoundersBand() {
   const reduceMotion = useReducedMotion();
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [imageFailures, setImageFailures] = useState({});
+  const activeFounder = useMemo(() => founders[activeIndex], [activeIndex]);
+
+  useEffect(() => {
+    if (reduceMotion || founders.length <= 1) return undefined;
+
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => wrapIndex(founders.length, current + 1));
+    }, 5600);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const images = founders
+      .map((founder) => founder.imageSrc)
+      .filter(Boolean)
+      .map((src) => {
+        const image = new Image();
+        image.decoding = "async";
+        image.src = src;
+        return image;
+      });
+
+    return () => {
+      images.forEach((image) => {
+        image.src = "";
+      });
+    };
+  }, []);
+
+  const showImage = Boolean(activeFounder.imageSrc) && !imageFailures[activeFounder.name];
+
+  return (
+    <div className="aboutUsFounders">
+      <Reveal>
+        <SectionHeading title="Founding Team" />
+      </Reveal>
+
+      <Reveal className="aboutUsFounders__stageWrap" delay={0.04}>
+        <div className="aboutUsFounders__stage">
+          <button
+            type="button"
+            className="aboutUsFounders__arrow aboutUsFounders__arrow--left"
+            onClick={() => setActiveIndex((current) => wrapIndex(founders.length, current - 1))}
+            aria-label="Previous founder"
+          >
+            <ArrowLeft className="aboutUsFounders__arrowIcon" />
+          </button>
+
+          <AnimatePresence mode="wait">
+            <motion.article
+              key={activeFounder.name}
+              className="aboutUsFounders__portrait"
+              initial={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.985, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 1.01, y: -8 }}
+              transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {showImage ? (
+                <>
+                  <img
+                    src={activeFounder.imageSrc}
+                    alt=""
+                    className="aboutUsFounders__portraitBackdrop"
+                    loading="eager"
+                    decoding="sync"
+                    fetchPriority={activeIndex === 0 ? "high" : "auto"}
+                    style={{ objectPosition: activeFounder.imagePosition || "center center" }}
+                    onError={() =>
+                      setImageFailures((current) => ({ ...current, [activeFounder.name]: true }))
+                    }
+                  />
+                  <div className="aboutUsFounders__portraitSubjectWrap">
+                    <img
+                      src={activeFounder.imageSrc}
+                      alt={activeFounder.name}
+                      className="aboutUsFounders__portraitImage"
+                      loading="eager"
+                      decoding="sync"
+                      fetchPriority={activeIndex === 0 ? "high" : "auto"}
+                      style={{ objectPosition: activeFounder.imagePosition || "center center" }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="aboutUsFounders__portraitFallback" aria-hidden="true">
+                  <span className="aboutUsFounders__portraitInitials">
+                    {getFounderInitials(activeFounder.name)}
+                  </span>
+                </div>
+              )}
+              <div className="aboutUsFounders__portraitVeil" aria-hidden="true" />
+              <div className="aboutUsFounders__portraitMeta">
+                <p className="aboutUsFounders__counter">
+                  {String(activeIndex + 1).padStart(2, "0")} / {String(founders.length).padStart(2, "0")}
+                </p>
+                <h3 className="aboutUsFounders__portraitName">{activeFounder.name}</h3>
+                <p className="aboutUsFounders__portraitRole">{activeFounder.role}</p>
+                <p className="aboutUsFounders__portraitBio">{activeFounder.bio}</p>
+              </div>
+            </motion.article>
+          </AnimatePresence>
+
+          <button
+            type="button"
+            className="aboutUsFounders__arrow aboutUsFounders__arrow--right"
+            onClick={() => setActiveIndex((current) => wrapIndex(founders.length, current + 1))}
+            aria-label="Next founder"
+          >
+            <ArrowRight className="aboutUsFounders__arrowIcon" />
+          </button>
+        </div>
+
+        <div className="aboutUsFounders__roster">
+          {founders.map((founder, index) => (
+            <button
+              key={founder.name}
+              type="button"
+              className={`aboutUsFounders__rosterBtn ${
+                activeIndex === index ? "aboutUsFounders__rosterBtn--active" : ""
+              }`}
+              onClick={() => setActiveIndex(index)}
+            >
+              {founder.name}
+            </button>
+          ))}
+        </div>
+      </Reveal>
+    </div>
+  );
+}
+
+export default function HomeAboutUs() {
   const [openAccordion, setOpenAccordion] = useState("01");
 
   return (
@@ -733,53 +584,16 @@ export default function HomeAboutUs() {
         <section className="aboutUsHero aboutUsBand">
           <div className="aboutUsHero__inner aboutUsWrap">
             <Reveal className="aboutUsHero__content" amount={0.3}>
-              {(active) => (
-                <>
-                  <p className="aboutUsHero__eyebrow">About Carvver</p>
-                  <div className="aboutUsHero__titleWrap">
-                    <h1 className="aboutUsHero__title">
-                      <TypewriterText text="About Us" speed={82} initialDelay={120} />
-                    </h1>
-                    <motion.svg
-                      className="aboutUsHero__line"
-                      viewBox="0 0 300 20"
-                      preserveAspectRatio="none"
-                      aria-hidden="true"
-                    >
-                      <motion.path
-                        d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        initial={{ pathLength: 0, opacity: 0 }}
-                        animate={{ pathLength: 1, opacity: 1 }}
-                        transition={{ duration: 1.05, ease: "easeInOut", delay: 0.22 }}
-                      />
-                    </motion.svg>
-                  </div>
-                  <TextScramble
-                    as="p"
-                    text="Carvver gives Filipino creators and customers one clearer place to discover work, build trust, and move through services more confidently."
-                    className="aboutUsHero__sub"
-                    trigger={active}
-                    startDelay={120}
-                  />
-                </>
-              )}
-            </Reveal>
-
-            <Reveal className="aboutUsHero__metrics" delay={0.08}>
-              {[
-                { label: "For providers", value: "Credibility + reach" },
-                { label: "For customers", value: "Faster trust" },
-                { label: "Transactions", value: "Escrow-backed safety" },
-              ].map((item) => (
-                <div key={item.label} className="aboutUsMetric">
-                  <span className="aboutUsMetric__label">{item.label}</span>
-                  <strong className="aboutUsMetric__value">{item.value}</strong>
+              <>
+                <div className="aboutUsHero__titleWrap">
+                  <h1 className="aboutUsHero__title">About Carvver</h1>
+                  <AccentLine className="aboutUsHero__line" delay={0.16} />
                 </div>
-              ))}
+                <p className="aboutUsHero__sub">
+                  Carvver gives Filipino creators and customers one clearer place to discover work,
+                  build trust, and move through services more confidently.
+                </p>
+              </>
             </Reveal>
           </div>
         </section>
@@ -787,100 +601,10 @@ export default function HomeAboutUs() {
         <section className="aboutUsBand aboutUsSection">
           <div className="aboutUsWrap">
             <Reveal>
-              {(active) => (
-                <SectionHeading
-                  eyebrow="Our Story"
-                  title="Why Carvver exists"
-                  sub="The platform exists to give emerging creators a fairer starting point while helping customers discover trustworthy services without relying on scattered platforms."
-                  trigger={active}
-                />
-              )}
+              <SectionHeading title="Our Story" />
             </Reveal>
-            <div className="aboutUsStory__grid">
-              {storyCards.map((card, index) => (
-                <Reveal key={card.title} delay={0.06 * index}>
-                  {(active) => (
-                    <article className="aboutUsStoryCard">
-                      <h3 className="aboutUsStoryCard__title">{card.title}</h3>
-                      <TextScramble
-                        as="p"
-                        text={card.text}
-                        className="aboutUsStoryCard__text"
-                        trigger={active}
-                        startDelay={80}
-                      />
-                    </article>
-                  )}
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="aboutUsBand aboutUsSection">
-          <div className="aboutUsWrap aboutUsFeature">
-            <Reveal className="aboutUsFeature__copy">
-              {(active) => (
-                <>
-                <SectionHeading
-                  eyebrow="What Makes Us Different"
-                  title="Carvver keeps growth portable"
-                  sub="The platform is meant to be the trusted home for listings and proof, while still helping creators reach people outside of one closed ecosystem."
-                  trigger={active}
-                />
-                  <TextScramble
-                    as="p"
-                    text="Few-click posting matters because creators should not have to rebuild the same offer every time they want to promote themselves elsewhere. Carvver should organize the work once, then let that work travel."
-                    className="aboutUsFeature__text"
-                    trigger={active}
-                    startDelay={100}
-                  />
-                  <TextScramble
-                    as="p"
-                    text="That gives creators wider reach while still giving customers one cleaner place for profiles, reviews, trust signals, and safer payment handling."
-                    className="aboutUsFeature__text aboutUsFeature__text--muted"
-                    trigger={active}
-                    startDelay={220}
-                  />
-                </>
-              )}
-            </Reveal>
-
-            <Reveal className="aboutUsFeature__flowWrap" delay={0.1}>
-              {(active) => (
-                <div className="aboutUsFlow">
-                  <div className="aboutUsFlow__head">
-                    <span className="aboutUsFlow__iconWrap" aria-hidden="true">
-                      <Share2 className="aboutUsFlow__icon" />
-                    </span>
-                    <div>
-                      <h3 className="aboutUsFlow__title">Few-click posting</h3>
-                      <TextScramble
-                        as="p"
-                        text="One listing, wider reach, and a stronger source of truth."
-                        className="aboutUsFlow__sub"
-                        trigger={active}
-                        startDelay={80}
-                      />
-                    </div>
-                  </div>
-                  <div className="aboutUsFlow__steps">
-                    {flowSteps.map((step, index) => (
-                      <motion.div
-                        key={step}
-                        className="aboutUsFlow__step"
-                        initial={reduceMotion ? { opacity: 1 } : { opacity: 0, x: -12 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, amount: 0.65 }}
-                        transition={{ duration: 0.4, delay: index * 0.07 }}
-                      >
-                        <span className="aboutUsFlow__stepIndex">0{index + 1}</span>
-                        <span className="aboutUsFlow__stepText">{step}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              )}
+            <Reveal delay={0.06}>
+              <StoryProgressSlider items={storySlides} />
             </Reveal>
           </div>
         </section>
@@ -888,35 +612,22 @@ export default function HomeAboutUs() {
         <section className="aboutUsBand aboutUsSection">
           <div className="aboutUsWrap">
             <Reveal>
-              {(active) => (
-                <SectionHeading
-                  eyebrow="Core Pillars"
-                  title="What the platform should protect"
-                  sub="These are the parts of Carvver that make the concept paper feel distinct instead of interchangeable with a typical freelance marketplace."
-                  trigger={active}
-                />
-              )}
+              <SectionHeading title="What Makes Us Different" />
             </Reveal>
-            <div className="aboutUsPillars__grid">
-              {pillars.map(({ title, text, Icon }, index) => (
-                <Reveal key={title} delay={0.05 * index}>
-                  {(active) => (
-                    <article className="aboutUsPillar">
-                      <span className="aboutUsPillar__iconWrap" aria-hidden="true">
-                        <Icon className="aboutUsPillar__icon" />
-                      </span>
-                      <div className="aboutUsPillar__copy">
-                        <h3 className="aboutUsPillar__title">{title}</h3>
-                        <TextScramble
-                          as="p"
-                          text={text}
-                          className="aboutUsPillar__text"
-                          trigger={active}
-                          startDelay={70}
-                        />
-                      </div>
-                    </article>
-                  )}
+            <Reveal className="aboutUsIntro" delay={0.04}>
+              <p>
+                Carvver is built to keep growth portable while keeping trust signals, proof, and
+                transaction clarity in one dependable home.
+              </p>
+            </Reveal>
+            <div className="aboutUsAccordion">
+              {differenceItems.map((item, index) => (
+                <Reveal key={item.id} delay={0.04 * index}>
+                  <AccordionItem
+                    item={item}
+                    open={openAccordion === item.id}
+                    onToggle={(id) => setOpenAccordion((current) => (current === id ? "" : id))}
+                  />
                 </Reveal>
               ))}
             </div>
@@ -924,37 +635,28 @@ export default function HomeAboutUs() {
         </section>
 
         <section className="aboutUsBand aboutUsSection">
-          <div className="aboutUsWrap aboutUsAudience">
+          <div className="aboutUsWrap">
             <Reveal>
-              {(active) => (
-                <SectionHeading
-                  eyebrow="Who It Serves"
-                  title="The experience has to work on both sides"
-                  sub="Carvver grows stronger when service providers feel supported and customers feel informed enough to trust what they are seeing."
-                  trigger={active}
-                />
-              )}
+              <SectionHeading title="Core Pillars" />
+            </Reveal>
+            <Reveal delay={0.06}>
+              <PillarsSpotlight items={pillars} />
+            </Reveal>
+          </div>
+        </section>
+
+        <section className="aboutUsBand aboutUsSection">
+          <div className="aboutUsWrap">
+            <Reveal>
+              <SectionHeading title="Who It Serves" />
             </Reveal>
             <div className="aboutUsAudience__grid">
               {audienceLanes.map((lane, index) => (
                 <Reveal key={lane.title} delay={0.06 * index}>
-                  {(active) => (
-                    <article className="aboutUsAudience__lane">
-                      <div className="aboutUsAudience__labelRow">
-                        <span className="aboutUsAudience__iconWrap" aria-hidden="true">
-                          {index === 0 ? <Sparkles className="aboutUsAudience__icon" /> : <Users className="aboutUsAudience__icon" />}
-                        </span>
-                        <h3 className="aboutUsAudience__title">{lane.title}</h3>
-                      </div>
-                      <TextScramble
-                        as="p"
-                        text={lane.text}
-                        className="aboutUsAudience__text"
-                        trigger={active}
-                        startDelay={80}
-                      />
-                    </article>
-                  )}
+                  <article className="aboutUsAudience__lane">
+                    <h3 className="aboutUsAudience__title">{lane.title}</h3>
+                    <p className="aboutUsAudience__text">{lane.text}</p>
+                  </article>
                 </Reveal>
               ))}
             </div>
@@ -967,94 +669,24 @@ export default function HomeAboutUs() {
           </div>
         </section>
 
-        <section className="aboutUsBand aboutUsSection">
-          <div className="aboutUsWrap aboutUsAccordionWrap">
-            <Reveal>
-              {(active) => (
-                <SectionHeading
-                  eyebrow="What Was Missing"
-                  title="A few ideas the platform needed to say more clearly"
-                  sub="These are the product principles that matter in the concept paper and deserved to be stated directly on the page."
-                  trigger={active}
-                />
-              )}
-            </Reveal>
-            <div className="aboutUsAccordion">
-              {accordionItems.map((item, index) => (
-                <Reveal key={item.id} delay={0.04 * index}>
-                  <AccordionItem
-                    item={item}
-                    open={openAccordion === item.id}
-                    onToggle={(id) => setOpenAccordion((prev) => (prev === id ? "" : id))}
-                  />
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section className="aboutUsBand aboutUsQuote">
           <div className="aboutUsWrap aboutUsQuote__inner">
             <Reveal>
-              {(active) => (
-                <>
-                  <p className="aboutUsQuote__eyebrow">Our Quote</p>
-                  <div className="aboutUsQuote__titleWrap">
-                    <h2 className="aboutUsQuote__title">
-                      <TypewriterText text="Carve with what you love" speed={58} initialDelay={180} />
-                    </h2>
-                    <motion.svg
-                      className="aboutUsQuote__line"
-                      viewBox="0 0 300 20"
-                      preserveAspectRatio="none"
-                      aria-hidden="true"
-                    >
-                      <motion.path
-                        d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        initial={{ pathLength: 0, opacity: 0 }}
-                        whileInView={{ pathLength: 1, opacity: 1 }}
-                        viewport={{ once: true, amount: 0.75 }}
-                        transition={{ duration: 1.05, ease: "easeInOut", delay: 0.12 }}
-                      />
-                    </motion.svg>
-                  </div>
-                  <TextScramble
-                    as="p"
-                    text="That motto reflects the center of the concept paper: help creators turn the work they genuinely care about into something more discoverable, more trusted, and more sustainable over time."
-                    className="aboutUsQuote__text"
-                    trigger={active}
-                    startDelay={90}
-                  />
-                </>
-              )}
-            </Reveal>
-          </div>
-        </section>
-
-        <section className="aboutUsBand aboutUsClosing">
-          <div className="aboutUsWrap">
-            <Reveal className="aboutUsClosing__content">
-              {(active) => (
-                <>
-                  <span className="aboutUsClosing__iconWrap" aria-hidden="true">
-                    <Compass className="aboutUsClosing__icon" />
-                  </span>
-                  <h2 className="aboutUsClosing__title">
-                    A creator-first platform shaped around trust, visibility, and safer growth.
+              <>
+                <p className="aboutUsQuote__eyebrow">Our Quote</p>
+                <div className="aboutUsQuote__titleWrap">
+                  <h2 className="aboutUsQuote__title">
+                    <span className="aboutUsQuote__mark">"</span>
+                    <span>Carve with what you love</span>
+                    <span className="aboutUsQuote__mark">"</span>
                   </h2>
-                  <TextScramble
-                    as="p"
-                    text="Carvver is meant to be more than a listing page. It is a dedicated home where emerging providers can earn credibility, where customers can make better decisions, and where the platform itself grows stronger through clearer signals, stronger support, and a more human marketplace rhythm."
-                    className="aboutUsClosing__text"
-                    trigger={active}
-                    startDelay={100}
-                  />
-                </>
-              )}
+                  <AccentLine className="aboutUsQuote__line" delay={0.12} />
+                </div>
+                <p className="aboutUsQuote__text">
+                  That motto reflects the center of Carvver: help creators turn the work they care
+                  about into something more discoverable, more trusted, and more sustainable.
+                </p>
+              </>
             </Reveal>
           </div>
         </section>

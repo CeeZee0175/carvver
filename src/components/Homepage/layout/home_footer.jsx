@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import { motion as Motion, useInView, useReducedMotion } from "framer-motion";
 import {
   ChevronRight,
   Facebook,
@@ -14,6 +14,10 @@ import {
   buildCategoryPath,
   setFeaturedCategoryIntent,
 } from "../../../lib/featuredCategoryIntent";
+import {
+  navigateToHomeSection,
+  navigateToPublicRoute,
+} from "../../../lib/publicNavigation";
 import { ALL_SERVICE_CATEGORIES } from "../../../lib/serviceCategories";
 
 const supabase = createClient();
@@ -21,7 +25,7 @@ const supabase = createClient();
 const exploreLinks = [
   { label: "Home", target: "home-hero" },
   { label: "About Us", routeKey: "about-us" },
-  { label: "How It Works", target: "home-how" },
+  { label: "Features", routeKey: "features" },
   { label: "Stay Tuned", target: "home-updates" },
   { label: "Community", routeKey: "community" },
   { label: "Pricing", routeKey: "pricing" },
@@ -30,7 +34,7 @@ const exploreLinks = [
 const supportLinks = [
   { label: "Contact Us", target: null },
   { label: "Help Center", target: null },
-  { label: "FAQs", target: null },
+  { label: "FAQs", routeKey: "faq" },
   { label: "Terms", target: null },
   { label: "Privacy Policy", target: null },
 ];
@@ -77,14 +81,14 @@ function TypewriterMotto({ text, active, speed = 42, initialDelay = 220 }) {
     <div className="homeFooter__mottoWrap">
       <span className="homeFooter__motto">{displayText}</span>
       {!reduceMotion && displayText.length < text.length && (
-        <motion.span
+        <Motion.span
           className="homeFooter__mottoCursor"
           aria-hidden="true"
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
         >
           |
-        </motion.span>
+        </Motion.span>
       )}
     </div>
   );
@@ -93,23 +97,23 @@ function TypewriterMotto({ text, active, speed = 42, initialDelay = 220 }) {
 function FooterHeading({ children, active }) {
   return (
     <div className="homeFooter__headingWrap">
-      <motion.h3
+      <Motion.h3
         className="homeFooter__heading"
         initial={{ opacity: 0, y: 8 }}
         animate={active ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1] }}
       >
         {children}
-      </motion.h3>
+      </Motion.h3>
 
-      <motion.svg
+      <Motion.svg
         className="homeFooter__headingLine"
         viewBox="0 0 300 20"
         preserveAspectRatio="none"
         aria-hidden="true"
       >
-        <motion.path
-          d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+        <Motion.path
+          d="M 0,10 L 300,10"
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
@@ -118,7 +122,7 @@ function FooterHeading({ children, active }) {
           animate={active ? { pathLength: 1, opacity: 1 } : {}}
           transition={{ duration: 0.9, ease: "easeInOut", delay: 0.08 }}
         />
-      </motion.svg>
+      </Motion.svg>
     </div>
   );
 }
@@ -127,7 +131,7 @@ function FooterLinkItem({ item, index, onNavigate, onRouteNavigate, active }) {
   const Icon = item.Icon;
 
   return (
-    <motion.button
+    <Motion.button
       type="button"
       className="homeFooter__link"
       initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
@@ -164,7 +168,7 @@ function FooterLinkItem({ item, index, onNavigate, onRouteNavigate, active }) {
       </span>
 
       <ChevronRight className="homeFooter__linkChevron" aria-hidden="true" />
-    </motion.button>
+    </Motion.button>
   );
 }
 
@@ -187,8 +191,20 @@ export default function HomeFooter({ fullBleed = false }) {
       return { ...item, route: "/community" };
     }
 
+    if (item.routeKey === "features") {
+      return { ...item, route: "/features" };
+    }
+
     if (item.routeKey === "pricing") {
       return { ...item, route: "/pricing" };
+    }
+
+    return item;
+  });
+
+  const resolvedSupportLinks = supportLinks.map((item) => {
+    if (item.routeKey === "faq") {
+      return { ...item, route: "/faq" };
     }
 
     return item;
@@ -225,20 +241,20 @@ export default function HomeFooter({ fullBleed = false }) {
 
   const scrollToTarget = (id) => {
     if (!id) return;
-    if (location.pathname !== "/") {
-      navigate(`/#${id}`);
-      return;
-    }
+    navigateToHomeSection({
+      navigate,
+      location,
+      targetId: id,
+      reduceMotion,
+    });
+  };
 
-    const element = document.getElementById(id);
-    if (!element) {
-      navigate(`/#${id}`);
-      return;
-    }
-
-    element.scrollIntoView({
-      behavior: reduceMotion ? "auto" : "smooth",
-      block: "start",
+  const routeToTarget = (pathname) => {
+    navigateToPublicRoute({
+      navigate,
+      location,
+      pathname,
+      reduceMotion,
     });
   };
 
@@ -248,14 +264,14 @@ export default function HomeFooter({ fullBleed = false }) {
       <div className="homeFooter__wash homeFooter__wash--b" aria-hidden="true" />
       <div className="homeFooter__goldLine" aria-hidden="true" />
 
-      <motion.div
+      <Motion.div
         className="homeFooter__inner"
         initial={{ opacity: 0, y: 16, filter: "blur(10px)" }}
         animate={inView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
         transition={{ duration: 0.65, ease: [0.2, 0.95, 0.2, 1] }}
       >
         <div className="homeFooter__top">
-          <motion.div
+          <Motion.div
             className="homeFooter__brandBlock"
             initial={{ opacity: 0, y: 12 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -264,14 +280,14 @@ export default function HomeFooter({ fullBleed = false }) {
             <div className="homeFooter__brandWrap">
               <h2 className="homeFooter__brand">Carvver</h2>
 
-              <motion.svg
+              <Motion.svg
                 className="homeFooter__brandLine"
                 viewBox="0 0 300 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
-                  d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                <Motion.path
+                  d="M 0,10 L 300,10"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.2"
@@ -280,7 +296,7 @@ export default function HomeFooter({ fullBleed = false }) {
                   animate={inView ? { pathLength: 1, opacity: 1 } : {}}
                   transition={{ duration: 1.1, ease: "easeInOut", delay: 0.22 }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
 
             <p className="homeFooter__desc">
@@ -289,7 +305,7 @@ export default function HomeFooter({ fullBleed = false }) {
 
             <div className="homeFooter__socials" aria-label="Social links">
               {socials.map(({ label, Icon }, index) => (
-                <motion.button
+                <Motion.button
                   key={label}
                   type="button"
                   className="homeFooter__socialBtn"
@@ -305,10 +321,10 @@ export default function HomeFooter({ fullBleed = false }) {
                   aria-label={label}
                 >
                   <Icon className="homeFooter__socialIcon" />
-                </motion.button>
+                </Motion.button>
               ))}
             </div>
-          </motion.div>
+          </Motion.div>
 
           <div className="homeFooter__cols">
             <div className="homeFooter__col">
@@ -320,7 +336,7 @@ export default function HomeFooter({ fullBleed = false }) {
                     item={item}
                     index={index}
                     onNavigate={scrollToTarget}
-                    onRouteNavigate={navigate}
+                    onRouteNavigate={routeToTarget}
                     active={inView}
                   />
                 ))}
@@ -336,7 +352,7 @@ export default function HomeFooter({ fullBleed = false }) {
                     item={item}
                     index={index}
                     onNavigate={scrollToTarget}
-                    onRouteNavigate={navigate}
+                    onRouteNavigate={routeToTarget}
                     active={inView}
                   />
                 ))}
@@ -346,13 +362,13 @@ export default function HomeFooter({ fullBleed = false }) {
             <div className="homeFooter__col">
               <FooterHeading active={inView}>Support</FooterHeading>
               <div className="homeFooter__links">
-                {supportLinks.map((item, index) => (
+                {resolvedSupportLinks.map((item, index) => (
                   <FooterLinkItem
                     key={item.label}
                     item={item}
                     index={index}
                     onNavigate={scrollToTarget}
-                    onRouteNavigate={navigate}
+                    onRouteNavigate={routeToTarget}
                     active={inView}
                   />
                 ))}
@@ -361,7 +377,7 @@ export default function HomeFooter({ fullBleed = false }) {
           </div>
         </div>
 
-        <motion.div
+        <Motion.div
           className="homeFooter__bottom"
           initial={{ opacity: 0, y: 10 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -373,8 +389,8 @@ export default function HomeFooter({ fullBleed = false }) {
             Copyright {new Date().getFullYear()} Carvver. All rights reserved.
           </p>
 
-        </motion.div>
-      </motion.div>
+        </Motion.div>
+      </Motion.div>
     </footer>
   );
 }
