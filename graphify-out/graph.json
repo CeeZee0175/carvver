@@ -3868,7 +3868,7 @@
       "label": "AnimateFaqPopup()",
       "file_type": "code",
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Homepage\\layout\\navbar.jsx",
-      "source_location": "L445",
+      "source_location": "L428",
       "id": "navbar_animatefaqpopup",
       "community": 23,
       "norm_label": "animatefaqpopup()"
@@ -12501,7 +12501,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Homepage\\layout\\navbar.jsx",
-      "source_location": "L445",
+      "source_location": "L428",
       "weight": 1.0,
       "_src": "c_users_ieq3q_carvver_src_components_homepage_layout_navbar_jsx",
       "_tgt": "navbar_animatefaqpopup",

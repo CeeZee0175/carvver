@@ -183,6 +183,21 @@ export default function NavBar() {
     setOpenFaqNotice(true);
   };
 
+  const handleAboutClick = () => {
+    closeAll();
+    navigate("/about-us");
+  };
+
+  const handleCommunityClick = () => {
+    closeAll();
+    navigate("/community");
+  };
+
+  const handlePricingClick = () => {
+    closeAll();
+    navigate("/pricing");
+  };
+
   const handleClientStart = async () => {
     closeAll();
 
@@ -232,83 +247,60 @@ export default function NavBar() {
               Carvver
             </a>
 
-            <nav className="navLinks" aria-label="Primary">
-              <div className="navGroup">
-                <button
-                  className={`navPill ${openStart ? "navPill--open" : ""}`}
-                  type="button"
-                  onClick={toggleStart}
-                  aria-expanded={openStart}
-                  aria-haspopup="menu"
-                >
-                  Get Started <ChevronIcon open={openStart} />
-                </button>
+            <div className="navGroup">
+              <button
+                className={`navPill ${openStart ? "navPill--open" : ""}`}
+                type="button"
+                onClick={toggleStart}
+                aria-expanded={openStart}
+                aria-haspopup="menu"
+              >
+                Get Started <ChevronIcon open={openStart} />
+              </button>
 
-                <div className={`navMenu navMenu--wide ${openStart ? "navMenu--open" : ""}`} role="menu">
-                  <button className="navStartRow" type="button" role="menuitem" onClick={handleClientStart}>
-                    <span className="navStartRow__icon"><PeopleIcon /></span>
-                    <div className="navStartRow__text">
-                      <div className="navStartRow__title">Client? Browse Now!</div>
-                      <div className="navStartRow__desc">
-                        Browse through service provider listings to find what you need.
-                      </div>
+              <div className={`navMenu navMenu--wide ${openStart ? "navMenu--open" : ""}`} role="menu">
+                <button className="navStartRow" type="button" role="menuitem" onClick={handleClientStart}>
+                  <span className="navStartRow__icon"><PeopleIcon /></span>
+                  <div className="navStartRow__text">
+                    <div className="navStartRow__title">Client? Browse Now!</div>
+                    <div className="navStartRow__desc">
+                      Browse through service provider listings to find what you need.
                     </div>
-                  </button>
+                  </div>
+                </button>
 
-                  <button className="navStartRow" type="button" role="menuitem" onClick={handleFreelancerStart}>
-                    <span className="navStartRow__icon"><BriefcaseIcon /></span>
-                    <div className="navStartRow__text">
-                      <div className="navStartRow__title">Freelancer? Start Now!</div>
-                      <div className="navStartRow__desc">
-                        Register now to start selling your services.
-                      </div>
+                <button className="navStartRow" type="button" role="menuitem" onClick={handleFreelancerStart}>
+                  <span className="navStartRow__icon"><BriefcaseIcon /></span>
+                  <div className="navStartRow__text">
+                    <div className="navStartRow__title">Freelancer? Start Now!</div>
+                    <div className="navStartRow__desc">
+                      Register now to start selling your services.
                     </div>
-                  </button>
-                </div>
-              </div>
-
-              <div className="navInlineLinks">
-                <button
-                  className="navLinkPill"
-                  type="button"
-                  onClick={() => {
-                    closeAll();
-                    navigate("/about-us");
-                  }}
-                >
-                  About Us
-                </button>
-                <button
-                  className="navLinkPill"
-                  type="button"
-                  onClick={() => {
-                    closeAll();
-                    navigate("/community");
-                  }}
-                >
-                  Community
-                </button>
-                <button className="navLinkPill" type="button" onClick={handleFeatureClick}>
-                  Features
-                </button>
-                <button
-                  className="navLinkPill"
-                  type="button"
-                  onClick={() => {
-                    closeAll();
-                    navigate("/pricing");
-                  }}
-                >
-                  Pricing
-                </button>
-                <button className="navLinkPill" type="button" onClick={handleFaqClick}>
-                  FAQ
+                  </div>
                 </button>
               </div>
-            </nav>
+            </div>
           </div>
 
-          <div className="navActions navEnter navEnter--2">
+          <nav className="navCenter navEnter navEnter--2" aria-label="Primary">
+            <button className="navTextLink" type="button" onClick={handleAboutClick}>
+              About Us
+            </button>
+            <button className="navTextLink" type="button" onClick={handleCommunityClick}>
+              Community
+            </button>
+            <button className="navTextLink" type="button" onClick={handleFeatureClick}>
+              Features
+            </button>
+            <button className="navTextLink" type="button" onClick={handlePricingClick}>
+              Pricing
+            </button>
+            <button className="navTextLink" type="button" onClick={handleFaqClick}>
+              FAQ
+            </button>
+          </nav>
+
+          <div className="navActions navEnter navEnter--3">
             <motion.button
               whileTap={{ scale: 0.93 }}
               className="btn btn--ghost"
@@ -350,44 +342,35 @@ export default function NavBar() {
       <div className={`mobilePanel ${openMobile ? "mobilePanel--open" : ""}`}>
         <div className="mobilePrimaryLinks">
           <button
-            className="mobileLinkBtn"
+            className="mobilePrimaryLink"
             type="button"
-            onClick={() => {
-              closeAll();
-              navigate("/about-us");
-            }}
+            onClick={handleAboutClick}
           >
             About Us
           </button>
           <button
-            className="mobileLinkBtn"
+            className="mobilePrimaryLink"
             type="button"
-            onClick={() => {
-              closeAll();
-              navigate("/community");
-            }}
+            onClick={handleCommunityClick}
           >
             Community
           </button>
-          <button className="mobileLinkBtn" type="button" onClick={handleFeatureClick}>
+          <button className="mobilePrimaryLink" type="button" onClick={handleFeatureClick}>
             Features
           </button>
           <button
-            className="mobileLinkBtn"
+            className="mobilePrimaryLink"
             type="button"
-            onClick={() => {
-              closeAll();
-              navigate("/pricing");
-            }}
+            onClick={handlePricingClick}
           >
             Pricing
           </button>
-          <button className="mobileLinkBtn" type="button" onClick={handleFaqClick}>
+          <button className="mobilePrimaryLink" type="button" onClick={handleFaqClick}>
             FAQ
           </button>
         </div>
 
-        <button className="mobileLinkBtn" type="button" onClick={toggleStart}>
+        <button className="mobileGetStartedBtn" type="button" onClick={toggleStart}>
           Get Started <ChevronIcon open={openStart} />
         </button>
 
