@@ -24,6 +24,7 @@ import {
   SERVICE_MEDIA_MAX_ITEMS,
   SERVICE_MEDIA_MAX_VIDEO_BYTES,
 } from "../hooks/useFreelancerServiceListings";
+import { fetchFreelancerPayoutMethod } from "../hooks/useMarketplaceWorkflow";
 
 const INITIAL_PACKAGES = [
   { id: null, name: "Basic", summary: "", price: "", deliveryTimeDays: "" },
@@ -79,6 +80,7 @@ export default function FreelancerPostListing() {
   const [error, setError] = useState("");
   const [loadingListing, setLoadingListing] = useState(isEditMode);
   const [listingPublished, setListingPublished] = useState(false);
+  const [payoutReady, setPayoutReady] = useState(true);
 
   useEffect(() => {
     mediaItemsRef.current = mediaItems;
@@ -150,6 +152,28 @@ export default function FreelancerPostListing() {
       active = false;
     };
   }, [isEditMode, listingId]);
+
+  useEffect(() => {
+    let active = true;
+
+    fetchFreelancerPayoutMethod()
+      .then((method) => {
+        if (!active) return;
+        const ready = Boolean(
+          String(method?.payoutMethod || "").trim() &&
+            String(method?.accountName || "").trim() &&
+            String(method?.accountReference || "").trim()
+        );
+        setPayoutReady(ready);
+      })
+      .catch(() => {
+        if (active) setPayoutReady(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const highlights = useMemo(
     () =>
@@ -271,6 +295,7 @@ export default function FreelancerPostListing() {
     : "Build your listing with packages, media, and clear delivery details so customers can book with confidence.";
 
   const showDraftActions = !listingPublished;
+  const publishDisabled = (!listingPublished && !payoutReady) || Boolean(submittingMode) || loadingListing;
 
   return (
     <FreelancerDashboardFrame mainClassName="profilePage profilePage--details freelancerMarketplacePage">
@@ -312,9 +337,9 @@ export default function FreelancerPostListing() {
               </div>
 
               <p className="freelancerMarketplaceHero__sub">{subText}</p>
-            </div>
+          </div>
 
-            <div className="freelancerListingActions">
+          <div className="freelancerListingActions">
               {showDraftActions ? (
                 <motion.button
                   type="button"
@@ -355,7 +380,7 @@ export default function FreelancerPostListing() {
                 whileTap={{ scale: 0.98 }}
                 transition={PROFILE_SPRING}
                 onClick={() => handleSubmit(showDraftActions ? "publish" : "save")}
-                disabled={Boolean(submittingMode) || loadingListing}
+                disabled={publishDisabled}
               >
                 {submittingMode === "publish" || submittingMode === "save" ? (
                   <>
@@ -370,6 +395,33 @@ export default function FreelancerPostListing() {
           </div>
         </section>
       </Reveal>
+
+      {!payoutReady ? (
+        <Reveal delay={0.06}>
+          <section className="profileNotice">
+            <div className="profileNotice__copy">
+              <h2 className="profileNotice__title">
+                Add your payout destination before publishing
+              </h2>
+              <p className="profileNotice__desc">
+                You can still build and save drafts, but listing publication stays locked until your payout method is complete in Settings.
+              </p>
+            </div>
+            <div className="workflowActions">
+              <motion.button
+                type="button"
+                className="workflowActionBtn workflowActionBtn--ghost"
+                whileHover={{ y: -1.5 }}
+                whileTap={{ scale: 0.98 }}
+                transition={PROFILE_SPRING}
+                onClick={() => navigate("/dashboard/freelancer/settings")}
+              >
+                Open settings
+              </motion.button>
+            </div>
+          </section>
+        </Reveal>
+      ) : null}
 
       {loadingListing ? (
         <Reveal delay={0.08}>

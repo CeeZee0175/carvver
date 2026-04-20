@@ -87,6 +87,14 @@ function isMissingTableError(error) {
   return error?.code === "42P01" || /relation .* does not exist/i.test(message);
 }
 
+function hasValidPayoutDestination(row) {
+  return Boolean(
+    normalizeText(row?.payout_method) &&
+      normalizeText(row?.account_name) &&
+      normalizeText(row?.account_reference)
+  );
+}
+
 function getPublicServiceMediaUrl(path) {
   if (!path) return "";
   const { data } = supabase.storage.from(SERVICE_MEDIA_BUCKET).getPublicUrl(path);
@@ -172,6 +180,22 @@ async function getSignedInFreelancerId() {
   }
 
   return session.user.id;
+}
+
+async function ensureFreelancerPayoutDestinationReady(freelancerId) {
+  const { data, error } = await supabase
+    .from("freelancer_payout_methods")
+    .select("payout_method, account_name, account_reference")
+    .eq("freelancer_id", freelancerId)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  if (!hasValidPayoutDestination(data)) {
+    throw new Error(
+      "Add your payout destination in Settings before publishing service listings."
+    );
+  }
 }
 
 async function fetchOwnedServices(freelancerId, listingId = "") {
@@ -525,6 +549,10 @@ export async function saveFreelancerServiceListing({
     throw new Error("Add at least one package with a valid price.");
   }
 
+  if (publish) {
+    await ensureFreelancerPayoutDestinationReady(freelancerId);
+  }
+
   let serviceRow = null;
   const isEditing = Boolean(listingId);
 
@@ -592,6 +620,10 @@ export async function createFreelancerServiceListing(input) {
 export async function setFreelancerListingPublished(listingId, publish = true) {
   const freelancerId = await getSignedInFreelancerId();
   const timestamp = new Date().toISOString();
+
+  if (publish) {
+    await ensureFreelancerPayoutDestinationReady(freelancerId);
+  }
 
   const { data, error } = await supabase
     .from("services")

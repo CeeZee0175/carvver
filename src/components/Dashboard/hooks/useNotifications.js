@@ -55,7 +55,27 @@ export function formatNotificationTime(date) {
   return "Just now";
 }
 
-function buildNotifications({ profile, savedCount, pendingOrders, recentServices }) {
+function normalizeText(value) {
+  return String(value || "").trim();
+}
+
+function resolveNotificationIcon(item) {
+  const label = normalizeText(item?.label).toLowerCase();
+  const title = normalizeText(item?.title).toLowerCase();
+
+  if (label.includes("saved")) return Bookmark;
+  if (label.includes("listing") || title.includes("listing")) return PackageSearch;
+  if (label.includes("orders") || title.includes("order") || title.includes("payout")) {
+    return ShoppingBag;
+  }
+  if (label.includes("profile")) return UserRound;
+  if (label.includes("tip") || title.includes("trust") || title.includes("verified")) {
+    return ShieldCheck;
+  }
+  return Bell;
+}
+
+function buildBaseNotifications({ profile, role, savedCount, pendingOrders, recentServices }) {
   const now = Date.now();
   const firstName = profile?.first_name || "there";
   const locationLabel =
@@ -66,6 +86,65 @@ function buildNotifications({ profile, savedCount, pendingOrders, recentServices
     }) ||
     String(profile?.address || "").trim() ||
     String(profile?.country || "").trim();
+
+  if (role === "freelancer") {
+    const notifications = [
+      {
+        id: "freelancer-welcome",
+        group: "system",
+        label: "Overview",
+        title: `Welcome back, ${firstName}.`,
+        body:
+          "Your workspace keeps orders, profile visibility, and payout-ready delivery activity closer together.",
+        createdAt: new Date(now - 1000 * 60 * 8).toISOString(),
+        defaultRead: false,
+        ctaLabel: "Open dashboard",
+        path: "/dashboard/freelancer",
+        Icon: Bell,
+        accent: "rgba(124,58,237,0.94)",
+        accentSoft: "rgba(124,58,237,0.12)",
+      },
+    ];
+
+    if (pendingOrders > 0) {
+      notifications.push({
+        id: "freelancer-pending-orders",
+        group: "activity",
+        label: "Orders",
+        title: `${pendingOrders} active order${pendingOrders === 1 ? "" : "s"} need attention`,
+        body:
+          "Keep delivery notes, progress updates, and payout-ready handoff details moving.",
+        createdAt: new Date(now - 1000 * 60 * 18).toISOString(),
+        defaultRead: false,
+        ctaLabel: "Open orders",
+        path: "/dashboard/freelancer/orders",
+        Icon: ShoppingBag,
+        accent: "rgba(249,115,22,0.94)",
+        accentSoft: "rgba(249,115,22,0.12)",
+      });
+    }
+
+    if (!profile?.freelancer_headline || !locationLabel) {
+      notifications.push({
+        id: "freelancer-profile-reminder",
+        group: "system",
+        label: "Profile",
+        title: "Your freelancer profile can still feel more complete.",
+        body:
+          "A stronger headline and visible location help customers trust what you offer faster.",
+        createdAt: new Date(now - 1000 * 60 * 65).toISOString(),
+        defaultRead: false,
+        ctaLabel: "Open profile",
+        path: "/dashboard/freelancer/profile",
+        Icon: UserRound,
+        accent: "rgba(42,20,80,0.94)",
+        accentSoft: "rgba(42,20,80,0.10)",
+      });
+    }
+
+    return notifications;
+  }
+
   const notifications = [
     {
       id: "welcome",
@@ -175,9 +254,24 @@ function buildNotifications({ profile, savedCount, pendingOrders, recentServices
     });
   });
 
-  return notifications.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  return notifications;
+}
+
+function normalizeStoredNotification(row) {
+  return {
+    id: row.id,
+    group: normalizeText(row.notification_group) || "system",
+    label: normalizeText(row.label) || "Update",
+    title: normalizeText(row.title),
+    body: normalizeText(row.body),
+    createdAt: row.created_at || new Date().toISOString(),
+    defaultRead: false,
+    ctaLabel: normalizeText(row.cta_label) || "Open",
+    path: normalizeText(row.path) || "/",
+    accent: normalizeText(row.accent) || "rgba(124,58,237,0.94)",
+    accentSoft: normalizeText(row.accent_soft) || "rgba(124,58,237,0.12)",
+    Icon: resolveNotificationIcon(row),
+  };
 }
 
 export function useNotifications() {
@@ -186,13 +280,16 @@ export function useNotifications() {
   const [savedCount, setSavedCount] = useState(0);
   const [pendingOrders, setPendingOrders] = useState(0);
   const [recentServices, setRecentServices] = useState([]);
+  const [storedNotifications, setStoredNotifications] = useState([]);
   const [readMap, setReadMap] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
 
-    async function fetchSavedCount(nextUserId) {
+    async function fetchSavedCount(nextUserId, role) {
+      if (role !== "customer") return 0;
+
       const { count, error } = await supabase
         .from("saved_services")
         .select("id", { count: "exact", head: true })
@@ -202,18 +299,22 @@ export function useNotifications() {
       return count ?? 0;
     }
 
-    async function fetchPendingOrders(nextUserId) {
+    async function fetchPendingOrders(nextUserId, role) {
+      const column = role === "freelancer" ? "freelancer_id" : "customer_id";
+
       const { count, error } = await supabase
         .from("orders")
         .select("id", { count: "exact", head: true })
-        .eq("customer_id", nextUserId)
+        .eq(column, nextUserId)
         .in("status", ["pending", "active"]);
 
       if (error) throw error;
       return count ?? 0;
     }
 
-    async function fetchRecentServices() {
+    async function fetchRecentServices(role) {
+      if (role !== "customer") return [];
+
       const { data, error } = await supabase
         .from("services")
         .select(
@@ -225,6 +326,22 @@ export function useNotifications() {
 
       if (error) throw error;
       return data || [];
+    }
+
+    async function fetchStoredNotifications(nextUserId) {
+      if (!nextUserId || nextUserId === "guest") return [];
+
+      const { data, error } = await supabase
+        .from("user_notifications")
+        .select(
+          "id, notification_group, label, title, body, path, cta_label, accent, accent_soft, created_at"
+        )
+        .eq("user_id", nextUserId)
+        .order("created_at", { ascending: false })
+        .limit(40);
+
+      if (error) throw error;
+      return (data || []).map(normalizeStoredNotification);
     }
 
     async function fetchReadMap(nextUserId) {
@@ -251,19 +368,30 @@ export function useNotifications() {
         } = await supabase.auth.getSession();
 
         const nextUserId = session?.user?.id || "guest";
+        const nextProfile = await getProfile().catch(() => null);
+        const role = normalizeText(nextProfile?.role).toLowerCase() || "customer";
 
         const tasks = [
-          getProfile(),
-          nextUserId !== "guest" ? fetchSavedCount(nextUserId) : Promise.resolve(0),
+          Promise.resolve(nextProfile),
           nextUserId !== "guest"
-            ? fetchPendingOrders(nextUserId)
+            ? fetchSavedCount(nextUserId, role)
             : Promise.resolve(0),
-          fetchRecentServices(),
+          nextUserId !== "guest"
+            ? fetchPendingOrders(nextUserId, role)
+            : Promise.resolve(0),
+          fetchRecentServices(role),
+          fetchStoredNotifications(nextUserId),
           fetchReadMap(nextUserId),
         ];
 
-        const [profileRes, savedRes, ordersRes, servicesRes, readRes] =
-          await Promise.allSettled(tasks);
+        const [
+          profileRes,
+          savedRes,
+          ordersRes,
+          servicesRes,
+          storedRes,
+          readRes,
+        ] = await Promise.allSettled(tasks);
 
         if (!active) return;
 
@@ -273,6 +401,9 @@ export function useNotifications() {
         setPendingOrders(ordersRes.status === "fulfilled" ? ordersRes.value : 0);
         setRecentServices(
           servicesRes.status === "fulfilled" ? servicesRes.value : []
+        );
+        setStoredNotifications(
+          storedRes.status === "fulfilled" ? storedRes.value : []
         );
         setReadMap(readRes.status === "fulfilled" ? readRes.value : {});
       } finally {
@@ -304,18 +435,24 @@ export function useNotifications() {
   }, [userId]);
 
   const notifications = useMemo(() => {
-    const base = buildNotifications({
+    const role = normalizeText(profile?.role).toLowerCase() || "customer";
+    const base = buildBaseNotifications({
       profile,
+      role,
       savedCount,
       pendingOrders,
       recentServices,
     });
 
-    return base.map((item) => ({
+    const merged = [...storedNotifications, ...base].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    return merged.map((item) => ({
       ...item,
       isRead: readMap[item.id] ?? item.defaultRead,
     }));
-  }, [profile, savedCount, pendingOrders, recentServices, readMap]);
+  }, [pendingOrders, profile, readMap, recentServices, savedCount, storedNotifications]);
 
   const unreadNotifications = useMemo(
     () => notifications.filter((item) => !item.isRead),
@@ -414,6 +551,7 @@ export function useNotifications() {
     unreadCount: unreadNotifications.length,
     hasUnread: unreadNotifications.length > 0,
     profile,
+    role: normalizeText(profile?.role).toLowerCase() || "customer",
     toggleRead,
     markRead,
     markAllRead,

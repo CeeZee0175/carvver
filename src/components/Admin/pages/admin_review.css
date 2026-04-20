@@ -1,0 +1,459 @@
+@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap");
+
+.adminPage {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: clip;
+  color: rgba(27, 16, 46, 0.96);
+}
+
+.adminPage__base {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(250, 247, 241, 1) 0%,
+    rgba(247, 241, 235, 1) 52%,
+    rgba(244, 238, 232, 1) 100%
+  );
+}
+
+.adminPage__bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(820px 480px at 16% 10%, rgba(255, 255, 255, 0.78), transparent 62%),
+    radial-gradient(720px 440px at 86% 16%, rgba(242, 193, 78, 0.12), transparent 64%),
+    radial-gradient(760px 500px at 18% 82%, rgba(124, 58, 237, 0.09), transparent 66%),
+    radial-gradient(860px 540px at 84% 74%, rgba(42, 20, 80, 0.06), transparent 68%);
+}
+
+.adminBar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid rgba(42, 20, 80, 0.08);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
+}
+
+.adminBar__inner,
+.adminPage__main {
+  position: relative;
+  z-index: 2;
+  width: min(1240px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.adminBar__inner {
+  min-height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.adminBar__brandWrap {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.adminBar__brand {
+  font-family: "Dancing Script", cursive;
+  font-size: clamp(32px, 2.4vw, 40px);
+  font-weight: 700;
+  color: rgba(42, 20, 80, 0.98);
+}
+
+.adminBar__meta {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(87, 34, 182, 0.72);
+}
+
+.adminBar__button {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.8);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.84);
+}
+
+.adminBar__buttonIcon {
+  width: 16px;
+  height: 16px;
+}
+
+.adminPage__main {
+  padding: 26px 0 54px;
+  display: grid;
+  gap: 24px;
+}
+
+.adminHero {
+  display: grid;
+  gap: 14px;
+  padding: 6px 0 2px;
+}
+
+.adminHero__titleWrap {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  padding-bottom: 16px;
+}
+
+.adminHero__title {
+  margin: 0;
+  font-family: "Dancing Script", cursive;
+  font-size: clamp(58px, 6vw, 88px);
+  line-height: 0.94;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.98);
+}
+
+.adminHero__line {
+  position: absolute;
+  left: 8%;
+  width: 82%;
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(242, 193, 78, 0) 0%,
+    rgba(242, 193, 78, 0.92) 24%,
+    rgba(242, 193, 78, 1) 50%,
+    rgba(242, 193, 78, 0.92) 76%,
+    rgba(242, 193, 78, 0) 100%
+  );
+}
+
+.adminHero__welcome {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.64);
+}
+
+.adminLayout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: 24px;
+}
+
+.adminQueue,
+.adminDetail {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
+.adminPanel {
+  border-radius: 28px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 20px 60px rgba(12, 7, 18, 0.06);
+  padding: 22px;
+  display: grid;
+  gap: 16px;
+}
+
+.adminPanel--loading {
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.68);
+}
+
+.adminPanel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.adminPanel__title {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 22px;
+  font-weight: 850;
+  color: rgba(27, 16, 46, 0.96);
+}
+
+.adminPanel__count {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(87, 34, 182, 0.72);
+}
+
+.adminFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.adminFilterChip,
+.adminQueueCard__pill {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  background: rgba(255, 255, 255, 0.84);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: rgba(42, 20, 80, 0.76);
+}
+
+.adminFilterChip {
+  cursor: pointer;
+}
+
+.adminFilterChip--active {
+  border-color: rgba(124, 58, 237, 0.18);
+  background: rgba(124, 58, 237, 0.08);
+  color: rgba(66, 29, 133, 0.94);
+}
+
+.adminQueue__list,
+.adminDeliveryStack {
+  display: grid;
+  gap: 12px;
+}
+
+.adminQueueCard,
+.adminDeliveryCard {
+  border-radius: 20px;
+  border: 1px solid rgba(42, 20, 80, 0.08);
+  background: rgba(255, 255, 255, 0.86);
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.adminQueueCard {
+  cursor: pointer;
+  text-align: left;
+}
+
+.adminQueueCard--active {
+  border-color: rgba(124, 58, 237, 0.2);
+  box-shadow: 0 16px 38px rgba(124, 58, 237, 0.08);
+}
+
+.adminQueueCard__top,
+.adminDeliveryCard__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.adminQueueCard__title,
+.adminDeliveryCard__title {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 850;
+  color: rgba(27, 16, 46, 0.94);
+}
+
+.adminQueueCard__meta,
+.adminDeliveryCard__meta {
+  display: block;
+  margin-top: 4px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(27, 16, 46, 0.64);
+}
+
+.adminQueueCard__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.72);
+}
+
+.adminDetailGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.adminDetailGrid--compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.adminDetailFact,
+.adminField {
+  display: grid;
+  gap: 8px;
+}
+
+.adminField--wide {
+  grid-column: 1 / -1;
+}
+
+.adminDetailFact__label,
+.adminField__label {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: rgba(87, 34, 182, 0.72);
+}
+
+.adminDetailFact__value {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.92);
+}
+
+.adminField__control {
+  min-height: 48px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.84);
+  outline: none;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.92);
+}
+
+.adminField__textarea {
+  min-height: 124px;
+  resize: vertical;
+}
+
+.adminDeliveryCard__note,
+.adminQueue__loading {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.66;
+  color: rgba(27, 16, 46, 0.64);
+}
+
+.adminActionRow,
+.adminReceiptRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.adminAction {
+  min-height: 46px;
+  padding: 0 16px;
+  border-radius: 16px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.adminAction--release {
+  background: linear-gradient(180deg, rgba(20, 132, 89, 1), rgba(20, 132, 89, 0.84));
+}
+
+.adminAction--block {
+  background: linear-gradient(180deg, rgba(180, 83, 9, 1), rgba(180, 83, 9, 0.84));
+}
+
+.adminAction--fail {
+  background: linear-gradient(180deg, rgba(190, 24, 93, 1), rgba(190, 24, 93, 0.84));
+}
+
+.adminAction:disabled {
+  cursor: wait;
+  opacity: 0.76;
+}
+
+.adminAction__icon {
+  width: 16px;
+  height: 16px;
+}
+
+.adminAction__icon--spin {
+  animation: adminSpin 0.9s linear infinite;
+}
+
+.adminEmptySurface {
+  padding: 42px 0;
+}
+
+@keyframes adminSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1080px) {
+  .adminLayout,
+  .adminDetailGrid,
+  .adminDetailGrid--compact {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .adminBar__inner,
+  .adminPage__main {
+    width: min(1240px, calc(100% - 28px));
+  }
+
+  .adminHero__title {
+    font-size: clamp(50px, 16vw, 72px);
+  }
+
+  .adminPanel,
+  .adminQueueCard,
+  .adminDeliveryCard {
+    padding: 16px;
+  }
+}

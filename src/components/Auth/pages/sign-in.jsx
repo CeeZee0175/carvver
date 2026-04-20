@@ -1,11 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, LoaderCircle } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  ArrowRight,
+  LoaderCircle,
+  ChevronDown,
+  ShieldCheck,
+} from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import "./sign-in.css";
 import {
   ensureProfileForSession,
+  signInAdmin,
   signIn,
 } from "../../../lib/supabase/auth";
 import { PASSWORD_POLICY_NOTICE } from "../../../lib/passwordPolicy";
@@ -113,6 +123,31 @@ function getSignInErrors(values) {
   };
 }
 
+function validateAdminField(name, value) {
+  const normalizedValue = typeof value === "string" ? value.trim() : value;
+
+  if (name === "adminUsername" && !normalizedValue) {
+    return "Admin username is required.";
+  }
+
+  if (name === "password" && !value) {
+    return "Password is required.";
+  }
+
+  return "";
+}
+
+function getAdminErrors(values) {
+  return {
+    ...(validateAdminField("adminUsername", values.adminUsername)
+      ? { adminUsername: validateAdminField("adminUsername", values.adminUsername) }
+      : {}),
+    ...(validateAdminField("password", values.password)
+      ? { password: validateAdminField("password", values.password) }
+      : {}),
+  };
+}
+
 export default function SignIn() {
   const ref = useRef(null);
   const inView = useInView(ref, { amount: 0.35, once: true });
@@ -121,13 +156,23 @@ export default function SignIn() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(false);
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
+  const [adminLoading, setAdminLoading] = useState(false);
   const [formValues, setFormValues] = useState({
     email: "",
     password: "",
     remember: true,
   });
+  const [adminValues, setAdminValues] = useState({
+    adminUsername: "",
+    password: "",
+    remember: true,
+  });
   const [fieldErrors, setFieldErrors] = useState({});
+  const [adminFieldErrors, setAdminFieldErrors] = useState({});
   const [formError, setFormError] = useState("");
+  const [adminFormError, setAdminFormError] = useState("");
   const categoryIntent = resolveFeaturedCategoryIntent(location.search);
 
   useEffect(() => {
@@ -186,6 +231,41 @@ export default function SignIn() {
     setFieldError(name, validateSignInField(name, value));
   };
 
+  const setAdminFieldError = (name, message) => {
+    setAdminFieldErrors((prev) => {
+      if (!message) {
+        const { [name]: _removed, ...rest } = prev;
+        return rest;
+      }
+
+      return {
+        ...prev,
+        [name]: message,
+      };
+    });
+  };
+
+  const handleAdminFieldChange = (event) => {
+    const { name, type, value, checked } = event.target;
+    const nextValue = type === "checkbox" ? checked : value;
+
+    setAdminValues((prev) => ({
+      ...prev,
+      [name]: nextValue,
+    }));
+
+    if (adminFieldErrors[name]) {
+      setAdminFieldError(name, validateAdminField(name, nextValue));
+    }
+
+    if (adminFormError) setAdminFormError("");
+  };
+
+  const handleAdminFieldBlur = (event) => {
+    const { name, value } = event.target;
+    setAdminFieldError(name, validateAdminField(name, value));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -240,6 +320,36 @@ export default function SignIn() {
       setFormError(err.message || "Invalid email or password.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAdminSubmit = async (event) => {
+    event.preventDefault();
+
+    const errors = getAdminErrors(adminValues);
+    if (Object.keys(errors).length > 0) {
+      setAdminFieldErrors(errors);
+      setAdminFormError("");
+      return;
+    }
+
+    try {
+      setAdminFormError("");
+      setAdminLoading(true);
+      const result = await signInAdmin({
+        adminUsername: adminValues.adminUsername.trim(),
+        password: adminValues.password,
+        remember: adminValues.remember,
+      });
+
+      toast.success(`Welcome back, ${result.profile?.first_name || "Admin"}!`);
+      navigate("/admin");
+    } catch (error) {
+      setAdminFormError(
+        error.message || "Invalid admin username or password."
+      );
+    } finally {
+      setAdminLoading(false);
     }
   };
 
@@ -402,6 +512,180 @@ export default function SignIn() {
               )}
             </motion.button>
           </motion.form>
+
+          <motion.div className="signInBottomPrompt"
+            initial={{ opacity: 0, y: 8 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1], delay: 0.74 }}>
+            <div className={`signInAdminAccordion ${adminOpen ? "signInAdminAccordion--open" : ""}`}>
+              <button
+                type="button"
+                className="signInAdminAccordion__trigger"
+                onClick={() => {
+                  setAdminOpen((prev) => !prev);
+                  if (adminFormError) setAdminFormError("");
+                }}
+                aria-expanded={adminOpen}
+                aria-controls="admin-login-panel"
+              >
+                <span className="signInAdminAccordion__triggerMain">
+                  <span className="signInAdminAccordion__iconWrap" aria-hidden="true">
+                    <ShieldCheck className="signInAdminAccordion__icon" />
+                  </span>
+                  <span className="signInAdminAccordion__triggerCopy">
+                    <span className="signInAdminAccordion__eyebrow">Admin Login</span>
+                    <span className="signInAdminAccordion__title">
+                      Sign in with your admin username
+                    </span>
+                  </span>
+                </span>
+
+                <motion.span
+                  className="signInAdminAccordion__chevron"
+                  animate={{ rotate: adminOpen ? 180 : 0 }}
+                  transition={{ duration: 0.24, ease: "easeOut" }}
+                >
+                  <ChevronDown />
+                </motion.span>
+              </button>
+
+              <AnimatePresence initial={false}>
+                {adminOpen ? (
+                  <motion.div
+                    id="admin-login-panel"
+                    className="signInAdminAccordion__panel"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <form className="signInAdminAccordion__form" onSubmit={handleAdminSubmit} noValidate>
+                      <label className="signFieldBlock">
+                        <span className="signFieldBlock__label">Admin username</span>
+                        <div
+                          className={`signField ${
+                            adminFieldErrors.adminUsername ? "signField--error" : ""
+                          }`}
+                        >
+                          <span className="signField__iconWrap" aria-hidden="true">
+                            <ShieldCheck className="signField__icon" />
+                          </span>
+                          <input
+                            className="signField__control"
+                            type="text"
+                            name="adminUsername"
+                            placeholder="admin username"
+                            autoComplete="username"
+                            value={adminValues.adminUsername}
+                            onChange={handleAdminFieldChange}
+                            onBlur={handleAdminFieldBlur}
+                            aria-invalid={adminFieldErrors.adminUsername ? "true" : "false"}
+                          />
+                        </div>
+                        {adminFieldErrors.adminUsername ? (
+                          <span className="signFieldBlock__error">
+                            {adminFieldErrors.adminUsername}
+                          </span>
+                        ) : null}
+                      </label>
+
+                      <label className="signFieldBlock">
+                        <span className="signFieldBlock__label">Password</span>
+                        <div
+                          className={`signField signField--password ${
+                            adminFieldErrors.password ? "signField--error" : ""
+                          }`}
+                        >
+                          <span className="signField__iconWrap" aria-hidden="true">
+                            <Lock className="signField__icon" />
+                          </span>
+                          <input
+                            className="signField__control signField__control--password"
+                            type={showAdminPassword ? "text" : "password"}
+                            name="password"
+                            placeholder="Password"
+                            autoComplete="current-password"
+                            value={adminValues.password}
+                            onChange={handleAdminFieldChange}
+                            onBlur={handleAdminFieldBlur}
+                            aria-invalid={adminFieldErrors.password ? "true" : "false"}
+                          />
+                          <button
+                            type="button"
+                            className="signField__toggle"
+                            onClick={() => setShowAdminPassword((prev) => !prev)}
+                            aria-label={showAdminPassword ? "Hide password" : "Show password"}
+                          >
+                            {showAdminPassword ? (
+                              <EyeOff className="signField__toggleIcon" />
+                            ) : (
+                              <Eye className="signField__toggleIcon" />
+                            )}
+                          </button>
+                        </div>
+                        {adminFieldErrors.password ? (
+                          <span className="signFieldBlock__error">
+                            {adminFieldErrors.password}
+                          </span>
+                        ) : null}
+                      </label>
+
+                      <div className="signInForm__row">
+                        <label className="signCheckbox">
+                          <input
+                            type="checkbox"
+                            className="signCheckbox__input"
+                            name="remember"
+                            checked={adminValues.remember}
+                            onChange={handleAdminFieldChange}
+                          />
+                          <span className="signCheckbox__box" aria-hidden="true">
+                            <svg
+                              viewBox="0 0 16 16"
+                              className="signCheckbox__mark"
+                              focusable="false"
+                            >
+                              <path
+                                d="M3.3 8.35 6.45 11.4 12.7 4.95"
+                                className="signCheckbox__markPath"
+                              />
+                            </svg>
+                          </span>
+                          <span className="signCheckbox__text">Remember me</span>
+                        </label>
+                      </div>
+
+                      {adminFormError ? (
+                        <p className="signInForm__error">{adminFormError}</p>
+                      ) : null}
+
+                      <motion.button
+                        type="submit"
+                        className={`signPrimaryBtn signPrimaryBtn--admin ${
+                          adminLoading ? "signPrimaryBtn--loading" : ""
+                        }`}
+                        disabled={adminLoading}
+                        whileHover={adminLoading ? {} : { y: -1.5 }}
+                        whileTap={adminLoading ? {} : { scale: 0.98 }}
+                        transition={{ type: "spring", stiffness: 340, damping: 24 }}
+                      >
+                        {adminLoading ? (
+                          <LoaderCircle className="signPrimaryBtn__spinner" aria-hidden="true" />
+                        ) : (
+                          <>
+                            <span className="signPrimaryBtn__text">Admin Sign In</span>
+                            <span className="signPrimaryBtn__arrowWrap" aria-hidden="true">
+                              <ArrowRight className="signPrimaryBtn__arrow" />
+                            </span>
+                          </>
+                        )}
+                      </motion.button>
+                    </form>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </div>
+          </motion.div>
 
           <motion.div className="signInBottomPrompt"
             initial={{ opacity: 0, y: 8 }}

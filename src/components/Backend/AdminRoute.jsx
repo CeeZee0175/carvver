@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { createClient } from "../../lib/supabase/client";
 import {
   CUSTOMER_WELCOME_PATH,
@@ -8,24 +8,11 @@ import {
   isCustomerOnboardingComplete,
   isFreelancerOnboardingComplete,
   resolveProfileRole,
-  setFreelancerWelcomeDestination,
 } from "../../lib/customerOnboarding";
 
 const supabase = createClient();
 
-async function fetchProfile(userId) {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (error) throw error;
-  return data;
-}
-
-export default function FreelancerRoute({ children }) {
-  const location = useLocation();
+export default function AdminRoute({ children }) {
   const [state, setState] = useState({
     loading: true,
     redirectTo: "",
@@ -45,7 +32,14 @@ export default function FreelancerRoute({ children }) {
       let profile = null;
 
       try {
-        profile = await fetchProfile(session.user.id);
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+        profile = data;
       } catch {
         profile = null;
       }
@@ -57,36 +51,26 @@ export default function FreelancerRoute({ children }) {
       if (role === "admin") {
         setState({
           loading: false,
-          redirectTo: "/admin",
+          redirectTo: "",
         });
         return;
       }
 
-      if (role !== "freelancer") {
+      if (role === "freelancer") {
         setState({
           loading: false,
-          redirectTo: isCustomerOnboardingComplete(profile)
-            ? DEFAULT_CUSTOMER_DESTINATION
-            : CUSTOMER_WELCOME_PATH,
-        });
-        return;
-      }
-
-      if (!isFreelancerOnboardingComplete(profile)) {
-        setFreelancerWelcomeDestination(
-          `${location.pathname}${location.search}${location.hash}`
-        );
-
-        setState({
-          loading: false,
-          redirectTo: FREELANCER_WELCOME_PATH,
+          redirectTo: isFreelancerOnboardingComplete(profile)
+            ? "/dashboard/freelancer"
+            : FREELANCER_WELCOME_PATH,
         });
         return;
       }
 
       setState({
         loading: false,
-        redirectTo: "",
+        redirectTo: isCustomerOnboardingComplete(profile)
+          ? DEFAULT_CUSTOMER_DESTINATION
+          : CUSTOMER_WELCOME_PATH,
       });
     }
 
@@ -104,7 +88,7 @@ export default function FreelancerRoute({ children }) {
       active = false;
       subscription.unsubscribe();
     };
-  }, [location.hash, location.pathname, location.search]);
+  }, []);
 
   if (state.loading) return null;
   if (state.redirectTo) return <Navigate to={state.redirectTo} replace />;

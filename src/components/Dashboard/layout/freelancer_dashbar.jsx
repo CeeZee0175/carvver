@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
+  Bell,
   Home,
   LogOut,
   MessageCircle,
@@ -15,19 +15,74 @@ import "./dashbar.css";
 import { getProfile, signOut } from "../../../lib/supabase/auth";
 import { PROFILE_UPDATED_EVENT } from "../../../lib/profileSync";
 import {
+  formatNotificationTime,
+  useNotifications,
+} from "../hooks/useNotifications";
+import {
   getProfileDisplayName,
   getProfileInitials,
 } from "../shared/profileIdentity";
 
 const SPRING = { type: "spring", stiffness: 340, damping: 24 };
 
+function NotificationPreviewItem({ item, index, onOpen }) {
+  const Icon = item.Icon;
+
+  return (
+    <motion.button
+      type="button"
+      className="dashbarNotifyItem"
+      initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      transition={{
+        duration: 0.28,
+        delay: index * 0.04,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      whileHover={{ x: 2 }}
+      whileTap={{ scale: 0.985 }}
+      onClick={() => onOpen(item)}
+    >
+      <span
+        className="dashbarNotifyItem__iconWrap"
+        style={{
+          "--notify-accent": item.accent,
+          "--notify-accent-soft": item.accentSoft,
+        }}
+        aria-hidden="true"
+      >
+        <Icon className="dashbarNotifyItem__icon" />
+      </span>
+
+      <span className="dashbarNotifyItem__copy">
+        <span className="dashbarNotifyItem__meta">
+          <span className="dashbarNotifyItem__tag">{item.label}</span>
+          <span className="dashbarNotifyItem__time">
+            {formatNotificationTime(item.createdAt)}
+          </span>
+        </span>
+        <span className="dashbarNotifyItem__title">{item.title}</span>
+      </span>
+    </motion.button>
+  );
+}
+
 export default function FreelancerDashBar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const {
+    loading: notificationsLoading,
+    unreadNotifications,
+    unreadCount,
+    hasUnread,
+    markAllRead,
+    markRead,
+  } = useNotifications();
   const rootRef = useRef(null);
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState("");
   const [openProfile, setOpenProfile] = useState(false);
+  const [openNotifications, setOpenNotifications] = useState(false);
   const [user, setUser] = useState({
     fullName: "",
     email: "",
@@ -70,12 +125,14 @@ export default function FreelancerDashBar() {
       if (!rootRef.current) return;
       if (!rootRef.current.contains(event.target)) {
         setOpenProfile(false);
+        setOpenNotifications(false);
       }
     };
 
     const onKey = (event) => {
       if (event.key === "Escape") {
         setOpenProfile(false);
+        setOpenNotifications(false);
       }
     };
 
@@ -90,6 +147,7 @@ export default function FreelancerDashBar() {
 
   useEffect(() => {
     setOpenProfile(false);
+    setOpenNotifications(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -122,6 +180,32 @@ export default function FreelancerDashBar() {
       toast.error("Failed to sign out. Please try again.");
     }
   };
+
+  const handleOpenNotification = async (item) => {
+    try {
+      await markRead(item.id);
+    } catch {
+      toast.error("We couldn't update notifications. Please try again.");
+    }
+
+    setOpenNotifications(false);
+    navigate(item.path);
+  };
+
+  const handleMarkAllRead = async () => {
+    if (!hasUnread) return;
+
+    try {
+      await markAllRead();
+      toast.success("All notifications marked as read.");
+    } catch {
+      toast.error("We couldn't update notifications. Please try again.");
+    }
+  };
+
+  const previewNotifications = unreadNotifications.slice(0, 4);
+  const onNotificationsPage =
+    location.pathname === "/dashboard/freelancer/notifications";
 
   const onMessagesPage = location.pathname === "/dashboard/freelancer/messages";
   const onSettingsPage = location.pathname === "/dashboard/freelancer/settings";
@@ -181,6 +265,89 @@ export default function FreelancerDashBar() {
                 Join Carvver Pro
               </span>
             </motion.button>
+
+            <div className="dashbarNotifyWrap">
+              <motion.button
+                type="button"
+                className={`dashbarIconBtn dashbarIconBtn--notify ${
+                  openNotifications ? "dashbarIconBtn--active" : ""
+                } ${onNotificationsPage ? "dashbarIconBtn--active" : ""}`}
+                whileHover={{ y: -1.5, scale: 1.03 }}
+                whileTap={{ scale: 0.95 }}
+                transition={SPRING}
+                aria-label="Notifications"
+                aria-expanded={openNotifications}
+                aria-haspopup="menu"
+                onClick={() => {
+                  setOpenNotifications((prev) => {
+                    const next = !prev;
+                    if (next) setOpenProfile(false);
+                    return next;
+                  });
+                }}
+              >
+                <Bell className="dashbarIconBtn__icon" />
+                {unreadCount > 0 ? (
+                  <span className="dashbarNotifyBadge" aria-hidden="true">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                ) : null}
+              </motion.button>
+
+              <div
+                className={`dashbarNotifyMenu ${
+                  openNotifications ? "dashbarNotifyMenu--open" : ""
+                }`}
+                role="menu"
+              >
+                <div className="dashbarNotifyMenu__head">
+                  <div>
+                    <div className="dashbarNotifyMenu__eyebrow">Notifications</div>
+                    <div className="dashbarNotifyMenu__title">
+                      Freelancer updates
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="dashbarNotifyMenu__action"
+                    onClick={handleMarkAllRead}
+                    disabled={!hasUnread}
+                  >
+                    Mark all read
+                  </button>
+                </div>
+
+                <div className="dashbarNotifyMenu__list">
+                  {notificationsLoading ? (
+                    <div className="dashbarNotifyMenu__empty">Loading...</div>
+                  ) : previewNotifications.length > 0 ? (
+                    previewNotifications.map((item, index) => (
+                      <NotificationPreviewItem
+                        key={item.id}
+                        item={item}
+                        index={index}
+                        onOpen={handleOpenNotification}
+                      />
+                    ))
+                  ) : (
+                    <div className="dashbarNotifyMenu__empty">
+                      No recent notification
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  className="dashbarNotifyMenu__footer"
+                  onClick={() => {
+                    setOpenNotifications(false);
+                    navigate("/dashboard/freelancer/notifications");
+                  }}
+                >
+                  Open notifications
+                </button>
+              </div>
+            </div>
 
             <motion.button
               type="button"

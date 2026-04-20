@@ -494,6 +494,103 @@
   transform: translateX(4px);
 }
 
+.signPrimaryBtn--admin{
+  height: 50px;
+  margin-top: 2px;
+}
+
+.signInAdminAccordion{
+  width: 100%;
+  border-radius: 22px;
+  border: 1px solid rgba(42,20,80,0.10);
+  background: rgba(255,255,255,0.76);
+  box-shadow: 0 16px 42px rgba(12,7,18,0.05);
+  overflow: hidden;
+}
+
+.signInAdminAccordion__trigger{
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 18px 18px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.signInAdminAccordion__triggerMain{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.signInAdminAccordion__iconWrap{
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(124,58,237,0.10);
+  color: rgba(66,29,133,0.94);
+}
+
+.signInAdminAccordion__icon{
+  width: 18px;
+  height: 18px;
+}
+
+.signInAdminAccordion__triggerCopy{
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.signInAdminAccordion__eyebrow{
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(87,34,182,0.72);
+}
+
+.signInAdminAccordion__title{
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 800;
+  color: rgba(27,16,46,0.92);
+}
+
+.signInAdminAccordion__chevron{
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  display: grid;
+  place-items: center;
+  color: rgba(42,20,80,0.56);
+}
+
+.signInAdminAccordion__chevron svg{
+  width: 18px;
+  height: 18px;
+}
+
+.signInAdminAccordion__panel{
+  overflow: hidden;
+}
+
+.signInAdminAccordion__form{
+  display: grid;
+  gap: 14px;
+  padding: 0 18px 18px;
+}
+
 .signInBottomPrompt{
   margin-top: 24px;
   display: flex;
@@ -575,6 +672,12 @@
   .signInBottomPrompt{
     justify-content: center;
     text-align: center;
+  }
+
+  .signInAdminAccordion__trigger,
+  .signInAdminAccordion__form{
+    padding-left: 14px;
+    padding-right: 14px;
   }
 }
 

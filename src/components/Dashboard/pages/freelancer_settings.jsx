@@ -236,7 +236,7 @@ export default function FreelancerSettings() {
             <div>
               <h2 className="profileSection__title">Payout destination</h2>
               <p className="profileSection__sub">
-                After the customer confirms completion, payout is queued for ops release using these saved details.
+                After the customer confirms completion, payout is queued for ops release using these saved details. New listings also need this destination before they can be published.
               </p>
             </div>
           </div>

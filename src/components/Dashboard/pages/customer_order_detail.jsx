@@ -39,6 +39,43 @@ function formatPayoutState(value) {
   return "Held";
 }
 
+function DeliveryAssetList({ assets = [] }) {
+  if (!assets.length) return null;
+
+  return (
+    <div className="workflowAssetList">
+      {assets.map((asset) => (
+        <article key={asset.id} className="workflowAssetCard">
+          <div className="workflowAssetCard__preview">
+            {asset.assetKind === "image" ? (
+              <img src={asset.publicUrl} alt={asset.originalName} />
+            ) : asset.assetKind === "video" ? (
+              <video src={asset.publicUrl} controls preload="metadata" />
+            ) : (
+              <div className="workflowAssetCard__document">PDF</div>
+            )}
+          </div>
+
+          <div className="workflowAssetCard__body">
+            <strong className="workflowAssetCard__title">{asset.originalName}</strong>
+            <span className="workflowAssetCard__meta">
+              {asset.assetKind === "document" ? "Document" : asset.assetKind}
+            </span>
+            <a
+              className="workflowLink"
+              href={asset.publicUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open file
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 function DeliverySummary({ order }) {
   if (!order?.deliveries?.length) {
     return (
@@ -142,6 +179,8 @@ function DeliverySummary({ order }) {
               </>
             )}
           </div>
+
+          <DeliveryAssetList assets={delivery.assets} />
         </article>
       ))}
     </div>
@@ -399,6 +438,16 @@ export default function CustomerOrderDetail() {
                 <p className="workflowSummaryNote">
                   Confirming receipt marks the work complete and queues the freelancer payout for ops release. It does not mean the payout was already sent.
                 </p>
+                {order.payoutRelease?.customerReceiptUrl ? (
+                  <a
+                    className="workflowActionBtn workflowActionBtn--ghost"
+                    href={order.payoutRelease.customerReceiptUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open receipt
+                  </a>
+                ) : null}
                 {["pending", "active"].includes(order.status) ? (
                   <motion.button
                     type="button"

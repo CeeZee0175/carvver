@@ -35,6 +35,11 @@ export default function PublicOnlyRoute({ children }) {
 
         const role = resolveProfileRole(data, session);
 
+        if (role === "admin") {
+          setRedirectTo("/admin");
+          return;
+        }
+
         if (role === "freelancer") {
           setRedirectTo(
             isFreelancerOnboardingComplete(data)

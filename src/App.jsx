@@ -5,6 +5,7 @@ import CustomerWelcomeRoute from "./components/Backend/CustomerWelcomeRoute";
 import FreelancerRoute from "./components/Backend/FreelancerRoute";
 import FreelancerWelcomeRoute from "./components/Backend/FreelancerWelcomeRoute";
 import PublicOnlyRoute from "./components/Backend/PublicOnlyRoute";
+import AdminRoute from "./components/Backend/AdminRoute";
 import { createClient } from "./lib/supabase/client";
 import {
   isCustomerOnboardingComplete,
@@ -17,6 +18,7 @@ const NavBar = lazy(() => import("./components/Homepage/layout/navbar"));
 const Home = lazy(() => import("./components/Homepage/pages/home"));
 const HomeFooter = lazy(() => import("./components/Homepage/layout/home_footer"));
 const DashBar = lazy(() => import("./components/Dashboard/layout/dashbar"));
+const AdminReview = lazy(() => import("./components/Admin/pages/admin_review"));
 const HomeAboutUs = lazy(() => import("./components/Homepage/pages/home_aboutUs"));
 const HomeCommunity = lazy(() => import("./components/Homepage/pages/home_community"));
 const FeaturesPageContent = lazy(() => import("./components/Homepage/pages/features_page"));
@@ -99,6 +101,10 @@ const supabase = createClient();
 
 function resolveRouteShellFamily(pathname) {
   if (pathname.startsWith("/dashboard")) {
+    return "dashboard";
+  }
+
+  if (pathname.startsWith("/admin")) {
     return "dashboard";
   }
 
@@ -472,6 +478,16 @@ function AppRoutes() {
 
       {/* Protected routes - redirects to /sign-in if not logged in */}
       <Route
+        path="/admin"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <AdminRoute>
+              <AdminReview />
+            </AdminRoute>
+          </Suspense>
+        }
+      />
+      <Route
         path="/dashboard/customer"
         element={
           <Suspense fallback={<RouteFallback />}>
@@ -617,6 +633,16 @@ function AppRoutes() {
           <Suspense fallback={<RouteFallback />}>
             <FreelancerRoute>
               <FreelancerOrderDetail />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer/notifications"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <NotifPage />
             </FreelancerRoute>
           </Suspense>
         }

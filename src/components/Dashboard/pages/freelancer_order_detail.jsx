@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LoaderCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -15,6 +15,10 @@ import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import {
   createFreelancerOrderUpdate,
   fetchFreelancerOrderDetail,
+  ORDER_DELIVERY_ACCEPTED_DOCUMENT_TYPES,
+  ORDER_DELIVERY_ACCEPTED_IMAGE_TYPES,
+  ORDER_DELIVERY_ACCEPTED_VIDEO_TYPES,
+  ORDER_DELIVERY_MAX_ASSET_ITEMS,
   submitFreelancerOrderDelivery,
 } from "../hooks/useMarketplaceWorkflow";
 import SearchableCombobox from "../../Shared/searchable_combobox";
@@ -45,6 +49,51 @@ function formatPayoutState(value) {
   if (normalized === "failed") return "Failed";
   if (normalized === "refunded") return "Refunded";
   return "Held";
+}
+
+function buildAcceptedDeliveryAssetTypes() {
+  return [
+    ...ORDER_DELIVERY_ACCEPTED_IMAGE_TYPES,
+    ...ORDER_DELIVERY_ACCEPTED_VIDEO_TYPES,
+    ...ORDER_DELIVERY_ACCEPTED_DOCUMENT_TYPES,
+  ].join(",");
+}
+
+function DeliveryAssetList({ assets = [] }) {
+  if (!assets.length) return null;
+
+  return (
+    <div className="workflowAssetList">
+      {assets.map((asset) => (
+        <article key={asset.id} className="workflowAssetCard">
+          <div className="workflowAssetCard__preview">
+            {asset.assetKind === "image" ? (
+              <img src={asset.publicUrl} alt={asset.originalName} />
+            ) : asset.assetKind === "video" ? (
+              <video src={asset.publicUrl} controls preload="metadata" />
+            ) : (
+              <div className="workflowAssetCard__document">PDF</div>
+            )}
+          </div>
+
+          <div className="workflowAssetCard__body">
+            <strong className="workflowAssetCard__title">{asset.originalName}</strong>
+            <span className="workflowAssetCard__meta">
+              {asset.assetKind === "document" ? "Document" : asset.assetKind}
+            </span>
+            <a
+              className="workflowLink"
+              href={asset.publicUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open file
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
 }
 
 function DeliveryHistory({ order }) {
@@ -150,6 +199,8 @@ function DeliveryHistory({ order }) {
               </>
             )}
           </div>
+
+          <DeliveryAssetList assets={delivery.assets} />
         </article>
       ))}
     </div>
@@ -159,6 +210,7 @@ function DeliveryHistory({ order }) {
 export default function FreelancerOrderDetail() {
   const navigate = useNavigate();
   const { orderId = "" } = useParams();
+  const deliveryAssetsRef = useRef([]);
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState(null);
   const [error, setError] = useState("");
@@ -177,6 +229,7 @@ export default function FreelancerOrderDetail() {
     shipmentNote: "",
     proofUrl: "",
   });
+  const [deliveryAssets, setDeliveryAssets] = useState([]);
   const [updateState, setUpdateState] = useState({ pending: false, error: "", success: "" });
   const [deliveryState, setDeliveryState] = useState({
     pending: false,
@@ -201,6 +254,54 @@ export default function FreelancerOrderDetail() {
   useEffect(() => {
     load();
   }, [orderId]);
+
+  useEffect(() => {
+    deliveryAssetsRef.current = deliveryAssets;
+  }, [deliveryAssets]);
+
+  useEffect(() => {
+    return () => {
+      deliveryAssetsRef.current.forEach((item) => {
+        if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      });
+    };
+  }, []);
+
+  const removeDeliveryAsset = (assetId) => {
+    setDeliveryAssets((prev) => {
+      const target = prev.find((item) => item.id === assetId);
+      if (target?.previewUrl) {
+        URL.revokeObjectURL(target.previewUrl);
+      }
+
+      return prev.filter((item) => item.id !== assetId);
+    });
+  };
+
+  const handleDeliveryAssetPicked = (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    const remainingSlots = ORDER_DELIVERY_MAX_ASSET_ITEMS - deliveryAssets.length;
+    const nextAssets = files.slice(0, Math.max(remainingSlots, 0)).map((file) => ({
+      id: `${Date.now()}-${file.name}-${Math.random().toString(36).slice(2, 8)}`,
+      file,
+      originalName: file.name,
+      previewUrl: String(file.type || "").startsWith("image/") ||
+        String(file.type || "").startsWith("video/")
+        ? URL.createObjectURL(file)
+        : "",
+      assetKind: String(file.type || "").startsWith("video/")
+        ? "video"
+        : String(file.type || "") === "application/pdf"
+          ? "document"
+          : "image",
+    }));
+
+    setDeliveryAssets((prev) => [...prev, ...nextAssets].slice(0, ORDER_DELIVERY_MAX_ASSET_ITEMS));
+    setDeliveryState((prev) => ({ ...prev, error: "" }));
+    event.target.value = "";
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -234,6 +335,7 @@ export default function FreelancerOrderDetail() {
       await submitFreelancerOrderDelivery({
         orderId,
         ...deliveryValues,
+        deliveryAssets: deliveryAssets.map((item) => item.file),
       });
       setDeliveryValues({
         deliveryNote: "",
@@ -244,6 +346,12 @@ export default function FreelancerOrderDetail() {
         trackingReference: "",
         shipmentNote: "",
         proofUrl: "",
+      });
+      setDeliveryAssets((prev) => {
+        prev.forEach((item) => {
+          if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+        });
+        return [];
       });
       await load();
       setDeliveryState({
@@ -414,6 +522,46 @@ export default function FreelancerOrderDetail() {
                       }
                     />
                   </label>
+
+                  <label className="workflowField workflowField--wide">
+                    <span className="workflowField__label">
+                      Upload final files or proof
+                    </span>
+                    <input
+                      className="workflowField__control workflowField__control--file"
+                      type="file"
+                      accept={buildAcceptedDeliveryAssetTypes()}
+                      multiple
+                      onChange={handleDeliveryAssetPicked}
+                    />
+                    <p className="workflowForm__note">
+                      Upload up to {ORDER_DELIVERY_MAX_ASSET_ITEMS} files. PDFs work well for digital handoff, while images or videos work well for physical proof.
+                    </p>
+                  </label>
+
+                  {deliveryAssets.length ? (
+                    <div className="workflowUploadList">
+                      {deliveryAssets.map((asset) => (
+                        <article key={asset.id} className="workflowUploadChip">
+                          <div className="workflowUploadChip__copy">
+                            <strong className="workflowUploadChip__title">
+                              {asset.originalName}
+                            </strong>
+                            <span className="workflowUploadChip__meta">
+                              {asset.assetKind}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            className="workflowUploadChip__remove"
+                            onClick={() => removeDeliveryAsset(asset.id)}
+                          >
+                            Remove
+                          </button>
+                        </article>
+                      ))}
+                    </div>
+                  ) : null}
 
                   {order.fulfillment_type === "physical" ? (
                     <>
@@ -710,6 +858,16 @@ export default function FreelancerOrderDetail() {
                 <p className="workflowSummaryNote">
                   Customer completion only queues payout for ops release. Funds are marked released only after the payout request is processed successfully.
                 </p>
+                {order.payoutRelease?.freelancerReceiptUrl ? (
+                  <a
+                    className="workflowActionBtn workflowActionBtn--ghost"
+                    href={order.payoutRelease.freelancerReceiptUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open payout receipt
+                  </a>
+                ) : null}
               </article>
             </aside>
           </section>

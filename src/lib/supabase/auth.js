@@ -106,6 +106,53 @@ export async function signIn({ email, password, remember }) {
   return data;
 }
 
+async function resolveAdminEmail(adminUsername) {
+  const normalizedUsername = String(adminUsername || "").trim().toLowerCase();
+
+  if (!normalizedUsername) {
+    throw new Error("Enter your admin username.");
+  }
+
+  try {
+    const { data, error } = await supabase.functions.invoke("resolve-admin-login", {
+      body: {
+        adminUsername: normalizedUsername,
+      },
+    });
+
+    if (error) throw error;
+
+    const email = String(data?.email || "").trim();
+    if (!email) {
+      throw new Error("Missing admin email.");
+    }
+
+    return email;
+  } catch {
+    throw new Error("Invalid admin username or password.");
+  }
+}
+
+export async function signInAdmin({ adminUsername, password, remember }) {
+  const email = await resolveAdminEmail(adminUsername);
+  const authResult = await signIn({
+    email,
+    password,
+    remember,
+  });
+
+  const profile = await ensureProfileForSession(authResult.session);
+  if (String(profile?.role || "").trim().toLowerCase() !== "admin") {
+    await signOut().catch(() => {});
+    throw new Error("That account does not have admin access.");
+  }
+
+  return {
+    ...authResult,
+    profile,
+  };
+}
+
 export async function requestPasswordRecovery(email, options = {}) {
   const normalizedEmail = String(email || "").trim();
 

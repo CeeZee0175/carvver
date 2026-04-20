@@ -2,7 +2,6 @@ import React, { startTransition, useEffect, useMemo, useState } from "react";
 import {
   AnimatePresence,
   LayoutGroup,
-  motion,
   useReducedMotion,
 } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +15,7 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import "./notifPage.css";
 import DashBar from "../layout/dashbar";
+import FreelancerDashBar from "../layout/freelancer_dashbar";
 import HomeFooter from "../../Homepage/layout/home_footer";
 import {
   formatNotificationTime,
@@ -212,12 +212,13 @@ export default function NotifPage() {
   const {
     loading,
     notifications,
-    unreadCount,
     hasUnread,
+    role,
     toggleRead,
     markRead,
     markAllRead,
   } = useNotifications();
+  const isFreelancer = role === "freelancer";
 
   const [activeFilter, setActiveFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -306,7 +307,7 @@ export default function NotifPage() {
       <div className="notifPage__base" />
       <div className="notifPage__bg" aria-hidden="true" />
 
-      <DashBar />
+      {isFreelancer ? <FreelancerDashBar /> : <DashBar />}
 
       <main className="notifPage__main">
         <motion.section
@@ -322,7 +323,9 @@ export default function NotifPage() {
               whileHover={{ x: -1 }}
               whileTap={{ scale: 0.97 }}
               transition={SPRING}
-              onClick={() => navigate("/dashboard/customer")}
+              onClick={() =>
+                navigate(isFreelancer ? "/dashboard/freelancer" : "/dashboard/customer")
+              }
             >
               <Home className="notifCrumbs__icon" />
               <span>Home</span>
@@ -359,7 +362,9 @@ export default function NotifPage() {
             </div>
 
             <p className="notifPage__sub">
-              Keep up with new activity, order updates, and saved listing changes.
+              {isFreelancer
+                ? "Keep up with payout updates, order activity, and profile reminders."
+                : "Keep up with new activity, order updates, and saved listing changes."}
             </p>
           </div>
 

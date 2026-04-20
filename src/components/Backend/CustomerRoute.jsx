@@ -57,6 +57,14 @@ export default function CustomerRoute({ children }) {
 
       const role = resolveProfileRole(profile, session);
 
+      if (role === "admin") {
+        setState({
+          loading: false,
+          redirectTo: "/admin",
+        });
+        return;
+      }
+
       if (role === "freelancer") {
         if (!isFreelancerOnboardingComplete(profile)) {
           setFreelancerWelcomeDestination(

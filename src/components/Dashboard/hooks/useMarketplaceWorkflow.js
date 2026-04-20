@@ -5,9 +5,81 @@ import { buildPhilippinesLocationLabel } from "../../../lib/phLocations";
 import { REQUEST_MEDIA_BUCKET } from "./useCustomerRequests";
 
 const supabase = createClient();
+export const ORDER_DELIVERY_ASSET_BUCKET = "order-delivery-assets";
+export const ORDER_RECEIPT_BUCKET = "order-receipts";
+export const ORDER_DELIVERY_ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
+export const ORDER_DELIVERY_ACCEPTED_VIDEO_TYPES = [
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+];
+export const ORDER_DELIVERY_ACCEPTED_DOCUMENT_TYPES = ["application/pdf"];
+export const ORDER_DELIVERY_MAX_ASSET_ITEMS = 5;
+export const ORDER_DELIVERY_MAX_ASSET_BYTES = 50 * 1024 * 1024;
 
 function normalizeText(value) {
   return String(value || "").trim();
+}
+
+function sanitizeFileName(name) {
+  return String(name || "delivery-asset")
+    .toLowerCase()
+    .replace(/[^a-z0-9.-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function getFileExtension(file) {
+  const fromName = String(file?.name || "").split(".").pop()?.toLowerCase();
+  if (fromName) return fromName;
+
+  switch (file?.type) {
+    case "image/png":
+      return "png";
+    case "image/webp":
+      return "webp";
+    case "video/webm":
+      return "webm";
+    case "video/quicktime":
+      return "mov";
+    case "application/pdf":
+      return "pdf";
+    default:
+      return "jpg";
+  }
+}
+
+function getDeliveryAssetKind(file) {
+  const type = String(file?.type || "").toLowerCase();
+
+  if (ORDER_DELIVERY_ACCEPTED_DOCUMENT_TYPES.includes(type)) return "document";
+  if (type.startsWith("video/")) return "video";
+  return "image";
+}
+
+function buildDeliveryAssetError(file) {
+  if (Number(file?.size || 0) > ORDER_DELIVERY_MAX_ASSET_BYTES) {
+    return "Delivery files must be 50 MB or smaller.";
+  }
+
+  return "Use JPG, PNG, WEBP, MP4, WEBM, MOV, or PDF files only.";
+}
+
+function validateDeliveryAssetFile(file) {
+  const type = String(file?.type || "").toLowerCase();
+  const isAccepted = [
+    ...ORDER_DELIVERY_ACCEPTED_IMAGE_TYPES,
+    ...ORDER_DELIVERY_ACCEPTED_VIDEO_TYPES,
+    ...ORDER_DELIVERY_ACCEPTED_DOCUMENT_TYPES,
+  ].includes(type);
+
+  if (!isAccepted || Number(file?.size || 0) > ORDER_DELIVERY_MAX_ASSET_BYTES) {
+    throw new Error(buildDeliveryAssetError(file));
+  }
 }
 
 function friendlyWorkflowMessage(error, fallback) {
@@ -32,6 +104,21 @@ function getPublicUrl(bucket, path) {
   if (!path) return "";
   const { data } = supabase.storage.from(bucket).getPublicUrl(path);
   return data?.publicUrl || "";
+}
+
+function getReceiptPublicUrl(path) {
+  return getPublicUrl(ORDER_RECEIPT_BUCKET, path);
+}
+
+function groupBy(rows, key) {
+  const map = new Map();
+  (rows || []).forEach((row) => {
+    const groupKey = row[key];
+    const existing = map.get(groupKey) || [];
+    existing.push(row);
+    map.set(groupKey, existing);
+  });
+  return map;
 }
 
 function formatPeso(value) {
@@ -194,7 +281,23 @@ function hasValidPayoutDestination(destination) {
   );
 }
 
-function normalizeOrderDelivery(row) {
+function normalizeDeliveryAsset(row) {
+  return {
+    id: row?.id || "",
+    deliveryId: row?.delivery_id || "",
+    orderId: row?.order_id || "",
+    freelancerId: row?.freelancer_id || "",
+    assetKind: normalizeText(row?.asset_kind) || "document",
+    mimeType: normalizeText(row?.mime_type),
+    originalName: normalizeText(row?.original_name) || "Delivery asset",
+    bucketPath: normalizeText(row?.bucket_path),
+    publicUrl: getPublicUrl(ORDER_DELIVERY_ASSET_BUCKET, row?.bucket_path),
+    createdAt: row?.created_at || null,
+    createdAtLabel: formatLongDateTime(row?.created_at),
+  };
+}
+
+function normalizeOrderDelivery(row, assets = []) {
   const fulfillmentType = normalizeFulfillmentType(row?.fulfillment_type);
 
   return {
@@ -212,6 +315,7 @@ function normalizeOrderDelivery(row) {
     proofUrl: normalizeText(row?.proof_url),
     createdAt: row?.created_at || null,
     createdAtLabel: formatLongDateTime(row?.created_at),
+    assets,
   };
 }
 
@@ -238,6 +342,10 @@ function normalizePayoutReleaseRequest(row) {
     releasedAtLabel: formatLongDateTime(row.released_at),
     processedAt: row.processed_at || null,
     processedAtLabel: formatLongDateTime(row.processed_at),
+    freelancerReceiptPath: normalizeText(row.freelancer_receipt_path),
+    customerReceiptPath: normalizeText(row.customer_receipt_path),
+    freelancerReceiptUrl: getReceiptPublicUrl(row.freelancer_receipt_path),
+    customerReceiptUrl: getReceiptPublicUrl(row.customer_receipt_path),
   };
 }
 
@@ -260,6 +368,43 @@ async function fetchFreelancerPayoutMethodByFreelancerId(freelancerId) {
 
   if (error) throw error;
   return normalizePayoutMethod(data);
+}
+
+async function uploadOrderDeliveryAsset({
+  freelancerId,
+  orderId,
+  deliveryId,
+  file,
+}) {
+  validateDeliveryAssetFile(file);
+
+  const extension = getFileExtension(file);
+  const safeName = sanitizeFileName(file.name);
+  const bucketPath = `${freelancerId}/${orderId}/${deliveryId}/${Date.now()}-${safeName}.${extension}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(ORDER_DELIVERY_ASSET_BUCKET)
+    .upload(bucketPath, file, {
+      upsert: false,
+      cacheControl: "3600",
+    });
+
+  if (uploadError) throw uploadError;
+
+  const { error: insertError } = await supabase.from("order_delivery_assets").insert({
+    delivery_id: deliveryId,
+    order_id: orderId,
+    freelancer_id: freelancerId,
+    bucket_path: bucketPath,
+    asset_kind: getDeliveryAssetKind(file),
+    mime_type: normalizeText(file.type) || "application/octet-stream",
+    original_name: normalizeText(file.name) || "delivery-asset",
+  });
+
+  if (insertError) {
+    await supabase.storage.from(ORDER_DELIVERY_ASSET_BUCKET).remove([bucketPath]);
+    throw insertError;
+  }
 }
 
 async function ensureThread({ customerId, freelancerId }) {
@@ -622,6 +767,7 @@ async function fetchOrderDetail(orderId, column, ownerId) {
   const [
     { data: updateRows, error: updateError },
     { data: deliveryRows, error: deliveryError },
+    { data: deliveryAssetRows, error: deliveryAssetError },
     { data: payoutRequestRows, error: payoutError },
   ] = await Promise.all([
     supabase
@@ -637,9 +783,16 @@ async function fetchOrderDetail(orderId, column, ownerId) {
       .eq("order_id", orderId)
       .order("created_at", { ascending: true }),
     supabase
+      .from("order_delivery_assets")
+      .select(
+        "id, delivery_id, order_id, freelancer_id, bucket_path, asset_kind, mime_type, original_name, created_at"
+      )
+      .eq("order_id", orderId)
+      .order("created_at", { ascending: true }),
+    supabase
       .from("payout_release_requests")
       .select(
-        "id, order_id, customer_id, freelancer_id, amount, currency, status, destination_method, destination_account_name, destination_account_reference, provider_reference, ops_note, requested_at, processed_at, released_at, created_at"
+        "id, order_id, customer_id, freelancer_id, amount, currency, status, destination_method, destination_account_name, destination_account_reference, provider_reference, ops_note, requested_at, processed_at, released_at, created_at, freelancer_receipt_path, customer_receipt_path"
       )
       .eq("order_id", orderId)
       .order("created_at", { ascending: false })
@@ -648,11 +801,19 @@ async function fetchOrderDetail(orderId, column, ownerId) {
 
   if (updateError) throw updateError;
   if (deliveryError) throw deliveryError;
+  if (deliveryAssetError) throw deliveryAssetError;
   if (payoutError) throw payoutError;
 
   const payoutRelease = normalizePayoutReleaseRequest((payoutRequestRows || [])[0] || null);
   const escrowStatus = normalizeEscrowStatus(orderRow.escrow_status);
   const fulfillmentType = normalizeFulfillmentType(orderRow.fulfillment_type);
+  const assetMap = groupBy(
+    (deliveryAssetRows || []).map(normalizeDeliveryAsset),
+    "deliveryId"
+  );
+  const normalizedDeliveries = (deliveryRows || []).map((row) =>
+    normalizeOrderDelivery(row, assetMap.get(row.id) || [])
+  );
 
   return {
     ...orderRow,
@@ -669,10 +830,10 @@ async function fetchOrderDetail(orderId, column, ownerId) {
     customerName: buildProfileName(orderRow.customer, "Customer"),
     freelancerName: buildProfileName(orderRow.freelancer, "Freelancer"),
     updates: (updateRows || []).map(normalizeOrderUpdate),
-    deliveries: (deliveryRows || []).map(normalizeOrderDelivery),
+    deliveries: normalizedDeliveries,
     latestDelivery:
-      (deliveryRows || []).length > 0
-        ? normalizeOrderDelivery(deliveryRows[deliveryRows.length - 1])
+      normalizedDeliveries.length > 0
+        ? normalizedDeliveries[normalizedDeliveries.length - 1]
         : null,
     payoutRelease,
   };
@@ -686,6 +847,162 @@ export async function fetchCustomerOrderDetail(orderId) {
 export async function fetchFreelancerOrderDetail(orderId) {
   const profile = await getSignedInProfile();
   return fetchOrderDetail(orderId, "freelancer_id", profile.id);
+}
+
+async function fetchAdminOrderDetail(orderId) {
+  return fetchOrderDetail(orderId, "id", orderId);
+}
+
+export async function fetchAdminPayoutQueue() {
+  const profile = await getSignedInProfile();
+  if (normalizeText(profile?.role).toLowerCase() !== "admin") {
+    throw new Error("Admin access is required to open this queue.");
+  }
+
+  const { data, error } = await supabase
+    .from("payout_release_requests")
+    .select(
+      `
+      id,
+      order_id,
+      customer_id,
+      freelancer_id,
+      amount,
+      currency,
+      status,
+      destination_method,
+      destination_account_name,
+      destination_account_reference,
+      provider_reference,
+      ops_note,
+      requested_at,
+      processed_at,
+      released_at,
+      freelancer_receipt_path,
+      customer_receipt_path,
+      orders (
+        id,
+        status,
+        escrow_status,
+        fulfillment_type,
+        total_price,
+        freelancer_net,
+        created_at,
+        services (
+          id,
+          title,
+          category,
+          location
+        ),
+        customer:profiles!orders_customer_id_fkey (
+          id,
+          first_name,
+          last_name,
+          display_name
+        ),
+        freelancer:profiles!orders_freelancer_id_fkey (
+          id,
+          first_name,
+          last_name,
+          display_name
+        )
+      )
+    `
+    )
+    .order("requested_at", { ascending: false });
+
+  if (error) throw error;
+
+  return (data || []).map((row) => {
+    const order = Array.isArray(row.orders) ? row.orders[0] : row.orders;
+    const payoutRelease = normalizePayoutReleaseRequest(row);
+
+    return {
+      id: row.id,
+      orderId: row.order_id,
+      status: payoutRelease?.status || "pending",
+      amount: payoutRelease?.amount || 0,
+      amountLabel: payoutRelease?.amountLabel || formatPeso(row.amount),
+      requestedAt: payoutRelease?.requestedAt,
+      requestedAtLabel: payoutRelease?.requestedAtLabel || "",
+      fulfillmentType: normalizeFulfillmentType(order?.fulfillment_type),
+      escrowStatus: normalizeEscrowStatus(order?.escrow_status),
+      orderStatus: normalizeText(order?.status) || "pending",
+      destinationMethod: normalizeText(row.destination_method),
+      destinationAccountReference: normalizeText(row.destination_account_reference),
+      providerReference: normalizeText(row.provider_reference),
+      opsNote: normalizeText(row.ops_note),
+      serviceTitle: normalizeText(order?.services?.title) || "Order",
+      category: normalizeText(order?.services?.category),
+      location: normalizeText(order?.services?.location),
+      customerName: buildProfileName(order?.customer, "Customer"),
+      freelancerName: buildProfileName(order?.freelancer, "Freelancer"),
+      payoutRelease,
+    };
+  });
+}
+
+export async function fetchAdminPayoutReviewDetail(payoutRequestId) {
+  const profile = await getSignedInProfile();
+  if (normalizeText(profile?.role).toLowerCase() !== "admin") {
+    throw new Error("Admin access is required to open this payout review.");
+  }
+
+  const { data, error } = await supabase
+    .from("payout_release_requests")
+    .select(
+      "id, order_id, customer_id, freelancer_id, amount, currency, status, destination_method, destination_account_name, destination_account_reference, provider_reference, ops_note, requested_at, processed_at, released_at, freelancer_receipt_path, customer_receipt_path"
+    )
+    .eq("id", payoutRequestId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data?.order_id) {
+    throw new Error("We couldn't find that payout review.");
+  }
+
+  const order = await fetchAdminOrderDetail(data.order_id);
+
+  return {
+    ...order,
+    adminPayoutRequest: normalizePayoutReleaseRequest(data),
+  };
+}
+
+export async function processAdminPayoutAction({
+  payoutRequestId,
+  action,
+  providerReference,
+  note,
+}) {
+  const profile = await getSignedInProfile();
+  if (normalizeText(profile?.role).toLowerCase() !== "admin") {
+    throw new Error("Admin access is required for payout actions.");
+  }
+
+  const { data, error } = await supabase.functions.invoke(
+    "release-freelancer-payout",
+    {
+      body: {
+        payoutRequestId,
+        action,
+        providerReference,
+        note,
+      },
+    }
+  );
+
+  if (error) {
+    throw new Error(
+      String(error.message || "We couldn't process that payout action.")
+    );
+  }
+
+  if (data?.error) {
+    throw new Error(String(data.error));
+  }
+
+  return data;
 }
 
 export async function confirmOrderCompletion(orderId) {
@@ -870,6 +1187,7 @@ export async function submitFreelancerOrderDelivery({
   trackingReference,
   shipmentNote,
   proofUrl,
+  deliveryAssets = [],
 }) {
   const profile = await getSignedInProfile();
   const order = await fetchOrderDetail(orderId, "freelancer_id", profile.id);
@@ -883,13 +1201,22 @@ export async function submitFreelancerOrderDelivery({
   const normalizedTrackingReference = normalizeText(trackingReference);
   const normalizedShipmentNote = normalizeText(shipmentNote);
   const normalizedProofUrl = normalizeText(proofUrl);
+  const nextAssets = Array.isArray(deliveryAssets) ? deliveryAssets.filter(Boolean) : [];
 
   if (!normalizedDeliveryNote) {
     throw new Error("Add a short delivery note before sending.");
   }
 
-  if (fulfillmentType === "digital" && !normalizedDeliverableUrl) {
-    throw new Error("Add the delivery link or access URL for this digital order.");
+  if (nextAssets.length > ORDER_DELIVERY_MAX_ASSET_ITEMS) {
+    throw new Error("Keep delivery uploads to 5 files or fewer.");
+  }
+
+  if (
+    fulfillmentType === "digital" &&
+    !normalizedDeliverableUrl &&
+    nextAssets.length === 0
+  ) {
+    throw new Error("Add a delivery link or upload at least one final file for this digital order.");
   }
 
   if (fulfillmentType === "physical") {
@@ -923,6 +1250,17 @@ export async function submitFreelancerOrderDelivery({
     .single();
 
   if (deliveryError) throw deliveryError;
+
+  if (nextAssets.length > 0) {
+    for (const asset of nextAssets) {
+      await uploadOrderDeliveryAsset({
+        freelancerId: profile.id,
+        orderId,
+        deliveryId: insertedDelivery.id,
+        file: asset,
+      });
+    }
+  }
 
   if (normalizeText(order.status) === "pending") {
     const { error: activateError } = await supabase
