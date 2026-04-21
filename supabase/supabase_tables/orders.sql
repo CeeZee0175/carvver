@@ -13,7 +13,6 @@ create table public.orders (
   payment_provider text null,
   payment_reference text null,
   escrow_status text null,
-  fulfillment_type text not null default 'digital'::text,
   paid_at timestamp with time zone null,
   selected_package_id uuid null,
   selected_package_name text null,
@@ -23,25 +22,13 @@ create table public.orders (
   selected_package_included_items text[] null,
   completed_at timestamp with time zone null,
   released_at timestamp with time zone null,
+  fulfillment_type text not null default 'digital'::text,
   constraint orders_pkey primary key (id),
   constraint orders_checkout_service_customer_unique unique (checkout_session_id, service_id, customer_id),
   constraint orders_customer_id_fkey foreign KEY (customer_id) references profiles (id) on delete set null,
   constraint orders_freelancer_id_fkey foreign KEY (freelancer_id) references profiles (id) on delete set null,
   constraint orders_checkout_session_id_fkey foreign KEY (checkout_session_id) references customer_checkout_sessions (id) on delete set null,
   constraint orders_service_id_fkey foreign KEY (service_id) references services (id) on delete set null,
-  constraint orders_status_check check (
-    (
-      status = any (
-        array[
-          'pending'::text,
-          'active'::text,
-          'completed'::text,
-          'cancelled'::text,
-          'disputed'::text
-        ]
-      )
-    )
-  ),
   constraint orders_escrow_status_check check (
     (
       escrow_status = any (
@@ -52,6 +39,19 @@ create table public.orders (
           'blocked'::text,
           'refunded'::text,
           'failed'::text
+        ]
+      )
+    )
+  ),
+  constraint orders_status_check check (
+    (
+      status = any (
+        array[
+          'pending'::text,
+          'active'::text,
+          'completed'::text,
+          'cancelled'::text,
+          'disputed'::text
         ]
       )
     )

@@ -10,12 +10,12 @@ create table public.services (
   created_at timestamp with time zone null default now(),
   is_verified boolean null default false,
   is_pro boolean null default false,
-  fulfillment_type text not null default 'digital'::text,
   listing_overview text null,
   listing_highlights text[] null,
   delivery_time_days integer null,
   revisions integer null,
   updated_at timestamp with time zone null default timezone ('utc'::text, now()),
+  fulfillment_type text not null default 'digital'::text,
   constraint services_pkey primary key (id),
   constraint services_freelancer_id_fkey foreign KEY (freelancer_id) references profiles (id) on delete CASCADE,
   constraint services_fulfillment_type_check check (

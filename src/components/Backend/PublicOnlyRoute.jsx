@@ -12,6 +12,20 @@ import {
 
 const supabase = createClient();
 
+function GuardFallback() {
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        width: "100%",
+        background:
+          "linear-gradient(180deg, rgba(249,250,251,1) 0%, rgba(245,247,250,1) 100%)",
+      }}
+      aria-hidden="true"
+    />
+  );
+}
+
 export default function PublicOnlyRoute({ children }) {
   const [session, setSession] = useState(undefined);
   const [redirectTo, setRedirectTo] = useState("");
@@ -77,7 +91,7 @@ export default function PublicOnlyRoute({ children }) {
     };
   }, []);
 
-  if (session === undefined) return null;
+  if (session === undefined) return <GuardFallback />;
 
   if (session) {
     return <Navigate to={redirectTo || DEFAULT_CUSTOMER_DESTINATION} replace />;

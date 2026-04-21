@@ -13,8 +13,8 @@ create table public.order_deliveries (
   proof_url text null,
   created_at timestamp with time zone not null default timezone ('utc'::text, now()),
   constraint order_deliveries_pkey primary key (id),
-  constraint order_deliveries_order_id_fkey foreign KEY (order_id) references orders (id) on delete CASCADE,
   constraint order_deliveries_freelancer_id_fkey foreign KEY (freelancer_id) references auth.users (id) on delete CASCADE,
+  constraint order_deliveries_order_id_fkey foreign KEY (order_id) references orders (id) on delete CASCADE,
   constraint order_deliveries_delivery_note_check check ((char_length(btrim(delivery_note)) > 0)),
   constraint order_deliveries_fulfillment_type_check check (
     (

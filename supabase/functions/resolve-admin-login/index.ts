@@ -60,6 +60,7 @@ Deno.serve(async (request: Request) => {
     return jsonResponse({
       success: true,
       email,
+      adminUsername: String(profile.admin_username || "").trim().toLowerCase(),
     });
   } catch (error) {
     const serialized = serializeError(

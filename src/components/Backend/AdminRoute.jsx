@@ -12,6 +12,20 @@ import {
 
 const supabase = createClient();
 
+function GuardFallback() {
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        width: "100%",
+        background:
+          "linear-gradient(180deg, rgba(249,250,251,1) 0%, rgba(245,247,250,1) 100%)",
+      }}
+      aria-hidden="true"
+    />
+  );
+}
+
 export default function AdminRoute({ children }) {
   const [state, setState] = useState({
     loading: true,
@@ -90,7 +104,7 @@ export default function AdminRoute({ children }) {
     };
   }, []);
 
-  if (state.loading) return null;
+  if (state.loading) return <GuardFallback />;
   if (state.redirectTo) return <Navigate to={state.redirectTo} replace />;
 
   return children;

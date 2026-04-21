@@ -123,8 +123,15 @@ async function resolveAdminEmail(adminUsername) {
     if (error) throw error;
 
     const email = String(data?.email || "").trim();
+    const resolvedUsername = String(data?.adminUsername || "")
+      .trim()
+      .toLowerCase();
     if (!email) {
       throw new Error("Missing admin email.");
+    }
+
+    if (!resolvedUsername || resolvedUsername !== normalizedUsername) {
+      throw new Error("Mismatched admin username.");
     }
 
     return email;
@@ -134,7 +141,8 @@ async function resolveAdminEmail(adminUsername) {
 }
 
 export async function signInAdmin({ adminUsername, password, remember }) {
-  const email = await resolveAdminEmail(adminUsername);
+  const normalizedUsername = String(adminUsername || "").trim().toLowerCase();
+  const email = await resolveAdminEmail(normalizedUsername);
   const authResult = await signIn({
     email,
     password,
@@ -142,7 +150,10 @@ export async function signInAdmin({ adminUsername, password, remember }) {
   });
 
   const profile = await ensureProfileForSession(authResult.session);
-  if (String(profile?.role || "").trim().toLowerCase() !== "admin") {
+  if (
+    String(profile?.role || "").trim().toLowerCase() !== "admin" ||
+    String(profile?.admin_username || "").trim().toLowerCase() !== normalizedUsername
+  ) {
     await signOut().catch(() => {});
     throw new Error("That account does not have admin access.");
   }

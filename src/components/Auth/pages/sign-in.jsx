@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useInView,
+  useReducedMotion,
+} from "framer-motion";
 import {
   Eye,
   EyeOff,
@@ -8,7 +13,6 @@ import {
   ArrowRight,
   LoaderCircle,
   ChevronDown,
-  ShieldCheck,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
@@ -513,10 +517,12 @@ export default function SignIn() {
             </motion.button>
           </motion.form>
 
-          <motion.div className="signInBottomPrompt"
+          <motion.div
+            className="signInCard__adminSection"
             initial={{ opacity: 0, y: 8 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1], delay: 0.74 }}>
+            transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1], delay: 0.74 }}
+          >
             <div className={`signInAdminAccordion ${adminOpen ? "signInAdminAccordion--open" : ""}`}>
               <button
                 type="button"
@@ -529,14 +535,8 @@ export default function SignIn() {
                 aria-controls="admin-login-panel"
               >
                 <span className="signInAdminAccordion__triggerMain">
-                  <span className="signInAdminAccordion__iconWrap" aria-hidden="true">
-                    <ShieldCheck className="signInAdminAccordion__icon" />
-                  </span>
                   <span className="signInAdminAccordion__triggerCopy">
-                    <span className="signInAdminAccordion__eyebrow">Admin Login</span>
-                    <span className="signInAdminAccordion__title">
-                      Sign in with your admin username
-                    </span>
+                    <span className="signInAdminAccordion__title">Admin Login</span>
                   </span>
                 </span>
 
@@ -568,7 +568,7 @@ export default function SignIn() {
                           }`}
                         >
                           <span className="signField__iconWrap" aria-hidden="true">
-                            <ShieldCheck className="signField__icon" />
+                            <Lock className="signField__icon" />
                           </span>
                           <input
                             className="signField__control"
