@@ -289,6 +289,11 @@
   flex-shrink: 0;
 }
 
+.messagesConversation__menuWrap {
+  position: relative;
+  display: inline-flex;
+}
+
 .messagesConversation__context {
   display: inline-flex;
   align-items: center;
@@ -329,11 +334,78 @@
   transform: translateY(-1px);
 }
 
+.messagesConversation__menu:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.messagesConversation__menu--open {
+  border-color: rgba(124, 58, 237, 0.24);
+  background: rgba(255, 255, 255, 0.98);
+}
+
 .messagesConversation__menuDot {
   width: 4px;
   height: 4px;
   border-radius: 999px;
   background: rgba(42, 20, 80, 0.72);
+}
+
+.messagesConversation__actionMenu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 20;
+  min-width: 210px;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 20px 58px rgba(12, 7, 18, 0.14);
+  display: grid;
+  gap: 4px;
+}
+
+.messagesConversation__actionItem {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(27, 16, 46, 0.86);
+  cursor: pointer;
+}
+
+.messagesConversation__actionItem:hover {
+  background: rgba(124, 58, 237, 0.06);
+}
+
+.messagesConversation__actionItem--danger {
+  color: rgba(185, 28, 28, 0.92);
+}
+
+.messagesConversation__actionItem--danger:hover {
+  background: rgba(220, 38, 38, 0.08);
+}
+
+.messagesConversation__actionItem:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.messagesConversation__actionIcon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
 }
 
 .messagesConversation__body {
@@ -386,6 +458,62 @@
   gap: 8px;
 }
 
+.messagesBubble__body--attachment {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: min(420px, 70vw);
+}
+
+.messagesBubble__attachmentIcon {
+  width: 34px;
+  height: 34px;
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(124, 58, 237, 0.1);
+  color: rgba(42, 20, 80, 0.9);
+}
+
+.messagesBubble__attachmentCopy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.messagesBubble__attachmentName {
+  font-size: 13.5px;
+  line-height: 1.35;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+.messagesBubble__attachmentMeta {
+  font-size: 11.5px;
+  line-height: 1.4;
+  font-weight: 750;
+  opacity: 0.72;
+}
+
+.messagesBubble__attachmentLink {
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  color: rgba(42, 20, 80, 0.94);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.messagesBubble__attachmentLinkIcon {
+  width: 13px;
+  height: 13px;
+}
+
 .messagesBubble__cardLabel {
   font-size: 11px;
   font-weight: 800;
@@ -418,6 +546,11 @@
   color: rgba(242, 193, 78, 0.88);
 }
 
+.messagesBubble--own .messagesBubble__attachmentIcon {
+  background: rgba(242, 193, 78, 0.16);
+  color: rgba(255, 255, 255, 0.96);
+}
+
 .messagesBubble__metaBelow {
   padding: 0 4px;
   line-height: 1;
@@ -443,6 +576,10 @@
   gap: 12px;
   padding-top: 18px;
   border-top: 1px solid rgba(42, 20, 80, 0.08);
+}
+
+.messagesComposer__fileInput {
+  display: none;
 }
 
 .messagesComposer__field {
@@ -580,6 +717,16 @@
 
   .messagesBubble {
     max-width: 100%;
+  }
+
+  .messagesBubble__body--attachment {
+    grid-template-columns: 30px minmax(0, 1fr);
+    min-width: 0;
+  }
+
+  .messagesBubble__attachmentLink {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
 
   .messagesComposer__actions {

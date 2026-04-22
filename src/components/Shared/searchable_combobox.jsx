@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion as Motion} from "framer-motion";
+import { AnimatePresence, motion as Motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import {
   filterLocationOptions,
@@ -28,6 +28,7 @@ export default function SearchableCombobox({
   error = false,
   allowCustomValue = false,
   customValueLabel = "Use",
+  showAllOptionsOnOpen = false,
   ariaLabel,
 }) {
   const wrapperRef = useRef(null);
@@ -41,12 +42,19 @@ export default function SearchableCombobox({
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [menuPosition, setMenuPosition] = useState(null);
 
+  const trimmedQuery = String(query || "").trim();
+  const normalizedValue = normalizeLocationText(value || "");
+  const shouldShowAllOptions =
+    showAllOptionsOnOpen &&
+    isOpen &&
+    normalizedValue &&
+    normalizeLocationText(trimmedQuery) === normalizedValue;
+  const effectiveQuery = shouldShowAllOptions ? "" : query;
   const filteredOptions = useMemo(
-    () => filterLocationOptions(query, options),
-    [options, query]
+    () => filterLocationOptions(effectiveQuery, options),
+    [effectiveQuery, options]
   );
 
-  const trimmedQuery = String(query || "").trim();
   const normalizedQuery = normalizeLocationText(trimmedQuery);
   const exactMatch = filteredOptions.some(
     (option) => normalizeLocationText(option) === normalizedQuery

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { motion as Motion} from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { ALL_SERVICE_CATEGORIES } from "../../../lib/serviceCategories";
 import "./profile.css";
 import "./freelancer_pages.css";
 import "./freelancer_marketplace.css";
@@ -94,7 +95,18 @@ export default function FreelancerBrowseRequests() {
   const [sort, setSort] = useState("newest");
 
   const categoryOptions = useMemo(
-    () => ["All", ...Array.from(new Set(requests.map((item) => item.category).filter(Boolean)))],
+    () => {
+      const requestCategories = Array.from(
+        new Set(requests.map((item) => item.category).filter(Boolean))
+      );
+      return [
+        "All",
+        ...ALL_SERVICE_CATEGORIES,
+        ...requestCategories.filter(
+          (item) => !ALL_SERVICE_CATEGORIES.includes(item)
+        ),
+      ];
+    },
     [requests]
   );
   const filteredRequests = useFreelancerRequestFilters(requests, {
@@ -127,7 +139,7 @@ export default function FreelancerBrowseRequests() {
                   aria-hidden="true"
                 >
                   <Motion.path
-                    d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                    d="M 0,10 L 300,10"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.2"
@@ -168,25 +180,6 @@ export default function FreelancerBrowseRequests() {
               </Motion.button>
             </div>
           </div>
-
-          <div className="freelancerMarketplaceHero__meta">
-            <div className="freelancerMarketplaceHero__metaItem">
-              <span className="freelancerMarketplaceHero__metaLabel">Open requests</span>
-              <strong className="freelancerMarketplaceHero__metaValue">{requests.length}</strong>
-            </div>
-            <div className="freelancerMarketplaceHero__metaItem">
-              <span className="freelancerMarketplaceHero__metaLabel">With media</span>
-              <strong className="freelancerMarketplaceHero__metaValue">
-                {requests.filter((item) => item.previewMedia).length}
-              </strong>
-            </div>
-            <div className="freelancerMarketplaceHero__metaItem">
-              <span className="freelancerMarketplaceHero__metaLabel">Visible after filters</span>
-              <strong className="freelancerMarketplaceHero__metaValue">
-                {filteredRequests.length}
-              </strong>
-            </div>
-          </div>
         </section>
       </Reveal>
 
@@ -224,6 +217,7 @@ export default function FreelancerBrowseRequests() {
               searchHint="Browse categories"
               noResultsText="No category matches"
               ariaLabel="Filter requests by category"
+              showAllOptionsOnOpen
             />
 
             <SearchableCombobox
@@ -237,6 +231,7 @@ export default function FreelancerBrowseRequests() {
               searchHint="Choose sorting"
               noResultsText="No sort options"
               ariaLabel="Sort request listings"
+              showAllOptionsOnOpen
             />
           </div>
 
@@ -262,7 +257,7 @@ export default function FreelancerBrowseRequests() {
           {loading ? (
             <div className="freelancerRequestGrid">
               {Array.from({ length: 6 }).map((_, index) => (
-                <div key={index} className="freelancerRequestCard" style={{ minHeight: 420 }} />
+                <div key={index} className="freelancerRequestCard" style={{ minHeight: 330 }} />
               ))}
             </div>
           ) : filteredRequests.length === 0 ? (

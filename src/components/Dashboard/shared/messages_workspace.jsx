@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "framer-motion";
+import { ExternalLink, FileText, Trash2, Upload } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   EmptySurface,
@@ -59,18 +60,100 @@ function formatConversationStarted(value) {
   }).format(date);
 }
 
-function MessageHeaderActionButton() {
+function formatFileSize(value) {
+  const bytes = Number(value || 0);
+  if (!Number.isFinite(bytes) || bytes <= 0) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function MessageHeaderActionButton({
+  open,
+  onToggle,
+  onClose,
+  onUpload,
+  onDelete,
+  disabled,
+}) {
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (rootRef.current?.contains(event.target)) return;
+      onClose();
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose, open]);
+
   return (
-    <button
-      type="button"
-      className="messagesConversation__menu"
-      aria-label="Conversation actions"
-      title="Conversation actions"
-    >
-      <span className="messagesConversation__menuDot" />
-      <span className="messagesConversation__menuDot" />
-      <span className="messagesConversation__menuDot" />
-    </button>
+    <div className="messagesConversation__menuWrap" ref={rootRef}>
+      <button
+        type="button"
+        className={`messagesConversation__menu ${
+          open ? "messagesConversation__menu--open" : ""
+        }`}
+        aria-label="Conversation actions"
+        title="Conversation actions"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        onClick={onToggle}
+        disabled={disabled}
+      >
+        <span className="messagesConversation__menuDot" />
+        <span className="messagesConversation__menuDot" />
+        <span className="messagesConversation__menuDot" />
+      </button>
+
+      <AnimatePresence>
+        {open ? (
+          <Motion.div
+            className="messagesConversation__actionMenu"
+            role="menu"
+            initial={{ opacity: 0, y: 8, scale: 0.98, filter: "blur(6px)" }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: 6, scale: 0.98, filter: "blur(6px)" }}
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <button
+              type="button"
+              className="messagesConversation__actionItem"
+              role="menuitem"
+              onClick={onUpload}
+              disabled={disabled}
+            >
+              <Upload className="messagesConversation__actionIcon" />
+              <span>Upload file</span>
+            </button>
+            <button
+              type="button"
+              className="messagesConversation__actionItem messagesConversation__actionItem--danger"
+              role="menuitem"
+              onClick={onDelete}
+              disabled={disabled}
+            >
+              <Trash2 className="messagesConversation__actionIcon" />
+              <span>Delete conversation</span>
+            </button>
+          </Motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -146,6 +229,49 @@ function MessageBubble({ message, ownMessage }) {
     );
   }
 
+  if (message.message_type === "attachment") {
+    const originalName =
+      String(message?.metadata?.originalName || "").trim() || "Attachment";
+    const mimeType = String(message?.metadata?.mimeType || "").trim();
+    const size = formatFileSize(message?.metadata?.size);
+
+    return (
+      <Motion.div
+        className={`messagesBubbleWrap ${
+          ownMessage ? "messagesBubbleWrap--own" : ""
+        }`.trim()}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className={bubbleClassName}>
+          <div className="messagesBubble__body messagesBubble__body--attachment">
+            <FileText className="messagesBubble__attachmentIcon" />
+            <div className="messagesBubble__attachmentCopy">
+              <div className="messagesBubble__attachmentName">{originalName}</div>
+              <div className="messagesBubble__attachmentMeta">
+                {[mimeType || "File", size].filter(Boolean).join(" · ")}
+              </div>
+            </div>
+            {message.attachmentUrl ? (
+              <a
+                className="messagesBubble__attachmentLink"
+                href={message.attachmentUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span>Open</span>
+                <ExternalLink className="messagesBubble__attachmentLinkIcon" />
+              </a>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="messagesBubble__metaBelow">{metaText}</div>
+      </Motion.div>
+    );
+  }
+
   return (
     <Motion.div
       className={`messagesBubbleWrap ${
@@ -168,6 +294,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
   const navigate = useNavigate();
   const location = useLocation();
   const composerRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const searchParams = useMemo(
     () => new URLSearchParams(location.search),
@@ -175,6 +302,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
   );
 
   const [draft, setDraft] = useState("");
+  const [actionMenuOpen, setActionMenuOpen] = useState(false);
 
   const {
     loading,
@@ -185,8 +313,11 @@ export default function MessagesWorkspace({ role = "customer" }) {
     messages,
     sending,
     startingThread,
+    hidingThread,
     setActiveThreadId,
     sendMessage,
+    sendAttachment,
+    hideConversation,
     ensureThreadForFreelancer,
     ensureThreadForCustomer,
   } = useMessagesInbox(role);
@@ -219,6 +350,10 @@ export default function MessagesWorkspace({ role = "customer" }) {
     composerRef.current?.focus();
   }, [sending]);
 
+  useEffect(() => {
+    queueMicrotask(() => setActionMenuOpen(false));
+  }, [activeThread?.id]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const sent = await sendMessage(draft);
@@ -226,6 +361,27 @@ export default function MessagesWorkspace({ role = "customer" }) {
       setDraft("");
       composerRef.current?.focus();
     }
+  };
+
+  const handleUploadFile = () => {
+    setActionMenuOpen(false);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    await sendAttachment(file);
+  };
+
+  const handleDeleteConversation = async () => {
+    setActionMenuOpen(false);
+    const confirmed = window.confirm(
+      "Delete this conversation from your inbox? It will stay visible for the other person."
+    );
+    if (!confirmed) return;
+    await hideConversation(activeThread?.id);
   };
 
   const titleText = "Messages";
@@ -381,7 +537,14 @@ export default function MessagesWorkspace({ role = "customer" }) {
                       </div>
                     ) : null}
 
-                    <MessageHeaderActionButton />
+                    <MessageHeaderActionButton
+                      open={actionMenuOpen}
+                      onToggle={() => setActionMenuOpen((current) => !current)}
+                      onClose={() => setActionMenuOpen(false)}
+                      onUpload={handleUploadFile}
+                      onDelete={handleDeleteConversation}
+                      disabled={sending || hidingThread || !activeThread}
+                    />
                   </div>
                 </div>
 
@@ -421,6 +584,14 @@ export default function MessagesWorkspace({ role = "customer" }) {
                 </div>
 
                 <form className="messagesComposer" onSubmit={handleSubmit}>
+                  <input
+                    ref={fileInputRef}
+                    className="messagesComposer__fileInput"
+                    type="file"
+                    onChange={handleFileSelected}
+                    disabled={sending || startingThread || hidingThread || !activeThread}
+                  />
+
                   <div className="messagesComposer__field">
                     <label className="messagesComposer__label" htmlFor="messages-composer">
                       Reply
@@ -435,6 +606,8 @@ export default function MessagesWorkspace({ role = "customer" }) {
                       placeholder={
                         startingThread
                           ? "Opening your thread..."
+                          : sending
+                            ? "Sending..."
                           : "Type your message here..."
                       }
                       disabled={sending || startingThread || !activeThread}
@@ -452,6 +625,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
                       disabled={
                         sending ||
                         startingThread ||
+                        hidingThread ||
                         !activeThread ||
                         !String(draft || "").trim()
                       }

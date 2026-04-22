@@ -4,6 +4,24 @@ import { getProfile } from "../../../lib/supabase/auth";
 import { buildPhilippinesLocationLabel } from "../../../lib/phLocations";
 
 const supabase = createClient();
+const MESSAGE_ATTACHMENTS_BUCKET = "message-attachments";
+const MESSAGE_ATTACHMENT_SIGNED_URL_TTL = 60 * 60;
+
+function getSafeFileName(name) {
+  return String(name || "attachment")
+    .trim()
+    .replace(/[^\w.-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 120) || "attachment";
+}
+
+function getAttachmentKind(file) {
+  const mimeType = String(file?.type || "").toLowerCase();
+  if (mimeType.startsWith("image/")) return "image";
+  if (mimeType.startsWith("video/")) return "video";
+  return "document";
+}
 
 function getCounterpartId(thread, currentUserId) {
   if (!thread || !currentUserId) return "";
@@ -53,6 +71,10 @@ function buildCounterpartMeta(profile, role) {
 
 function buildMessagePreview(message, currentUserId) {
   if (!message) return "No messages yet";
+  if (message.message_type === "attachment") {
+    const name = String(message?.metadata?.originalName || "Attachment").trim();
+    return `${message.sender_id === currentUserId ? "You: " : ""}Attachment: ${name}`;
+  }
   if (message.message_type === "proposal") {
     const amount = Number(message?.metadata?.offeredPrice || 0);
     const deliveryDays = Number(message?.metadata?.deliveryDays || 0);
@@ -79,7 +101,30 @@ function normalizeMessageRow(row) {
     message_type: String(row.message_type || "text").trim() || "text",
     metadata:
       row.metadata && typeof row.metadata === "object" ? row.metadata : {},
+    attachmentUrl: row.attachmentUrl || "",
   };
+}
+
+async function enrichAttachmentMessages(messages) {
+  const enrichedEntries = await Promise.all(
+    messages.map(async (message) => {
+      const bucketPath = String(message?.metadata?.bucketPath || "").trim();
+      if (message.message_type !== "attachment" || !bucketPath) {
+        return message;
+      }
+
+      const { data, error } = await supabase.storage
+        .from(MESSAGE_ATTACHMENTS_BUCKET)
+        .createSignedUrl(bucketPath, MESSAGE_ATTACHMENT_SIGNED_URL_TTL);
+
+      return {
+        ...message,
+        attachmentUrl: error ? "" : data?.signedUrl || "",
+      };
+    })
+  );
+
+  return enrichedEntries;
 }
 
 async function fetchThreadMessages(threadId) {
@@ -90,7 +135,7 @@ async function fetchThreadMessages(threadId) {
     .order("created_at", { ascending: true });
 
   if (!primary.error) {
-    return (primary.data || []).map(normalizeMessageRow);
+    return enrichAttachmentMessages((primary.data || []).map(normalizeMessageRow));
   }
 
   const message = String(primary.error?.message || "");
@@ -140,6 +185,7 @@ export function useMessagesInbox(role = "customer") {
   const [messages, setMessages] = useState([]);
   const [sending, setSending] = useState(false);
   const [startingThread, setStartingThread] = useState(false);
+  const [hidingThread, setHidingThread] = useState(false);
 
   const userId = profile?.id || "";
   const activeThreadIdRef = useRef("");
@@ -167,7 +213,7 @@ export function useMessagesInbox(role = "customer") {
 
     const { data: threadRows, error: threadError } = await supabase
       .from("customer_freelancer_threads")
-      .select("id, customer_id, freelancer_id, created_at, updated_at, last_message_at")
+      .select("id, customer_id, freelancer_id, created_at, updated_at, last_message_at, customer_hidden_at, freelancer_hidden_at")
       .eq(role === "customer" ? "customer_id" : "freelancer_id", currentProfile.id)
       .order("last_message_at", { ascending: false, nullsFirst: false })
       .order("updated_at", { ascending: false });
@@ -194,7 +240,7 @@ export function useMessagesInbox(role = "customer") {
         threadIds.length > 0
           ? supabase
               .from("customer_freelancer_messages")
-              .select("id, thread_id, sender_id, body, created_at")
+              .select("id, thread_id, sender_id, body, created_at, message_type, metadata")
               .in("thread_id", threadIds)
               .order("created_at", { ascending: false })
           : Promise.resolve({ data: [], error: null }),
@@ -214,20 +260,32 @@ export function useMessagesInbox(role = "customer") {
 
     return {
       currentProfile,
-      nextThreads: rows.map((thread) => {
-        const counterpartId = getCounterpartId(thread, currentProfile.id);
-        const counterpartProfile = profileMap.get(counterpartId);
-        const latestMessage = latestByThread.get(thread.id);
+      nextThreads: rows
+        .map((thread) => {
+          const counterpartId = getCounterpartId(thread, currentProfile.id);
+          const counterpartProfile = profileMap.get(counterpartId);
+          const latestMessage = latestByThread.get(thread.id);
+          const activityTime =
+            latestMessage?.created_at || thread.last_message_at || thread.created_at;
+          const hiddenTime =
+            role === "customer"
+              ? thread.customer_hidden_at
+              : thread.freelancer_hidden_at;
 
-        return {
-          ...thread,
-          counterpartId,
-          counterpart: buildCounterpartMeta(counterpartProfile, role === "customer" ? "freelancer" : "customer"),
-          latestMessage,
-          preview: buildMessagePreview(latestMessage, currentProfile.id),
-          previewTime: latestMessage?.created_at || thread.last_message_at || thread.updated_at,
-        };
-      }),
+          return {
+            ...thread,
+            counterpartId,
+            counterpart: buildCounterpartMeta(counterpartProfile, role === "customer" ? "freelancer" : "customer"),
+            latestMessage: latestMessage ? normalizeMessageRow(latestMessage) : null,
+            preview: buildMessagePreview(latestMessage, currentProfile.id),
+            previewTime: latestMessage?.created_at || thread.last_message_at || thread.updated_at,
+            hiddenForCurrentUser:
+              hiddenTime && activityTime
+                ? new Date(hiddenTime).getTime() >= new Date(activityTime).getTime()
+                : false,
+          };
+        })
+        .filter((thread) => !thread.hiddenForCurrentUser),
     };
   }, [cleanupExpiredThreads, role]);
 
@@ -308,6 +366,11 @@ export function useMessagesInbox(role = "customer") {
 
           if (payload.eventType === "INSERT" && payload.new) {
             const nextMessage = normalizeMessageRow(payload.new);
+            if (nextMessage.message_type === "attachment") {
+              await loadMessages(changedThreadId);
+              return;
+            }
+
             setMessages((current) =>
               current.some((entry) => entry.id === nextMessage.id)
                 ? current
@@ -474,6 +537,105 @@ export function useMessagesInbox(role = "customer") {
     [activeThreadId, cleanupExpiredThreads, loadMessages, refreshThreads, role, userId]
   );
 
+  const sendAttachment = useCallback(
+    async (file) => {
+      if (!file || !activeThreadId || !userId) return false;
+
+      setSending(true);
+      setError("");
+
+      const safeName = getSafeFileName(file.name);
+      const bucketPath = `${activeThreadId}/${userId}/${Date.now()}-${safeName}`;
+
+      try {
+        await cleanupExpiredThreads();
+
+        const { error: uploadError } = await supabase.storage
+          .from(MESSAGE_ATTACHMENTS_BUCKET)
+          .upload(bucketPath, file, {
+            cacheControl: "3600",
+            contentType: file.type || "application/octet-stream",
+            upsert: false,
+          });
+
+        if (uploadError) throw uploadError;
+
+        const metadata = {
+          bucketPath,
+          originalName: file.name || safeName,
+          mimeType: file.type || "application/octet-stream",
+          size: file.size || 0,
+          kind: getAttachmentKind(file),
+        };
+
+        const { error: insertError } = await supabase
+          .from("customer_freelancer_messages")
+          .insert([
+            {
+              thread_id: activeThreadId,
+              sender_id: userId,
+              sender_role: role,
+              body: `Attachment: ${metadata.originalName}`,
+              message_type: "attachment",
+              metadata,
+            },
+          ]);
+
+        if (insertError) {
+          await supabase.storage
+            .from(MESSAGE_ATTACHMENTS_BUCKET)
+            .remove([bucketPath])
+            .catch(() => {});
+          throw insertError;
+        }
+
+        await Promise.all([refreshThreads(), loadMessages(activeThreadId)]);
+        return true;
+      } catch (nextError) {
+        setError(nextError.message || "We couldn't upload that file.");
+        return false;
+      } finally {
+        setSending(false);
+      }
+    },
+    [activeThreadId, cleanupExpiredThreads, loadMessages, refreshThreads, role, userId]
+  );
+
+  const hideConversation = useCallback(
+    async (threadId = activeThreadId) => {
+      const normalizedThreadId = String(threadId || "").trim();
+      if (!normalizedThreadId) return false;
+
+      setHidingThread(true);
+      setError("");
+
+      try {
+        const { error: hideError } = await supabase.rpc(
+          "hide_customer_freelancer_thread",
+          {
+            p_thread_id: normalizedThreadId,
+          }
+        );
+
+        if (hideError) throw hideError;
+
+        if (normalizedThreadId === activeThreadId) {
+          setActiveThreadId("");
+          setMessages([]);
+        }
+
+        await refreshThreads();
+        return true;
+      } catch (nextError) {
+        setError(nextError.message || "We couldn't delete that conversation.");
+        return false;
+      } finally {
+        setHidingThread(false);
+      }
+    },
+    [activeThreadId, refreshThreads]
+  );
+
   const activeThread = useMemo(
     () => threads.find((thread) => thread.id === activeThreadId) || null,
     [activeThreadId, threads]
@@ -490,8 +652,11 @@ export function useMessagesInbox(role = "customer") {
     messages,
     sending,
     startingThread,
+    hidingThread,
     setActiveThreadId,
     sendMessage,
+    sendAttachment,
+    hideConversation,
     ensureThreadForFreelancer,
     ensureThreadForCustomer,
     refreshThreads,
