@@ -130,12 +130,15 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 0;
-  align-items: end;
+  align-items: center;
+  justify-items: center;
+  text-align: center;
 }
 
 .notifPage__titleWrap{
   position: relative;
   display: inline-block;
+  justify-self: center;
   padding-bottom: 0;
 }
 
@@ -175,7 +178,7 @@
 }
 
 .notifPage__sub{
-  margin: 12px 0 0;
+  margin: 12px auto 0;
   max-width: 58ch;
   font-family: Inter, system-ui, sans-serif;
   font-size: 15px;
@@ -682,7 +685,7 @@
 
 @media (max-width: 880px){
   .notifPage__hero{
-    align-items: start;
+    align-items: center;
   }
 
   .notifRow__inner{

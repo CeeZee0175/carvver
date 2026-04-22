@@ -147,18 +147,7 @@
 }
 
 .cartHeroStat--open::before {
-  content: "";
-  position: absolute;
-  top: 6px;
-  bottom: 6px;
-  left: 0;
-  width: 1px;
-  background: linear-gradient(
-    180deg,
-    rgba(42, 20, 80, 0.1) 0%,
-    rgba(124, 58, 237, 0.34) 48%,
-    rgba(242, 193, 78, 0.3) 100%
-  );
+  display: none;
 }
 
 .cartHeroStat__label {

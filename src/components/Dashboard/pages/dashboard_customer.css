@@ -4,18 +4,22 @@
   align-content: start;
 }
 
-.dashLandingHero {
+.profileHero.dashLandingHero {
   align-items: start;
   grid-template-columns: minmax(0, 1fr);
   gap: clamp(22px, 4vw, 42px);
   justify-items: center;
-  padding: 6px 0 2px;
+  padding: 0 0 2px;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
   backdrop-filter: none;
   text-align: center;
+}
+
+.profileHero.dashLandingHero::before {
+  display: none;
 }
 
 .dashLandingHero .profileHero__heading {
