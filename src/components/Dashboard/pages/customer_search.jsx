@@ -393,7 +393,7 @@ export default function CustomerSearch() {
                   aria-hidden="true"
                 >
                   <Motion.path
-                    d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                    d="M 0,10 L 300,10"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.2"

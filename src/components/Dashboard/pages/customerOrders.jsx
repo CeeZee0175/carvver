@@ -15,7 +15,6 @@ import {
   DashboardBreadcrumbs,
   EmptySurface,
   Reveal,
-  TypewriterHeading,
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import "./browse_categories.css";
@@ -80,7 +79,7 @@ export default function CustomerOrders() {
             <div className="profileHero__titleWrap">
               <h1 className="profileHero__title">
                 <span className="customerOrdersPage__titleText">
-                  <TypewriterHeading text="Orders" />
+                  Orders
                   <Motion.svg
                     className="profileHero__line customerOrdersPage__line"
                     viewBox="0 0 300 20"
@@ -282,7 +281,7 @@ export default function CustomerOrders() {
                         </div>
                       </div>
 
-                      <h3 className="browseServiceCard__title">
+                      <h3 className="browseServiceCard__title customerOrderListingCard__title">
                         {order.services?.title || "Service unavailable"}
                       </h3>
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { motion as Motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -28,7 +29,7 @@ function NotificationPreviewItem({ item, index, onOpen }) {
   const Icon = item.Icon;
 
   return (
-    <motion.button
+    <Motion.button
       type="button"
       className="dashbarNotifyItem"
       initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
@@ -62,7 +63,7 @@ function NotificationPreviewItem({ item, index, onOpen }) {
         </span>
         <span className="dashbarNotifyItem__title">{item.title}</span>
       </span>
-    </motion.button>
+    </Motion.button>
   );
 }
 
@@ -233,7 +234,7 @@ export default function FreelancerDashBar() {
             </button>
           </div>
 
-          <motion.form
+          <Motion.form
             className="dashbar__searchWrap dashbarEnter dashbarEnter--2"
             onSubmit={handleSearchSubmit}
             initial={false}
@@ -250,10 +251,10 @@ export default function FreelancerDashBar() {
                 onChange={(event) => setQuery(event.target.value)}
               />
             </label>
-          </motion.form>
+          </Motion.form>
 
           <div className="dashbar__right dashbarEnter dashbarEnter--3">
-            <motion.button
+            <Motion.button
               type="button"
               className="dashbarPill dashbarPill--pro"
               whileHover={{ y: -1 }}
@@ -266,10 +267,10 @@ export default function FreelancerDashBar() {
               <span className="dashbarPill__text dashbarPill__text--pro">
                 Join Carvver Pro
               </span>
-            </motion.button>
+            </Motion.button>
 
             <div className="dashbarNotifyWrap">
-              <motion.button
+              <Motion.button
                 type="button"
                 className={`dashbarIconBtn dashbarIconBtn--notify ${
                   openNotifications ? "dashbarIconBtn--active" : ""
@@ -294,7 +295,7 @@ export default function FreelancerDashBar() {
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 ) : null}
-              </motion.button>
+              </Motion.button>
 
               <div
                 className={`dashbarNotifyMenu ${
@@ -351,7 +352,7 @@ export default function FreelancerDashBar() {
               </div>
             </div>
 
-            <motion.button
+            <Motion.button
               type="button"
               className={`dashbarIconBtn ${
                 onMessagesPage ? "dashbarIconBtn--active" : ""
@@ -364,9 +365,9 @@ export default function FreelancerDashBar() {
               onClick={() => navigate("/dashboard/freelancer/messages")}
             >
               <MessageCircle className="dashbarIconBtn__icon" />
-            </motion.button>
+            </Motion.button>
 
-            <motion.button
+            <Motion.button
               type="button"
               className={`dashbarIconBtn ${
                 onSettingsPage ? "dashbarIconBtn--active" : ""
@@ -379,10 +380,10 @@ export default function FreelancerDashBar() {
               onClick={() => navigate("/dashboard/freelancer/settings")}
             >
               <Settings className="dashbarIconBtn__icon" />
-            </motion.button>
+            </Motion.button>
 
             <div className="dashbarProfileWrap">
-              <motion.button
+              <Motion.button
                 type="button"
                 className={`dashbarProfile ${
                   openProfile ? "dashbarProfile--open" : ""
@@ -406,7 +407,7 @@ export default function FreelancerDashBar() {
                     user.initials
                   )}
                 </span>
-              </motion.button>
+              </Motion.button>
 
               <div
                 className={`dashbarProfileMenu ${

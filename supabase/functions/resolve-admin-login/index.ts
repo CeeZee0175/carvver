@@ -36,7 +36,7 @@ Deno.serve(async (request: Request) => {
       .from("profiles")
       .select("id, role, admin_username")
       .eq("role", "admin")
-      .eq("admin_username", adminUsername)
+      .ilike("admin_username", adminUsername)
       .maybeSingle();
 
     if (profileError) throw profileError;

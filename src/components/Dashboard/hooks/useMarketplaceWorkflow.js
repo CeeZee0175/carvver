@@ -273,14 +273,6 @@ function normalizePayoutQueueStatus(value) {
   return "pending";
 }
 
-function hasValidPayoutDestination(destination) {
-  return Boolean(
-    normalizeText(destination?.payoutMethod) &&
-      normalizeText(destination?.accountName) &&
-      normalizeText(destination?.accountReference)
-  );
-}
-
 function normalizeDeliveryAsset(row) {
   return {
     id: row?.id || "",
@@ -355,19 +347,6 @@ async function getSignedInProfile() {
     throw new Error("You need to be signed in to continue.");
   }
   return profile;
-}
-
-async function fetchFreelancerPayoutMethodByFreelancerId(freelancerId) {
-  if (!freelancerId) return normalizePayoutMethod(null);
-
-  const { data, error } = await supabase
-    .from("freelancer_payout_methods")
-    .select("payout_method, account_name, account_reference")
-    .eq("freelancer_id", freelancerId)
-    .maybeSingle();
-
-  if (error) throw error;
-  return normalizePayoutMethod(data);
 }
 
 async function uploadOrderDeliveryAsset({
@@ -1008,7 +987,6 @@ export async function processAdminPayoutAction({
 export async function confirmOrderCompletion(orderId) {
   const profile = await getSignedInProfile();
   const order = await fetchOrderDetail(orderId, "customer_id", profile.id);
-  const now = new Date().toISOString();
 
   if (normalizeEscrowStatus(order.escrow_status) === "released") {
     return {
@@ -1018,78 +996,31 @@ export async function confirmOrderCompletion(orderId) {
     };
   }
 
-  const payoutDestination = await fetchFreelancerPayoutMethodByFreelancerId(order.freelancer_id);
-  const payoutDestinationReady = hasValidPayoutDestination(payoutDestination);
-  const nextPayoutRequestStatus = payoutDestinationReady ? "pending" : "blocked";
-  const nextEscrowStatus = payoutDestinationReady ? "pending_release" : "blocked";
+  const { data: receiptResult, error: receiptError } = await supabase.rpc(
+    "confirm_customer_order_receipt",
+    { p_order_id: orderId }
+  );
 
-  const { data: payoutRequest, error: payoutError } = await supabase
-    .from("payout_release_requests")
-    .upsert(
-      [
-        {
-          order_id: orderId,
-          customer_id: profile.id,
-          freelancer_id: order.freelancer_id,
-          amount: Number(order.freelancer_net || 0),
-          currency: "PHP",
-          status: nextPayoutRequestStatus,
-          destination_method: payoutDestination.payoutMethod || null,
-          destination_account_name: payoutDestination.accountName || null,
-          destination_account_reference: payoutDestination.accountReference || null,
-          provider_reference: null,
-          ops_note: payoutDestinationReady
-            ? "Queued for ops release after customer confirmation."
-            : "Blocked because the freelancer payout destination is missing or incomplete.",
-          requested_at: now,
-          processed_at: payoutDestinationReady ? null : now,
-          released_at: null,
-          updated_at: now,
-        },
-      ],
-      { onConflict: "order_id" }
-    )
-    .select("id")
-    .single();
+  if (receiptError) throw receiptError;
 
-  if (payoutError) throw payoutError;
-
-  const { error: orderError } = await supabase
-    .from("orders")
-    .update({
-      status: "completed",
-      escrow_status: nextEscrowStatus,
-      completed_at: order.completed_at || now,
-      released_at: null,
-    })
-    .eq("id", orderId)
-    .eq("customer_id", profile.id);
-
-  if (orderError) throw orderError;
-
+  const payoutRequestStatus = normalizePayoutQueueStatus(
+    receiptResult?.payoutRequestStatus
+  );
+  const escrowStatus = normalizeEscrowStatus(receiptResult?.escrowStatus);
+  const payoutDestinationReady = payoutRequestStatus === "pending";
   const updateTitle = payoutDestinationReady
     ? "Order completed and payout queued"
     : "Order completed but payout blocked";
-  const updateBody = payoutDestinationReady
-    ? "The customer marked this order as completed. The freelancer payout is now queued for ops release."
-    : "The customer marked this order as completed. The payout is blocked until the freelancer payout details are fixed.";
 
-  const { data: insertedUpdate, error: updateError } = await supabase
-    .from("order_updates")
-    .insert([
-      {
-        order_id: orderId,
-        author_id: profile.id,
-        author_role: "customer",
-        update_kind: "status",
-        title: updateTitle,
-        body: updateBody,
-      },
-    ])
-    .select("id")
-    .single();
-
-  if (updateError) throw updateError;
+  if (escrowStatus === "released" && !receiptResult?.updateId) {
+    return {
+      escrowStatus,
+      payoutRequestStatus,
+      message:
+        receiptResult?.message ||
+        "This order was already completed and the payout has already been released.",
+    };
+  }
 
   const thread = await ensureThread({
     customerId: order.customer_id,
@@ -1106,19 +1037,21 @@ export async function confirmOrderCompletion(orderId) {
     messageType: "order_update",
     metadata: {
       orderId,
-      updateId: insertedUpdate.id,
-      payoutRequestId: payoutRequest.id,
+      updateId: receiptResult?.updateId || null,
+      payoutRequestId: receiptResult?.payoutRequestId || null,
       updateKind: "status",
       title: updateTitle,
     },
   });
 
   return {
-    escrowStatus: nextEscrowStatus,
-    payoutRequestStatus: nextPayoutRequestStatus,
-    message: payoutDestinationReady
-      ? "Order completed. The freelancer payout is now queued for ops release."
-      : "Order completed. The payout is blocked until the freelancer updates their payout details.",
+    escrowStatus,
+    payoutRequestStatus,
+    message:
+      receiptResult?.message ||
+      (payoutDestinationReady
+        ? "Order completed. The freelancer payout is now queued for ops release."
+        : "Order completed. The payout is blocked until the freelancer updates their payout details."),
   };
 }
 

@@ -106,6 +106,35 @@ export async function signIn({ email, password, remember }) {
   return data;
 }
 
+function readResolvedAdminEmail(data, normalizedUsername) {
+  const email = String(data?.email || "").trim();
+  const resolvedUsername = String(data?.adminUsername || "")
+    .trim()
+    .toLowerCase();
+
+  if (!email) {
+    throw new Error("Missing admin email.");
+  }
+
+  if (!resolvedUsername || resolvedUsername !== normalizedUsername) {
+    throw new Error("Mismatched admin username.");
+  }
+
+  return email;
+}
+
+async function resolveAdminEmailWithEdgeFunction(normalizedUsername) {
+  const { data, error } = await supabase.functions.invoke("resolve-admin-login", {
+    body: {
+      adminUsername: normalizedUsername,
+    },
+  });
+
+  if (error) throw error;
+
+  return readResolvedAdminEmail(data, normalizedUsername);
+}
+
 async function resolveAdminEmail(adminUsername) {
   const normalizedUsername = String(adminUsername || "").trim().toLowerCase();
 
@@ -114,27 +143,19 @@ async function resolveAdminEmail(adminUsername) {
   }
 
   try {
-    const { data, error } = await supabase.functions.invoke("resolve-admin-login", {
-      body: {
-        adminUsername: normalizedUsername,
-      },
+    const { data, error } = await supabase.rpc("resolve_admin_login_email", {
+      p_admin_username: normalizedUsername,
     });
 
-    if (error) throw error;
+    if (!error) {
+      if (!data) {
+        throw new Error("Missing admin email.");
+      }
 
-    const email = String(data?.email || "").trim();
-    const resolvedUsername = String(data?.adminUsername || "")
-      .trim()
-      .toLowerCase();
-    if (!email) {
-      throw new Error("Missing admin email.");
+      return readResolvedAdminEmail(data, normalizedUsername);
     }
 
-    if (!resolvedUsername || resolvedUsername !== normalizedUsername) {
-      throw new Error("Mismatched admin username.");
-    }
-
-    return email;
+    return await resolveAdminEmailWithEdgeFunction(normalizedUsername);
   } catch {
     throw new Error("Invalid admin username or password.");
   }

@@ -1,3 +1,8 @@
+# Auth emails are delivered by Supabase Auth through the project's Resend SMTP
+# integration. Configure this in the Supabase Dashboard/Auth SMTP settings:
+# sender address/name, smtp.resend.com, port 587, SMTP username, and the
+# Resend API key as the SMTP password. Do not send auth email from app code.
+
 [functions.create-paymongo-checkout]
 verify_jwt = false
 

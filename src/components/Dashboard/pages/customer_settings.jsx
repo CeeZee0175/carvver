@@ -302,7 +302,7 @@ export default function CustomerSettings() {
                 aria-hidden="true"
               >
                 <Motion.path
-                  d="M 0,10 Q 62,0 124,10 Q 186,20 248,10"
+                  d="M 0,10 L 248,10"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.2"
