@@ -1,11 +1,11 @@
 # Graph Report - C:\Users\ieq3q\carvver  (2026-04-23)
 
 ## Corpus Check
-- 115 files · ~8,191,876 words
+- 115 files · ~8,192,048 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 685 nodes · 949 edges · 67 communities detected
+- 688 nodes · 956 edges · 67 communities detected
 - Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 93 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -105,28 +105,28 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.1
-Nodes (47): FreelancerOrders(), acceptRequestProposal(), buildDeliveryAssetError(), buildProfileInitials(), buildProfileName(), confirmOrderCompletion(), createFreelancerOrderUpdate(), createRequestProposal() (+39 more)
+Cohesion: 0.06
+Nodes (25): finalizeSuccessfulCheckoutSession(), updateCheckoutSession(), extractBearerToken(), buildDisplayName(), buildReceiptPdf(), buildSessionResponse(), drawReceiptText(), getEnv() (+17 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.06
-Nodes (22): finalizeSuccessfulCheckoutSession(), updateCheckoutSession(), extractBearerToken(), buildDisplayName(), buildReceiptPdf(), buildSessionResponse(), getEnv(), normalizeCartItem() (+14 more)
+Cohesion: 0.1
+Nodes (47): FreelancerOrders(), acceptRequestProposal(), buildDeliveryAssetError(), buildProfileInitials(), buildProfileName(), confirmOrderCompletion(), createFreelancerOrderUpdate(), createRequestProposal() (+39 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.08
 Nodes (17): deriveInitialValues(), deriveInitialValues(), coercePhilippinesLocation(), filterLocationOptions(), findBarangay(), findCity(), findRegion(), getBarangaysByRegionCity() (+9 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.1
-Nodes (26): deriveProfileNames(), ensureProfileForSession(), getAvatarUrl(), getProfile(), getProfileById(), getSession(), readResolvedAdminEmail(), requestEmailChange() (+18 more)
-
-### Community 4 - "Community 4"
 Cohesion: 0.07
 Nodes (16): getPublicServiceMediaUrl(), formatPeso(), getPublicServiceMediaUrl(), ServiceResultCard(), CustomerOrders(), getPublicUrl(), fetchAchievementUnlockMap(), getFileExtension() (+8 more)
 
-### Community 5 - "Community 5"
+### Community 4 - "Community 4"
 Cohesion: 0.08
 Nodes (20): BrowseCategories(), CustomerFreelancerProfile(), CustomerServiceDetail(), formatPeso(), packagesMatchCartItem(), FavBook(), FavCard(), getCategoryIcon() (+12 more)
+
+### Community 5 - "Community 5"
+Cohesion: 0.1
+Nodes (24): deriveProfileNames(), ensureProfileForSession(), getAvatarUrl(), getProfile(), getProfileById(), getSession(), readResolvedAdminEmail(), requestEmailChange() (+16 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.09
@@ -157,16 +157,16 @@ Cohesion: 0.15
 Nodes (11): DashBar(), NotificationPreviewItem(), FreelancerDashBar(), NotificationPreviewItem(), NotificationRow(), NotifPage(), formatNotificationTime(), normalizeStoredNotification() (+3 more)
 
 ### Community 13 - "Community 13"
+Cohesion: 0.19
+Nodes (17): getAuthRouteMessage(), clearCustomerWelcomeDestination(), clearDestination(), clearFreelancerWelcomeDestination(), getCustomerWelcomeDestination(), getDestination(), getFreelancerWelcomeDestination(), hasOwn() (+9 more)
+
+### Community 14 - "Community 14"
 Cohesion: 0.13
 Nodes (6): CustomerSettings(), fetchBillingHistory(), fetchBillingProfile(), normalizeBillingHistory(), normalizeBillingProfile(), useCustomerAccountSettings()
 
-### Community 14 - "Community 14"
+### Community 15 - "Community 15"
 Cohesion: 0.18
 Nodes (14): DashboardCustomer(), buildCalendarDays(), createDateFromValue(), formatDateKey(), formatDeadlineValue(), formatMonthLabel(), getTodayDateValue(), PostRequest() (+6 more)
-
-### Community 15 - "Community 15"
-Cohesion: 0.22
-Nodes (15): clearCustomerWelcomeDestination(), clearDestination(), clearFreelancerWelcomeDestination(), getCustomerWelcomeDestination(), getDestination(), getFreelancerWelcomeDestination(), hasOwn(), isBrowser() (+7 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.18
@@ -425,17 +425,17 @@ Nodes (0):
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `buildPhilippinesLocationLabel()` connect `Community 7` to `Community 0`, `Community 2`, `Community 5`, `Community 6`, `Community 11`?**
-  _High betweenness centrality (0.214) - this node is a cross-community bridge._
-- **Why does `getPublicUrl()` connect `Community 4` to `Community 10`, `Community 11`, `Community 5`, `Community 6`?**
+- **Why does `buildPhilippinesLocationLabel()` connect `Community 7` to `Community 1`, `Community 2`, `Community 4`, `Community 6`, `Community 11`?**
+  _High betweenness centrality (0.213) - this node is a cross-community bridge._
+- **Why does `getPublicUrl()` connect `Community 3` to `Community 10`, `Community 11`, `Community 4`, `Community 6`?**
   _High betweenness centrality (0.123) - this node is a cross-community bridge._
-- **Why does `normalizeProposal()` connect `Community 0` to `Community 7`?**
+- **Why does `normalizeProposal()` connect `Community 1` to `Community 7`?**
   _High betweenness centrality (0.103) - this node is a cross-community bridge._
 - **Are the 9 inferred relationships involving `getPublicUrl()` (e.g. with `getPublicServiceMediaUrl()` and `uploadAvatarFile()`) actually correct?**
   _`getPublicUrl()` has 9 INFERRED edges - model-reasoned connections that need verification._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.1 - nodes in this community are weakly interconnected._
-- **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.06 - nodes in this community are weakly interconnected._
+- **Should `Community 1` be split into smaller, more focused modules?**
+  _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.08 - nodes in this community are weakly interconnected._
