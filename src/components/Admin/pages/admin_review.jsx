@@ -293,8 +293,21 @@ export default function AdminReview() {
     return queue.filter((item) => item.status === filter);
   }, [filter, queue]);
 
+  const releaseProviderReference = actionValues.providerReference.trim();
+
   const handleAction = async (action) => {
     if (!selectedId) return;
+
+    const trimmedProviderReference = actionValues.providerReference.trim();
+
+    if (action === "release" && !trimmedProviderReference) {
+      setActionState({
+        pending: false,
+        error: "Add a provider reference before releasing this payout.",
+        success: "",
+      });
+      return;
+    }
 
     setActionState({ pending: true, error: "", success: "" });
 
@@ -302,7 +315,7 @@ export default function AdminReview() {
       await processAdminPayoutAction({
         payoutRequestId: selectedId,
         action,
-        providerReference: actionValues.providerReference,
+        providerReference: trimmedProviderReference,
         note: actionValues.note,
       });
 
@@ -541,8 +554,13 @@ export default function AdminReview() {
                                 providerReference: event.target.value,
                               }))
                             }
-                            placeholder="External payout reference"
+                            placeholder="Required for release"
+                            required={false}
                           />
+                          <span className="adminField__hint">
+                            Required when releasing funds. Use the external payout,
+                            transfer, or ops reference.
+                          </span>
                         </label>
 
                         <label className="adminField adminField--wide">
@@ -590,7 +608,7 @@ export default function AdminReview() {
                           whileHover={{ y: -1.5 }}
                           whileTap={{ scale: 0.98 }}
                           transition={SPRING}
-                          disabled={actionState.pending}
+                          disabled={actionState.pending || !releaseProviderReference}
                           onClick={() => handleAction("release")}
                         >
                           {actionState.pending ? (

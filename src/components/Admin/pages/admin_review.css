@@ -321,6 +321,14 @@
   color: rgba(87, 34, 182, 0.72);
 }
 
+.adminField__hint {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 700;
+  color: rgba(27, 16, 46, 0.56);
+}
+
 .adminDetailFact__value {
   font-family: Inter, system-ui, sans-serif;
   font-size: 15px;
