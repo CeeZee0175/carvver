@@ -34,36 +34,47 @@ function normalizeText(value: unknown) {
   return String(value || "").trim();
 }
 
-function replaceReceiptWhitespace(value: string) {
-  return value.replace(
-    /[\u00a0\u1680\u180e\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]/g,
-    " "
-  );
+const RECEIPT_PDF_SPACING_PATTERN =
+  /[\u0009-\u000d\u001c-\u001f\u0085\u00a0\u1680\u180e\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]/g;
+const RECEIPT_PDF_UNSAFE_PATTERN = /[^\x20-\x7e]/g;
+
+function enforceReceiptPdfAscii(value: string) {
+  return value
+    .replace(RECEIPT_PDF_SPACING_PATTERN, " ")
+    .replace(RECEIPT_PDF_UNSAFE_PATTERN, "?")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-function sanitizeReceiptText(value: unknown) {
-  return replaceReceiptWhitespace(String(value ?? ""))
+function toReceiptPdfText(value: unknown) {
+  const normalized = String(value ?? "")
+    .replace(RECEIPT_PDF_SPACING_PATTERN, " ")
     .normalize("NFKC")
-    .replace(
-      /[\u00a0\u1680\u180e\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]/g,
-      " "
-    )
+    .replace(RECEIPT_PDF_SPACING_PATTERN, " ")
     .replace(/[\u2018\u2019\u201a\u201b\u2032]/g, "'")
     .replace(/[\u201c\u201d\u201e\u201f\u2033]/g, '"')
     .replace(/[\u2010-\u2015\u2212]/g, "-")
     .replace(/\u2026/g, "...")
     .replace(/[\u2022\u00b7]/g, "-")
     .replace(/\u20b1/g, "PHP ")
-    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f]/g, "")
+    .replace(/[\u0000-\u0008\u000e-\u001b\u007f-\u009f]/g, "")
     .replace(/[\ud800-\udfff]/g, "?")
-    .replace(/[^\x20-\x7e]/g, "?")
-    .replace(/\s+/g, " ")
-    .trim();
+    .replace(RECEIPT_PDF_SPACING_PATTERN, " ");
+
+  return enforceReceiptPdfAscii(normalized);
 }
 
-function receiptField(value: unknown, fallback: string) {
+function receiptValue(value: unknown, fallback: string) {
   const normalized = normalizeText(value);
-  return sanitizeReceiptText(normalized || fallback);
+  return toReceiptPdfText(normalized || fallback);
+}
+
+function receiptMoney(value: unknown) {
+  return toReceiptPdfText(formatPeso(value));
+}
+
+function receiptDate(value: unknown) {
+  return toReceiptPdfText(formatDateTime(value));
 }
 
 function drawReceiptText(
@@ -71,7 +82,7 @@ function drawReceiptText(
   text: unknown,
   options: Parameters<PDFPage["drawText"]>[1]
 ) {
-  page.drawText(sanitizeReceiptText(text), options);
+  page.drawText(enforceReceiptPdfAscii(toReceiptPdfText(text)), options);
 }
 
 function formatPeso(value: unknown) {
@@ -396,38 +407,36 @@ Deno.serve(async (request: Request) => {
     let customerReceiptPath: string | null = null;
 
     if (action === "release") {
-      const serviceTitle = receiptField(order.services?.title, "Carvver order");
-      const customerName = receiptField(
+      const serviceTitle = receiptValue(order.services?.title, "Carvver order");
+      const customerName = receiptValue(
         buildDisplayName(order.customer, "Customer"),
         "Customer"
       );
-      const freelancerName = receiptField(
+      const freelancerName = receiptValue(
         buildDisplayName(order.freelancer, "Freelancer"),
         "Freelancer"
       );
-      const netPayoutAmount = sanitizeReceiptText(formatPeso(payoutRequest.amount));
-      const customerTotalAmount = sanitizeReceiptText(formatPeso(order.total_price));
-      const destinationMethod = receiptField(
+      const netPayoutAmount = receiptMoney(payoutRequest.amount);
+      const customerTotalAmount = receiptMoney(order.total_price);
+      const destinationMethod = receiptValue(
         payoutRequest.destination_method,
         "Not specified"
       );
-      const destinationReference = receiptField(
+      const destinationReference = receiptValue(
         payoutRequest.destination_account_reference,
         "No reference"
       );
-      const originalPaymentReference = receiptField(
+      const originalPaymentReference = receiptValue(
         order.payment_reference,
         "Not available"
       );
-      const providerReferenceForReceipt = receiptField(
+      const providerReferenceForReceipt = receiptValue(
         providerReference,
         "Not available"
       );
-      const requestedAt = sanitizeReceiptText(
-        formatDateTime(payoutRequest.requested_at)
-      );
-      const completedAt = sanitizeReceiptText(formatDateTime(order.completed_at));
-      const releasedAt = sanitizeReceiptText(formatDateTime(now));
+      const requestedAt = receiptDate(payoutRequest.requested_at);
+      const completedAt = receiptDate(order.completed_at);
+      const releasedAt = receiptDate(now);
 
       const freelancerReceiptBytes = await buildReceiptPdf(
         "Carvver Payout Receipt",
