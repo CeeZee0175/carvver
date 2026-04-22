@@ -1,101 +1,87 @@
 import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { createClient } from "../../lib/supabase/client";
+import { Navigate, useNavigate } from "react-router-dom";
 import {
   CUSTOMER_WELCOME_PATH,
   DEFAULT_CUSTOMER_DESTINATION,
   FREELANCER_WELCOME_PATH,
   isCustomerOnboardingComplete,
   isFreelancerOnboardingComplete,
-  resolveProfileRole,
 } from "../../lib/customerOnboarding";
+import {
+  AUTH_ROUTE_STATUS,
+  getAuthRouteMessage,
+  resolveAuthenticatedProfile,
+} from "./authRouteState";
+import { AuthGuardError, AuthGuardFallback } from "./AuthGuardFeedback";
 
-const supabase = createClient();
+function getPublicRedirect(result) {
+  if (result.status === AUTH_ROUTE_STATUS.ADMIN) return "/admin";
 
-function GuardFallback() {
-  return (
-    <div
-      style={{
-        minHeight: "100vh",
-        width: "100%",
-        background:
-          "linear-gradient(180deg, rgba(249,250,251,1) 0%, rgba(245,247,250,1) 100%)",
-      }}
-      aria-hidden="true"
-    />
-  );
+  if (result.status === AUTH_ROUTE_STATUS.FREELANCER) {
+    return isFreelancerOnboardingComplete(result.profile)
+      ? "/dashboard/freelancer"
+      : FREELANCER_WELCOME_PATH;
+  }
+
+  if (result.status === AUTH_ROUTE_STATUS.CUSTOMER) {
+    return isCustomerOnboardingComplete(result.profile)
+      ? DEFAULT_CUSTOMER_DESTINATION
+      : CUSTOMER_WELCOME_PATH;
+  }
+
+  return "";
 }
 
 export default function PublicOnlyRoute({ children }) {
-  const [session, setSession] = useState(undefined);
-  const [redirectTo, setRedirectTo] = useState("");
+  const navigate = useNavigate();
+  const [state, setState] = useState({
+    loading: true,
+    redirectTo: "",
+    profileError: null,
+  });
 
   useEffect(() => {
     let active = true;
 
-    async function resolveRedirect(session) {
+    async function resolveRoute() {
+      const result = await resolveAuthenticatedProfile();
       if (!active) return;
 
-      setSession(session);
-
-      if (session) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .maybeSingle();
-
-        if (!active) return;
-
-        const role = resolveProfileRole(data, session);
-
-        if (role === "admin") {
-          setRedirectTo("/admin");
-          return;
-        }
-
-        if (role === "freelancer") {
-          setRedirectTo(
-            isFreelancerOnboardingComplete(data)
-              ? "/dashboard/freelancer"
-              : FREELANCER_WELCOME_PATH
-          );
-          return;
-        }
-
-        if (!isCustomerOnboardingComplete(data)) {
-          setRedirectTo(CUSTOMER_WELCOME_PATH);
-          return;
-        }
-
-        setRedirectTo(DEFAULT_CUSTOMER_DESTINATION);
+      if (result.status === AUTH_ROUTE_STATUS.INVALID_SESSION) {
+        setState({
+          loading: false,
+          redirectTo: "",
+          profileError: result.reason === "profile" ? result : null,
+        });
         return;
       }
 
-      setRedirectTo("");
+      setState({
+        loading: false,
+        redirectTo: getPublicRedirect(result),
+        profileError: null,
+      });
     }
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      resolveRedirect(session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      resolveRedirect(nextSession);
-    });
+    resolveRoute();
 
     return () => {
       active = false;
-      subscription.unsubscribe();
     };
   }, []);
 
-  if (session === undefined) return <GuardFallback />;
+  if (state.loading) return <AuthGuardFallback />;
 
-  if (session) {
-    return <Navigate to={redirectTo || DEFAULT_CUSTOMER_DESTINATION} replace />;
+  if (state.profileError) {
+    return (
+      <AuthGuardError
+        message={getAuthRouteMessage(state.profileError)}
+        onRetry={() => navigate("/sign-in", { replace: true })}
+      />
+    );
   }
+
+  if (state.redirectTo) return <Navigate to={state.redirectTo} replace />;
 
   return children;
 }

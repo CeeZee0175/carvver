@@ -1,27 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { createClient } from "../../lib/supabase/client";
 import {
   CUSTOMER_WELCOME_PATH,
   DEFAULT_CUSTOMER_DESTINATION,
   DEFAULT_FREELANCER_DESTINATION,
   isCustomerOnboardingComplete,
   isFreelancerOnboardingComplete,
-  resolveProfileRole,
 } from "../../lib/customerOnboarding";
-
-const supabase = createClient();
-
-async function fetchProfile(userId) {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (error) throw error;
-  return data;
-}
+import {
+  AUTH_ROUTE_STATUS,
+  resolveAuthenticatedProfile,
+} from "./authRouteState";
+import { AuthGuardFallback } from "./AuthGuardFeedback";
 
 export default function FreelancerWelcomeRoute({ children }) {
   const [state, setState] = useState({
@@ -32,67 +22,49 @@ export default function FreelancerWelcomeRoute({ children }) {
   useEffect(() => {
     let active = true;
 
-    async function resolveRoute(session) {
+    async function resolveRoute() {
+      const result = await resolveAuthenticatedProfile();
       if (!active) return;
 
-      if (!session?.user) {
+      if (
+        result.status === AUTH_ROUTE_STATUS.SIGNED_OUT ||
+        result.status === AUTH_ROUTE_STATUS.INVALID_SESSION
+      ) {
         setState({ loading: false, redirectTo: "/sign-in" });
         return;
       }
 
-      let profile = null;
-
-      try {
-        profile = await fetchProfile(session.user.id);
-      } catch {
-        profile = null;
+      if (result.status === AUTH_ROUTE_STATUS.ADMIN) {
+        setState({ loading: false, redirectTo: "/admin" });
+        return;
       }
 
-      if (!active) return;
-
-      const role = resolveProfileRole(profile, session);
-
-      if (role !== "freelancer") {
+      if (result.status !== AUTH_ROUTE_STATUS.FREELANCER) {
         setState({
           loading: false,
-          redirectTo: isCustomerOnboardingComplete(profile)
+          redirectTo: isCustomerOnboardingComplete(result.profile)
             ? DEFAULT_CUSTOMER_DESTINATION
             : CUSTOMER_WELCOME_PATH,
         });
         return;
       }
 
-      if (isFreelancerOnboardingComplete(profile)) {
-        setState({
-          loading: false,
-          redirectTo: DEFAULT_FREELANCER_DESTINATION,
-        });
-        return;
-      }
-
       setState({
         loading: false,
-        redirectTo: "",
+        redirectTo: isFreelancerOnboardingComplete(result.profile)
+          ? DEFAULT_FREELANCER_DESTINATION
+          : "",
       });
     }
 
-    supabase.auth
-      .getSession()
-      .then(({ data: { session } }) => resolveRoute(session));
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      resolveRoute(session);
-    });
+    resolveRoute();
 
     return () => {
       active = false;
-      subscription.unsubscribe();
     };
   }, []);
 
-  if (state.loading) return null;
+  if (state.loading) return <AuthGuardFallback />;
   if (state.redirectTo) return <Navigate to={state.redirectTo} replace />;
 
   return children;

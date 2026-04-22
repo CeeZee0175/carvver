@@ -21,6 +21,7 @@ import {
   ensureProfileForSession,
   signInAdmin,
   signIn,
+  signOut,
 } from "../../../lib/supabase/auth";
 import { PASSWORD_POLICY_NOTICE } from "../../../lib/passwordPolicy";
 import {
@@ -280,6 +281,8 @@ export default function SignIn() {
       return;
     }
 
+    let signedIn = false;
+
     try {
       setFormError("");
       setIsLoading(true);
@@ -288,6 +291,7 @@ export default function SignIn() {
         password: formValues.password,
         remember: formValues.remember,
       });
+      signedIn = true;
 
       const profile = await ensureProfileForSession(authResult.session);
       const customerDestination = categoryIntent
@@ -308,7 +312,7 @@ export default function SignIn() {
         return;
       }
 
-      toast.success(`Welcome back, ${profile.first_name}!`);
+      toast.success(`Welcome back, ${profile?.first_name || "there"}!`);
 
       if (categoryIntent) {
         clearFeaturedCategoryIntent();
@@ -317,10 +321,15 @@ export default function SignIn() {
         navigate(DEFAULT_CUSTOMER_DESTINATION);
       } else if (profile.role === "freelancer") {
         navigate("/dashboard/freelancer");
+      } else if (profile.role === "admin") {
+        navigate("/admin");
       } else {
         navigate(DEFAULT_CUSTOMER_DESTINATION);
       }
     } catch (err) {
+      if (signedIn) {
+        await signOut().catch(() => {});
+      }
       setFormError(err.message || "Invalid email or password.");
     } finally {
       setIsLoading(false);

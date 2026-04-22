@@ -272,7 +272,7 @@ export default function SignUp() {
     try {
       setFormError("");
       setIsLoading(true);
-      const result = await signUp({
+      await signUp({
         firstName: formValues.firstName.trim(),
         lastName: formValues.lastName.trim(),
         email: formValues.email.trim(),
@@ -281,9 +281,7 @@ export default function SignUp() {
         region: formValues.region.trim(),
       });
 
-      if (result.session) {
-        await signOut();
-      }
+      await signOut().catch(() => {});
 
       navigate(buildCategoryPath("/sign-up/success", categoryIntent), { replace: true });
     } catch (err) {

@@ -1,30 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { createClient } from "../../lib/supabase/client";
 import {
   CUSTOMER_WELCOME_PATH,
   DEFAULT_CUSTOMER_DESTINATION,
   FREELANCER_WELCOME_PATH,
   isCustomerOnboardingComplete,
   isFreelancerOnboardingComplete,
-  resolveProfileRole,
 } from "../../lib/customerOnboarding";
-
-const supabase = createClient();
-
-function GuardFallback() {
-  return (
-    <div
-      style={{
-        minHeight: "100vh",
-        width: "100%",
-        background:
-          "linear-gradient(180deg, rgba(249,250,251,1) 0%, rgba(245,247,250,1) 100%)",
-      }}
-      aria-hidden="true"
-    />
-  );
-}
+import {
+  AUTH_ROUTE_STATUS,
+  resolveAuthenticatedProfile,
+} from "./authRouteState";
+import { AuthGuardFallback } from "./AuthGuardFeedback";
 
 export default function AdminRoute({ children }) {
   const [state, setState] = useState({
@@ -35,45 +22,27 @@ export default function AdminRoute({ children }) {
   useEffect(() => {
     let active = true;
 
-    async function resolveRoute(session) {
+    async function resolveRoute() {
+      const result = await resolveAuthenticatedProfile();
       if (!active) return;
 
-      if (!session?.user) {
+      if (
+        result.status === AUTH_ROUTE_STATUS.SIGNED_OUT ||
+        result.status === AUTH_ROUTE_STATUS.INVALID_SESSION
+      ) {
         setState({ loading: false, redirectTo: "/sign-in" });
         return;
       }
 
-      let profile = null;
-
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .maybeSingle();
-
-        if (error) throw error;
-        profile = data;
-      } catch {
-        profile = null;
-      }
-
-      if (!active) return;
-
-      const role = resolveProfileRole(profile, session);
-
-      if (role === "admin") {
-        setState({
-          loading: false,
-          redirectTo: "",
-        });
+      if (result.status === AUTH_ROUTE_STATUS.ADMIN) {
+        setState({ loading: false, redirectTo: "" });
         return;
       }
 
-      if (role === "freelancer") {
+      if (result.status === AUTH_ROUTE_STATUS.FREELANCER) {
         setState({
           loading: false,
-          redirectTo: isFreelancerOnboardingComplete(profile)
+          redirectTo: isFreelancerOnboardingComplete(result.profile)
             ? "/dashboard/freelancer"
             : FREELANCER_WELCOME_PATH,
         });
@@ -82,29 +51,20 @@ export default function AdminRoute({ children }) {
 
       setState({
         loading: false,
-        redirectTo: isCustomerOnboardingComplete(profile)
+        redirectTo: isCustomerOnboardingComplete(result.profile)
           ? DEFAULT_CUSTOMER_DESTINATION
           : CUSTOMER_WELCOME_PATH,
       });
     }
 
-    supabase.auth
-      .getSession()
-      .then(({ data: { session } }) => resolveRoute(session));
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      resolveRoute(session);
-    });
+    resolveRoute();
 
     return () => {
       active = false;
-      subscription.unsubscribe();
     };
   }, []);
 
-  if (state.loading) return <GuardFallback />;
+  if (state.loading) return <AuthGuardFallback />;
   if (state.redirectTo) return <Navigate to={state.redirectTo} replace />;
 
   return children;

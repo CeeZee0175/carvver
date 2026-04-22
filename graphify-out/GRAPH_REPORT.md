@@ -1,12 +1,12 @@
-# Graph Report - C:\Users\ieq3q\carvver  (2026-04-20)
+# Graph Report - C:\Users\ieq3q\carvver  (2026-04-22)
 
 ## Corpus Check
-- 113 files · ~4,726,646 words
+- 115 files · ~4,726,953 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 677 nodes · 926 edges · 67 communities detected
-- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 82 edges (avg confidence: 0.8)
+- 679 nodes · 934 edges · 67 communities detected
+- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 89 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -121,28 +121,28 @@ Cohesion: 0.08
 Nodes (17): deriveInitialValues(), deriveInitialValues(), coercePhilippinesLocation(), filterLocationOptions(), findBarangay(), findCity(), findRegion(), getBarangaysByRegionCity() (+9 more)
 
 ### Community 4 - "Community 4"
+Cohesion: 0.09
+Nodes (24): deriveProfileNames(), ensureProfileForSession(), getAvatarUrl(), getProfile(), getProfileById(), getSession(), requestEmailChange(), requestPasswordRecovery() (+16 more)
+
+### Community 5 - "Community 5"
 Cohesion: 0.07
 Nodes (14): getCustomerDisplayName(), getCustomerInitials(), getCustomerRealName(), CustomerOrders(), Profile(), ProfileAchievements(), fetchAchievementUnlockMap(), getFileExtension() (+6 more)
 
-### Community 5 - "Community 5"
+### Community 6 - "Community 6"
 Cohesion: 0.09
 Nodes (19): DashboardFreelancer(), FreelancerBrowseRequests(), FreelancerProfile(), FreelancerRequestDetail(), FreelancerSettings(), getFileExtension(), sanitizeFileName(), uploadAvatarFile() (+11 more)
 
-### Community 6 - "Community 6"
+### Community 7 - "Community 7"
 Cohesion: 0.11
 Nodes (16): buildCategoryPath(), clearFeaturedCategoryIntent(), getFeaturedCategoryFromSearch(), getFeaturedCategoryIntent(), getIntentStorage(), normalizeFeaturedCategory(), persistFeaturedCategoryFromSearch(), resolveFeaturedCategoryIntent() (+8 more)
-
-### Community 7 - "Community 7"
-Cohesion: 0.1
-Nodes (13): BrowseCategories(), CustomerServiceDetail(), formatPeso(), packagesMatchCartItem(), FavBook(), FavCard(), getCategoryIcon(), timeAgo() (+5 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.18
 Nodes (26): buildServicePayload(), createFreelancerServiceListing(), deleteFreelancerDraft(), ensureFreelancerPayoutDestinationReady(), fetchFreelancerListingForEdit(), fetchOwnedServices(), fetchServiceMedia(), fetchServicePackages() (+18 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.12
-Nodes (19): deriveProfileNames(), ensureProfileForSession(), getAvatarUrl(), getProfile(), getProfileById(), getSession(), requestEmailChange(), requestPasswordRecovery() (+11 more)
+Cohesion: 0.1
+Nodes (13): BrowseCategories(), CustomerServiceDetail(), formatPeso(), packagesMatchCartItem(), FavBook(), FavCard(), getCategoryIcon(), timeAgo() (+5 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.12
@@ -165,8 +165,8 @@ Cohesion: 0.15
 Nodes (13): CustomerFreelancerProfile(), buildBadge(), buildCustomerAchievementMetrics(), buildOrderMetrics(), buildReviewMetrics(), buildSavedMetrics(), makeAchievement(), buildPhilippinesLocationLabel() (+5 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.23
-Nodes (14): clearCustomerWelcomeDestination(), clearDestination(), clearFreelancerWelcomeDestination(), getCustomerWelcomeDestination(), getDestination(), getFreelancerWelcomeDestination(), hasOwn(), isBrowser() (+6 more)
+Cohesion: 0.24
+Nodes (15): clearCustomerWelcomeDestination(), clearDestination(), clearFreelancerWelcomeDestination(), getCustomerWelcomeDestination(), getDestination(), getFreelancerWelcomeDestination(), hasOwn(), isBrowser() (+7 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.18
@@ -234,15 +234,15 @@ Nodes (0):
 
 ### Community 32 - "Community 32"
 Cohesion: 0.5
-Nodes (2): CustomerRequestDetail(), useCustomerRequestDetail()
+Nodes (1): FreelancerOrders()
 
 ### Community 33 - "Community 33"
 Cohesion: 0.5
-Nodes (0): 
+Nodes (2): CustomerRequestDetail(), useCustomerRequestDetail()
 
 ### Community 34 - "Community 34"
 Cohesion: 0.5
-Nodes (1): FreelancerOrders()
+Nodes (0): 
 
 ### Community 35 - "Community 35"
 Cohesion: 0.5
@@ -265,8 +265,8 @@ Cohesion: 0.67
 Nodes (0): 
 
 ### Community 40 - "Community 40"
-Cohesion: 0.67
-Nodes (0): 
+Cohesion: 1.0
+Nodes (2): formatPeso(), FreelancerListingPreview()
 
 ### Community 41 - "Community 41"
 Cohesion: 0.67
@@ -274,27 +274,27 @@ Nodes (0):
 
 ### Community 42 - "Community 42"
 Cohesion: 0.67
-Nodes (0): 
+Nodes (1): createClient()
 
 ### Community 43 - "Community 43"
-Cohesion: 0.67
+Cohesion: 1.0
 Nodes (0): 
 
 ### Community 44 - "Community 44"
-Cohesion: 0.67
+Cohesion: 1.0
 Nodes (0): 
 
 ### Community 45 - "Community 45"
 Cohesion: 1.0
-Nodes (2): formatPeso(), FreelancerListingPreview()
+Nodes (0): 
 
 ### Community 46 - "Community 46"
-Cohesion: 0.67
+Cohesion: 1.0
 Nodes (0): 
 
 ### Community 47 - "Community 47"
-Cohesion: 0.67
-Nodes (1): createClient()
+Cohesion: 1.0
+Nodes (0): 
 
 ### Community 48 - "Community 48"
 Cohesion: 1.0
@@ -373,7 +373,17 @@ Cohesion: 1.0
 Nodes (0): 
 
 ## Knowledge Gaps
-- **Thin community `Community 48`** (2 nodes): `vite.config.js`, `getManualChunkName()`
+- **Thin community `Community 43`** (2 nodes): `vite.config.js`, `getManualChunkName()`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 44`** (2 nodes): `AdminRoute()`, `AdminRoute.jsx`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 45`** (2 nodes): `CustomerRoute.jsx`, `CustomerRoute()`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 46`** (2 nodes): `CustomerWelcomeRoute.jsx`, `CustomerWelcomeRoute()`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 47`** (2 nodes): `FreelancerRoute.jsx`, `FreelancerRoute()`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 48`** (2 nodes): `FreelancerWelcomeRoute.jsx`, `FreelancerWelcomeRoute()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 49`** (2 nodes): `ProtectedRoute.jsx`, `ProtectedRoute()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -415,12 +425,12 @@ Nodes (0):
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `buildPhilippinesLocationLabel()` connect `Community 14` to `Community 0`, `Community 3`, `Community 4`, `Community 5`, `Community 17`?**
-  _High betweenness centrality (0.207) - this node is a cross-community bridge._
-- **Why does `getPublicUrl()` connect `Community 2` to `Community 11`, `Community 4`, `Community 5`?**
-  _High betweenness centrality (0.102) - this node is a cross-community bridge._
+- **Why does `buildPhilippinesLocationLabel()` connect `Community 14` to `Community 0`, `Community 3`, `Community 5`, `Community 6`, `Community 17`?**
+  _High betweenness centrality (0.215) - this node is a cross-community bridge._
+- **Why does `getPublicUrl()` connect `Community 2` to `Community 11`, `Community 5`, `Community 6`?**
+  _High betweenness centrality (0.116) - this node is a cross-community bridge._
 - **Why does `normalizeProposal()` connect `Community 0` to `Community 14`?**
-  _High betweenness centrality (0.096) - this node is a cross-community bridge._
+  _High betweenness centrality (0.105) - this node is a cross-community bridge._
 - **Are the 8 inferred relationships involving `buildPhilippinesLocationLabel()` (e.g. with `buildFreelancerTasks()` and `normalizeRequest()`) actually correct?**
   _`buildPhilippinesLocationLabel()` has 8 INFERRED edges - model-reasoned connections that need verification._
 - **Should `Community 0` be split into smaller, more focused modules?**

@@ -1,28 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { createClient } from "../../lib/supabase/client";
 import {
   CUSTOMER_WELCOME_PATH,
   FREELANCER_WELCOME_PATH,
   isCustomerOnboardingComplete,
   isFreelancerOnboardingComplete,
-  resolveProfileRole,
   setCustomerWelcomeDestination,
   setFreelancerWelcomeDestination,
 } from "../../lib/customerOnboarding";
-
-const supabase = createClient();
-
-async function fetchProfile(userId) {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (error) throw error;
-  return data;
-}
+import {
+  AUTH_ROUTE_STATUS,
+  resolveAuthenticatedProfile,
+} from "./authRouteState";
+import { AuthGuardFallback } from "./AuthGuardFeedback";
 
 export default function CustomerRoute({ children }) {
   const location = useLocation();
@@ -34,92 +24,53 @@ export default function CustomerRoute({ children }) {
   useEffect(() => {
     let active = true;
 
-    async function resolveRoute(session) {
+    async function resolveRoute() {
+      const result = await resolveAuthenticatedProfile();
       if (!active) return;
 
-      if (!session?.user) {
-        setState({
-          loading: false,
-          redirectTo: "/sign-in",
-        });
+      const currentPath = `${location.pathname}${location.search}${location.hash}`;
+
+      if (
+        result.status === AUTH_ROUTE_STATUS.SIGNED_OUT ||
+        result.status === AUTH_ROUTE_STATUS.INVALID_SESSION
+      ) {
+        setState({ loading: false, redirectTo: "/sign-in" });
         return;
       }
 
-      let profile = null;
-
-      try {
-        profile = await fetchProfile(session.user.id);
-      } catch {
-        profile = null;
-      }
-
-      if (!active) return;
-
-      const role = resolveProfileRole(profile, session);
-
-      if (role === "admin") {
-        setState({
-          loading: false,
-          redirectTo: "/admin",
-        });
+      if (result.status === AUTH_ROUTE_STATUS.ADMIN) {
+        setState({ loading: false, redirectTo: "/admin" });
         return;
       }
 
-      if (role === "freelancer") {
-        if (!isFreelancerOnboardingComplete(profile)) {
-          setFreelancerWelcomeDestination(
-            `${location.pathname}${location.search}${location.hash}`
-          );
-
-          setState({
-            loading: false,
-            redirectTo: FREELANCER_WELCOME_PATH,
-          });
+      if (result.status === AUTH_ROUTE_STATUS.FREELANCER) {
+        if (!isFreelancerOnboardingComplete(result.profile)) {
+          setFreelancerWelcomeDestination(currentPath);
+          setState({ loading: false, redirectTo: FREELANCER_WELCOME_PATH });
           return;
         }
 
-        setState({
-          loading: false,
-          redirectTo: "/dashboard/freelancer",
-        });
+        setState({ loading: false, redirectTo: "/dashboard/freelancer" });
         return;
       }
 
-      if (!isCustomerOnboardingComplete(profile)) {
-        setCustomerWelcomeDestination(
-          `${location.pathname}${location.search}${location.hash}`
-        );
-
-        setState({
-          loading: false,
-          redirectTo: CUSTOMER_WELCOME_PATH,
-        });
+      if (!isCustomerOnboardingComplete(result.profile)) {
+        setCustomerWelcomeDestination(currentPath);
+        setState({ loading: false, redirectTo: CUSTOMER_WELCOME_PATH });
         return;
       }
 
-      setState({
-        loading: false,
-        redirectTo: "",
-      });
+      setState({ loading: false, redirectTo: "" });
     }
 
-    supabase.auth
-      .getSession()
-      .then(({ data: { session } }) => resolveRoute(session));
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      resolveRoute(session);
-    });
+    resolveRoute();
 
     return () => {
       active = false;
-      subscription.unsubscribe();
     };
   }, [location.hash, location.pathname, location.search]);
 
-  if (state.loading) return null;
+  if (state.loading) return <AuthGuardFallback />;
   if (state.redirectTo) return <Navigate to={state.redirectTo} replace />;
 
   return children;

@@ -1,27 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { createClient } from "../../lib/supabase/client";
-
-const supabase = createClient();
+import {
+  AUTH_ROUTE_STATUS,
+  resolveAuthenticatedProfile,
+} from "./authRouteState";
+import { AuthGuardFallback } from "./AuthGuardFeedback";
 
 export default function ProtectedRoute({ children }) {
-  const [session, setSession] = useState(undefined);
+  const [state, setState] = useState({
+    loading: true,
+    redirectTo: "",
+  });
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+    let active = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    async function resolveRoute() {
+      const result = await resolveAuthenticatedProfile();
+      if (!active) return;
 
-    return () => subscription.unsubscribe();
+      setState({
+        loading: false,
+        redirectTo:
+          result.status === AUTH_ROUTE_STATUS.SIGNED_OUT ||
+          result.status === AUTH_ROUTE_STATUS.INVALID_SESSION
+            ? "/sign-in"
+            : "",
+      });
+    }
+
+    resolveRoute();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
-  if (session === undefined) return null;
-
-  if (session === null) return <Navigate to="/sign-in" replace />;
+  if (state.loading) return <AuthGuardFallback />;
+  if (state.redirectTo) return <Navigate to={state.redirectTo} replace />;
 
   return children;
 }
