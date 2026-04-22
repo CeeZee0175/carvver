@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import "./profile.css";
 import "./freelancer_pages.css";
@@ -27,7 +27,7 @@ const SORT_OPTIONS = [
 
 function RequestCard({ request, onOpen, index = 0 }) {
   return (
-    <motion.article
+    <Motion.article
       className="freelancerRequestCard"
       initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -70,7 +70,7 @@ function RequestCard({ request, onOpen, index = 0 }) {
             </span>
           </div>
 
-          <motion.button
+          <Motion.button
             type="button"
             className="freelancerRequestCard__btn"
             whileHover={{ y: -1.5 }}
@@ -79,10 +79,10 @@ function RequestCard({ request, onOpen, index = 0 }) {
             onClick={onOpen}
           >
             View request
-          </motion.button>
+          </Motion.button>
         </div>
       </div>
-    </motion.article>
+    </Motion.article>
   );
 }
 
@@ -120,13 +120,13 @@ export default function FreelancerBrowseRequests() {
                 <h1 className="freelancerMarketplaceHero__title">
                   <TypewriterHeading text="Browse request listings" />
                 </h1>
-                <motion.svg
+                <Motion.svg
                   className="freelancerMarketplaceHero__line"
                   viewBox="0 0 300 20"
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <motion.path
+                  <Motion.path
                     d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                     fill="none"
                     stroke="currentColor"
@@ -136,7 +136,7 @@ export default function FreelancerBrowseRequests() {
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 1.05, ease: "easeInOut", delay: 0.14 }}
                   />
-                </motion.svg>
+                </Motion.svg>
               </div>
 
               <p className="freelancerMarketplaceHero__sub">
@@ -145,7 +145,7 @@ export default function FreelancerBrowseRequests() {
             </div>
 
             <div className="freelancerMarketplaceHero__actions">
-              <motion.button
+              <Motion.button
                 type="button"
                 className="freelancerMarketplaceHero__action"
                 whileHover={{ y: -1.5 }}
@@ -154,9 +154,9 @@ export default function FreelancerBrowseRequests() {
                 onClick={() => navigate("/dashboard/freelancer/post-listing")}
               >
                 Post a listing
-              </motion.button>
+              </Motion.button>
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className="freelancerMarketplaceHero__ghost"
                 whileHover={{ y: -1.5 }}
@@ -165,7 +165,7 @@ export default function FreelancerBrowseRequests() {
                 onClick={() => navigate("/dashboard/freelancer/messages")}
               >
                 Open messages
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
 

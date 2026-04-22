@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  AnimatePresence,
-  motion,
+  AnimatePresence, motion as Motion,
   useInView,
   useReducedMotion,
 } from "framer-motion";
@@ -111,7 +110,7 @@ function MatrixTitle({
     <h2 id={id} className="homeTwo__title">
       <span className="homeTwo__matrix" aria-label={text}>
         {letters.map((letter, index) => (
-          <motion.span
+          <Motion.span
             key={`${index}-${letter.char}`}
             className="homeTwo__letter"
             initial={false}
@@ -122,7 +121,7 @@ function MatrixTitle({
             aria-hidden="true"
           >
             {letter.isSpace ? "\u00A0" : letter.char}
-          </motion.span>
+          </Motion.span>
         ))}
       </span>
     </h2>
@@ -325,7 +324,7 @@ export default function HomeTwo() {
         >
           <div className="homeTwoRail__ambience" aria-hidden="true">
             <AnimatePresence mode="wait">
-              <motion.div
+              <Motion.div
                 key={activeItem.id}
                 className="homeTwoRail__bgFrame"
                 initial={{ opacity: 0 }}
@@ -339,12 +338,12 @@ export default function HomeTwo() {
                   className="homeTwoRail__bgImage"
                 />
                 <span className="homeTwoRail__bgWash" />
-              </motion.div>
+              </Motion.div>
             </AnimatePresence>
           </div>
 
           <div className="homeTwoRail__stageWrap">
-            <motion.div
+            <Motion.div
               className={`homeTwoRail__stage ${isHovering ? "homeTwoRail__stage--hovering" : ""}`}
               drag={reduceMotion ? false : "x"}
               dragConstraints={{ left: 0, right: 0 }}
@@ -367,7 +366,7 @@ export default function HomeTwo() {
                 const brightness = isCenter ? 1 : 0.76;
 
                 return (
-                  <motion.button
+                  <Motion.button
                     key={`${item.id}-${absoluteIndex}`}
                     type="button"
                     className={`homeTwoRail__card ${isCenter ? "homeTwoRail__card--center" : ""}`}
@@ -403,16 +402,16 @@ export default function HomeTwo() {
                       ) : null}
                       <strong className="homeTwoRail__cardTitle">{item.title}</strong>
                     </span>
-                  </motion.button>
+                  </Motion.button>
                 );
               })}
-            </motion.div>
+            </Motion.div>
           </div>
 
           <div className="homeTwoRail__footer">
             <div className="homeTwoRail__copy">
               <AnimatePresence mode="wait">
-                <motion.div
+                <Motion.div
                   key={activeItem.id}
                   className="homeTwoRail__copyInner"
                   initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12, filter: "blur(6px)" }}
@@ -425,7 +424,7 @@ export default function HomeTwo() {
                   ) : null}
                   <h3 className="homeTwoRail__activeTitle">{activeItem.title}</h3>
                   <p className="homeTwoRail__activeDesc">{activeItem.description}</p>
-                </motion.div>
+                </Motion.div>
               </AnimatePresence>
             </div>
 
@@ -454,7 +453,7 @@ export default function HomeTwo() {
                 </button>
               </div>
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className="homeTwoRail__explore"
                 whileHover={reduceMotion ? undefined : { y: -1.5, scale: 1.02 }}
@@ -464,7 +463,7 @@ export default function HomeTwo() {
               >
                 <span>Explore</span>
                 <ArrowUpRight className="homeTwoRail__exploreIcon" />
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
         </div>

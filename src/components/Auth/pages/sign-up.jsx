@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion as Motion, useInView, useReducedMotion } from "framer-motion";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, User, LoaderCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./sign-up.css";
@@ -23,12 +23,12 @@ function TypewriterText({ text, active, speed = 85, initialDelay = 120, classNam
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    setDisplayText("");
+    queueMicrotask(() => setDisplayText(""));
 
     if (!active) return undefined;
 
     if (reduceMotion) {
-      setDisplayText(text);
+      queueMicrotask(() => setDisplayText(text));
       return undefined;
     }
 
@@ -49,12 +49,12 @@ function TypewriterText({ text, active, speed = 85, initialDelay = 120, classNam
     <span className={className}>
       {displayText}
       {!reduceMotion && showCursor && displayText.length < text.length && (
-        <motion.span
+        <Motion.span
           className="signUpType__cursor"
           aria-hidden="true"
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
-        >|</motion.span>
+        >|</Motion.span>
       )}
     </span>
   );
@@ -67,15 +67,15 @@ function BrandTitle({ active }) {
         <h1 className="signUpBrand__title">
           <TypewriterText text="Carvver" active={active} speed={95} initialDelay={120} />
         </h1>
-        <motion.svg className="signUpBrand__line" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
-          <motion.path
+        <Motion.svg className="signUpBrand__line" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
+          <Motion.path
             d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
             fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={active ? { pathLength: 1, opacity: 1 } : {}}
             transition={{ duration: 1.05, ease: "easeInOut", delay: 0.22 }}
           />
-        </motion.svg>
+        </Motion.svg>
       </div>
     </div>
   );
@@ -87,28 +87,28 @@ function RoleToggle({ value, onChange }) {
       <div className="signUpToggle__inner">
         <div className="signUpToggle__slot">
           {value === "customer" && (
-            <motion.span layoutId="signUpToggleLine" className="signUpToggle__line"
+            <Motion.span layoutId="signUpToggleLine" className="signUpToggle__line"
               transition={{ type: "spring", stiffness: 420, damping: 34 }} />
           )}
-          <motion.button type="button" role="tab" aria-selected={value === "customer"}
+          <Motion.button type="button" role="tab" aria-selected={value === "customer"}
             className={`signUpToggle__btn ${value === "customer" ? "signUpToggle__btn--active" : ""}`}
             onClick={() => onChange("customer")} whileHover={{ y: -1 }} whileTap={{ scale: 0.985 }}>
             Customer
-          </motion.button>
+          </Motion.button>
         </div>
 
         <span className="signUpToggle__sep" aria-hidden="true">|</span>
 
         <div className="signUpToggle__slot">
           {value === "freelancer" && (
-            <motion.span layoutId="signUpToggleLine" className="signUpToggle__line"
+            <Motion.span layoutId="signUpToggleLine" className="signUpToggle__line"
               transition={{ type: "spring", stiffness: 420, damping: 34 }} />
           )}
-          <motion.button type="button" role="tab" aria-selected={value === "freelancer"}
+          <Motion.button type="button" role="tab" aria-selected={value === "freelancer"}
             className={`signUpToggle__btn ${value === "freelancer" ? "signUpToggle__btn--active" : ""}`}
             onClick={() => onChange("freelancer")} whileHover={{ y: -1 }} whileTap={{ scale: 0.985 }}>
             Freelancer
-          </motion.button>
+          </Motion.button>
         </div>
       </div>
     </div>
@@ -298,7 +298,7 @@ export default function SignUp() {
       <div className="signUpPage__ambient" aria-hidden="true" />
 
       <main className="signUpPage__center" ref={ref}>
-        <motion.section
+        <Motion.section
           className="signUpCard"
           initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
           animate={inView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
@@ -309,12 +309,12 @@ export default function SignUp() {
           <div className="signUpCard__header">
             <BrandTitle active={inView} />
 
-            <motion.h2 className="signUpCard__title"
+            <Motion.h2 className="signUpCard__title"
               initial={{ opacity: 0, y: 8 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, ease: [0.2, 0.95, 0.2, 1], delay: 0.3 }}>
               Create Account
-            </motion.h2>
+            </Motion.h2>
 
             <p className="signUpCard__sub">
               <TypewriterText
@@ -327,14 +327,14 @@ export default function SignUp() {
             </p>
           </div>
 
-          <motion.div className="signUpCard__toggleWrap"
+          <Motion.div className="signUpCard__toggleWrap"
             initial={{ opacity: 0, y: 8 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1], delay: 0.42 }}>
             <RoleToggle value={role} onChange={handleRoleChange} />
-          </motion.div>
+          </Motion.div>
 
-          <motion.form className="signUpForm" onSubmit={handleSubmit} noValidate
+          <Motion.form className="signUpForm" onSubmit={handleSubmit} noValidate
             initial={{ opacity: 0, y: 10 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.55, ease: [0.2, 0.95, 0.2, 1], delay: 0.54 }}>
@@ -381,7 +381,7 @@ export default function SignUp() {
 
             <AnimatePresence initial={false}>
               {role === "freelancer" && (
-                <motion.div key="region-field"
+                <Motion.div key="region-field"
                   initial={{ opacity: 0, height: 0, y: -8 }}
                   animate={{ opacity: 1, height: "auto", y: 0 }}
                   exit={{ opacity: 0, height: 0, y: -8 }}
@@ -413,7 +413,7 @@ export default function SignUp() {
                       </span>
                     )}
                   </label>
-                </motion.div>
+                </Motion.div>
               )}
             </AnimatePresence>
 
@@ -541,7 +541,7 @@ export default function SignUp() {
             )}
             {formError && <p className="signUpForm__error">{formError}</p>}
 
-            <motion.button type="submit" className={`signUpPrimaryBtn ${isLoading ? "signUpPrimaryBtn--loading" : ""}`}
+            <Motion.button type="submit" className={`signUpPrimaryBtn ${isLoading ? "signUpPrimaryBtn--loading" : ""}`}
               disabled={isLoading}
               whileHover={isLoading ? {} : { y: -1.5 }}
               whileTap={isLoading ? {} : { scale: 0.98 }}
@@ -556,10 +556,10 @@ export default function SignUp() {
                   </span>
                 </>
               )}
-            </motion.button>
-          </motion.form>
+            </Motion.button>
+          </Motion.form>
 
-          <motion.div className="signUpBottomPrompt"
+          <Motion.div className="signUpBottomPrompt"
             initial={{ opacity: 0, y: 8 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1], delay: 0.84 }}>
@@ -571,8 +571,8 @@ export default function SignUp() {
             >
               Sign In
             </button>
-          </motion.div>
-        </motion.section>
+          </Motion.div>
+        </Motion.section>
       </main>
     </div>
   );

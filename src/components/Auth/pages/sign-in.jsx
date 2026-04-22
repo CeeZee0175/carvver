@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  AnimatePresence,
-  motion,
+  AnimatePresence, motion as Motion,
   useInView,
   useReducedMotion,
 } from "framer-motion";
@@ -51,7 +50,10 @@ function TypewriterText({ text, active, speed = 85, initialDelay = 120, classNam
     if (!active || startedRef.current) return;
     startedRef.current = true;
 
-    if (reduceMotion) { setDisplayText(text); return; }
+    if (reduceMotion) {
+      queueMicrotask(() => setDisplayText(text));
+      return undefined;
+    }
 
     let timeoutId;
     let index = 0;
@@ -70,12 +72,12 @@ function TypewriterText({ text, active, speed = 85, initialDelay = 120, classNam
     <span className={className}>
       {displayText}
       {!reduceMotion && showCursor && displayText.length < text.length && (
-        <motion.span
+        <Motion.span
           className="signInType__cursor"
           aria-hidden="true"
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
-        >|</motion.span>
+        >|</Motion.span>
       )}
     </span>
   );
@@ -88,15 +90,15 @@ function BrandTitle({ active }) {
         <h1 className="signInBrand__title">
           <TypewriterText text="Carvver" active={active} speed={95} initialDelay={120} />
         </h1>
-        <motion.svg className="signInBrand__line" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
-          <motion.path
+        <Motion.svg className="signInBrand__line" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
+          <Motion.path
             d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
             fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={active ? { pathLength: 1, opacity: 1 } : {}}
             transition={{ duration: 1.05, ease: "easeInOut", delay: 0.22 }}
           />
-        </motion.svg>
+        </Motion.svg>
       </div>
     </div>
   );
@@ -384,7 +386,7 @@ export default function SignIn() {
       <div className="signInPage__ambient" aria-hidden="true" />
 
       <main className="signInPage__center" ref={ref}>
-        <motion.section
+        <Motion.section
           className="signInCard"
           initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
           animate={inView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
@@ -395,12 +397,12 @@ export default function SignIn() {
           <div className="signInCard__header">
             <BrandTitle active={inView} />
 
-            <motion.h2 className="signInCard__title"
+            <Motion.h2 className="signInCard__title"
               initial={{ opacity: 0, y: 8 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, ease: [0.2, 0.95, 0.2, 1], delay: 0.3 }}>
               Welcome
-            </motion.h2>
+            </Motion.h2>
 
             <p className="signInCard__sub">
               <TypewriterText
@@ -411,7 +413,7 @@ export default function SignIn() {
             </p>
           </div>
 
-          <motion.form className="signInForm" onSubmit={handleSubmit} noValidate
+          <Motion.form className="signInForm" onSubmit={handleSubmit} noValidate
             initial={{ opacity: 0, y: 10 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.55, ease: [0.2, 0.95, 0.2, 1], delay: 0.54 }}>
@@ -508,7 +510,7 @@ export default function SignIn() {
             <p className="signInForm__notice">{PASSWORD_POLICY_NOTICE}</p>
             {formError && <p className="signInForm__error">{formError}</p>}
 
-            <motion.button type="submit" className={`signPrimaryBtn ${isLoading ? "signPrimaryBtn--loading" : ""}`}
+            <Motion.button type="submit" className={`signPrimaryBtn ${isLoading ? "signPrimaryBtn--loading" : ""}`}
               disabled={isLoading}
               whileHover={isLoading ? {} : { y: -1.5 }}
               whileTap={isLoading ? {} : { scale: 0.98 }}
@@ -523,10 +525,10 @@ export default function SignIn() {
                   </span>
                 </>
               )}
-            </motion.button>
-          </motion.form>
+            </Motion.button>
+          </Motion.form>
 
-          <motion.div
+          <Motion.div
             className="signInCard__adminSection"
             initial={{ opacity: 0, y: 8 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -549,18 +551,18 @@ export default function SignIn() {
                   </span>
                 </span>
 
-                <motion.span
+                <Motion.span
                   className="signInAdminAccordion__chevron"
                   animate={{ rotate: adminOpen ? 180 : 0 }}
                   transition={{ duration: 0.24, ease: "easeOut" }}
                 >
                   <ChevronDown />
-                </motion.span>
+                </Motion.span>
               </button>
 
               <AnimatePresence initial={false}>
                 {adminOpen ? (
-                  <motion.div
+                  <Motion.div
                     id="admin-login-panel"
                     className="signInAdminAccordion__panel"
                     initial={{ height: 0, opacity: 0 }}
@@ -668,7 +670,7 @@ export default function SignIn() {
                         <p className="signInForm__error">{adminFormError}</p>
                       ) : null}
 
-                      <motion.button
+                      <Motion.button
                         type="submit"
                         className={`signPrimaryBtn signPrimaryBtn--admin ${
                           adminLoading ? "signPrimaryBtn--loading" : ""
@@ -688,15 +690,15 @@ export default function SignIn() {
                             </span>
                           </>
                         )}
-                      </motion.button>
+                      </Motion.button>
                     </form>
-                  </motion.div>
+                  </Motion.div>
                 ) : null}
               </AnimatePresence>
             </div>
-          </motion.div>
+          </Motion.div>
 
-          <motion.div className="signInBottomPrompt"
+          <Motion.div className="signInBottomPrompt"
             initial={{ opacity: 0, y: 8 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.45, ease: [0.2, 0.95, 0.2, 1], delay: 0.8 }}>
@@ -708,8 +710,8 @@ export default function SignIn() {
             >
               Create Account
             </button>
-          </motion.div>
-        </motion.section>
+          </Motion.div>
+        </Motion.section>
       </main>
     </div>
   );

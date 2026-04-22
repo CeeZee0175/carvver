@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { LoaderCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import "./profile.css";
 import "./workflow_pages.css";
@@ -95,13 +95,13 @@ export default function FreelancerRequestDetail() {
                 <h1 className="freelancerMarketplaceHero__title">
                   <TypewriterHeading text={request?.title || "Request details"} />
                 </h1>
-                <motion.svg
+                <Motion.svg
                   className="freelancerMarketplaceHero__line"
                   viewBox="0 0 300 20"
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <motion.path
+                  <Motion.path
                     d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                     fill="none"
                     stroke="currentColor"
@@ -111,7 +111,7 @@ export default function FreelancerRequestDetail() {
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 1.05, ease: "easeInOut", delay: 0.14 }}
                   />
-                </motion.svg>
+                </Motion.svg>
               </div>
 
               <p className="freelancerMarketplaceHero__sub">
@@ -120,7 +120,7 @@ export default function FreelancerRequestDetail() {
             </div>
 
             <div className="freelancerMarketplaceHero__actions">
-              <motion.button
+              <Motion.button
                 type="button"
                 className="freelancerMarketplaceHero__action"
                 whileHover={{ y: -1.5 }}
@@ -130,9 +130,9 @@ export default function FreelancerRequestDetail() {
                 disabled={!request?.customer?.id}
               >
                 Message customer
-              </motion.button>
+              </Motion.button>
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className="freelancerMarketplaceHero__ghost"
                 whileHover={{ y: -1.5 }}
@@ -141,7 +141,7 @@ export default function FreelancerRequestDetail() {
                 onClick={() => navigate("/dashboard/freelancer/browse-requests")}
               >
                 Back to requests
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
 
@@ -257,7 +257,7 @@ export default function FreelancerRequestDetail() {
                   </p>
                 ) : null}
 
-                <motion.button
+                <Motion.button
                   type="button"
                   className="freelancerRequestDetail__action"
                   whileHover={{ y: -1.5 }}
@@ -266,7 +266,7 @@ export default function FreelancerRequestDetail() {
                   onClick={openConversation}
                 >
                   Start conversation
-                </motion.button>
+                </Motion.button>
               </article>
 
               <article className="freelancerRequestDetailCard">
@@ -338,7 +338,7 @@ export default function FreelancerRequestDetail() {
                   </label>
 
                   <div className="workflowActions">
-                    <motion.button
+                    <Motion.button
                       type="submit"
                       className="workflowActionBtn workflowActionBtn--primary"
                       whileHover={{ y: -1.5 }}
@@ -350,7 +350,7 @@ export default function FreelancerRequestDetail() {
                         <LoaderCircle className="customerSettingsAction__spinner" />
                       ) : null}
                       <span>Send proposal</span>
-                    </motion.button>
+                    </Motion.button>
                   </div>
                 </form>
               </article>

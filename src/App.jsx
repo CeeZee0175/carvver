@@ -316,21 +316,9 @@ function AppRoutes() {
   useRouteShellFamily(location.pathname);
 
   const [splashDone, setSplashDone] = useState(location.pathname !== "/");
-  const [showSplash, setShowSplash] = useState(location.pathname === "/" && !splashDone);
-
-  useEffect(() => {
-    if (location.pathname !== "/") {
-      setShowSplash(false);
-      return;
-    }
-
-    if (!splashDone) {
-      setShowSplash(true);
-    }
-  }, [location.pathname, splashDone]);
+  const showSplash = location.pathname === "/" && !splashDone;
 
   const handleSplashFinish = () => {
-    setShowSplash(false);
     setSplashDone(true);
   };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./splash_screen.css";
 
 export default function SplashScreen({ onFinish, duration = 9000 }) {
@@ -13,11 +13,11 @@ export default function SplashScreen({ onFinish, duration = 9000 }) {
   const AUTO_FADE_MS = 900;
   const CLICK_EXIT_MS = 650;
 
-  const finishNow = () => {
+  const finishNow = useCallback(() => {
     if (done.current) return;
     done.current = true;
     if (onFinish) onFinish();
-  };
+  }, [onFinish]);
 
   const startAutoFade = () => {
     if (done.current) return;
@@ -53,7 +53,7 @@ export default function SplashScreen({ onFinish, duration = 9000 }) {
       if (autoFinishTimer.current) clearTimeout(autoFinishTimer.current);
       if (clickFinishTimer.current) clearTimeout(clickFinishTimer.current);
     };
-  }, [duration]);
+  }, [duration, finishNow]);
 
   return (
     <div

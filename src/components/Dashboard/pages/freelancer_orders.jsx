@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import "./profile.css";
 import "./workflow_pages.css";
@@ -48,13 +48,13 @@ export default function FreelancerOrders() {
                 <h1 className="workflowHero__title">
                   <TypewriterHeading text="Orders" />
                 </h1>
-                <motion.svg
+                <Motion.svg
                   className="workflowHero__line"
                   viewBox="0 0 300 20"
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <motion.path
+                  <Motion.path
                     d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                     fill="none"
                     stroke="currentColor"
@@ -64,7 +64,7 @@ export default function FreelancerOrders() {
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 1.05, ease: "easeInOut", delay: 0.14 }}
                   />
-                </motion.svg>
+                </Motion.svg>
               </div>
               <p className="workflowHero__sub">
                 Track held earnings, queued payouts, blocked cases, and the customer orders already moving through your workflow.
@@ -152,7 +152,7 @@ export default function FreelancerOrders() {
                       </div>
 
                       <div className="workflowActions">
-                        <motion.button
+                        <Motion.button
                           type="button"
                           className="workflowActionBtn workflowActionBtn--primary"
                           whileHover={{ y: -1.5 }}
@@ -161,7 +161,7 @@ export default function FreelancerOrders() {
                           onClick={() => navigate(`/dashboard/freelancer/orders/${order.id}`)}
                         >
                           Open order
-                        </motion.button>
+                        </Motion.button>
                       </div>
                     </article>
                   ))}
@@ -191,7 +191,7 @@ export default function FreelancerOrders() {
                 </div>
               </div>
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className="workflowActionBtn workflowActionBtn--ghost"
                 whileHover={{ y: -1.5 }}
@@ -200,7 +200,7 @@ export default function FreelancerOrders() {
                 onClick={() => navigate("/dashboard/freelancer/settings")}
               >
                 Update payout details
-              </motion.button>
+              </Motion.button>
             </article>
           </aside>
         </section>

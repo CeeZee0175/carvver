@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./auth-callback.css";
 import {
@@ -136,7 +136,7 @@ export default function AuthCallback() {
       <div className="authCallbackPage__ambient" aria-hidden="true" />
 
       <main className="authCallbackPage__center">
-        <motion.section
+        <Motion.section
           className="authCallbackCard"
           initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -178,7 +178,7 @@ export default function AuthCallback() {
               </div>
             )}
           </div>
-        </motion.section>
+        </Motion.section>
       </main>
     </div>
   );

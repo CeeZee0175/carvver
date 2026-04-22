@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import { ArrowRight, MapPin } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { createClient } from "../../../lib/supabase/client";
@@ -75,7 +75,7 @@ function buildPackageMap(rows) {
 
 function ServiceResultCard({ item, index, onOpen }) {
   return (
-    <motion.article
+    <Motion.article
       className="dashboardSearchCard"
       initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -129,7 +129,7 @@ function ServiceResultCard({ item, index, onOpen }) {
             </div>
           </div>
 
-          <motion.button
+          <Motion.button
             type="button"
             className="dashboardSearchCard__action"
             whileHover={{ y: -1.5 }}
@@ -139,16 +139,16 @@ function ServiceResultCard({ item, index, onOpen }) {
           >
             <span>View listing</span>
             <ArrowRight className="dashboardSearchCard__actionIcon" />
-          </motion.button>
+          </Motion.button>
         </div>
       </div>
-    </motion.article>
+    </Motion.article>
   );
 }
 
 function FreelancerResultCard({ item, index, onOpen }) {
   return (
-    <motion.article
+    <Motion.article
       className="dashboardSearchCard"
       initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -193,7 +193,7 @@ function FreelancerResultCard({ item, index, onOpen }) {
             Customer-visible freelancer profile
           </div>
 
-          <motion.button
+          <Motion.button
             type="button"
             className="dashboardSearchCard__action dashboardSearchCard__action--ghost"
             whileHover={{ y: -1.5 }}
@@ -203,10 +203,10 @@ function FreelancerResultCard({ item, index, onOpen }) {
           >
             <span>Open profile</span>
             <ArrowRight className="dashboardSearchCard__actionIcon" />
-          </motion.button>
+          </Motion.button>
         </div>
       </div>
-    </motion.article>
+    </Motion.article>
   );
 }
 
@@ -386,13 +386,13 @@ export default function CustomerSearch() {
                 <h1 className="dashboardSearchHero__title">
                   <TypewriterHeading text="Search results" />
                 </h1>
-                <motion.svg
+                <Motion.svg
                   className="dashboardSearchHero__line"
                   viewBox="0 0 300 20"
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <motion.path
+                  <Motion.path
                     d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                     fill="none"
                     stroke="currentColor"
@@ -402,7 +402,7 @@ export default function CustomerSearch() {
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 1.05, ease: "easeInOut", delay: 0.16 }}
                   />
-                </motion.svg>
+                </Motion.svg>
               </div>
 
               <p className="dashboardSearchHero__sub">
@@ -418,7 +418,7 @@ export default function CustomerSearch() {
               </p>
             </div>
 
-            <motion.button
+            <Motion.button
               type="button"
               className="dashboardSearchHero__ghost"
               whileHover={{ y: -1.5 }}
@@ -428,7 +428,7 @@ export default function CustomerSearch() {
             >
               <span>Browse services</span>
               <ArrowRight className="dashboardSearchHero__ghostIcon" />
-            </motion.button>
+            </Motion.button>
           </div>
         </section>
       </Reveal>

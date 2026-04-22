@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 
 function createBeam(width, height) {
   const angle = -35 + Math.random() * 10;
@@ -138,7 +138,7 @@ export function BeamsBackground({ className, intensity = "strong" }) {
         className="beamsBackground__canvas"
       />
 
-      <motion.div
+      <Motion.div
         className="beamsBackground__pulse"
         animate={{ opacity: [0.08, 0.25, 0.08] }}
         transition={{

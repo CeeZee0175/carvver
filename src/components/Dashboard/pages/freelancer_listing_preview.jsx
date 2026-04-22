@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import "./profile.css";
 import "./freelancer_pages.css";
@@ -106,13 +106,13 @@ export default function FreelancerListingPreview() {
                 <h1 className="freelancerMarketplaceHero__title">
                   <TypewriterHeading text={listing?.title || "Listing preview"} />
                 </h1>
-                <motion.svg
+                <Motion.svg
                   className="freelancerMarketplaceHero__line"
                   viewBox="0 0 300 20"
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <motion.path
+                  <Motion.path
                     d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                     fill="none"
                     stroke="currentColor"
@@ -122,7 +122,7 @@ export default function FreelancerListingPreview() {
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 1.05, ease: "easeInOut", delay: 0.14 }}
                   />
-                </motion.svg>
+                </Motion.svg>
               </div>
 
               <p className="freelancerMarketplaceHero__sub">
@@ -131,7 +131,7 @@ export default function FreelancerListingPreview() {
             </div>
 
             <div className="freelancerListingActions">
-              <motion.button
+              <Motion.button
                 type="button"
                 className="freelancerListingActionBtn"
                 whileHover={{ y: -1.5 }}
@@ -142,7 +142,7 @@ export default function FreelancerListingPreview() {
                 }
               >
                 Edit listing
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
 
@@ -217,7 +217,7 @@ export default function FreelancerListingPreview() {
                 {listing.media?.length > 1 ? (
                   <div className="serviceDetailMediaGrid">
                     {listing.media.map((item) => (
-                      <motion.button
+                      <Motion.button
                         key={item.id}
                         type="button"
                         className={`serviceDetailMediaThumb ${
@@ -243,7 +243,7 @@ export default function FreelancerListingPreview() {
                             {item.original_name}
                           </span>
                         </div>
-                      </motion.button>
+                      </Motion.button>
                     ))}
                   </div>
                 ) : null}

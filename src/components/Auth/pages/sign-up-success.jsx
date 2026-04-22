@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion as Motion, useReducedMotion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./sign-up-success.css";
 import {
@@ -45,7 +45,7 @@ export default function SignUpSuccess() {
       <div className="signUpSuccessPage__ambient" aria-hidden="true" />
 
       <main className="signUpSuccessPage__center">
-        <motion.section
+        <Motion.section
           className="signUpSuccessCard"
           initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -56,7 +56,7 @@ export default function SignUpSuccess() {
           <div className="signUpSuccessCard__content">
             <span className="signUpSuccessCard__eyebrow">Registration Complete</span>
 
-            <motion.div
+            <Motion.div
               className="signUpSuccessCard__badge"
               initial={reduceMotion ? false : { scale: 0.84, opacity: 0 }}
               animate={reduceMotion ? undefined : { scale: 1, opacity: 1 }}
@@ -68,7 +68,7 @@ export default function SignUpSuccess() {
                 viewBox="0 0 96 96"
                 role="presentation"
               >
-                <motion.circle
+                <Motion.circle
                   className="signUpSuccessCard__ring"
                   cx="48"
                   cy="48"
@@ -79,7 +79,7 @@ export default function SignUpSuccess() {
                   animate={{ pathLength: 1 }}
                   transition={{ duration: 0.65, ease: "easeInOut", delay: 0.18 }}
                 />
-                <motion.path
+                <Motion.path
                   className="signUpSuccessCard__tick"
                   d="M31 49.5 42.5 61 66 37.5"
                   fill="none"
@@ -91,7 +91,7 @@ export default function SignUpSuccess() {
                   transition={{ duration: 0.45, ease: "easeInOut", delay: 0.48 }}
                 />
               </svg>
-            </motion.div>
+            </Motion.div>
 
             <h1 className="signUpSuccessCard__title">You&apos;re successfully registered.</h1>
 
@@ -112,7 +112,7 @@ export default function SignUpSuccess() {
               Click here if you are not redirected.
             </button>
           </div>
-        </motion.section>
+        </Motion.section>
       </main>
     </div>
   );

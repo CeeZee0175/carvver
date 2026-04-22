@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowRight,
@@ -86,7 +86,7 @@ export default function CustomerFreelancerProfile() {
 
         setProfile(profileData);
         setServices(serviceData || []);
-      } catch (nextError) {
+      } catch {
         if (!active) return;
         setProfile(null);
         setServices([]);
@@ -236,7 +236,7 @@ export default function CustomerFreelancerProfile() {
           </div>
 
           <div className="customerFreelancerHero__actions">
-            <motion.button
+            <Motion.button
               type="button"
               className="customerFreelancerHero__primaryBtn"
               whileHover={{ y: -2 }}
@@ -246,9 +246,9 @@ export default function CustomerFreelancerProfile() {
             >
               <span>Message</span>
               <ArrowRight className="customerFreelancerHero__ghostIcon" />
-            </motion.button>
+            </Motion.button>
 
-            <motion.button
+            <Motion.button
               type="button"
               className={`customerFreelancerHero__favoriteBtn ${
                 isFavorite ? "customerFreelancerHero__favoriteBtn--active" : ""
@@ -263,9 +263,9 @@ export default function CustomerFreelancerProfile() {
                 fill={isFavorite ? "currentColor" : "none"}
               />
               <span>{isFavorite ? "Favorited" : "Add to favorites"}</span>
-            </motion.button>
+            </Motion.button>
 
-            <motion.button
+            <Motion.button
               type="button"
               className="customerFreelancerHero__ghostBtn"
               whileHover={{ y: -2 }}
@@ -275,7 +275,7 @@ export default function CustomerFreelancerProfile() {
             >
               <span>Browse services</span>
               <ArrowRight className="customerFreelancerHero__ghostIcon" />
-            </motion.button>
+            </Motion.button>
           </div>
         </section>
       </Reveal>
@@ -315,7 +315,7 @@ export default function CustomerFreelancerProfile() {
 
               <div className="customerFreelancerSummaryGrid">
                 {summaryItems.map((item) => (
-                  <motion.article
+                  <Motion.article
                     key={item.label}
                     className="customerFreelancerSummaryCard"
                     whileHover={{ y: -3 }}
@@ -324,7 +324,7 @@ export default function CustomerFreelancerProfile() {
                   >
                     <span className="customerFreelancerSummaryCard__label">{item.label}</span>
                     <strong className="customerFreelancerSummaryCard__value">{item.value}</strong>
-                  </motion.article>
+                  </Motion.article>
                 ))}
               </div>
             </section>
@@ -388,7 +388,7 @@ export default function CustomerFreelancerProfile() {
               ) : (
                 <div className="customerFreelancerServiceGrid">
                   {services.map((service) => (
-                    <motion.article
+                    <Motion.article
                       key={service.id}
                       className="customerFreelancerServiceCard"
                       whileHover={{ y: -4 }}
@@ -423,7 +423,7 @@ export default function CustomerFreelancerProfile() {
                         <strong className="customerFreelancerServiceCard__price">
                           {formatPeso(service.price)}
                         </strong>
-                        <motion.button
+                        <Motion.button
                           type="button"
                           className="customerFreelancerServiceCard__link"
                           whileHover={{ x: 2 }}
@@ -435,9 +435,9 @@ export default function CustomerFreelancerProfile() {
                         >
                           View listing
                           <ArrowRight className="customerFreelancerServiceCard__linkIcon" />
-                        </motion.button>
+                        </Motion.button>
                       </div>
-                    </motion.article>
+                    </Motion.article>
                   ))}
                 </div>
               )}

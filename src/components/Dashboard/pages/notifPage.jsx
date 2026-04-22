@@ -1,8 +1,7 @@
 import React, { startTransition, useEffect, useMemo, useState } from "react";
 import {
   AnimatePresence,
-  LayoutGroup,
-  motion,
+  LayoutGroup, motion as Motion,
   useReducedMotion,
 } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -33,8 +32,8 @@ function TypewriterHeading({ text = "Notifications" }) {
 
   useEffect(() => {
     if (reduceMotion) {
-      setDisplayText(text);
-      return;
+      queueMicrotask(() => setDisplayText(text));
+      return undefined;
     }
 
     let timeoutId;
@@ -54,14 +53,14 @@ function TypewriterHeading({ text = "Notifications" }) {
     <span className="notifPage__titleTextValue">
       {displayText}
       {!reduceMotion && displayText.length < text.length && (
-        <motion.span
+        <Motion.span
           className="notifPage__cursor"
           aria-hidden="true"
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 0.85, repeat: Infinity, ease: "easeInOut" }}
         >
           |
-        </motion.span>
+        </Motion.span>
       )}
     </span>
   );
@@ -72,7 +71,7 @@ function NotificationRow({ item, index, onToggleRead, onOpen }) {
   const Icon = item.Icon;
 
   return (
-    <motion.article
+    <Motion.article
       layout
       className={`notifRow ${item.isRead ? "notifRow--read" : "notifRow--unread"}`}
       style={{
@@ -115,7 +114,7 @@ function NotificationRow({ item, index, onToggleRead, onOpen }) {
         </div>
 
         <div className="notifRow__actions">
-          <motion.button
+          <Motion.button
             type="button"
             className="notifRow__action"
             whileHover={{ y: -1 }}
@@ -124,9 +123,9 @@ function NotificationRow({ item, index, onToggleRead, onOpen }) {
             onClick={() => onToggleRead(item)}
           >
             {item.isRead ? "Mark unread" : "Mark as read"}
-          </motion.button>
+          </Motion.button>
 
-          <motion.button
+          <Motion.button
             type="button"
             className="notifRow__action notifRow__action--primary"
             whileHover={{ x: 1 }}
@@ -136,10 +135,10 @@ function NotificationRow({ item, index, onToggleRead, onOpen }) {
           >
             <span>{item.ctaLabel}</span>
             <ArrowRight className="notifRow__actionIcon" />
-          </motion.button>
+          </Motion.button>
         </div>
       </div>
-    </motion.article>
+    </Motion.article>
   );
 }
 
@@ -167,13 +166,13 @@ function EmptyState({ activeFilter, onShowAll }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <motion.div
+    <Motion.div
       className="notifEmpty"
       initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
-      <motion.div
+      <Motion.div
         className="notifEmpty__halo"
         aria-hidden="true"
         animate={reduceMotion ? undefined : { scale: [1, 1.06, 1], opacity: [0.6, 0.9, 0.6] }}
@@ -192,7 +191,7 @@ function EmptyState({ activeFilter, onShowAll }) {
       </p>
 
       {activeFilter !== "all" && (
-        <motion.button
+        <Motion.button
           type="button"
           className="notifEmpty__action"
           whileHover={{ y: -1 }}
@@ -201,9 +200,9 @@ function EmptyState({ activeFilter, onShowAll }) {
           onClick={onShowAll}
         >
           Show all notifications
-        </motion.button>
+        </Motion.button>
       )}
-    </motion.div>
+    </Motion.div>
   );
 }
 
@@ -260,7 +259,9 @@ export default function NotifPage() {
   );
 
   useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(totalPages);
+    if (currentPage > totalPages) {
+      queueMicrotask(() => setCurrentPage(totalPages));
+    }
   }, [currentPage, totalPages]);
 
   const paginatedNotifications = useMemo(() => {
@@ -311,14 +312,14 @@ export default function NotifPage() {
       {isFreelancer ? <FreelancerDashBar /> : <DashBar />}
 
       <main className="notifPage__main">
-        <motion.section
+        <Motion.section
           className="notifPage__header"
           initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18, filter: "blur(10px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
         >
           <section className="notifCrumbs">
-            <motion.button
+            <Motion.button
               type="button"
               className="notifCrumbs__home"
               whileHover={{ x: -1 }}
@@ -330,7 +331,7 @@ export default function NotifPage() {
             >
               <Home className="notifCrumbs__icon" />
               <span>Home</span>
-            </motion.button>
+            </Motion.button>
 
             <span className="notifCrumbs__sep">/</span>
             <span className="notifCrumbs__current">Notifications</span>
@@ -341,13 +342,13 @@ export default function NotifPage() {
               <h1 className="notifPage__title">
                 <span className="notifPage__titleText">
                   <TypewriterHeading />
-                  <motion.svg
+                  <Motion.svg
                     className="notifPage__line"
                     viewBox="0 0 300 20"
                     preserveAspectRatio="none"
                     aria-hidden="true"
                   >
-                    <motion.path
+                    <Motion.path
                       d="M 0,10 L 300,10"
                       fill="none"
                       stroke="currentColor"
@@ -357,7 +358,7 @@ export default function NotifPage() {
                       animate={{ pathLength: 1, opacity: 1 }}
                       transition={{ duration: 1.05, ease: "easeInOut", delay: 0.1 }}
                     />
-                  </motion.svg>
+                  </Motion.svg>
                 </span>
               </h1>
             </div>
@@ -372,7 +373,7 @@ export default function NotifPage() {
           <div className="notifToolbar">
             <div className="notifToolbar__filters">
               {NOTIFICATION_FILTERS.map((option) => (
-                <motion.button
+                <Motion.button
                   key={option.value}
                   type="button"
                   className={`notifChip ${
@@ -385,11 +386,11 @@ export default function NotifPage() {
                 >
                   <span>{option.label}</span>
                   <span className="notifChip__count">{counts[option.value]}</span>
-                </motion.button>
+                </Motion.button>
               ))}
             </div>
 
-            <motion.button
+            <Motion.button
               type="button"
               className={`notifToolbar__action ${
                 !hasUnread ? "notifToolbar__action--disabled" : ""
@@ -402,9 +403,9 @@ export default function NotifPage() {
             >
               <CheckCheck className="notifToolbar__actionIcon" />
               <span>Mark all read</span>
-            </motion.button>
+            </Motion.button>
           </div>
-        </motion.section>
+        </Motion.section>
 
         <section className="notifFeed">
           {loading ? (
@@ -413,7 +414,7 @@ export default function NotifPage() {
             ))
           ) : paginatedNotifications.length > 0 ? (
             <AnimatePresence mode="wait">
-              <motion.div
+              <Motion.div
                 key={`${activeFilter}-${currentPage}`}
                 className="notifFeed__page"
                 initial={
@@ -438,7 +439,7 @@ export default function NotifPage() {
                     onOpen={handleOpenNotification}
                   />
                 ))}
-              </motion.div>
+              </Motion.div>
             </AnimatePresence>
           ) : (
             <EmptyState
@@ -450,13 +451,13 @@ export default function NotifPage() {
 
         {!loading && totalPages > 1 && (
           <LayoutGroup>
-            <motion.nav
+            <Motion.nav
               className="notifPagination"
               initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.32 }}
             >
-              <motion.button
+              <Motion.button
                 type="button"
                 className="notifPagination__arrow"
                 whileHover={currentPage > 1 ? { x: -1 } : undefined}
@@ -466,7 +467,7 @@ export default function NotifPage() {
                 disabled={currentPage === 1}
               >
                 <ChevronLeft className="notifPagination__arrowIcon" />
-              </motion.button>
+              </Motion.button>
 
               <div className="notifPagination__list">
                 {Array.from({ length: totalPages }, (_, index) => {
@@ -474,7 +475,7 @@ export default function NotifPage() {
                   const active = currentPage === page;
 
                   return (
-                    <motion.button
+                    <Motion.button
                       key={page}
                       type="button"
                       className={`notifPagination__btn ${
@@ -486,19 +487,19 @@ export default function NotifPage() {
                       onClick={() => handlePageChange(page)}
                     >
                       {active && (
-                        <motion.span
+                        <Motion.span
                           layoutId="notifPaginationActive"
                           className="notifPagination__activeBg"
                           transition={SPRING}
                         />
                       )}
                       <span className="notifPagination__label">{page}</span>
-                    </motion.button>
+                    </Motion.button>
                   );
                 })}
               </div>
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className="notifPagination__arrow"
                 whileHover={currentPage < totalPages ? { x: 1 } : undefined}
@@ -510,8 +511,8 @@ export default function NotifPage() {
                 disabled={currentPage === totalPages}
               >
                 <ChevronRight className="notifPagination__arrowIcon" />
-              </motion.button>
-            </motion.nav>
+              </Motion.button>
+            </Motion.nav>
           </LayoutGroup>
         )}
       </main>

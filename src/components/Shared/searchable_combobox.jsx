@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion} from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import {
   filterLocationOptions,
@@ -58,13 +58,13 @@ export default function SearchableCombobox({
 
   useEffect(() => {
     if (!isOpen) {
-      setQuery(value || "");
+      queueMicrotask(() => setQuery(value || ""));
     }
   }, [isOpen, value]);
 
   useEffect(() => {
     if (disabled) {
-      setIsOpen(false);
+      queueMicrotask(() => setIsOpen(false));
     }
   }, [disabled]);
 
@@ -90,7 +90,9 @@ export default function SearchableCombobox({
   useEffect(() => {
     if (!isOpen) return;
 
-    setHighlightedIndex(showCustomOption ? 0 : filteredOptions.length === 0 ? -1 : 0);
+    queueMicrotask(() =>
+      setHighlightedIndex(showCustomOption ? 0 : filteredOptions.length === 0 ? -1 : 0)
+    );
   }, [filteredOptions.length, isOpen, query, showCustomOption]);
 
   useEffect(() => {
@@ -217,7 +219,7 @@ export default function SearchableCombobox({
     isOpen && !disabled && menuPosition
       ? createPortal(
           <AnimatePresence>
-            <motion.div
+            <Motion.div
               ref={menuRef}
               className="searchableCombo__menu"
               style={{
@@ -240,7 +242,7 @@ export default function SearchableCombobox({
                 role="listbox"
               >
                 {showCustomOption ? (
-                  <motion.button
+                  <Motion.button
                     id={`${listboxId}-option-0`}
                     type="button"
                     className={`searchableCombo__option ${
@@ -259,7 +261,7 @@ export default function SearchableCombobox({
                     transition={SPRING}
                   >
                     {customValueLabel} "{trimmedQuery}"
-                  </motion.button>
+                  </Motion.button>
                 ) : null}
 
                 {filteredOptions.length === 0 && !showCustomOption ? (
@@ -294,7 +296,7 @@ export default function SearchableCombobox({
                   })
                 )}
               </div>
-            </motion.div>
+            </Motion.div>
           </AnimatePresence>,
           document.body
         )

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   EmptySurface,
@@ -13,7 +13,7 @@ import "./messages_workspace.css";
 
 function MessageThreadButton({ thread, active, onSelect }) {
   return (
-    <motion.button
+    <Motion.button
       type="button"
       className={`messagesThread ${active ? "messagesThread--active" : ""}`.trim()}
       whileHover={{ y: -2 }}
@@ -43,7 +43,7 @@ function MessageThreadButton({ thread, active, onSelect }) {
 
         <span className="messagesThread__preview">{thread.preview}</span>
       </span>
-    </motion.button>
+    </Motion.button>
   );
 }
 
@@ -85,7 +85,7 @@ function MessageBubble({ message, ownMessage }) {
     const status = String(message?.metadata?.status || "").trim();
 
     return (
-      <motion.div
+      <Motion.div
         className={`messagesBubbleWrap ${
           ownMessage ? "messagesBubbleWrap--own" : ""
         }`.trim()}
@@ -116,7 +116,7 @@ function MessageBubble({ message, ownMessage }) {
         </div>
 
         <div className="messagesBubble__metaBelow">{metaText}</div>
-      </motion.div>
+      </Motion.div>
     );
   }
 
@@ -125,7 +125,7 @@ function MessageBubble({ message, ownMessage }) {
     const kind = String(message?.metadata?.updateKind || "").trim();
 
     return (
-      <motion.div
+      <Motion.div
         className={`messagesBubbleWrap ${
           ownMessage ? "messagesBubbleWrap--own" : ""
         }`.trim()}
@@ -142,12 +142,12 @@ function MessageBubble({ message, ownMessage }) {
         </div>
 
         <div className="messagesBubble__metaBelow">{metaText}</div>
-      </motion.div>
+      </Motion.div>
     );
   }
 
   return (
-    <motion.div
+    <Motion.div
       className={`messagesBubbleWrap ${
         ownMessage ? "messagesBubbleWrap--own" : ""
       }`.trim()}
@@ -160,7 +160,7 @@ function MessageBubble({ message, ownMessage }) {
       </div>
 
       <div className="messagesBubble__metaBelow">{metaText}</div>
-    </motion.div>
+    </Motion.div>
   );
 }
 
@@ -257,14 +257,14 @@ export default function MessagesWorkspace({ role = "customer" }) {
                 <TypewriterHeading text={titleText} />
               </h1>
 
-              <motion.svg
+              <Motion.svg
                 className="messagesHero__line"
                 viewBox="0 0 250 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
-                  d="M 0,10 Q 62,0 125,10 Q 188,20 250,10"
+                <Motion.path
+                  d="M 0,10 L 250,10"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.2"
@@ -273,7 +273,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 1.05, ease: "easeInOut", delay: 0.14 }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
 
             <p className="messagesHero__sub">{heroSubtext}</p>

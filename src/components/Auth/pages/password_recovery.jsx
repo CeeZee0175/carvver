@@ -1,16 +1,18 @@
 import React, { useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion} from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { requestPasswordRecovery } from "../../../lib/supabase/auth";
 import {
-  buildRecoveryPath,
-  EMAIL_PATTERN,
   InlineStatus,
   PasswordRecoveryShell,
   RecoveryButton,
+} from "./password_recovery_shared";
+import {
+  buildRecoveryPath,
+  EMAIL_PATTERN,
   setStoredRecoveryState,
   useRecoveryLinkBridge,
-} from "./password_recovery_shared";
+} from "./password_recovery_state";
 import "./password_recovery.css";
 
 export default function PasswordRecovery() {
@@ -88,7 +90,7 @@ export default function PasswordRecovery() {
   return (
     <PasswordRecoveryShell title="Recover password">
       {({ inView }) => (
-        <motion.form
+        <Motion.form
           className="passwordRecoveryForm"
           onSubmit={handleSubmit}
           initial={{ opacity: 0, y: 10 }}
@@ -172,7 +174,7 @@ export default function PasswordRecovery() {
               Continue
             </RecoveryButton>
           </div>
-        </motion.form>
+        </Motion.form>
       )}
     </PasswordRecoveryShell>
   );

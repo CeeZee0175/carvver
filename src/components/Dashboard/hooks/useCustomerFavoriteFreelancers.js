@@ -91,7 +91,7 @@ export function useCustomerFavoriteFreelancers({ includeProfiles = true, limit =
           .map((freelancerId) => profileMap.get(freelancerId))
           .filter(Boolean)
       );
-    } catch (nextError) {
+    } catch {
       setFavoriteIds([]);
       setFavoriteFreelancers([]);
       setError("We couldn't load your favorite freelancers.");
@@ -182,7 +182,7 @@ export function useCustomerFavoriteFreelancers({ includeProfiles = true, limit =
         }
 
         return { favorite: !wasFavorite };
-      } catch (nextError) {
+      } catch {
         setFavoriteIds(previousIds);
         if (includeProfiles) {
           setFavoriteFreelancers(previousProfiles);

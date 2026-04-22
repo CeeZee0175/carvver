@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion as Motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight, ChevronDown } from "lucide-react";
 import founderCarl from "../../../assets/Carl Cardinal.jpg";
 import founderShaira from "../../../assets/Shaira Brillantes.jpg";
@@ -8,9 +8,6 @@ import founderAngelo from "../../../assets/Angelo Nollano.jpg";
 import founderJhoanis from "../../../assets/Jhoanis Zuniga.jpg";
 import founderMark from "../../../assets/Mark Caraballe.jpg";
 import "./home_aboutUs.css";
-
-const keepMotionReference = motion;
-void keepMotionReference;
 
 const storySlides = [
   {
@@ -184,7 +181,7 @@ function AccentLine({ className, delay = 0 }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <motion.span
+    <Motion.span
       className={className}
       aria-hidden="true"
       initial={reduceMotion ? { opacity: 1, scaleX: 1 } : { opacity: 0, scaleX: 0.2 }}
@@ -203,7 +200,7 @@ function Reveal({ children, className = "", delay = 0, amount = 0.2 }) {
   const isActive = inView || reduceMotion;
 
   return (
-    <motion.div
+    <Motion.div
       ref={ref}
       className={className}
       initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18, filter: "blur(10px)" }}
@@ -211,7 +208,7 @@ function Reveal({ children, className = "", delay = 0, amount = 0.2 }) {
       transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {typeof children === "function" ? children(isActive) : children}
-    </motion.div>
+    </Motion.div>
   );
 }
 
@@ -265,7 +262,7 @@ function StoryProgressSlider({ items }) {
     <div className="aboutUsStorySlider">
       <div className="aboutUsStorySlider__frame">
         <AnimatePresence mode="wait">
-          <motion.div
+          <Motion.div
             key={activeSlide.id}
             className="aboutUsStorySlider__media"
             initial={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.985 }}
@@ -284,7 +281,7 @@ function StoryProgressSlider({ items }) {
               <h3 className="aboutUsStorySlider__title">{activeSlide.title}</h3>
               <p className="aboutUsStorySlider__text">{activeSlide.text}</p>
             </div>
-          </motion.div>
+          </Motion.div>
         </AnimatePresence>
       </div>
 
@@ -307,7 +304,7 @@ function StoryProgressSlider({ items }) {
               {String(index + 1).padStart(2, "0")}
             </span>
             <span className="aboutUsStorySlider__tabLine" aria-hidden="true">
-              <motion.span
+              <Motion.span
                 className="aboutUsStorySlider__tabFill"
                 animate={{
                   width:
@@ -331,7 +328,7 @@ function AccordionItem({ item, open, onToggle }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <motion.article
+    <Motion.article
       layout
       className={`aboutUsAccordion__item ${open ? "aboutUsAccordion__item--open" : ""}`}
       transition={{ type: "spring", stiffness: 320, damping: 30 }}
@@ -350,7 +347,7 @@ function AccordionItem({ item, open, onToggle }) {
 
       <AnimatePresence initial={false}>
         {open ? (
-          <motion.div
+          <Motion.div
             key="content"
             className="aboutUsAccordion__content"
             initial={reduceMotion ? { opacity: 1, height: "auto" } : { opacity: 0, height: 0 }}
@@ -359,10 +356,10 @@ function AccordionItem({ item, open, onToggle }) {
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           >
             <p className="aboutUsAccordion__body">{item.body}</p>
-          </motion.div>
+          </Motion.div>
         ) : null}
       </AnimatePresence>
-    </motion.article>
+    </Motion.article>
   );
 }
 
@@ -386,7 +383,7 @@ function PillarsSpotlight({ items }) {
   return (
     <div className="aboutUsPillars">
       <AnimatePresence mode="wait">
-        <motion.article
+        <Motion.article
           key={activeItem.id}
           className="aboutUsPillars__panel"
           initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 16, filter: "blur(10px)" }}
@@ -408,7 +405,7 @@ function PillarsSpotlight({ items }) {
           <h3 className="aboutUsPillars__title">{activeItem.title}</h3>
           <p className="aboutUsPillars__text">{activeItem.text}</p>
           </div>
-        </motion.article>
+        </Motion.article>
       </AnimatePresence>
 
       <div className="aboutUsPillars__pager" aria-label="Core pillars navigation">
@@ -486,7 +483,7 @@ function FoundersBand() {
           </button>
 
           <AnimatePresence mode="wait">
-            <motion.article
+            <Motion.article
               key={activeFounder.name}
               className="aboutUsFounders__portrait"
               initial={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.985, y: 10 }}
@@ -536,7 +533,7 @@ function FoundersBand() {
                 <p className="aboutUsFounders__portraitRole">{activeFounder.role}</p>
                 <p className="aboutUsFounders__portraitBio">{activeFounder.bio}</p>
               </div>
-            </motion.article>
+            </Motion.article>
           </AnimatePresence>
 
           <button

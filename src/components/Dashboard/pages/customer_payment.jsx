@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion} from "framer-motion";
 import { LoaderCircle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -87,7 +87,7 @@ function InlineStatus({ tone = "neutral", message }) {
   if (!message) return null;
 
   return (
-    <motion.div
+    <Motion.div
       className={`customerPaymentStatus customerPaymentStatus--${tone}`}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
@@ -95,7 +95,7 @@ function InlineStatus({ tone = "neutral", message }) {
       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
     >
       {message}
-    </motion.div>
+    </Motion.div>
   );
 }
 
@@ -376,13 +376,13 @@ export default function CustomerPayment() {
               <h1 className="customerPaymentHero__title">
                 <TypewriterHeading text="Payment" />
               </h1>
-              <motion.svg
+              <Motion.svg
                 className="customerPaymentHero__line"
                 viewBox="0 0 268 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
+                <Motion.path
                   d="M 0,10 Q 67,0 134,10 Q 201,20 268,10"
                   fill="none"
                   stroke="currentColor"
@@ -392,7 +392,7 @@ export default function CustomerPayment() {
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 1.05, ease: "easeInOut", delay: 0.18 }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
 
             <p className="profileHero__sub">
@@ -492,7 +492,7 @@ export default function CustomerPayment() {
                   <InlineStatus
                     key="payment-success"
                     tone="success"
-                    message="Payment confirmed. Your order is now in motion."
+                    message="Payment confirmed. Your order is now in Motion."
                   />
                 ) : null}
               </AnimatePresence>
@@ -536,7 +536,7 @@ export default function CustomerPayment() {
                     </div>
 
                     <div className="customerPaymentActions">
-                      <motion.button
+                      <Motion.button
                         type="button"
                         className="profileEditor__btn profileEditor__btn--primary customerPaymentAction"
                         whileHover={{ y: -1.5 }}
@@ -551,10 +551,10 @@ export default function CustomerPayment() {
                         <span>
                           {paymentSession?.qrImageUrl ? "Generate new QR" : "Generate QR"}
                         </span>
-                      </motion.button>
+                      </Motion.button>
 
                       {pollPaused && paymentSession?.sessionId ? (
-                        <motion.button
+                        <Motion.button
                           type="button"
                           className="profileEditor__btn profileEditor__btn--ghost customerPaymentAction customerPaymentAction--ghost"
                           whileHover={{ y: -1.5 }}
@@ -567,11 +567,11 @@ export default function CustomerPayment() {
                             <LoaderCircle className="customerPaymentSpinner" />
                           ) : null}
                           <span>Retry status</span>
-                        </motion.button>
+                        </Motion.button>
                       ) : null}
 
                       {showPaidState ? (
-                        <motion.button
+                        <Motion.button
                           type="button"
                           className="profileEditor__btn profileEditor__btn--ghost customerPaymentAction customerPaymentAction--ghost"
                           whileHover={{ y: -1.5 }}
@@ -580,9 +580,9 @@ export default function CustomerPayment() {
                           onClick={() => navigate("/dashboard/customer/orders")}
                         >
                           Open orders
-                        </motion.button>
+                        </Motion.button>
                       ) : (
-                        <motion.button
+                        <Motion.button
                           type="button"
                           className="profileEditor__btn profileEditor__btn--ghost customerPaymentAction customerPaymentAction--ghost"
                           whileHover={{ y: -1.5 }}
@@ -591,7 +591,7 @@ export default function CustomerPayment() {
                           onClick={() => navigate("/dashboard/customer/cart")}
                         >
                           Back to cart
-                        </motion.button>
+                        </Motion.button>
                       )}
                     </div>
                   </div>
@@ -610,7 +610,7 @@ export default function CustomerPayment() {
                     </div>
 
                     <div className="customerPaymentActions">
-                      <motion.button
+                      <Motion.button
                         type="button"
                         className="profileEditor__btn profileEditor__btn--primary customerPaymentAction"
                         whileHover={{ y: -1.5 }}
@@ -625,9 +625,9 @@ export default function CustomerPayment() {
                         <span>
                           {paymentSession?.checkoutUrl ? "Open card checkout again" : "Continue with card"}
                         </span>
-                      </motion.button>
+                      </Motion.button>
 
-                      <motion.button
+                      <Motion.button
                         type="button"
                         className="profileEditor__btn profileEditor__btn--ghost customerPaymentAction customerPaymentAction--ghost"
                         whileHover={{ y: -1.5 }}
@@ -636,7 +636,7 @@ export default function CustomerPayment() {
                         onClick={() => navigate("/dashboard/customer/cart")}
                       >
                         Back to cart
-                      </motion.button>
+                      </Motion.button>
                     </div>
                   </div>
                 </div>

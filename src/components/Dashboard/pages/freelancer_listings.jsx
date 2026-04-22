@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import "./profile.css";
@@ -137,13 +137,13 @@ export default function FreelancerListings() {
                 <h1 className="freelancerMarketplaceHero__title">
                   <TypewriterHeading text="My Listings" />
                 </h1>
-                <motion.svg
+                <Motion.svg
                   className="freelancerMarketplaceHero__line"
                   viewBox="0 0 300 20"
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <motion.path
+                  <Motion.path
                     d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                     fill="none"
                     stroke="currentColor"
@@ -153,7 +153,7 @@ export default function FreelancerListings() {
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 1.05, ease: "easeInOut", delay: 0.14 }}
                   />
-                </motion.svg>
+                </Motion.svg>
               </div>
 
               <p className="freelancerMarketplaceHero__sub">
@@ -162,7 +162,7 @@ export default function FreelancerListings() {
             </div>
 
             <div className="freelancerListingActions">
-              <motion.button
+              <Motion.button
                 type="button"
                 className="freelancerListingActionBtn"
                 whileHover={{ y: -1.5 }}
@@ -171,7 +171,7 @@ export default function FreelancerListings() {
                 onClick={() => navigate("/dashboard/freelancer/post-listing")}
               >
                 Create listing
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
 
@@ -270,7 +270,7 @@ export default function FreelancerListings() {
                 const deleteBusy = busyKey === `delete:${listing.id}`;
 
                 return (
-                  <motion.article
+                  <Motion.article
                     key={listing.id}
                     className="freelancerListingCard"
                     initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
@@ -314,7 +314,7 @@ export default function FreelancerListings() {
                       </div>
 
                       <div className="freelancerListingCard__actions">
-                        <motion.button
+                        <Motion.button
                           type="button"
                           className="freelancerListingActionBtn--ghost"
                           whileHover={{ y: -1.5 }}
@@ -325,10 +325,10 @@ export default function FreelancerListings() {
                           }
                         >
                           Edit
-                        </motion.button>
+                        </Motion.button>
 
                         {listing.is_published ? (
-                          <motion.button
+                          <Motion.button
                             type="button"
                             className="freelancerListingActionBtn"
                             whileHover={{ y: -1.5 }}
@@ -339,10 +339,10 @@ export default function FreelancerListings() {
                             }
                           >
                             View listing
-                          </motion.button>
+                          </Motion.button>
                         ) : (
                           <>
-                            <motion.button
+                            <Motion.button
                               type="button"
                               className="freelancerListingActionBtn"
                               whileHover={{ y: -1.5 }}
@@ -352,9 +352,9 @@ export default function FreelancerListings() {
                               disabled={publishBusy}
                             >
                               {publishBusy ? "Publishing..." : "Publish"}
-                            </motion.button>
+                            </Motion.button>
 
-                            <motion.button
+                            <Motion.button
                               type="button"
                               className="freelancerListingActionBtn--ghost"
                               whileHover={{ y: -1.5 }}
@@ -364,12 +364,12 @@ export default function FreelancerListings() {
                               disabled={deleteBusy}
                             >
                               {deleteBusy ? "Deleting..." : "Delete draft"}
-                            </motion.button>
+                            </Motion.button>
                           </>
                         )}
                       </div>
                     </div>
-                  </motion.article>
+                  </Motion.article>
                 );
               })}
             </div>

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -18,6 +18,7 @@ import {
   TypewriterHeading,
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
+import "./browse_categories.css";
 import "./profile.css";
 
 const ORDER_FILTERS = [
@@ -52,34 +53,15 @@ function formatOrderPrice(value) {
   return `PHP ${Number(value || 0).toLocaleString()}`;
 }
 
-function OrderStat({ label, value }) {
-  return (
-    <div className="profileMiniStat profileMiniStat--open">
-      <span className="profileMiniStat__label">{label}</span>
-      <strong className="profileMiniStat__value">{value}</strong>
-    </div>
-  );
-}
-
 export default function CustomerOrders() {
   const navigate = useNavigate();
-  const { loading, orders, savedCount, error } = useCustomerOrdersData();
+  const { loading, orders, error } = useCustomerOrdersData();
   const [filter, setFilter] = useState("all");
 
   const filteredOrders = useMemo(() => {
     if (filter === "all") return orders;
     return orders.filter((order) => order.status === filter);
   }, [filter, orders]);
-
-  const stats = useMemo(
-    () => ({
-      total: orders.length,
-      active: orders.filter((order) => ["pending", "active"].includes(order.status))
-        .length,
-      completed: orders.filter((order) => order.status === "completed").length,
-    }),
-    [orders]
-  );
 
   return (
     <CustomerDashboardFrame mainClassName="profilePage profilePage--details customerOrdersPage">
@@ -93,20 +75,20 @@ export default function CustomerOrders() {
       </Reveal>
 
       <Reveal delay={0.04}>
-        <section className="profileHero">
+        <section className="profileHero profileHero--centered">
           <div className="profileHero__heading">
             <div className="profileHero__titleWrap">
               <h1 className="profileHero__title">
                 <span className="customerOrdersPage__titleText">
                   <TypewriterHeading text="Orders" />
-                  <motion.svg
+                  <Motion.svg
                     className="profileHero__line customerOrdersPage__line"
                     viewBox="0 0 300 20"
                     preserveAspectRatio="none"
                     aria-hidden="true"
                   >
-                    <motion.path
-                      d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                    <Motion.path
+                      d="M 0,10 L 300,10"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2.2"
@@ -115,7 +97,7 @@ export default function CustomerOrders() {
                       animate={{ pathLength: 1, opacity: 1 }}
                       transition={{ duration: 1.05, ease: "easeInOut", delay: 0.2 }}
                     />
-                  </motion.svg>
+                  </Motion.svg>
                 </span>
               </h1>
             </div>
@@ -123,13 +105,6 @@ export default function CustomerOrders() {
             <p className="profileHero__sub">
               See every order in one place and check what still needs your attention.
             </p>
-          </div>
-
-          <div className="profileHero__stats profileHero__stats--open">
-            <OrderStat label="Total" value={stats.total} />
-            <OrderStat label="Active" value={stats.active} />
-            <OrderStat label="Completed" value={stats.completed} />
-            <OrderStat label="Bookmarked Items" value={savedCount} />
           </div>
         </section>
       </Reveal>
@@ -157,7 +132,7 @@ export default function CustomerOrders() {
                 Narrow the order view before you scan the full history below.
               </p>
             </div>
-            <motion.button
+            <Motion.button
               type="button"
               className="profileSection__linkBtn"
               whileHover={{ x: 1.5 }}
@@ -167,7 +142,7 @@ export default function CustomerOrders() {
             >
               <span>Back to profile</span>
               <ArrowRight className="profileSection__linkIcon" />
-            </motion.button>
+            </Motion.button>
           </div>
 
           <div className="profileFilterGroup profileFilterGroup--scroll">
@@ -236,11 +211,16 @@ export default function CustomerOrders() {
                 const packageDeliveryDays = Number(
                   order.selected_package_delivery_time_days || 0
                 );
-
                 return (
-                  <article
+                  <Motion.article
                     key={order.id}
-                    className="profileOrderCard"
+                    className="browseServiceCard customerOrderListingCard"
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.38 }}
+                    whileHover={{ y: -5 }}
+                    whileTap={{ scale: 0.985 }}
                     onClick={() => navigate(`/dashboard/customer/orders/${order.id}`)}
                     role="button"
                     tabIndex={0}
@@ -251,51 +231,119 @@ export default function CustomerOrders() {
                       }
                     }}
                   >
-                    <div className="profileOrderCard__top">
-                      <div>
+                    <div className="browseServiceCard__media customerOrderListingCard__media">
+                      {order.previewMedia?.publicUrl ? (
+                        order.previewMedia.media_kind === "video" ? (
+                          <video
+                            className="browseServiceCard__mediaAsset"
+                            src={order.previewMedia.publicUrl}
+                            muted
+                            playsInline
+                          />
+                        ) : (
+                          <img
+                            className="browseServiceCard__mediaAsset"
+                            src={order.previewMedia.publicUrl}
+                            alt={order.services?.title || "Order service preview"}
+                          />
+                        )
+                      ) : (
+                        <div className="browseServiceCard__mediaBg">
+                          <span className="browseServiceCard__mediaIconWrap" aria-hidden="true">
+                            <Package className="browseServiceCard__mediaIcon" />
+                          </span>
+                          {packageName ? (
+                            <span className="browseServiceCard__mediaMeta">{packageName}</span>
+                          ) : null}
+                        </div>
+                      )}
+
+                      <div className="browseServiceCard__mediaTop">
                         <span className={`profileOrderStatus profileOrderStatus--${meta.tone}`}>
                           {meta.label}
                         </span>
-                        <h3 className="profileOrderCard__title">
-                          {order.services?.title || "Service unavailable"}
-                        </h3>
-                        {packageName ? (
-                          <p className="profileCard__supportingCopy">
-                            {packageName}
-                            {packageSummary ? ` · ${packageSummary}` : ""}
-                          </p>
-                        ) : null}
                       </div>
-                      <strong className="profileOrderCard__price">
-                        {formatOrderPrice(order.total_price)}
-                      </strong>
                     </div>
 
-                    <div className="profileOrderCard__meta">
-                      <span className="profileOrderCard__metaItem">
-                        <Sparkles className="profileOrderCard__metaIcon" />
-                        {order.services?.category || "Uncategorized service"}
-                      </span>
-                      <span className="profileOrderCard__metaItem">
-                        <Package className="profileOrderCard__metaIcon" />
-                        {freelancerName}
-                      </span>
+                    <div className="browseServiceCard__body">
+                      <div className="browseServiceCard__creatorRow">
+                        <div className="browseServiceCard__creatorMain">
+                          <div className="browseServiceCard__avatar">
+                            {String(freelancerName || "F").charAt(0).toUpperCase()}
+                          </div>
+                          <div className="browseServiceCard__creatorBlock">
+                            <span className="browseServiceCard__creator">{freelancerName}</span>
+                            <div className="browseServiceCard__trustRow">
+                              <span className="browseServiceCard__trustChip browseServiceCard__trustChip--verified">
+                                Order history
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <h3 className="browseServiceCard__title">
+                        {order.services?.title || "Service unavailable"}
+                      </h3>
+
                       {packageName ? (
+                        <p className="browseServiceCard__summary">
+                          {packageName}
+                          {packageSummary ? ` · ${packageSummary}` : ""}
+                        </p>
+                      ) : (
+                        <p className="browseServiceCard__summary">
+                          Review the booking details and current fulfillment status.
+                        </p>
+                      )}
+
+                      <div className="profileOrderCard__meta customerOrderListingCard__meta">
                         <span className="profileOrderCard__metaItem">
-                          <Package className="profileOrderCard__metaIcon" />
-                          {packageDeliveryDays > 0
-                            ? `${packageName} · ${packageDeliveryDays} day${
-                                packageDeliveryDays === 1 ? "" : "s"
-                              }`
-                            : packageName}
+                          <Sparkles className="profileOrderCard__metaIcon" />
+                          {order.services?.category || "Uncategorized service"}
                         </span>
-                      ) : null}
-                      <span className="profileOrderCard__metaItem">
-                        <ShoppingBag className="profileOrderCard__metaIcon" />
-                        {formatOrderDate(order.created_at)}
-                      </span>
+                        {packageName ? (
+                          <span className="profileOrderCard__metaItem">
+                            <Package className="profileOrderCard__metaIcon" />
+                            {packageDeliveryDays > 0
+                              ? `${packageName} · ${packageDeliveryDays} day${
+                                  packageDeliveryDays === 1 ? "" : "s"
+                                }`
+                              : packageName}
+                          </span>
+                        ) : null}
+                        <span className="profileOrderCard__metaItem">
+                          <ShoppingBag className="profileOrderCard__metaIcon" />
+                          {formatOrderDate(order.created_at)}
+                        </span>
+                      </div>
+
+                      <div className="browseServiceCard__bottom">
+                        <div className="browseServiceCard__offerRow">
+                          <div className="browseServiceCard__priceWrap">
+                            <span className="browseServiceCard__priceFrom">Total</span>
+                            <span className="browseServiceCard__price">
+                              {formatOrderPrice(order.total_price)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <Motion.button
+                          type="button"
+                          className="browseServiceCard__cartBtn customerOrderListingCard__detailBtn"
+                          whileHover={{ x: 1 }}
+                          whileTap={{ scale: 0.96 }}
+                          transition={PROFILE_SPRING}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            navigate(`/dashboard/customer/orders/${order.id}`);
+                          }}
+                        >
+                          <span>View details</span>
+                        </Motion.button>
+                      </div>
                     </div>
-                  </article>
+                  </Motion.article>
                 );
               })}
             </div>

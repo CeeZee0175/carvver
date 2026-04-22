@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   AnimatePresence,
-  LayoutGroup,
-  motion,
+  LayoutGroup, motion as Motion,
   useInView,
   useReducedMotion,
 } from "framer-motion";
@@ -94,8 +93,8 @@ function TypewriterTitle({ id, text = "How It Works", active }) {
     startedRef.current = true;
 
     if (reduceMotion) {
-      setDisplayText(text);
-      return;
+      queueMicrotask(() => setDisplayText(text));
+      return undefined;
     }
 
     let timeoutId;
@@ -122,7 +121,7 @@ function TypewriterTitle({ id, text = "How It Works", active }) {
           <span>{displayText}</span>
 
           {!reduceMotion && (
-            <motion.span
+            <Motion.span
               className="homeThree__cursor"
               aria-hidden="true"
               animate={{ opacity: [1, 0, 1] }}
@@ -133,17 +132,17 @@ function TypewriterTitle({ id, text = "How It Works", active }) {
               }}
             >
               |
-            </motion.span>
+            </Motion.span>
           )}
         </h2>
 
-        <motion.svg
+        <Motion.svg
           className="homeThree__underline"
           viewBox="0 0 300 20"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
-          <motion.path
+          <Motion.path
             fill="none"
             stroke="currentColor"
             strokeWidth="2.2"
@@ -163,7 +162,7 @@ function TypewriterTitle({ id, text = "How It Works", active }) {
               opacity: { duration: 0.35 },
             }}
           />
-        </motion.svg>
+        </Motion.svg>
       </div>
     </div>
   );
@@ -175,14 +174,14 @@ function RoleToggle({ value, onChange }) {
       <div className="homeThreeToggle__inner">
         <div className="homeThreeToggle__slot">
           {value === "customer" && (
-            <motion.span
+            <Motion.span
               layoutId="homeThreeToggleLine"
               className="homeThreeToggle__line"
               transition={{ type: "spring", stiffness: 420, damping: 34 }}
             />
           )}
 
-          <motion.button
+          <Motion.button
             type="button"
             role="tab"
             aria-selected={value === "customer"}
@@ -192,7 +191,7 @@ function RoleToggle({ value, onChange }) {
             whileTap={{ scale: 0.985 }}
           >
             Customer
-          </motion.button>
+          </Motion.button>
         </div>
 
         <span className="homeThreeToggle__sep" aria-hidden="true">
@@ -201,14 +200,14 @@ function RoleToggle({ value, onChange }) {
 
         <div className="homeThreeToggle__slot">
           {value === "provider" && (
-            <motion.span
+            <Motion.span
               layoutId="homeThreeToggleLine"
               className="homeThreeToggle__line"
               transition={{ type: "spring", stiffness: 420, damping: 34 }}
             />
           )}
 
-          <motion.button
+          <Motion.button
             type="button"
             role="tab"
             aria-selected={value === "provider"}
@@ -218,7 +217,7 @@ function RoleToggle({ value, onChange }) {
             whileTap={{ scale: 0.985 }}
           >
             Service Providers
-          </motion.button>
+          </Motion.button>
         </div>
       </div>
     </div>
@@ -231,13 +230,13 @@ function VerticalCardStack({ cards, stackKey, inView }) {
   const [dragReady, setDragReady] = useState(false);
 
   useEffect(() => {
-    setActiveIndex(0);
+    queueMicrotask(() => setActiveIndex(0));
   }, [stackKey]);
 
   useEffect(() => {
     if (!inView) return;
 
-    setDragReady(false);
+    queueMicrotask(() => setDragReady(false));
 
     const timer = setTimeout(() => {
       setDragReady(true);
@@ -273,7 +272,7 @@ function VerticalCardStack({ cards, stackKey, inView }) {
 
   return (
     <div className="homeThreeStack">
-      <motion.div
+      <Motion.div
         className="homeThreeStack__stage"
         initial={{ opacity: 0, y: 12 }}
         animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -286,7 +285,7 @@ function VerticalCardStack({ cards, stackKey, inView }) {
               const Icon = card.Icon;
 
               return (
-                <motion.article
+                <Motion.article
                   key={`${stackKey}-${card.id}`}
                   layout="position"
                   className={`homeThreeCard ${isTopCard ? "homeThreeCard--top" : ""}`}
@@ -340,12 +339,12 @@ function VerticalCardStack({ cards, stackKey, inView }) {
                   {isTopCard && dragReady && (
                     <div className="homeThreeCard__hint">Drag up or down</div>
                   )}
-                </motion.article>
+                </Motion.article>
               );
             })}
           </AnimatePresence>
         </LayoutGroup>
-      </motion.div>
+      </Motion.div>
 
       <div className="homeThreeDots" aria-label="Stack navigation">
         {cards.map((_, index) => (
@@ -374,13 +373,13 @@ export default function HomeThree() {
       <div className="homeThree__inner">
         <TypewriterTitle id="homeThree-title" text="How It Works" active={inView} />
 
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5, ease: [0.2, 0.95, 0.2, 1], delay: 0.18 }}
         >
           <RoleToggle value={role} onChange={setRole} />
-        </motion.div>
+        </Motion.div>
 
         <VerticalCardStack cards={cards} stackKey={role} inView={inView} />
       </div>

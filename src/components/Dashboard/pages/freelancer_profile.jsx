@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import {
   MessageCircle,
   Settings,
@@ -265,13 +265,13 @@ export default function FreelancerProfile() {
               <h1 className="profileHero__title">
                 <TypewriterHeading text="Profile" />
               </h1>
-              <motion.svg
+              <Motion.svg
                 className="profileHero__line"
                 viewBox="0 0 300 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
+                <Motion.path
                   d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                   fill="none"
                   stroke="currentColor"
@@ -281,7 +281,7 @@ export default function FreelancerProfile() {
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 1.05, ease: "easeInOut", delay: 0.18 }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
             <p className="profileHero__sub">
               Keep your name, work, and location in one place so people can understand
@@ -381,7 +381,7 @@ export default function FreelancerProfile() {
 
               <div className="profileEditor__actions">
                 {!editing ? (
-                  <motion.button
+                  <Motion.button
                     type="button"
                     className="profileEditor__btn profileEditor__btn--primary"
                     whileHover={{ y: -1 }}
@@ -391,10 +391,10 @@ export default function FreelancerProfile() {
                   >
                     <UserRound className="profileEditor__btnIcon" />
                     <span>Edit profile</span>
-                  </motion.button>
+                  </Motion.button>
                 ) : (
                   <>
-                    <motion.button
+                    <Motion.button
                       type="button"
                       className="profileEditor__btn profileEditor__btn--ghost"
                       whileHover={{ y: -1 }}
@@ -407,8 +407,8 @@ export default function FreelancerProfile() {
                       disabled={saving}
                     >
                       Cancel
-                    </motion.button>
-                    <motion.button
+                    </Motion.button>
+                    <Motion.button
                       type="submit"
                       className="profileEditor__btn profileEditor__btn--primary"
                       whileHover={{ y: -1 }}
@@ -417,7 +417,7 @@ export default function FreelancerProfile() {
                       disabled={saving}
                     >
                       <span>{saving ? "Saving..." : "Save changes"}</span>
-                    </motion.button>
+                    </Motion.button>
                   </>
                 )}
               </div>
@@ -722,7 +722,7 @@ export default function FreelancerProfile() {
 
       <Reveal delay={0.14}>
         <section className="profileNavBand">
-          <motion.button
+          <Motion.button
             type="button"
             className="profileNavBand__item"
             whileHover={{ y: -2 }}
@@ -732,9 +732,9 @@ export default function FreelancerProfile() {
           >
             <UserRound className="profileNavBand__icon" />
             <span className="profileNavBand__label">Dashboard</span>
-          </motion.button>
+          </Motion.button>
 
-          <motion.button
+          <Motion.button
             type="button"
             className="profileNavBand__item"
             whileHover={{ y: -2 }}
@@ -744,9 +744,9 @@ export default function FreelancerProfile() {
           >
             <MessageCircle className="profileNavBand__icon" />
             <span className="profileNavBand__label">Messages</span>
-          </motion.button>
+          </Motion.button>
 
-          <motion.button
+          <Motion.button
             type="button"
             className="profileNavBand__item"
             whileHover={{ y: -2 }}
@@ -756,7 +756,7 @@ export default function FreelancerProfile() {
           >
             <Settings className="profileNavBand__icon" />
             <span className="profileNavBand__label">Settings</span>
-          </motion.button>
+          </Motion.button>
         </section>
       </Reveal>
 

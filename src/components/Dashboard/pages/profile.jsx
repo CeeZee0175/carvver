@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -80,16 +80,6 @@ function ReviewStars({ rating }) {
           }`}
         />
       ))}
-    </div>
-  );
-}
-
-function StatMiniCard({ label, value, hint, className = "" }) {
-  return (
-    <div className={`profileMiniStat ${className}`.trim()}>
-      <span className="profileMiniStat__label">{label}</span>
-      <strong className="profileMiniStat__value">{value}</strong>
-      {hint ? <span className="profileMiniStat__hint">{hint}</span> : null}
     </div>
   );
 }
@@ -192,7 +182,6 @@ export default function Profile() {
       percent: total > 0 ? Math.round((completed / total) * 100) : 0,
     };
   }, [progressTasks]);
-  const earnedBadgeCount = earnedAchievements.length;
   const averageRatingLabel =
     metrics.reviewCount > 0 ? metrics.averageRating.toFixed(1) : "--";
   const avatarSrc = removeAvatar
@@ -370,20 +359,20 @@ export default function Profile() {
       </Reveal>
 
       <Reveal delay={0.04}>
-        <section className="profileHero">
+        <section className="profileHero profileHero--centered">
           <div className="profileHero__heading">
             <div className="profileHero__titleWrap">
               <h1 className="profileHero__title">
                 <TypewriterHeading text="Profile" />
               </h1>
-              <motion.svg
+              <Motion.svg
                 className="profileHero__line"
                 viewBox="0 0 300 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
-                  d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                <Motion.path
+                  d="M 0,10 L 300,10"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.2"
@@ -392,35 +381,12 @@ export default function Profile() {
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 1.05, ease: "easeInOut", delay: 0.18 }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
 
             <p className="profileHero__sub">
               Keep your identity, progress, and earned trust signals together in one place.
             </p>
-          </div>
-
-          <div className="profileHero__stats profileHero__stats--open">
-            <StatMiniCard
-              className="profileMiniStat--open"
-              label="Saved"
-              value={loading ? "--" : metrics.savedCount}
-            />
-            <StatMiniCard
-              className="profileMiniStat--open"
-              label="Orders"
-              value={loading ? "--" : metrics.totalOrders}
-            />
-            <StatMiniCard
-              className="profileMiniStat--open"
-              label="Reviews"
-              value={loading ? "--" : metrics.reviewCount}
-            />
-            <StatMiniCard
-              className="profileMiniStat--open"
-              label="Earned"
-              value={loading ? "--" : earnedBadgeCount}
-            />
           </div>
         </section>
       </Reveal>
@@ -495,7 +461,7 @@ export default function Profile() {
               </p>
 
               {displayedBadges.length > 0 || (editing && hasSelectableBadges) ? (
-                <motion.div
+                <Motion.div
                   className="profileIdentity__badges"
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -503,7 +469,7 @@ export default function Profile() {
                   transition={{ duration: 0.42, delay: 0.08 }}
                 >
                   {displayedBadges.map((achievement, index) => (
-                    <motion.span
+                    <Motion.span
                       key={achievement.id}
                       className={`profileIdentity__badge ${
                         editing ? "profileIdentity__badge--editable" : ""
@@ -531,11 +497,11 @@ export default function Profile() {
                           <Minus className="profileIdentity__badgeControlIcon" />
                         </button>
                       ) : null}
-                    </motion.span>
+                    </Motion.span>
                   ))}
 
                   {canEditDisplayedBadges ? (
-                    <motion.button
+                    <Motion.button
                       type="button"
                       className="profileIdentity__badgeAdder"
                       initial={{ opacity: 0, y: 8, scale: 0.94 }}
@@ -552,9 +518,9 @@ export default function Profile() {
                       aria-label="Add a badge to your profile"
                     >
                       <Plus className="profileIdentity__badgeAdderIcon" />
-                    </motion.button>
+                    </Motion.button>
                   ) : null}
-                </motion.div>
+                </Motion.div>
               ) : null}
 
               <div className="profileIdentity__facts">
@@ -589,7 +555,7 @@ export default function Profile() {
 
               <div className="profileEditor__actions">
                 {!editing ? (
-                  <motion.button
+                  <Motion.button
                     type="button"
                     className="profileEditor__btn profileEditor__btn--primary"
                     whileHover={{ y: -1 }}
@@ -599,10 +565,10 @@ export default function Profile() {
                   >
                     <PenTool className="profileEditor__btnIcon" />
                     <span>Edit profile</span>
-                  </motion.button>
+                  </Motion.button>
                 ) : (
                   <>
-                    <motion.button
+                    <Motion.button
                       type="button"
                       className="profileEditor__btn profileEditor__btn--ghost"
                       whileHover={{ y: -1 }}
@@ -611,8 +577,8 @@ export default function Profile() {
                       onClick={handleEditToggle}
                     >
                       Cancel
-                    </motion.button>
-                    <motion.button
+                    </Motion.button>
+                    <Motion.button
                       type="submit"
                       className="profileEditor__btn profileEditor__btn--primary"
                       whileHover={{ y: -1 }}
@@ -621,7 +587,7 @@ export default function Profile() {
                       disabled={saving}
                     >
                       {saving ? "Saving..." : "Save changes"}
-                    </motion.button>
+                    </Motion.button>
                   </>
                 )}
               </div>
@@ -825,7 +791,7 @@ export default function Profile() {
 
       <Reveal delay={0.12}>
         <section className="profileNavBand">
-          <motion.button
+          <Motion.button
             type="button"
             className="profileNavBand__item"
             whileHover={{ y: -2 }}
@@ -835,9 +801,9 @@ export default function Profile() {
           >
             <ShoppingBag className="profileNavBand__icon" />
             <span className="profileNavBand__label">Orders</span>
-          </motion.button>
+          </Motion.button>
 
-          <motion.button
+          <Motion.button
             type="button"
             className="profileNavBand__item"
             whileHover={{ y: -2 }}
@@ -847,9 +813,9 @@ export default function Profile() {
           >
             <Bookmark className="profileNavBand__icon" />
             <span className="profileNavBand__label">Favorites</span>
-          </motion.button>
+          </Motion.button>
 
-          <motion.button
+          <Motion.button
             type="button"
             className="profileNavBand__item"
             whileHover={{ y: -2 }}
@@ -859,7 +825,7 @@ export default function Profile() {
           >
             <Trophy className="profileNavBand__icon" />
             <span className="profileNavBand__label">Achievements</span>
-          </motion.button>
+          </Motion.button>
         </section>
       </Reveal>
 
@@ -989,7 +955,7 @@ export default function Profile() {
                 Review the badges you earned and jump into the full catalog when needed.
               </p>
             </div>
-            <motion.button
+            <Motion.button
               type="button"
               className="profileSection__linkBtn"
               whileHover={{ x: 1.5 }}
@@ -999,7 +965,7 @@ export default function Profile() {
             >
               <span>View all achievements</span>
               <ArrowRight className="profileSection__linkIcon" />
-            </motion.button>
+            </Motion.button>
           </div>
 
           {loading ? (
@@ -1013,7 +979,7 @@ export default function Profile() {
           ) : (
             <div className="profileAchievementGrid">
               {previewAchievements.map((achievement, index) => (
-                <motion.article
+                <Motion.article
                   key={achievement.id}
                   className={`profileAchievement ${
                     achievement.legendary ? "profileAchievement--legendary" : ""
@@ -1058,7 +1024,7 @@ export default function Profile() {
                         : "Earned through your activity"}
                     </span>
                   </div>
-                </motion.article>
+                </Motion.article>
               ))}
             </div>
           )}
@@ -1067,14 +1033,14 @@ export default function Profile() {
 
       <AnimatePresence>
         {badgePickerOpen && editing ? (
-          <motion.div
+          <Motion.div
             className="profileBadgePicker"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setBadgePickerOpen(false)}
           >
-            <motion.div
+            <Motion.div
               className="profileBadgePicker__dialog"
               initial={{ opacity: 0, y: 18, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -1104,7 +1070,7 @@ export default function Profile() {
                   const isDisplayed = showcaseIds.includes(achievement.id);
 
                   return (
-                    <motion.button
+                    <Motion.button
                       key={achievement.id}
                       type="button"
                       className={`profileBadgePicker__option ${
@@ -1132,12 +1098,12 @@ export default function Profile() {
                           <Check className="profileBadgePicker__selectedIcon" />
                         </span>
                       ) : null}
-                    </motion.button>
+                    </Motion.button>
                   );
                 })}
               </div>
-            </motion.div>
-          </motion.div>
+            </Motion.div>
+          </Motion.div>
         ) : null}
       </AnimatePresence>
     </CustomerDashboardFrame>

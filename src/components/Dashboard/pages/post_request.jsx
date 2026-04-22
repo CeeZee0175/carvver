@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion} from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   ChevronDown,
@@ -499,7 +499,7 @@ export default function PostRequest() {
             <div>
               <h2 className="requestComposer__title">Tell freelancers what you need</h2>
             </div>
-            <motion.button
+            <Motion.button
               type="button"
               className="requestComposer__backLink"
               whileHover={{ y: -1.5 }}
@@ -508,7 +508,7 @@ export default function PostRequest() {
               onClick={() => navigate("/dashboard/customer")}
             >
               Back to dashboard
-            </motion.button>
+            </Motion.button>
           </div>
 
           <div className="requestGrid">
@@ -528,7 +528,7 @@ export default function PostRequest() {
             <div className="requestField" ref={categoryWrapRef}>
               <span className="requestField__label">Category</span>
               <div className={`requestDropdown ${categoryOpen ? "requestDropdown--open" : ""}`}>
-                <motion.button
+                <Motion.button
                   ref={categoryButtonRef}
                   type="button"
                   className="requestField__input requestDropdown__trigger"
@@ -550,11 +550,11 @@ export default function PostRequest() {
                     {selectedCategoryLabel || "Choose a category"}
                   </span>
                   <ChevronDown className="requestDropdown__chevron" aria-hidden="true" />
-                </motion.button>
+                </Motion.button>
 
                 <AnimatePresence>
                   {categoryOpen ? (
-                    <motion.div
+                    <Motion.div
                       id={categoryListId}
                       className="requestDropdown__menu"
                       role="listbox"
@@ -566,7 +566,7 @@ export default function PostRequest() {
                       {CATEGORY_OPTIONS.map((option, index) => {
                         const selected = option === formValues.category;
                         return (
-                          <motion.button
+                          <Motion.button
                             key={option}
                             ref={(node) => {
                               categoryOptionRefs.current[index] = node;
@@ -583,10 +583,10 @@ export default function PostRequest() {
                             onKeyDown={(event) => handleCategoryOptionKeyDown(event, index)}
                           >
                             {option}
-                          </motion.button>
+                          </Motion.button>
                         );
                       })}
-                    </motion.div>
+                    </Motion.div>
                   ) : null}
                 </AnimatePresence>
               </div>
@@ -595,7 +595,7 @@ export default function PostRequest() {
             <div className="requestField" ref={deadlineWrapRef}>
               <span className="requestField__label">Deadline</span>
               <div className={`requestDateField ${deadlineOpen ? "requestDateField--open" : ""}`}>
-                <motion.button
+                <Motion.button
                   ref={deadlineButtonRef}
                   type="button"
                   className="requestField__input requestDateField__trigger"
@@ -619,11 +619,11 @@ export default function PostRequest() {
                       : "Choose a deadline"}
                   </span>
                   <ChevronDown className="requestDateField__chevron" aria-hidden="true" />
-                </motion.button>
+                </Motion.button>
 
                 <AnimatePresence>
                   {deadlineOpen ? (
-                    <motion.div
+                    <Motion.div
                       id={deadlineGridId}
                       className="requestCalendar"
                       role="dialog"
@@ -634,7 +634,7 @@ export default function PostRequest() {
                       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     >
                       <div className="requestCalendar__header">
-                        <motion.button
+                        <Motion.button
                           type="button"
                           className="requestCalendar__nav"
                           whileHover={{ y: -1.5 }}
@@ -643,10 +643,10 @@ export default function PostRequest() {
                           onClick={() => shiftVisibleMonth(-1)}
                         >
                           <ChevronLeft aria-hidden="true" />
-                        </motion.button>
+                        </Motion.button>
 
                         <AnimatePresence mode="wait" initial={false}>
-                          <motion.strong
+                          <Motion.strong
                             key={formatMonthLabel(visibleMonth)}
                             className="requestCalendar__month"
                             initial={{ opacity: 0, y: 6, filter: "blur(6px)" }}
@@ -655,10 +655,10 @@ export default function PostRequest() {
                             transition={{ duration: 0.18 }}
                           >
                             {formatMonthLabel(visibleMonth)}
-                          </motion.strong>
+                          </Motion.strong>
                         </AnimatePresence>
 
-                        <motion.button
+                        <Motion.button
                           type="button"
                           className="requestCalendar__nav"
                           whileHover={{ y: -1.5 }}
@@ -667,7 +667,7 @@ export default function PostRequest() {
                           onClick={() => shiftVisibleMonth(1)}
                         >
                           <ChevronRight aria-hidden="true" />
-                        </motion.button>
+                        </Motion.button>
                       </div>
 
                       <div className="requestCalendar__weekdays">
@@ -678,7 +678,7 @@ export default function PostRequest() {
                         ))}
                       </div>
 
-                      <motion.div
+                      <Motion.div
                         key={`${visibleMonth.getFullYear()}-${visibleMonth.getMonth()}`}
                         className="requestCalendar__grid"
                         initial={{ opacity: 0, y: 8 }}
@@ -689,7 +689,7 @@ export default function PostRequest() {
                         {calendarDays.map((day) => {
                           const isSelected = day.value === formValues.timeline;
                           return (
-                            <motion.button
+                            <Motion.button
                               key={day.value}
                               type="button"
                               className={`requestCalendar__day ${
@@ -704,11 +704,11 @@ export default function PostRequest() {
                               disabled={day.isDisabled}
                             >
                               {day.dateNumber}
-                            </motion.button>
+                            </Motion.button>
                           );
                         })}
-                      </motion.div>
-                    </motion.div>
+                      </Motion.div>
+                    </Motion.div>
                   ) : null}
                 </AnimatePresence>
               </div>
@@ -784,7 +784,7 @@ export default function PostRequest() {
                   disabled={submitting}
                 />
 
-                <motion.button
+                <Motion.button
                   type="button"
                   className="requestUpload__button"
                   whileHover={{ y: -1.5 }}
@@ -794,12 +794,12 @@ export default function PostRequest() {
                   disabled={submitting}
                 >
                   Add photos or video
-                </motion.button>
+                </Motion.button>
               </div>
 
               <AnimatePresence>
                 {attachments.length > 0 ? (
-                  <motion.div
+                  <Motion.div
                     className="requestMediaGrid"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -807,7 +807,7 @@ export default function PostRequest() {
                     transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
                   >
                     {attachments.map((item) => (
-                      <motion.article
+                      <Motion.article
                         key={item.id}
                         className="requestMediaCard"
                         initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
@@ -847,9 +847,9 @@ export default function PostRequest() {
                         >
                           Remove
                         </button>
-                      </motion.article>
+                      </Motion.article>
                     ))}
-                  </motion.div>
+                  </Motion.div>
                 ) : null}
               </AnimatePresence>
             </div>
@@ -865,7 +865,7 @@ export default function PostRequest() {
               {error || ""}
             </p>
 
-            <motion.button
+            <Motion.button
               type="submit"
               className="requestSubmitBtn"
               whileHover={submitting ? {} : { y: -1.5 }}
@@ -881,7 +881,7 @@ export default function PostRequest() {
               ) : (
                 <span>Post request</span>
               )}
-            </motion.button>
+            </Motion.button>
           </div>
         </form>
       </Reveal>

@@ -145,18 +145,22 @@ export default function FreelancerDashBar() {
   }, []);
 
   useEffect(() => {
-    setOpenProfile(false);
-    setOpenNotifications(false);
+    queueMicrotask(() => {
+      setOpenProfile(false);
+      setOpenNotifications(false);
+    });
   }, [location.pathname]);
 
   useEffect(() => {
-    if (location.pathname === "/dashboard/freelancer/search") {
-      const params = new URLSearchParams(location.search);
-      setQuery(params.get("q") || "");
-      return;
-    }
+    queueMicrotask(() => {
+      if (location.pathname === "/dashboard/freelancer/search") {
+        const params = new URLSearchParams(location.search);
+        setQuery(params.get("q") || "");
+        return;
+      }
 
-    setQuery("");
+      setQuery("");
+    });
   }, [location.pathname, location.search]);
 
   const handleSearchSubmit = (event) => {

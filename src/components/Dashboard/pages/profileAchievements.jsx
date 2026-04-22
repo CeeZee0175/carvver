@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -104,13 +104,13 @@ export default function ProfileAchievements() {
               <h1 className="profileHero__title">
                 <TypewriterHeading text="Achievements" />
               </h1>
-              <motion.svg
+              <Motion.svg
                 className="profileHero__line"
                 viewBox="0 0 300 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
+                <Motion.path
                   d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                   fill="none"
                   stroke="currentColor"
@@ -120,7 +120,7 @@ export default function ProfileAchievements() {
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 1.05, ease: "easeInOut", delay: 0.2 }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
             <p className="profileHero__sub">
               Browse every customer achievement and choose which earned badges you
@@ -176,7 +176,7 @@ export default function ProfileAchievements() {
                 Filter the catalog and keep track of which earned badges you display.
               </p>
             </div>
-            <motion.button
+            <Motion.button
               type="button"
               className="profileSection__linkBtn"
               whileHover={{ x: 1.5 }}
@@ -186,7 +186,7 @@ export default function ProfileAchievements() {
             >
               <span>Back to profile</span>
               <ArrowRight className="profileSection__linkIcon" />
-            </motion.button>
+            </Motion.button>
           </div>
 
           <div className="profileFilterRow">

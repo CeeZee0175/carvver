@@ -1,69 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion as Motion, useInView, useReducedMotion } from "framer-motion";
 import { LoaderCircle } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
-import {
-  getSession,
-  verifyPasswordRecoveryTokenHash,
-} from "../../../lib/supabase/auth";
-
-const RECOVERY_STATE_KEY = "carvver-password-recovery";
-export const RECOVERY_OTP_LENGTH = 8;
-
-function isBrowser() {
-  return typeof window !== "undefined";
-}
-
-export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-export function getStoredRecoveryState() {
-  if (!isBrowser()) return null;
-
-  const raw = window.sessionStorage.getItem(RECOVERY_STATE_KEY);
-  if (!raw) return null;
-
-  try {
-    return JSON.parse(raw);
-  } catch {
-    window.sessionStorage.removeItem(RECOVERY_STATE_KEY);
-    return null;
-  }
-}
-
-export function setStoredRecoveryState(nextState) {
-  if (!isBrowser()) return;
-
-  const current = getStoredRecoveryState() || {};
-  window.sessionStorage.setItem(
-    RECOVERY_STATE_KEY,
-    JSON.stringify({
-      ...current,
-      ...nextState,
-    })
-  );
-}
-
-export function clearStoredRecoveryState() {
-  if (!isBrowser()) return;
-  window.sessionStorage.removeItem(RECOVERY_STATE_KEY);
-}
-
-export function getRecoveryEmail(search = "") {
-  const params = new URLSearchParams(search);
-  const queryEmail = String(params.get("email") || "").trim();
-  if (queryEmail) return queryEmail;
-  return String(getStoredRecoveryState()?.email || "").trim();
-}
-
-export function isRecoveryVerified() {
-  return Boolean(getStoredRecoveryState()?.verified);
-}
-
-export function buildRecoveryPath(pathname, email = "") {
-  const normalizedEmail = String(email || "").trim();
-  if (!normalizedEmail) return pathname;
-  return `${pathname}?email=${encodeURIComponent(normalizedEmail)}`;
-}
+import { RECOVERY_OTP_LENGTH } from "./password_recovery_state";
 
 function TypewriterText({
   text,
@@ -79,11 +17,11 @@ function TypewriterText({
     if (!active) return;
 
     if (reduceMotion) {
-      setDisplayText(text);
-      return;
+      queueMicrotask(() => setDisplayText(text));
+      return undefined;
     }
 
-    setDisplayText("");
+    queueMicrotask(() => setDisplayText(""));
     let timeoutId;
     let index = 0;
 
@@ -103,14 +41,14 @@ function TypewriterText({
     <span className={className}>
       {displayText}
       {!reduceMotion && displayText.length < text.length ? (
-        <motion.span
+        <Motion.span
           className="passwordRecoveryCard__cursor"
           aria-hidden="true"
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
         >
           |
-        </motion.span>
+        </Motion.span>
       ) : null}
     </span>
   );
@@ -120,7 +58,7 @@ export function InlineStatus({ tone = "neutral", message, className = "" }) {
   if (!message) return null;
 
   return (
-    <motion.div
+    <Motion.div
       className={`passwordRecoveryStatus passwordRecoveryStatus--${tone} ${className}`.trim()}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
@@ -128,7 +66,7 @@ export function InlineStatus({ tone = "neutral", message, className = "" }) {
       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
     >
       {message}
-    </motion.div>
+    </Motion.div>
   );
 }
 
@@ -142,7 +80,7 @@ export function PasswordRecoveryShell({ title, children, className = "" }) {
       <div className="passwordRecoveryPage__bg" aria-hidden="true" />
 
       <main className="passwordRecoveryPage__center" ref={rootRef}>
-        <motion.section
+        <Motion.section
           className={`passwordRecoveryCard ${className}`.trim()}
           initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
           animate={inView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
@@ -158,13 +96,13 @@ export function PasswordRecoveryShell({ title, children, className = "" }) {
                   initialDelay={100}
                 />
               </h1>
-              <motion.svg
+              <Motion.svg
                 className="passwordRecoveryCard__line passwordRecoveryCard__line--tight"
                 viewBox="0 0 250 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
+                <Motion.path
                   d="M 0,10 Q 62,0 125,10 Q 188,20 250,10"
                   fill="none"
                   stroke="currentColor"
@@ -174,12 +112,12 @@ export function PasswordRecoveryShell({ title, children, className = "" }) {
                   animate={inView ? { pathLength: 1, opacity: 1 } : {}}
                   transition={{ duration: 1.05, ease: "easeInOut", delay: 0.2 }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
           </header>
 
           {typeof children === "function" ? children({ inView }) : children}
-        </motion.section>
+        </Motion.section>
       </main>
     </div>
   );
@@ -195,7 +133,7 @@ export function RecoveryButton({
   className = "",
 }) {
   return (
-    <motion.button
+    <Motion.button
       type={type}
       className={`passwordRecoveryBtn passwordRecoveryBtn--${variant} ${className}`.trim()}
       whileHover={loading ? {} : { y: -1.5 }}
@@ -205,7 +143,7 @@ export function RecoveryButton({
       disabled={disabled || loading}
     >
       {loading ? <LoaderCircle className="passwordRecoveryBtn__spinner" /> : children}
-    </motion.button>
+    </Motion.button>
   );
 }
 
@@ -335,77 +273,4 @@ export function OTPInputGroup({
       {error ? <span className="passwordRecoveryField__error">{error}</span> : null}
     </div>
   );
-}
-
-export function useRecoveryLinkBridge(targetPath = "/recover-password/reset") {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [state, setState] = useState({
-    pending: false,
-    error: "",
-  });
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const tokenHash = String(params.get("token_hash") || "").trim();
-    const type = String(params.get("type") || "").trim();
-    const hash = isBrowser() ? window.location.hash || "" : "";
-    const hasRecoveryHash =
-      hash.includes("type=recovery") || hash.includes("access_token=");
-
-    if (!tokenHash && !hasRecoveryHash) {
-      return;
-    }
-
-    let active = true;
-
-    async function resolveRecoverySession() {
-      setState({
-        pending: true,
-        error: "",
-      });
-
-      try {
-        let nextEmail = getRecoveryEmail(location.search);
-
-        if (tokenHash && type === "recovery") {
-          const { data } = await verifyPasswordRecoveryTokenHash(tokenHash);
-          nextEmail = data?.user?.email || nextEmail;
-        } else {
-          await new Promise((resolve) => window.setTimeout(resolve, 180));
-          const session = await getSession();
-          nextEmail = session?.user?.email || nextEmail;
-
-          if (!nextEmail) {
-            throw new Error("That recovery link is no longer valid.");
-          }
-        }
-
-        if (!active) return;
-
-        setStoredRecoveryState({
-          email: nextEmail,
-          verified: true,
-        });
-
-        navigate(buildRecoveryPath(targetPath, nextEmail), {
-          replace: true,
-        });
-      } catch (error) {
-        if (!active) return;
-        setState({
-          pending: false,
-          error: error.message || "That recovery link is no longer valid.",
-        });
-      }
-    }
-
-    resolveRecoverySession();
-
-    return () => {
-      active = false;
-    };
-  }, [location.search, navigate, targetPath]);
-
-  return state;
 }

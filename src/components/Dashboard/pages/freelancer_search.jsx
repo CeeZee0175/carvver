@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { createClient } from "../../../lib/supabase/client";
@@ -87,7 +87,7 @@ function groupRows(rows, key, transform) {
 
 function RequestResultCard({ item, index, onOpen }) {
   return (
-    <motion.article
+    <Motion.article
       className="dashboardSearchCard"
       initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -134,7 +134,7 @@ function RequestResultCard({ item, index, onOpen }) {
         <div className="dashboardSearchCard__footer">
           <div className="dashboardSearchCard__secondaryText">Open customer brief</div>
 
-          <motion.button
+          <Motion.button
             type="button"
             className="dashboardSearchCard__action"
             whileHover={{ y: -1.5 }}
@@ -144,10 +144,10 @@ function RequestResultCard({ item, index, onOpen }) {
           >
             <span>View request</span>
             <ArrowRight className="dashboardSearchCard__actionIcon" />
-          </motion.button>
+          </Motion.button>
         </div>
       </div>
-    </motion.article>
+    </Motion.article>
   );
 }
 
@@ -157,7 +157,7 @@ function ListingResultCard({ item, index, onOpen }) {
     : "dashboardSearchCard__status dashboardSearchCard__status--draft";
 
   return (
-    <motion.article
+    <Motion.article
       className="dashboardSearchCard"
       initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -211,7 +211,7 @@ function ListingResultCard({ item, index, onOpen }) {
             Updated {item.updatedLabel}
           </div>
 
-          <motion.button
+          <Motion.button
             type="button"
             className="dashboardSearchCard__action dashboardSearchCard__action--ghost"
             whileHover={{ y: -1.5 }}
@@ -221,10 +221,10 @@ function ListingResultCard({ item, index, onOpen }) {
           >
             <span>{item.is_published ? "View listing" : "Edit draft"}</span>
             <ArrowRight className="dashboardSearchCard__actionIcon" />
-          </motion.button>
+          </Motion.button>
         </div>
       </div>
-    </motion.article>
+    </Motion.article>
   );
 }
 
@@ -446,13 +446,13 @@ export default function FreelancerSearch() {
                 <h1 className="dashboardSearchHero__title">
                   <TypewriterHeading text="Search results" />
                 </h1>
-                <motion.svg
+                <Motion.svg
                   className="dashboardSearchHero__line"
                   viewBox="0 0 300 20"
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <motion.path
+                  <Motion.path
                     d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                     fill="none"
                     stroke="currentColor"
@@ -462,7 +462,7 @@ export default function FreelancerSearch() {
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 1.05, ease: "easeInOut", delay: 0.16 }}
                   />
-                </motion.svg>
+                </Motion.svg>
               </div>
 
               <p className="dashboardSearchHero__sub">
@@ -478,7 +478,7 @@ export default function FreelancerSearch() {
               </p>
             </div>
 
-            <motion.button
+            <Motion.button
               type="button"
               className="dashboardSearchHero__ghost"
               whileHover={{ y: -1.5 }}
@@ -488,7 +488,7 @@ export default function FreelancerSearch() {
             >
               <span>Browse requests</span>
               <ArrowRight className="dashboardSearchHero__ghostIcon" />
-            </motion.button>
+            </Motion.button>
           </div>
         </section>
       </Reveal>

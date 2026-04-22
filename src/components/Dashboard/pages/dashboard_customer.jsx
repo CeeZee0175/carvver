@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import "./profile.css";
+import "./browse_categories.css";
 import "./dashboard_customer.css";
 import { createClient } from "../../../lib/supabase/client";
 import { buildCategoryPath } from "../../../lib/featuredCategoryIntent";
@@ -33,6 +34,14 @@ import { useCustomerRequests } from "../hooks/useCustomerRequests";
 import { useCustomerFavoriteFreelancers } from "../hooks/useCustomerFavoriteFreelancers";
 
 const supabase = createClient();
+const SERVICE_MEDIA_BUCKET = "service-media";
+
+const ACCENT_COLORS = [
+  { a: "rgba(124,58,237,0.22)", b: "rgba(242,193,78,0.14)" },
+  { a: "rgba(42,20,80,0.20)", b: "rgba(124,58,237,0.14)" },
+  { a: "rgba(242,193,78,0.22)", b: "rgba(124,58,237,0.12)" },
+  { a: "rgba(124,58,237,0.18)", b: "rgba(42,20,80,0.12)" },
+];
 
 const HERO_BUTTON_MOTION = {
   whileHover: { y: -6, scale: 1.024 },
@@ -59,6 +68,14 @@ function normalizeRelation(value) {
 
 function formatPeso(value) {
   return `PHP ${Number(value || 0).toLocaleString()}`;
+}
+
+function getPublicServiceMediaUrl(path) {
+  if (!path) return "";
+  const { data } = supabase.storage
+    .from(SERVICE_MEDIA_BUCKET)
+    .getPublicUrl(path);
+  return data?.publicUrl || "";
 }
 
 function formatRequestDate(value) {
@@ -98,6 +115,219 @@ function QuietEmptyState({ title, desc, actionLabel, onAction }) {
   );
 }
 
+function RecommendedServiceCard({
+  service,
+  index,
+  favoriteIds,
+  onFavoriteToggle,
+  onOpenListing,
+  onOpenMessage,
+  onViewFreelancer,
+}) {
+  const creator = normalizeRelation(service.profiles);
+  const creatorName = creator ? getCustomerDisplayName(creator) : "Freelancer";
+  const favoriteFreelancer = favoriteIds.includes(service.freelancer_id);
+  const colors = ACCENT_COLORS[index % ACCENT_COLORS.length];
+  const summaryText = String(service.description || "").trim()
+    || "Review packages, delivery time, and listing details.";
+  const packageLabel =
+    service.packageCount > 0
+      ? `${service.packageCount} package${service.packageCount === 1 ? "" : "s"} available`
+      : "Custom pricing";
+  const initials = getCustomerInitials({
+    first_name: creator?.first_name,
+    last_name: creator?.last_name,
+    display_name: creator?.display_name,
+  });
+
+  return (
+    <Motion.article
+      className="browseServiceCard dashLandingBrowseServiceCard"
+      style={{ "--card-accent-a": colors.a, "--card-accent-b": colors.b }}
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.42, delay: index * 0.05 }}
+      whileHover={{ y: -5 }}
+      whileTap={{ scale: 0.985 }}
+      onClick={() => onOpenListing(service.id)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onOpenListing(service.id);
+        }
+      }}
+    >
+      <div className="browseServiceCard__media">
+        {service.previewMedia?.publicUrl ? (
+          service.previewMedia.media_kind === "video" ? (
+            <video
+              className="browseServiceCard__mediaAsset"
+              src={service.previewMedia.publicUrl}
+              muted
+              playsInline
+            />
+          ) : (
+            <img
+              className="browseServiceCard__mediaAsset"
+              src={service.previewMedia.publicUrl}
+              alt={service.title}
+            />
+          )
+        ) : (
+          <div className="browseServiceCard__mediaBg">
+            <span className="browseServiceCard__mediaIconWrap" aria-hidden="true">
+              <PackageSearch className="browseServiceCard__mediaIcon" />
+            </span>
+            {service.packageCount > 0 ? (
+              <span className="browseServiceCard__mediaMeta">
+                {service.packageCount} package{service.packageCount === 1 ? "" : "s"}
+              </span>
+            ) : null}
+          </div>
+        )}
+
+        <div className="browseServiceCard__mediaTop">
+          <span className="browseServiceCard__tag">{service.category}</span>
+          {service.freelancer_id ? (
+            <Motion.button
+              type="button"
+              className={`browseServiceCard__favorite ${
+                favoriteFreelancer ? "browseServiceCard__favorite--active" : ""
+              }`}
+              aria-label={
+                favoriteFreelancer
+                  ? "Remove freelancer from favorites"
+                  : "Add freelancer to favorites"
+              }
+              whileTap={{ scale: 0.82 }}
+              onClick={(event) => {
+                event.stopPropagation();
+                onFavoriteToggle(service.freelancer_id, {
+                  id: service.freelancer_id,
+                  ...creator,
+                });
+              }}
+            >
+              <Heart
+                style={{ width: 15, height: 15 }}
+                fill={favoriteFreelancer ? "currentColor" : "none"}
+              />
+            </Motion.button>
+          ) : null}
+        </div>
+
+        {service.is_pro ? <div className="browseServiceCard__proBadge">Pro</div> : null}
+      </div>
+
+      <div className="browseServiceCard__body">
+        <div className="browseServiceCard__creatorRow">
+          <div className="browseServiceCard__creatorMain">
+            <div className="browseServiceCard__avatar">{initials}</div>
+            <div className="browseServiceCard__creatorBlock">
+              <span className="browseServiceCard__creator">{creatorName}</span>
+              {service.is_verified ? (
+                <div className="browseServiceCard__trustRow">
+                  <span className="browseServiceCard__trustChip browseServiceCard__trustChip--verified">
+                    Verified creator
+                  </span>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+
+        <h3 className="browseServiceCard__title">{service.title}</h3>
+        <p className="browseServiceCard__summary">{summaryText}</p>
+
+        <div className="browseServiceCard__metaStack">
+          <div className="browseServiceCard__ratingRow">
+            <span className="browseServiceCard__rating">
+              {service.average_rating
+                ? Number(service.average_rating).toFixed(1)
+                : "New"}
+            </span>
+            <span className="browseServiceCard__reviewCount">
+              {service.review_count
+                ? `(${Number(service.review_count)} review${
+                    Number(service.review_count) === 1 ? "" : "s"
+                  })`
+                : "(No reviews yet)"}
+            </span>
+          </div>
+
+          {service.location ? (
+            <div className="browseServiceCard__locationRow">
+              <MapPin className="dashLandingListingCard__metaIcon" />
+              <span className="browseServiceCard__locationText">{service.location}</span>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="browseServiceCard__bottom">
+          <div className="browseServiceCard__offerRow">
+            <div className="browseServiceCard__priceWrap">
+              <span className="browseServiceCard__priceFrom">Starting at</span>
+              <span className="browseServiceCard__price">
+                {formatPeso(service.startingPrice ?? service.price)}
+              </span>
+            </div>
+            <span className="browseServiceCard__packageMeta">{packageLabel}</span>
+          </div>
+
+          <div className="browseServiceCard__actions">
+            <Motion.button
+              type="button"
+              className="browseServiceCard__cartBtn"
+              whileHover={{ x: 1 }}
+              whileTap={{ scale: 0.96 }}
+              transition={LINK_BUTTON_MOTION.transition}
+              onClick={(event) => {
+                event.stopPropagation();
+                onOpenListing(service.id);
+              }}
+            >
+              <span>View listing</span>
+            </Motion.button>
+
+            <Motion.button
+              type="button"
+              className="browseServiceCard__btn browseServiceCard__btn--subtle"
+              whileHover={{ x: 1 }}
+              whileTap={{ scale: 0.96 }}
+              transition={LINK_BUTTON_MOTION.transition}
+              onClick={(event) => {
+                event.stopPropagation();
+                onOpenMessage(service.freelancer_id, {
+                  serviceTitle: service.title,
+                });
+              }}
+            >
+              Message
+            </Motion.button>
+
+            <Motion.button
+              type="button"
+              className="browseServiceCard__btn browseServiceCard__btn--ghost"
+              whileHover={{ x: 1 }}
+              whileTap={{ scale: 0.96 }}
+              transition={LINK_BUTTON_MOTION.transition}
+              onClick={(event) => {
+                event.stopPropagation();
+                onViewFreelancer(service.freelancer_id);
+              }}
+            >
+              Freelancer
+            </Motion.button>
+          </div>
+        </div>
+      </div>
+    </Motion.article>
+  );
+}
+
 export default function DashboardCustomer() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -120,15 +350,78 @@ export default function DashboardCustomer() {
   useEffect(() => {
     async function loadRecommendedServices() {
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("services")
           .select(
-            "id, title, category, price, location, freelancer_id, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline)"
+            "id, title, category, price, location, description, created_at, freelancer_id, is_pro, is_verified, average_rating, review_count, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline)"
           )
           .eq("is_published", true)
+          .order("created_at", { ascending: false })
           .limit(4);
 
-        setServices(data || []);
+        if (error) throw error;
+
+        const nextServices = data || [];
+        const serviceIds = nextServices.map((item) => item.id).filter(Boolean);
+
+        if (serviceIds.length === 0) {
+          setServices(nextServices);
+          return;
+        }
+
+        const [
+          { data: mediaRows, error: mediaError },
+          { data: packageRows, error: packageError },
+        ] = await Promise.all([
+          supabase
+            .from("service_media")
+            .select("service_id, bucket_path, media_kind, is_cover, sort_order")
+            .in("service_id", serviceIds)
+            .order("is_cover", { ascending: false })
+            .order("sort_order", { ascending: true }),
+          supabase
+            .from("service_packages")
+            .select("service_id, price")
+            .in("service_id", serviceIds),
+        ]);
+
+        if (mediaError) throw mediaError;
+        if (packageError) throw packageError;
+
+        const previewMap = new Map();
+        (mediaRows || []).forEach((item) => {
+          if (!previewMap.has(item.service_id)) {
+            previewMap.set(item.service_id, {
+              ...item,
+              publicUrl: getPublicServiceMediaUrl(item.bucket_path),
+            });
+          }
+        });
+
+        const packageMap = new Map();
+        (packageRows || []).forEach((item) => {
+          const existing = packageMap.get(item.service_id) || [];
+          existing.push(Number(item.price || 0));
+          packageMap.set(item.service_id, existing);
+        });
+
+        setServices(
+          nextServices.map((item) => {
+            const prices = (packageMap.get(item.id) || []).filter(
+              (value) => value > 0
+            );
+            const startingPrice =
+              prices.length > 0 ? Math.min(...prices) : Number(item.price || 0);
+
+            return {
+              ...item,
+              price: startingPrice,
+              startingPrice,
+              packageCount: (packageMap.get(item.id) || []).length,
+              previewMedia: previewMap.get(item.id) || null,
+            };
+          })
+        );
       } catch {
         setServices([]);
       } finally {
@@ -174,13 +467,13 @@ export default function DashboardCustomer() {
               <h1 className="profileHero__title">
                 <TypewriterHeading text="Welcome Back!" />
               </h1>
-              <motion.svg
+              <Motion.svg
                 className="profileHero__line"
                 viewBox="0 0 300 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
+                <Motion.path
                   d="M 0,10 L 300,10"
                   fill="none"
                   stroke="currentColor"
@@ -190,7 +483,7 @@ export default function DashboardCustomer() {
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 1.05, ease: "easeInOut", delay: 0.2 }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
 
             <p className="profileHero__sub">
@@ -198,7 +491,7 @@ export default function DashboardCustomer() {
             </p>
 
             <div className="dashLandingHero__actions">
-              <motion.button
+              <Motion.button
                 type="button"
                 className="dashLandingAction dashLandingAction--primary"
                 {...HERO_BUTTON_MOTION}
@@ -206,9 +499,9 @@ export default function DashboardCustomer() {
               >
                 <span>Browse Services</span>
                 <ArrowRight className="dashLandingAction__icon" />
-              </motion.button>
+              </Motion.button>
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className="dashLandingAction dashLandingAction--secondary"
                 {...HERO_BUTTON_MOTION}
@@ -216,7 +509,7 @@ export default function DashboardCustomer() {
               >
                 <PlusCircle className="dashLandingAction__icon" />
                 <span>Post a Request</span>
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
 
@@ -233,7 +526,7 @@ export default function DashboardCustomer() {
               </p>
             </div>
 
-            <motion.button
+            <Motion.button
               type="button"
               className="dashLandingGhostLink"
               {...LINK_BUTTON_MOTION}
@@ -241,7 +534,7 @@ export default function DashboardCustomer() {
             >
               <span>Post a request</span>
               <ArrowRight className="dashLandingGhostLink__icon" />
-            </motion.button>
+            </Motion.button>
           </div>
 
           {requestsLoading ? (
@@ -267,7 +560,7 @@ export default function DashboardCustomer() {
           ) : (
             <div className="dashLandingRequestGrid">
               {requests.map((request) => (
-                <motion.article
+                <Motion.article
                   key={request.id}
                   className="dashLandingRequestCard"
                   {...SURFACE_BUTTON_MOTION}
@@ -299,7 +592,7 @@ export default function DashboardCustomer() {
                       {formatRequestDate(request.created_at)}
                     </span>
                   </div>
-                </motion.article>
+                </Motion.article>
               ))}
             </div>
           )}
@@ -316,7 +609,7 @@ export default function DashboardCustomer() {
               </p>
             </div>
 
-            <motion.button
+            <Motion.button
               type="button"
               className="dashLandingGhostLink"
               {...LINK_BUTTON_MOTION}
@@ -324,13 +617,23 @@ export default function DashboardCustomer() {
             >
               <span>Browse all</span>
               <ArrowRight className="dashLandingGhostLink__icon" />
-            </motion.button>
+            </Motion.button>
           </div>
 
           {servicesLoading ? (
             <div className="dashLandingListingGrid">
               {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="dashLandingListingCard dashLandingListingCard--skeleton" />
+                <div key={index} className="browseServiceCard browseServiceCard--skeleton">
+                  <div className="browseServiceCard__media browseServiceCard__media--skeleton" />
+                  <div className="browseServiceCard__body">
+                    <div className="browseServiceCard__creatorRow">
+                      <div className="browseSkel browseSkel--avatar" />
+                      <div className="browseSkel browseSkel--name" />
+                    </div>
+                    <div className="browseSkel browseSkel--title" />
+                    <div className="browseSkel browseSkel--subtitle" />
+                  </div>
+                </div>
               ))}
             </div>
           ) : services.length === 0 ? (
@@ -341,82 +644,28 @@ export default function DashboardCustomer() {
             />
           ) : (
             <div className="dashLandingListingGrid">
-              {services.map((item) => {
-                const creator = normalizeRelation(item.profiles);
-                const isFavoriteFreelancer = favoriteIds.includes(item.freelancer_id);
-                return (
-                  <motion.article
-                    key={item.id}
-                    className="dashLandingListingCard"
-                    {...SURFACE_BUTTON_MOTION}
-                  >
-                    <div className="dashLandingListingCard__cover">
-                      <div className="dashLandingListingCard__coverTop">
-                        <span className="dashLandingListingCard__badge">{item.category}</span>
-                        {item.freelancer_id ? (
-                          <motion.button
-                            type="button"
-                            className={`dashLandingFavoriteToggle ${
-                              isFavoriteFreelancer ? "dashLandingFavoriteToggle--active" : ""
-                            }`}
-                            whileHover={{ y: -1 }}
-                            whileTap={{ scale: 0.94 }}
-                            transition={LINK_BUTTON_MOTION.transition}
-                            onClick={() =>
-                              handleFavoriteToggle(item.freelancer_id, {
-                                id: item.freelancer_id,
-                                ...creator,
-                              })
-                            }
-                            aria-label={
-                              isFavoriteFreelancer
-                                ? "Remove freelancer from favorites"
-                                : "Add freelancer to favorites"
-                            }
-                          >
-                            <Heart
-                              className="dashLandingFavoriteToggle__icon"
-                              fill={isFavoriteFreelancer ? "currentColor" : "none"}
-                            />
-                          </motion.button>
-                        ) : null}
-                      </div>
-                    </div>
-
-                    <div className="dashLandingListingCard__body">
-                      <h3 className="dashLandingListingCard__title">{item.title}</h3>
-                      <p className="dashLandingListingCard__creator">
-                        {creator ? getCustomerDisplayName(creator) : "Freelancer"}
-                      </p>
-
-                      <div className="dashLandingListingCard__meta">
-                        {item.location && (
-                          <span className="dashLandingListingCard__metaItem">
-                            <MapPin className="dashLandingListingCard__metaIcon" />
-                            {item.location}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="dashLandingListingCard__footer">
-                        <strong className="dashLandingListingCard__price">
-                          {formatPeso(item.price)}
-                        </strong>
-                        <motion.button
-                          type="button"
-                          className="dashLandingMiniBtn"
-                          {...LINK_BUTTON_MOTION}
-                          onClick={() =>
-                            navigate(`/dashboard/customer/freelancers/${item.freelancer_id}`)
-                          }
-                        >
-                          View freelancer
-                        </motion.button>
-                      </div>
-                    </div>
-                  </motion.article>
-                );
-              })}
+              {services.map((item, index) => (
+                <RecommendedServiceCard
+                  key={item.id}
+                  service={item}
+                  index={index}
+                  favoriteIds={favoriteIds}
+                  onFavoriteToggle={handleFavoriteToggle}
+                  onOpenListing={(serviceId) =>
+                    navigate(`/dashboard/customer/browse-services/${serviceId}`)
+                  }
+                  onOpenMessage={(freelancerId, params = {}) => {
+                    const search = new URLSearchParams({
+                      freelancer: freelancerId,
+                      ...params,
+                    });
+                    navigate(`/dashboard/customer/messages?${search.toString()}`);
+                  }}
+                  onViewFreelancer={(freelancerId) =>
+                    navigate(`/dashboard/customer/freelancers/${freelancerId}`)
+                  }
+                />
+              ))}
             </div>
           )}
         </section>
@@ -437,7 +686,7 @@ export default function DashboardCustomer() {
             {DASHBOARD_CATEGORY_HIGHLIGHTS.map((label, index) => {
               const Icon = getCategoryIcon(label);
               return (
-                <motion.button
+                <Motion.button
                   key={label}
                   type="button"
                   className="dashLandingCategoryCard"
@@ -456,7 +705,7 @@ export default function DashboardCustomer() {
                     <Icon className="dashLandingCategoryCard__icon" />
                   </span>
                   <span className="dashLandingCategoryCard__label">{label}</span>
-                </motion.button>
+                </Motion.button>
               );
             })}
           </div>
@@ -505,7 +754,7 @@ export default function DashboardCustomer() {
                   }) || "Location not set";
 
                 return (
-                  <motion.article
+                  <Motion.article
                     key={freelancer.id}
                     className="dashLandingFavoriteCard"
                     {...SURFACE_BUTTON_MOTION}
@@ -537,7 +786,7 @@ export default function DashboardCustomer() {
                         </div>
                       </div>
 
-                      <motion.button
+                      <Motion.button
                         type="button"
                         className="dashLandingFavoriteToggle dashLandingFavoriteToggle--active"
                         whileHover={{ y: -1 }}
@@ -553,7 +802,7 @@ export default function DashboardCustomer() {
                           className="dashLandingFavoriteToggle__icon"
                           fill="currentColor"
                         />
-                      </motion.button>
+                      </Motion.button>
                     </div>
 
                     <p className="dashLandingFavoriteCard__bio">
@@ -566,7 +815,7 @@ export default function DashboardCustomer() {
                         {locationLabel}
                       </span>
                     </div>
-                  </motion.article>
+                  </Motion.article>
                 );
               })}
             </div>

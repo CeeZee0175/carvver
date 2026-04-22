@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import React, { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion as Motion, useReducedMotion } from "framer-motion";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -35,20 +35,20 @@ function TypewriterText({
 
   useEffect(() => {
     if (reduceMotion) {
-      setDisplayText(text);
-      return;
+      queueMicrotask(() => setDisplayText(text));
+      return undefined;
     }
 
     if (!active) {
-      setDisplayText("");
-      return;
+      queueMicrotask(() => setDisplayText(""));
+      return undefined;
     }
 
     let timeoutId = null;
     let cancelled = false;
     let index = 0;
 
-    setDisplayText("");
+    queueMicrotask(() => setDisplayText(""));
 
     const tick = () => {
       if (cancelled) return;
@@ -72,14 +72,14 @@ function TypewriterText({
     <span className={className}>
       {displayText}
       {!reduceMotion && active && displayText.length < text.length && (
-        <motion.span
+        <Motion.span
           className="customerWelcome__cursor"
           aria-hidden="true"
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
         >
           |
-        </motion.span>
+        </Motion.span>
       )}
     </span>
   );
@@ -103,7 +103,7 @@ function WelcomePager({ page, total, onChange }) {
           const isActive = index === page;
 
           return (
-            <motion.button
+            <Motion.button
               key={index}
               type="button"
               className={`customerWelcomePager__dot ${
@@ -120,14 +120,14 @@ function WelcomePager({ page, total, onChange }) {
               aria-pressed={isActive}
             >
               {isActive ? (
-                <motion.span
+                <Motion.span
                   className="customerWelcomePager__dotRipple"
                   initial={{ scale: 0.8, opacity: 0.55 }}
                   animate={{ scale: 1.6, opacity: 0 }}
                   transition={{ duration: 0.6 }}
                 />
               ) : null}
-            </motion.button>
+            </Motion.button>
           );
         })}
       </div>
@@ -224,7 +224,7 @@ function Panel({ children, panelKey }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <motion.section
+    <Motion.section
       key={panelKey}
       className="customerWelcome__panel"
       initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 14, filter: "blur(8px)" }}
@@ -233,7 +233,7 @@ function Panel({ children, panelKey }) {
       transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
-    </motion.section>
+    </Motion.section>
   );
 }
 
@@ -463,7 +463,7 @@ export default function CustomerWelcome() {
               We couldn&apos;t open this page
             </h1>
             <p className="customerWelcomeError__text">{loadError}</p>
-            <motion.button
+            <Motion.button
               type="button"
               className="customerWelcomeButton customerWelcomeButton--primary"
               whileHover={{ y: -2 }}
@@ -472,7 +472,7 @@ export default function CustomerWelcome() {
               onClick={() => window.location.reload()}
             >
               Try again
-            </motion.button>
+            </Motion.button>
           </section>
         </main>
       </div>
@@ -521,7 +521,7 @@ export default function CustomerWelcome() {
                       </div>
                     </div>
 
-                    <motion.button
+                    <Motion.button
                       type="button"
                       className="customerWelcomeButton customerWelcomeButton--primary"
                       whileHover={{ y: -2 }}
@@ -530,7 +530,7 @@ export default function CustomerWelcome() {
                       onClick={() => setCurrentStep(1)}
                     >
                       Start
-                    </motion.button>
+                    </Motion.button>
                   </div>
 
                   <div className="customerWelcomeIntro__visual">
@@ -626,7 +626,7 @@ export default function CustomerWelcome() {
                   </div>
 
                   <div className="customerWelcomeActions">
-                    <motion.button
+                    <Motion.button
                       type="button"
                       className="customerWelcomeButton customerWelcomeButton--ghost"
                       whileHover={{ y: -2 }}
@@ -635,9 +635,9 @@ export default function CustomerWelcome() {
                       onClick={() => goToStep(0)}
                     >
                       Back
-                    </motion.button>
+                    </Motion.button>
 
-                    <motion.button
+                    <Motion.button
                       type="button"
                       className="customerWelcomeButton customerWelcomeButton--primary"
                       whileHover={{ y: -2 }}
@@ -646,7 +646,7 @@ export default function CustomerWelcome() {
                       onClick={handleIdentityContinue}
                     >
                       Continue
-                    </motion.button>
+                    </Motion.button>
                   </div>
                 </section>
               </Panel>
@@ -728,7 +728,7 @@ export default function CustomerWelcome() {
                   ) : null}
 
                   <div className="customerWelcomeActions">
-                    <motion.button
+                    <Motion.button
                       type="button"
                       className="customerWelcomeButton customerWelcomeButton--ghost"
                       whileHover={{ y: -2 }}
@@ -738,9 +738,9 @@ export default function CustomerWelcome() {
                       disabled={saving}
                     >
                       Back
-                    </motion.button>
+                    </Motion.button>
 
-                    <motion.button
+                    <Motion.button
                       type="button"
                       className="customerWelcomeButton customerWelcomeButton--primary"
                       whileHover={saving ? {} : { y: -2 }}
@@ -750,7 +750,7 @@ export default function CustomerWelcome() {
                       disabled={saving}
                     >
                       {saving ? "Saving..." : "Finish setup"}
-                    </motion.button>
+                    </Motion.button>
                   </div>
                 </section>
               </Panel>

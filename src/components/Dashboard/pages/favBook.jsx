@@ -5,8 +5,7 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import {
-  motion,
+import { motion as Motion,
   useInView,
   useReducedMotion,
   AnimatePresence,
@@ -110,7 +109,7 @@ function ScrollReveal({ children, delay = 0, y = 20, className }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <motion.div
+    <Motion.div
       ref={ref}
       className={className}
       initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y }}
@@ -118,7 +117,7 @@ function ScrollReveal({ children, delay = 0, y = 20, className }) {
       transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1], delay }}
     >
       {children}
-    </motion.div>
+    </Motion.div>
   );
 }
 
@@ -130,8 +129,8 @@ function TypewriterHeading({ text = "Saved Listings" }) {
 
   useEffect(() => {
     if (reduceMotion) {
-      setDisplayText(text);
-      return;
+      queueMicrotask(() => setDisplayText(text));
+      return undefined;
     }
 
     let timeoutId;
@@ -151,14 +150,14 @@ function TypewriterHeading({ text = "Saved Listings" }) {
     <h1 className="favHero__title">
       {displayText}
       {!reduceMotion && displayText.length < text.length && (
-        <motion.span
+        <Motion.span
           className="favHero__cursor"
           aria-hidden="true"
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 0.85, repeat: Infinity, ease: "easeInOut" }}
         >
           |
-        </motion.span>
+        </Motion.span>
       )}
     </h1>
   );
@@ -183,7 +182,7 @@ function FavCard({
   const inCart = cartServiceIds.includes(service.id);
 
   const colors = ACCENT_COLORS[index % ACCENT_COLORS.length];
-  const Icon = getCategoryIcon(service.category);
+  const categoryIcon = getCategoryIcon(service.category);
 
   const creatorName = service.profiles
     ? `${service.profiles.first_name || ""} ${service.profiles.last_name || ""}`.trim()
@@ -194,7 +193,7 @@ function FavCard({
     : "?";
 
   return (
-    <motion.article
+    <Motion.article
       ref={ref}
       layout
       className="favCard"
@@ -218,14 +217,16 @@ function FavCard({
       <div className="favCard__media">
         <div className="favCard__mediaBg">
           <span className="favCard__mediaIconWrap" aria-hidden="true">
-            <Icon className="favCard__mediaIcon" />
+            {React.createElement(categoryIcon, {
+              className: "favCard__mediaIcon",
+            })}
           </span>
         </div>
 
         <div className="favCard__mediaTop">
           <span className="favCard__tag">{service.category}</span>
 
-          <motion.button
+          <Motion.button
             type="button"
             className="favCard__remove"
             aria-label="Remove from saved"
@@ -234,11 +235,11 @@ function FavCard({
             transition={SPRING}
             onClick={(e) => {
               e.stopPropagation();
-              onRemove(item.id, item.service_id);
+              onRemove(item.id);
             }}
           >
             <X className="favCard__removeIcon" />
-          </motion.button>
+          </Motion.button>
         </div>
 
         <div className="favCard__savedBadge">
@@ -278,7 +279,7 @@ function FavCard({
           </div>
 
           <div className="favCard__actions">
-            <motion.button
+            <Motion.button
               type="button"
               className={`favCard__cartBtn ${inCart ? "favCard__cartBtn--active" : ""}`}
               whileHover={{ x: 1 }}
@@ -295,9 +296,9 @@ function FavCard({
             >
               <ShoppingCart className="favCard__cartIcon" />
               <span>{inCart ? "In cart" : "Choose package"}</span>
-            </motion.button>
+            </Motion.button>
 
-            <motion.button
+            <Motion.button
               type="button"
               className="favCard__viewBtn"
               whileHover={{ x: 2 }}
@@ -307,11 +308,11 @@ function FavCard({
             >
               View
               <ArrowRight className="favCard__viewIcon" />
-            </motion.button>
+            </Motion.button>
           </div>
         </div>
       </div>
-    </motion.article>
+    </Motion.article>
   );
 }
 
@@ -343,7 +344,7 @@ function EmptyState({ hasSearch, onClearSearch, onBrowse }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <motion.div
+    <Motion.div
       className="favEmpty"
       initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
@@ -354,7 +355,7 @@ function EmptyState({ hasSearch, onClearSearch, onBrowse }) {
       </h3>
 
       {hasSearch ? (
-        <motion.button
+        <Motion.button
           type="button"
           className="favEmpty__btn"
           whileHover={{ y: -1 }}
@@ -363,9 +364,9 @@ function EmptyState({ hasSearch, onClearSearch, onBrowse }) {
           onClick={onClearSearch}
         >
           Clear search
-        </motion.button>
+        </Motion.button>
       ) : (
-        <motion.button
+        <Motion.button
           type="button"
           className="favEmpty__btn"
           whileHover={{ y: -1 }}
@@ -375,9 +376,9 @@ function EmptyState({ hasSearch, onClearSearch, onBrowse }) {
         >
           <span>Browse Services</span>
           <ArrowRight className="favEmpty__btnIcon" />
-        </motion.button>
+        </Motion.button>
       )}
-    </motion.div>
+    </Motion.div>
   );
 }
 
@@ -546,7 +547,7 @@ export default function FavBook() {
   /* ── Remove handler (optimistic UI) ── */
 
   const handleRemove = useCallback(
-    async (savedRowId, serviceId) => {
+    async (savedRowId) => {
       const previousItems = [...savedItems];
 
       // optimistic remove
@@ -607,12 +608,6 @@ export default function FavBook() {
 
   const hasSearch = !!(searchQuery.trim() || activeCategory);
 
-  const subtitle = loading
-    ? "Loading your collection…"
-    : savedItems.length === 0
-      ? "Your personal collection of services you love"
-      : `${savedItems.length} service${savedItems.length !== 1 ? "s" : ""} in your collection`;
-
   /* ─── Render ─── */
 
   return (
@@ -631,13 +626,13 @@ export default function FavBook() {
             <div className="favHero__titleWrap">
               <TypewriterHeading text="Saved Listings" />
 
-              <motion.svg
+              <Motion.svg
                 className="favHero__line"
                 viewBox="0 0 300 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
+                <Motion.path
                   d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                   fill="none"
                   stroke="currentColor"
@@ -651,7 +646,7 @@ export default function FavBook() {
                     delay: 0.1,
                   }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
 
             <p className="favHero__sub">
@@ -679,7 +674,7 @@ export default function FavBook() {
 
               <AnimatePresence>
                 {searchQuery && (
-                  <motion.button
+                  <Motion.button
                     type="button"
                     className="favSearch__clear"
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -690,7 +685,7 @@ export default function FavBook() {
                     aria-label="Clear search"
                   >
                     <X style={{ width: 14, height: 14 }} />
-                  </motion.button>
+                  </Motion.button>
                 )}
               </AnimatePresence>
             </div>
@@ -698,7 +693,7 @@ export default function FavBook() {
             {/* Category chips */}
             {categories.length > 0 && (
               <div className="favChips">
-                <motion.button
+                <Motion.button
                   type="button"
                   className={`favChip ${!activeCategory ? "favChip--active" : ""}`}
                   whileHover={{ y: -1 }}
@@ -707,13 +702,13 @@ export default function FavBook() {
                   onClick={() => setActiveCategory(null)}
                 >
                   All
-                </motion.button>
+                </Motion.button>
 
                 {categories.map((cat) => {
                   const CatIcon = getCategoryIcon(cat);
 
                   return (
-                    <motion.button
+                    <Motion.button
                       key={cat}
                       type="button"
                       className={`favChip ${activeCategory === cat ? "favChip--active" : ""}`}
@@ -728,7 +723,7 @@ export default function FavBook() {
                     >
                       <CatIcon className="favChip__icon" />
                       {cat}
-                    </motion.button>
+                    </Motion.button>
                   );
                 })}
               </div>
@@ -736,7 +731,7 @@ export default function FavBook() {
 
             {/* Sort */}
             <div className="favSortGroup" ref={sortRef}>
-              <motion.button
+              <Motion.button
                 type="button"
                 className={`favSortTrigger ${openSort ? "favSortTrigger--open" : ""}`}
                 whileHover={{ y: -1 }}
@@ -749,11 +744,11 @@ export default function FavBook() {
                   className={`favSortTrigger__chevron ${openSort ? "favSortTrigger__chevron--open" : ""}`}
                   style={{ width: 14, height: 14 }}
                 />
-              </motion.button>
+              </Motion.button>
 
               <AnimatePresence>
                 {openSort && (
-                  <motion.div
+                  <Motion.div
                     className="favSortMenu"
                     initial={
                       reduceMotion
@@ -787,7 +782,7 @@ export default function FavBook() {
                         {opt.label}
                       </button>
                     ))}
-                  </motion.div>
+                  </Motion.div>
                 )}
               </AnimatePresence>
             </div>

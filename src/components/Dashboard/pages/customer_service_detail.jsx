@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import { ArrowRight, Heart, Link as LinkIcon, MessageCircle, Bookmark } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -258,13 +258,13 @@ export default function CustomerServiceDetail() {
                 <h1 className="serviceDetailHero__title">
                   <TypewriterHeading text={service?.title || "Listing"} />
                 </h1>
-                <motion.svg
+                <Motion.svg
                   className="serviceDetailHero__line"
                   viewBox="0 0 300 20"
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <motion.path
+                  <Motion.path
                     d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                     fill="none"
                     stroke="currentColor"
@@ -274,7 +274,7 @@ export default function CustomerServiceDetail() {
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 1.05, ease: "easeInOut", delay: 0.18 }}
                   />
-                </motion.svg>
+                </Motion.svg>
               </div>
 
               <p className="serviceDetailHero__sub">
@@ -283,7 +283,7 @@ export default function CustomerServiceDetail() {
             </div>
 
             <div className="serviceDetailHero__actions">
-              <motion.button
+              <Motion.button
                 type="button"
                 className="serviceDetailBtnGhost"
                 whileHover={{ y: -1.5 }}
@@ -294,9 +294,9 @@ export default function CustomerServiceDetail() {
               >
                 <Bookmark style={{ width: 14, height: 14 }} />
                 <span>{saved ? "Saved" : "Save listing"}</span>
-              </motion.button>
+              </Motion.button>
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className="serviceDetailBtnGhost"
                 whileHover={{ y: -1.5 }}
@@ -306,9 +306,9 @@ export default function CustomerServiceDetail() {
               >
                 <MessageCircle style={{ width: 14, height: 14 }} />
                 <span>Message</span>
-              </motion.button>
+              </Motion.button>
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className="serviceDetailBtnGhost"
                 whileHover={{ y: -1.5 }}
@@ -320,7 +320,7 @@ export default function CustomerServiceDetail() {
               >
                 <span>View freelancer</span>
                 <ArrowRight style={{ width: 14, height: 14 }} />
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
 
@@ -391,7 +391,7 @@ export default function CustomerServiceDetail() {
                 {service.media.length > 1 ? (
                   <div className="serviceDetailMediaGrid">
                     {service.media.map((item) => (
-                      <motion.button
+                      <Motion.button
                         key={item.id}
                         type="button"
                         className={`serviceDetailMediaThumb ${
@@ -417,7 +417,7 @@ export default function CustomerServiceDetail() {
                             {item.originalName}
                           </span>
                         </div>
-                      </motion.button>
+                      </Motion.button>
                     ))}
                   </div>
                 ) : null}
@@ -453,7 +453,7 @@ export default function CustomerServiceDetail() {
                   {service.packages.map((item) => {
                     const active = String(item.id || item.name) === selectedPackageId;
                     return (
-                      <motion.button
+                      <Motion.button
                         key={`${item.id || item.name}`}
                         type="button"
                         className={`serviceDetailPackage ${active ? "serviceDetailPackage--selected" : ""}`}
@@ -496,7 +496,7 @@ export default function CustomerServiceDetail() {
                             ))}
                           </div>
                         ) : null}
-                      </motion.button>
+                      </Motion.button>
                     );
                   })}
                 </div>
@@ -549,7 +549,7 @@ export default function CustomerServiceDetail() {
                 </div>
 
                 <div className="serviceDetailHero__secondaryActions">
-                  <motion.button
+                  <Motion.button
                     type="button"
                     className="serviceDetailTagBtn"
                     whileHover={{ y: -1.5 }}
@@ -559,9 +559,9 @@ export default function CustomerServiceDetail() {
                   >
                     <Heart style={{ width: 14, height: 14 }} fill={favoriteFreelancer ? "currentColor" : "none"} />
                     <span>{favoriteFreelancer ? "Favorited" : "Favorite freelancer"}</span>
-                  </motion.button>
+                  </Motion.button>
 
-                  <motion.button
+                  <Motion.button
                     type="button"
                     className="serviceDetailTagBtn"
                     whileHover={{ y: -1.5 }}
@@ -571,7 +571,7 @@ export default function CustomerServiceDetail() {
                   >
                     <MessageCircle style={{ width: 14, height: 14 }} />
                     <span>Message</span>
-                  </motion.button>
+                  </Motion.button>
                 </div>
               </article>
 
@@ -612,7 +612,7 @@ export default function CustomerServiceDetail() {
                 ) : null}
 
                 <div className="serviceDetailPackage__actions">
-                  <motion.button
+                  <Motion.button
                     type="button"
                     className="serviceDetailPackage__cta"
                     whileHover={{ y: -1.5 }}
@@ -621,7 +621,7 @@ export default function CustomerServiceDetail() {
                     onClick={handleCartAction}
                   >
                     {packageActionLabel}
-                  </motion.button>
+                  </Motion.button>
 
                   {selectedPackageInCart ? (
                     <span className="serviceDetailStatus">

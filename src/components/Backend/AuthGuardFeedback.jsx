@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 
 export function AuthGuardFallback({ message = "Checking your session" }) {
   return (
@@ -193,7 +193,7 @@ export function ExistingSessionPanel({
             gap: 10,
           }}
         >
-          <motion.button
+          <Motion.button
             type="button"
             onClick={onContinue}
             whileHover={{ y: -2, scale: 1.012 }}
@@ -212,8 +212,8 @@ export function ExistingSessionPanel({
             }}
           >
             Continue to dashboard
-          </motion.button>
-          <motion.button
+          </Motion.button>
+          <Motion.button
             type="button"
             onClick={onSignOut}
             disabled={signingOut}
@@ -233,7 +233,7 @@ export function ExistingSessionPanel({
             }}
           >
             {signingOut ? "Signing out..." : "Sign out and use another account"}
-          </motion.button>
+          </Motion.button>
         </div>
       </section>
     </div>

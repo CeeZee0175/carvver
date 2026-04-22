@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion as Motion} from "framer-motion";
 import { LoaderCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./profile.css";
@@ -237,7 +237,7 @@ export default function FreelancerOrderDetail() {
     success: "",
   });
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -249,11 +249,11 @@ export default function FreelancerOrderDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId]);
 
   useEffect(() => {
     load();
-  }, [orderId]);
+  }, [load]);
 
   useEffect(() => {
     deliveryAssetsRef.current = deliveryAssets;
@@ -391,8 +391,8 @@ export default function FreelancerOrderDetail() {
                 <h1 className="workflowHero__title">
                   <TypewriterHeading text={order?.services?.title || "Order detail"} />
                 </h1>
-                <motion.svg className="workflowHero__line" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
-                  <motion.path
+                <Motion.svg className="workflowHero__line" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
+                  <Motion.path
                     d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                     fill="none"
                     stroke="currentColor"
@@ -402,7 +402,7 @@ export default function FreelancerOrderDetail() {
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 1.05, ease: "easeInOut", delay: 0.14 }}
                   />
-                </motion.svg>
+                </Motion.svg>
               </div>
 
               <p className="workflowHero__sub">
@@ -411,7 +411,7 @@ export default function FreelancerOrderDetail() {
             </div>
 
             <div className="workflowHero__actions">
-              <motion.button
+              <Motion.button
                 type="button"
                 className="workflowActionBtn workflowActionBtn--ghost"
                 whileHover={{ y: -1.5 }}
@@ -422,7 +422,7 @@ export default function FreelancerOrderDetail() {
                 }
               >
                 Open chat
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
 
@@ -681,7 +681,7 @@ export default function FreelancerOrderDetail() {
                   )}
 
                   <div className="workflowActions">
-                    <motion.button
+                    <Motion.button
                       type="submit"
                       className="workflowActionBtn workflowActionBtn--primary"
                       whileHover={{ y: -1.5 }}
@@ -697,7 +697,7 @@ export default function FreelancerOrderDetail() {
                           ? "Share shipment details"
                           : "Share delivery"}
                       </span>
-                    </motion.button>
+                    </Motion.button>
                   </div>
                 </form>
               </article>
@@ -763,7 +763,7 @@ export default function FreelancerOrderDetail() {
                   </label>
 
                   <div className="workflowActions">
-                    <motion.button
+                    <Motion.button
                       type="submit"
                       className="workflowActionBtn workflowActionBtn--primary"
                       whileHover={{ y: -1.5 }}
@@ -775,7 +775,7 @@ export default function FreelancerOrderDetail() {
                         <LoaderCircle className="customerSettingsAction__spinner" />
                       ) : null}
                       <span>Send update</span>
-                    </motion.button>
+                    </Motion.button>
                   </div>
                 </form>
               </article>

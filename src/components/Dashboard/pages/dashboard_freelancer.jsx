@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import "./profile.css";
 import "./freelancer_pages.css";
@@ -113,13 +113,13 @@ export default function DashboardFreelancer() {
                   <TypewriterHeading text="Welcome Back!" />
                 </span>
               </h1>
-              <motion.svg
+              <Motion.svg
                 className="profileHero__line freelancerDashboardHero__line"
                 viewBox="0 0 300 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
+                <Motion.path
                   d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                   fill="none"
                   stroke="currentColor"
@@ -129,7 +129,7 @@ export default function DashboardFreelancer() {
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 1.05, ease: "easeInOut", delay: 0.18 }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
 
             <p className="profileHero__sub freelancerDashboardHero__sub">
@@ -137,22 +137,22 @@ export default function DashboardFreelancer() {
             </p>
 
             <div className="profileEditor__actions freelancerDashboard__heroActions">
-              <motion.button
+              <Motion.button
                 type="button"
                 className="profileEditor__btn profileEditor__btn--primary freelancerDashboardHero__primary"
                 {...SURFACE_MOTION}
                 onClick={() => navigate("/dashboard/freelancer/post-listing")}
               >
                 Post a listing
-              </motion.button>
-              <motion.button
+              </Motion.button>
+              <Motion.button
                 type="button"
                 className="profileEditor__btn profileEditor__btn--ghost"
                 {...SURFACE_MOTION}
                 onClick={() => navigate("/dashboard/freelancer/messages")}
               >
                 Open messages
-              </motion.button>
+              </Motion.button>
             </div>
 
             <div className="freelancerDashboardHero__facts">
@@ -209,7 +209,7 @@ export default function DashboardFreelancer() {
 
               <div className="freelancerDashboardQuickLinks__grid">
                 {quickLinks.map((item) => (
-                  <motion.button
+                  <Motion.button
                     key={item.label}
                     type="button"
                     className="freelancerDashboardQuickLinks__item"
@@ -218,7 +218,7 @@ export default function DashboardFreelancer() {
                   >
                     <span className="freelancerDashboardQuickLinks__label">{item.label}</span>
                     <p className="freelancerDashboardQuickLinks__desc">{item.description}</p>
-                  </motion.button>
+                  </Motion.button>
                 ))}
               </div>
             </section>
@@ -237,7 +237,7 @@ export default function DashboardFreelancer() {
 
               <div className="freelancerDashboardWorkspace">
                 {workspaceItems.map((item) => (
-                  <motion.button
+                  <Motion.button
                     key={item.title}
                     type="button"
                     className="freelancerDashboardWorkspace__item"
@@ -251,7 +251,7 @@ export default function DashboardFreelancer() {
                       {item.description}
                     </p>
                     <span className="freelancerDashboardWorkspace__cta">{item.cta}</span>
-                  </motion.button>
+                  </Motion.button>
                 ))}
               </div>
             </section>
@@ -267,7 +267,7 @@ export default function DashboardFreelancer() {
                   </p>
                 </div>
 
-                <motion.button
+                <Motion.button
                   type="button"
                   className="profileSection__linkBtn"
                   whileHover={{ y: -1.5 }}
@@ -276,7 +276,7 @@ export default function DashboardFreelancer() {
                   onClick={() => navigate("/dashboard/freelancer/browse-requests")}
                 >
                   Browse all
-                </motion.button>
+                </Motion.button>
               </div>
 
               {requestsError ? (
@@ -305,7 +305,7 @@ export default function DashboardFreelancer() {
               ) : (
                 <div className="freelancerRequestGrid freelancerRequestGrid--preview">
                   {requests.map((request, index) => (
-                    <motion.article
+                    <Motion.article
                       key={request.id}
                       className="freelancerRequestCard"
                       initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
@@ -347,7 +347,7 @@ export default function DashboardFreelancer() {
                             </span>
                           </div>
 
-                          <motion.button
+                          <Motion.button
                             type="button"
                             className="freelancerRequestCard__btn"
                             whileHover={{ y: -1.5 }}
@@ -358,10 +358,10 @@ export default function DashboardFreelancer() {
                             }
                           >
                             View request
-                          </motion.button>
+                          </Motion.button>
                         </div>
                       </div>
-                    </motion.article>
+                    </Motion.article>
                   ))}
                 </div>
               )}
@@ -381,7 +381,7 @@ export default function DashboardFreelancer() {
 
               <div className="freelancerExploreGrid freelancerDashboardExploreGrid">
                 {exploreCards.map((card) => (
-                  <motion.button
+                  <Motion.button
                     key={card.title}
                     type="button"
                     className="freelancerExploreCard freelancerDashboardExploreCard"
@@ -392,7 +392,7 @@ export default function DashboardFreelancer() {
                       <strong className="freelancerExploreCard__title">{card.title}</strong>
                       <p className="freelancerExploreCard__desc">{card.description}</p>
                     </div>
-                  </motion.button>
+                  </Motion.button>
                 ))}
               </div>
             </section>

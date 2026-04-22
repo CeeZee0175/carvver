@@ -56,8 +56,8 @@ function TypewriterMotto({ text, active, speed = 42, initialDelay = 220 }) {
     startedRef.current = true;
 
     if (reduceMotion) {
-      setDisplayText(text);
-      return;
+      queueMicrotask(() => setDisplayText(text));
+      return undefined;
     }
 
     let timeoutId;
@@ -320,7 +320,9 @@ export default function HomeFooter({ fullBleed = false }) {
                   whileTap={{ scale: 0.96 }}
                   aria-label={label}
                 >
-                  <Icon className="homeFooter__socialIcon" />
+                  {React.createElement(Icon, {
+                    className: "homeFooter__socialIcon",
+                  })}
                 </Motion.button>
               ))}
             </div>

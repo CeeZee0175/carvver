@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion as Motion, useInView, useReducedMotion } from "framer-motion";
 import { ArrowRight, Check, LoaderCircle } from "lucide-react";
 import { createClient } from "../../../lib/supabase/client";
 import "./home_four.css";
@@ -43,7 +43,7 @@ function FlipText({
   return (
     <span className="homeFour__flip">
       {word.split("").map((char, i) => (
-        <motion.span
+        <Motion.span
           key={`${char}-${i}`}
           className={`homeFour__char ${char === " " ? "homeFour__char--space" : ""}`}
           initial={false}
@@ -55,7 +55,7 @@ function FlipText({
           }}
         >
           {char === " " ? "\u00A0" : char}
-        </motion.span>
+        </Motion.span>
       ))}
     </span>
   );
@@ -76,8 +76,8 @@ function TypewriterDescription({
     startedRef.current = true;
 
     if (reduceMotion) {
-      setDisplayText(text);
-      return;
+      queueMicrotask(() => setDisplayText(text));
+      return undefined;
     }
 
     let timeoutId;
@@ -101,14 +101,14 @@ function TypewriterDescription({
     <p className="homeFour__desc">
       <span>{displayText}</span>
       {!reduceMotion && displayText.length < text.length && (
-        <motion.span
+        <Motion.span
           className="homeFour__descCursor"
           aria-hidden="true"
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
         >
           |
-        </motion.span>
+        </Motion.span>
       )}
     </p>
   );
@@ -134,7 +134,7 @@ function EmailInput({
       aria-busy={isSubmitting}
       noValidate
     >
-      <motion.div
+      <Motion.div
         className={`homeFourInput ${
           status === "error"
             ? "homeFourInput--error"
@@ -151,7 +151,7 @@ function EmailInput({
         }
         transition={{ duration: 0.3 }}
       >
-        <motion.div
+        <Motion.div
           className="homeFourInput__label"
           variants={labelContainerVariants}
           initial="initial"
@@ -159,15 +159,15 @@ function EmailInput({
           aria-hidden="true"
         >
           {"Enter your email".split("").map((char, index) => (
-            <motion.span
+            <Motion.span
               key={index}
               className="homeFourInput__labelChar"
               variants={labelLetterVariants}
             >
               {char === " " ? "\u00A0" : char}
-            </motion.span>
+            </Motion.span>
           ))}
-        </motion.div>
+        </Motion.div>
 
         <input
           type="email"
@@ -184,7 +184,7 @@ function EmailInput({
           disabled={isSubmitting}
         />
 
-        <motion.button
+        <Motion.button
           type="submit"
           className={`homeFourInput__submit ${
             status === "success" ? "homeFourInput__submit--success" : ""
@@ -203,7 +203,7 @@ function EmailInput({
         >
           <AnimatePresence mode="wait" initial={false}>
             {isSubmitting ? (
-              <motion.span
+              <Motion.span
                 key="loader"
                 initial={{ opacity: 0, scale: 0.72 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -212,9 +212,9 @@ function EmailInput({
                 className="homeFourInput__iconWrap"
               >
                 <LoaderCircle className="homeFourInput__submitIcon homeFourInput__submitIcon--loading" />
-              </motion.span>
+              </Motion.span>
             ) : status === "success" ? (
-              <motion.span
+              <Motion.span
                 key="check"
                 initial={{ opacity: 0, scale: 0.7, rotate: -12 }}
                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
@@ -223,9 +223,9 @@ function EmailInput({
                 className="homeFourInput__iconWrap"
               >
                 <Check className="homeFourInput__submitIcon" />
-              </motion.span>
+              </Motion.span>
             ) : (
-              <motion.span
+              <Motion.span
                 key="arrow"
                 initial={{ opacity: 0, scale: 0.7, rotate: 12 }}
                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
@@ -234,16 +234,16 @@ function EmailInput({
                 className="homeFourInput__iconWrap"
               >
                 <ArrowRight className="homeFourInput__submitIcon" />
-              </motion.span>
+              </Motion.span>
             )}
           </AnimatePresence>
-        </motion.button>
-      </motion.div>
+        </Motion.button>
+      </Motion.div>
 
       <div className="homeFourFeedback" aria-live="polite">
         <AnimatePresence mode="wait">
           {message ? (
-            <motion.p
+            <Motion.p
               key={`${status}-${message}`}
               className={`homeFourFeedback__text ${
                 status === "error"
@@ -258,9 +258,9 @@ function EmailInput({
               transition={{ duration: 0.22 }}
             >
               {message}
-            </motion.p>
+            </Motion.p>
           ) : (
-            <motion.p
+            <Motion.p
               key="empty"
               className="homeFourFeedback__spacer"
               initial={{ opacity: 0 }}
@@ -268,7 +268,7 @@ function EmailInput({
               exit={{ opacity: 0 }}
             >
               &nbsp;
-            </motion.p>
+            </Motion.p>
           )}
         </AnimatePresence>
       </div>
@@ -281,7 +281,7 @@ function Decorations() {
 
   return (
     <div className="homeFour__decorLayer" aria-hidden="true">
-      <motion.div
+      <Motion.div
         className="homeFour__decor homeFour__decor--planeA"
         animate={reduceMotion ? {} : { y: [0, -8, 0], rotate: [0, -4, 0] }}
         transition={{ duration: 5.6, repeat: Infinity, ease: "easeInOut" }}
@@ -296,9 +296,9 @@ function Decorations() {
           />
           <path d="M55 68L98 24" fill="none" stroke="currentColor" strokeWidth="4" />
         </svg>
-      </motion.div>
+      </Motion.div>
 
-      <motion.div
+      <Motion.div
         className="homeFour__decor homeFour__decor--planeB"
         animate={reduceMotion ? {} : { y: [0, 10, 0], rotate: [0, 5, 0] }}
         transition={{ duration: 6.2, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
@@ -313,9 +313,9 @@ function Decorations() {
           />
           <path d="M56 70L96 30" fill="none" stroke="currentColor" strokeWidth="4" />
         </svg>
-      </motion.div>
+      </Motion.div>
 
-      <motion.div
+      <Motion.div
         className="homeFour__decor homeFour__decor--star"
         animate={reduceMotion ? {} : { rotate: [0, 10, 0], scale: [1, 1.04, 1] }}
         transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
@@ -329,9 +329,9 @@ function Decorations() {
             strokeLinejoin="round"
           />
         </svg>
-      </motion.div>
+      </Motion.div>
 
-      <motion.div
+      <Motion.div
         className="homeFour__decor homeFour__decor--ring"
         animate={reduceMotion ? {} : { rotate: [0, 360] }}
         transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
@@ -340,9 +340,9 @@ function Decorations() {
           <circle cx="60" cy="60" r="34" fill="none" stroke="currentColor" strokeWidth="4" />
           <circle cx="60" cy="60" r="50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="7 7" />
         </svg>
-      </motion.div>
+      </Motion.div>
 
-      <motion.div
+      <Motion.div
         className="homeFour__decor homeFour__decor--scribbleA"
         animate={reduceMotion ? {} : { x: [0, 8, 0], y: [0, -4, 0] }}
         transition={{ duration: 5.4, repeat: Infinity, ease: "easeInOut" }}
@@ -356,9 +356,9 @@ function Decorations() {
             strokeLinecap="round"
           />
         </svg>
-      </motion.div>
+      </Motion.div>
 
-      <motion.div
+      <Motion.div
         className="homeFour__decor homeFour__decor--scribbleB"
         animate={reduceMotion ? {} : { x: [0, -6, 0], y: [0, 5, 0] }}
         transition={{ duration: 6.1, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
@@ -372,7 +372,7 @@ function Decorations() {
             strokeLinecap="round"
           />
         </svg>
-      </motion.div>
+      </Motion.div>
     </div>
   );
 }
@@ -480,7 +480,7 @@ export default function HomeFour() {
           text="Be the first to hear about new features, platform updates, and everything we're building at Carvver."
         />
 
-        <motion.div
+        <Motion.div
           className="homeFour__inputWrap"
           initial={{ opacity: 0, y: 10 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -494,7 +494,7 @@ export default function HomeFour() {
             status={status}
             message={message}
           />
-        </motion.div>
+        </Motion.div>
       </div>
     </section>
   );

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import { motion as Motion, useInView, useReducedMotion } from "framer-motion";
 import { ChevronRight, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "../../../lib/utils";
@@ -60,7 +60,7 @@ export function Reveal({
   const reduceMotion = useReducedMotion();
 
   return (
-    <motion.div
+    <Motion.div
       ref={ref}
       className={className}
       initial={
@@ -74,7 +74,7 @@ export function Reveal({
       transition={{ duration: 0.58, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
-    </motion.div>
+    </Motion.div>
   );
 }
 
@@ -94,7 +94,7 @@ export function TypewriterHeading({
     let cancelled = false;
     let index = 0;
 
-    setDisplayText("");
+    queueMicrotask(() => setDisplayText(""));
 
     const tick = () => {
       if (cancelled) return;
@@ -121,14 +121,14 @@ export function TypewriterHeading({
     <span className={className}>
       {resolvedText}
       {!reduceMotion && resolvedText.length < text.length && (
-        <motion.span
+        <Motion.span
           className="profileHero__cursor"
           aria-hidden="true"
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 0.88, repeat: Infinity, ease: "easeInOut" }}
         >
           |
-        </motion.span>
+        </Motion.span>
       )}
     </span>
   );
@@ -193,7 +193,7 @@ export function EmptySurface({
       <h3 className="profileEmpty__title">{title}</h3>
       {description ? <p className="profileEmpty__desc">{description}</p> : null}
       {actionLabel && onAction && (
-        <motion.button
+        <Motion.button
           type="button"
           className={cn("profileEmpty__btn", actionButtonClassName)}
           whileHover={actionMotion?.whileHover || { y: -1 }}
@@ -202,7 +202,7 @@ export function EmptySurface({
           onClick={onAction}
         >
           {actionLabel}
-        </motion.button>
+        </Motion.button>
       )}
     </div>
   );

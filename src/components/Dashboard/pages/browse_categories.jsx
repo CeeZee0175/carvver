@@ -5,8 +5,7 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import {
-  motion,
+import { motion as Motion,
   useInView,
   useReducedMotion,
   AnimatePresence,
@@ -330,7 +329,7 @@ function ScrollReveal({ children, delay = 0, y = 20, className }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <motion.div
+    <Motion.div
       ref={ref}
       className={className}
       initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y }}
@@ -344,7 +343,7 @@ function ScrollReveal({ children, delay = 0, y = 20, className }) {
       }}
     >
       {children}
-    </motion.div>
+    </Motion.div>
   );
 }
 
@@ -354,8 +353,8 @@ function TypewriterHeading({ text = "Browse Services" }) {
 
   useEffect(() => {
     if (reduceMotion) {
-      setDisplayText(text);
-      return;
+      queueMicrotask(() => setDisplayText(text));
+      return undefined;
     }
 
     let timeoutId;
@@ -375,14 +374,14 @@ function TypewriterHeading({ text = "Browse Services" }) {
     <h1 className="browseCategories__title">
       {displayText}
       {!reduceMotion && displayText.length < text.length && (
-        <motion.span
+        <Motion.span
           className="browseCategories__cursor"
           aria-hidden="true"
           animate={{ opacity: [1, 0, 1] }}
           transition={{ duration: 0.85, repeat: Infinity, ease: "easeInOut" }}
         >
           |
-        </motion.span>
+        </Motion.span>
       )}
     </h1>
   );
@@ -459,8 +458,10 @@ function CategoryModal({
 
   useEffect(() => {
     if (!open) return;
-    setDraftCategories(selectedCategories);
-    setDraftIncludeOthers(includeOthers);
+    queueMicrotask(() => {
+      setDraftCategories(selectedCategories);
+      setDraftIncludeOthers(includeOthers);
+    });
   }, [open, selectedCategories, includeOthers]);
 
   useEffect(() => {
@@ -481,7 +482,7 @@ function CategoryModal({
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
+        <Motion.div
           className="browseModalLayer"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -490,7 +491,7 @@ function CategoryModal({
         >
           <div className="browseModalOverlay" onClick={onClose} />
 
-          <motion.div
+          <Motion.div
             className="browseCategoryModal"
             initial={
               reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18, scale: 0.98 }
@@ -613,8 +614,8 @@ function CategoryModal({
                 Apply Categories
               </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </Motion.div>
+        </Motion.div>
       )}
     </AnimatePresence>
   );
@@ -646,28 +647,30 @@ function LocationMapModal({
   useEffect(() => {
     if (!open) return;
 
-    setActiveRegion(selectedRegion);
-    setActiveCity(selectedCity);
-    setExpandedRegion(selectedRegion || "NCR / Metro Manila");
+    queueMicrotask(() => {
+      setActiveRegion(selectedRegion);
+      setActiveCity(selectedCity);
+      setExpandedRegion(selectedRegion || "NCR / Metro Manila");
 
-    if (selectedCity && selectedRegion) {
-      const region = PHILIPPINES_REGIONS.find((r) => r.name === selectedRegion);
-      const city = region?.cities.find((c) => c.name === selectedCity);
-      if (city) {
-        setFocusTarget({ type: "city", coords: city.coords });
-        return;
+      if (selectedCity && selectedRegion) {
+        const region = PHILIPPINES_REGIONS.find((r) => r.name === selectedRegion);
+        const city = region?.cities.find((c) => c.name === selectedCity);
+        if (city) {
+          setFocusTarget({ type: "city", coords: city.coords });
+          return;
+        }
       }
-    }
 
-    if (selectedRegion) {
-      const region = PHILIPPINES_REGIONS.find((r) => r.name === selectedRegion);
-      if (region) {
-        setFocusTarget({ type: "region", coords: region.coords });
-        return;
+      if (selectedRegion) {
+        const region = PHILIPPINES_REGIONS.find((r) => r.name === selectedRegion);
+        if (region) {
+          setFocusTarget({ type: "region", coords: region.coords });
+          return;
+        }
       }
-    }
 
-    setFocusTarget({ type: "country", coords: PH_CENTER });
+      setFocusTarget({ type: "country", coords: PH_CENTER });
+    });
   }, [open, selectedRegion, selectedCity]);
 
   useEffect(() => {
@@ -684,7 +687,7 @@ function LocationMapModal({
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
+        <Motion.div
           className="browseModalLayer"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -693,7 +696,7 @@ function LocationMapModal({
         >
           <div className="browseModalOverlay" onClick={onClose} />
 
-          <motion.div
+          <Motion.div
             className="browseLocationModal"
             initial={
               reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18, scale: 0.98 }
@@ -939,7 +942,7 @@ function LocationMapModal({
 
                     <AnimatePresence initial={false}>
                       {expanded && (
-                        <motion.div
+                        <Motion.div
                           className="browseRegionCard__content"
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
@@ -984,7 +987,7 @@ function LocationMapModal({
                               );
                             })}
                           </div>
-                        </motion.div>
+                        </Motion.div>
                       )}
                     </AnimatePresence>
                   </div>
@@ -1019,8 +1022,8 @@ function LocationMapModal({
                 Apply Location
               </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </Motion.div>
+        </Motion.div>
       )}
     </AnimatePresence>
   );
@@ -1053,7 +1056,7 @@ function ServiceCard({
   );
   const inCart = cartServiceIds.includes(service.id);
   const colors = ACCENT_COLORS[index % ACCENT_COLORS.length];
-  const Icon = getCategoryIcon(service.category);
+  const categoryIcon = getCategoryIcon(service.category);
 
   const creatorName = service.profiles
     ? `${service.profiles.first_name} ${service.profiles.last_name}`
@@ -1077,7 +1080,7 @@ function ServiceCard({
     : "?";
 
   return (
-    <motion.article
+    <Motion.article
       ref={ref}
       className="browseServiceCard"
       style={{ "--card-accent-a": colors.a, "--card-accent-b": colors.b }}
@@ -1113,7 +1116,9 @@ function ServiceCard({
               className="browseServiceCard__mediaIconWrap"
               aria-hidden="true"
             >
-              <Icon className="browseServiceCard__mediaIcon" />
+              {React.createElement(categoryIcon, {
+                className: "browseServiceCard__mediaIcon",
+              })}
             </span>
             {service.packageCount > 0 ? (
               <span className="browseServiceCard__mediaMeta">
@@ -1127,7 +1132,7 @@ function ServiceCard({
         <div className="browseServiceCard__mediaTop">
           <span className="browseServiceCard__tag">{service.category}</span>
 
-          <motion.button
+          <Motion.button
             type="button"
             className={`browseServiceCard__save ${saved ? "browseServiceCard__save--active" : ""}`}
             aria-label={saved ? "Remove from saved" : "Save service"}
@@ -1137,7 +1142,7 @@ function ServiceCard({
               onToggleSave(service.id);
             }}
           >
-            <motion.span
+            <Motion.span
               animate={saved ? { scale: [1, 1.28, 1] } : { scale: 1 }}
               transition={{ duration: 0.22 }}
               style={{ display: "inline-grid", placeItems: "center" }}
@@ -1146,8 +1151,8 @@ function ServiceCard({
                 style={{ width: 15, height: 15 }}
                 fill={saved ? "currentColor" : "none"}
               />
-            </motion.span>
-          </motion.button>
+            </Motion.span>
+          </Motion.button>
         </div>
 
         {service.is_pro && (
@@ -1183,7 +1188,7 @@ function ServiceCard({
           </div>
 
           {service.freelancer_id ? (
-            <motion.button
+            <Motion.button
               type="button"
               className={`browseServiceCard__favorite ${
                 favoriteFreelancer ? "browseServiceCard__favorite--active" : ""
@@ -1206,7 +1211,7 @@ function ServiceCard({
                 style={{ width: 15, height: 15 }}
                 fill={favoriteFreelancer ? "currentColor" : "none"}
               />
-            </motion.button>
+            </Motion.button>
           ) : null}
         </div>
 
@@ -1262,7 +1267,7 @@ function ServiceCard({
           </div>
 
           <div className="browseServiceCard__actions">
-            <motion.button
+            <Motion.button
               type="button"
               className={`browseServiceCard__cartBtn ${
                 inCart ? "browseServiceCard__cartBtn--active" : ""
@@ -1280,9 +1285,9 @@ function ServiceCard({
               }}
             >
               <span>{inCart ? "In cart" : "Choose package"}</span>
-            </motion.button>
+            </Motion.button>
 
-            <motion.button
+            <Motion.button
               type="button"
               className="browseServiceCard__btn browseServiceCard__btn--subtle"
               whileHover={{ x: 1 }}
@@ -1295,9 +1300,9 @@ function ServiceCard({
               }
             >
               Message
-            </motion.button>
+            </Motion.button>
 
-            <motion.button
+            <Motion.button
               type="button"
               className="browseServiceCard__btn browseServiceCard__btn--ghost"
               whileHover={{ x: 1 }}
@@ -1306,11 +1311,11 @@ function ServiceCard({
               onClick={() => onViewFreelancer(service.freelancer_id)}
             >
               Freelancer
-            </motion.button>
+            </Motion.button>
           </div>
         </div>
       </div>
-    </motion.article>
+    </Motion.article>
   );
 }
 
@@ -1349,7 +1354,7 @@ function EmptyState({ hasFilters, onClearFilters }) {
         {hasFilters ? "No services match your filters" : "No services yet"}
       </h3>
       {hasFilters && (
-        <motion.button
+        <Motion.button
           type="button"
           className="browseEmptyState__btn"
           onClick={onClearFilters}
@@ -1357,7 +1362,7 @@ function EmptyState({ hasFilters, onClearFilters }) {
           whileTap={{ scale: 0.97 }}
         >
           Clear all filters
-        </motion.button>
+        </Motion.button>
       )}
     </ScrollReveal>
   );
@@ -1372,7 +1377,7 @@ function FilterDropdown({ label, icon: Icon, open, onToggle, children, wide }) {
 
   return (
     <div className="browseFilterGroup">
-      <motion.button
+      <Motion.button
         type="button"
         className={`browseFilterTrigger ${open ? "browseFilterTrigger--open" : ""}`}
         whileHover={{ y: -1 }}
@@ -1386,11 +1391,11 @@ function FilterDropdown({ label, icon: Icon, open, onToggle, children, wide }) {
           className={`browseFilterTrigger__chevron ${open ? "browseFilterTrigger__chevron--open" : ""}`}
           style={{ width: 14, height: 14 }}
         />
-      </motion.button>
+      </Motion.button>
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <Motion.div
             className={`browseFilterMenu ${wide ? "browseFilterMenu--wide" : "browseFilterMenu--small"}`}
             initial={
               reduceMotion ? { opacity: 1 } : { opacity: 0, y: 8, scale: 0.97 }
@@ -1402,7 +1407,7 @@ function FilterDropdown({ label, icon: Icon, open, onToggle, children, wide }) {
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
           >
             {children}
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </div>
@@ -1672,7 +1677,6 @@ export default function BrowseCategories() {
     services,
     selectedCategories,
     includeOthers,
-    deliveryDays,
     minBudget,
     maxBudget,
     proOnly,
@@ -1891,7 +1895,7 @@ export default function BrowseCategories() {
       <main className="browseCategories__main">
         <ScrollReveal y={8}>
           <section className="browseCrumbs">
-            <motion.button
+            <Motion.button
               type="button"
               className="browseCrumbs__home"
               whileHover={{ x: -1 }}
@@ -1901,7 +1905,7 @@ export default function BrowseCategories() {
             >
               <Home className="browseCrumbs__icon" />
               <span>Home</span>
-            </motion.button>
+            </Motion.button>
 
             <span className="browseCrumbs__sep">/</span>
             <span className="browseCrumbs__current">Browse Services</span>
@@ -1912,13 +1916,13 @@ export default function BrowseCategories() {
           <section className="browseHero">
             <div className="browseHero__titleWrap">
               <TypewriterHeading />
-              <motion.svg
+              <Motion.svg
                 className="browseHero__line"
                 viewBox="0 0 300 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
+                <Motion.path
                   d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                   fill="none"
                   stroke="currentColor"
@@ -1928,7 +1932,7 @@ export default function BrowseCategories() {
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 1.05, ease: "easeInOut", delay: 0.1 }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
           </section>
         </ScrollReveal>
@@ -1936,7 +1940,7 @@ export default function BrowseCategories() {
         <ScrollReveal y={14} delay={0.06}>
           <section className="browseControlPanel" ref={filterRef}>
             <div className="browseFilterBar__inner">
-              <motion.button
+              <Motion.button
                 type="button"
                 className={`browseFilterTrigger ${categoryModalOpen ? "browseFilterTrigger--open" : ""}`}
                 whileHover={{ y: -1 }}
@@ -1950,7 +1954,7 @@ export default function BrowseCategories() {
                   className={`browseFilterTrigger__chevron ${categoryModalOpen ? "browseFilterTrigger__chevron--open" : ""}`}
                   style={{ width: 14, height: 14 }}
                 />
-              </motion.button>
+              </Motion.button>
 
               <FilterDropdown
                 label={budgetLabel}
@@ -1997,7 +2001,7 @@ export default function BrowseCategories() {
                   </div>
 
                   <div className="browseBudgetMenu__actions">
-                    <motion.button
+                    <Motion.button
                       type="button"
                       className="browseFilterMenu__clear"
                       whileHover={{ y: -1 }}
@@ -2009,9 +2013,9 @@ export default function BrowseCategories() {
                       }}
                     >
                       Reset
-                    </motion.button>
+                    </Motion.button>
 
-                    <motion.button
+                    <Motion.button
                       type="button"
                       className="browseFilterMenu__apply"
                       whileHover={{ y: -1 }}
@@ -2024,7 +2028,7 @@ export default function BrowseCategories() {
                       }}
                     >
                       Apply
-                    </motion.button>
+                    </Motion.button>
                   </div>
                 </div>
               </FilterDropdown>
@@ -2059,7 +2063,7 @@ export default function BrowseCategories() {
                 </div>
               </FilterDropdown>
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className={`browseFilterTrigger browseFilterTrigger--location ${selectedRegion || selectedCity ? "browseFilterTrigger--open" : ""}`}
                 whileHover={{ y: -1 }}
@@ -2084,9 +2088,9 @@ export default function BrowseCategories() {
                     <X style={{ width: 12, height: 12 }} />
                   </span>
                 )}
-              </motion.button>
+              </Motion.button>
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className={`browseFilterToggle browseFilterToggle--pro ${proOnly ? "browseFilterToggle--active" : ""}`}
                 whileHover={{ y: -1 }}
@@ -2096,9 +2100,9 @@ export default function BrowseCategories() {
               >
                 <BadgeCheck style={{ width: 14, height: 14 }} />
                 Pro Services
-              </motion.button>
+              </Motion.button>
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className={`browseFilterToggle browseFilterToggle--verified ${verifiedOnly ? "browseFilterToggle--active" : ""}`}
                 whileHover={{ y: -1 }}
@@ -2109,7 +2113,7 @@ export default function BrowseCategories() {
               >
                 <ShieldCheck style={{ width: 14, height: 14 }} />
                 Verified
-              </motion.button>
+              </Motion.button>
 
               <FilterDropdown
                 label={`Sort: ${sortLabel}`}
@@ -2141,7 +2145,7 @@ export default function BrowseCategories() {
 
               <AnimatePresence>
                 {hasFilters && (
-                  <motion.button
+                  <Motion.button
                     type="button"
                     className="browseFilterClear"
                     initial={{ opacity: 0, scale: 0.88, x: -6 }}
@@ -2154,7 +2158,7 @@ export default function BrowseCategories() {
                   >
                     <X style={{ width: 13, height: 13 }} />
                     Clear filters
-                  </motion.button>
+                  </Motion.button>
                 )}
               </AnimatePresence>
             </div>
@@ -2211,7 +2215,7 @@ export default function BrowseCategories() {
                 {Array.from({ length: totalPages }, (_, i) => {
                   const page = i + 1;
                   return (
-                    <motion.button
+                    <Motion.button
                       key={page}
                       type="button"
                       className={`browsePagination__btn ${currentPage === page ? "browsePagination__btn--active" : ""}`}
@@ -2227,7 +2231,7 @@ export default function BrowseCategories() {
                       }}
                     >
                       {page}
-                    </motion.button>
+                    </Motion.button>
                   );
                 })}
               </div>

@@ -17,8 +17,17 @@ import {
 const supabase = createClient();
 
 export const PROFILE_AVATAR_BUCKET = "profile-avatars";
+const SERVICE_MEDIA_BUCKET = "service-media";
 export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
 export const AVATAR_ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+function getPublicServiceMediaUrl(path) {
+  if (!path) return "";
+  const { data } = supabase.storage
+    .from(SERVICE_MEDIA_BUCKET)
+    .getPublicUrl(path);
+  return data?.publicUrl || "";
+}
 
 function friendlySupabaseMessage(error, fallback) {
   const message = String(error?.message || "");
@@ -130,7 +139,38 @@ async function fetchOrders(userId) {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data || [];
+  const orders = data || [];
+  const serviceIds = orders.map((order) => order.service_id).filter(Boolean);
+
+  if (serviceIds.length === 0) return orders;
+
+  try {
+    const { data: mediaRows, error: mediaError } = await supabase
+      .from("service_media")
+      .select("service_id, bucket_path, media_kind, is_cover, sort_order")
+      .in("service_id", serviceIds)
+      .order("is_cover", { ascending: false })
+      .order("sort_order", { ascending: true });
+
+    if (mediaError) throw mediaError;
+
+    const previewMap = new Map();
+    (mediaRows || []).forEach((item) => {
+      if (!previewMap.has(item.service_id)) {
+        previewMap.set(item.service_id, {
+          ...item,
+          publicUrl: getPublicServiceMediaUrl(item.bucket_path),
+        });
+      }
+    });
+
+    return orders.map((order) => ({
+      ...order,
+      previewMedia: previewMap.get(order.service_id) || null,
+    }));
+  } catch {
+    return orders;
+  }
 }
 
 async function fetchReviews(userId) {

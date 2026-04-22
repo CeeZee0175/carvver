@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion} from "framer-motion";
 import { LogOut, MessageCircle, Sparkles, UserRound } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -96,13 +96,13 @@ export default function FreelancerSettings() {
               <h1 className="profileHero__title">
                 <TypewriterHeading text="Settings" />
               </h1>
-              <motion.svg
+              <Motion.svg
                 className="profileHero__line"
                 viewBox="0 0 300 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
+                <Motion.path
                   d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                   fill="none"
                   stroke="currentColor"
@@ -112,7 +112,7 @@ export default function FreelancerSettings() {
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 1.05, ease: "easeInOut", delay: 0.18 }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
             <p className="profileHero__sub">
               Review the details tied to your freelancer profile and keep your main
@@ -192,7 +192,7 @@ export default function FreelancerSettings() {
 
       <Reveal delay={0.14}>
         <section className="profileNavBand">
-          <motion.button
+          <Motion.button
             type="button"
             className="profileNavBand__item"
             whileHover={{ y: -2 }}
@@ -202,9 +202,9 @@ export default function FreelancerSettings() {
           >
             <UserRound className="profileNavBand__icon" />
             <span className="profileNavBand__label">Profile</span>
-          </motion.button>
+          </Motion.button>
 
-          <motion.button
+          <Motion.button
             type="button"
             className="profileNavBand__item"
             whileHover={{ y: -2 }}
@@ -214,9 +214,9 @@ export default function FreelancerSettings() {
           >
             <MessageCircle className="profileNavBand__icon" />
             <span className="profileNavBand__label">Messages</span>
-          </motion.button>
+          </Motion.button>
 
-          <motion.button
+          <Motion.button
             type="button"
             className="profileNavBand__item"
             whileHover={{ y: -2 }}
@@ -226,7 +226,7 @@ export default function FreelancerSettings() {
           >
             <Sparkles className="profileNavBand__icon" />
             <span className="profileNavBand__label">Carvver Pro</span>
-          </motion.button>
+          </Motion.button>
         </section>
       </Reveal>
 
@@ -294,28 +294,28 @@ export default function FreelancerSettings() {
 
             <AnimatePresence mode="wait">
               {payoutState.error ? (
-                <motion.div
+                <Motion.div
                   className="customerSettingsStatus customerSettingsStatus--danger"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                 >
                   {payoutState.error}
-                </motion.div>
+                </Motion.div>
               ) : payoutState.success ? (
-                <motion.div
+                <Motion.div
                   className="customerSettingsStatus customerSettingsStatus--success"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                 >
                   {payoutState.success}
-                </motion.div>
+                </Motion.div>
               ) : null}
             </AnimatePresence>
 
             <div className="customerSettingsActionsRow">
-              <motion.button
+              <Motion.button
                 type="submit"
                 className="profileEditor__btn profileEditor__btn--primary customerSettingsAction"
                 whileHover={{ y: -1.5 }}
@@ -324,9 +324,9 @@ export default function FreelancerSettings() {
                 disabled={payoutState.pending}
               >
                 <span>{payoutState.pending ? "Saving..." : "Save payout method"}</span>
-              </motion.button>
+              </Motion.button>
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
                 whileHover={{ y: -1.5 }}
@@ -335,7 +335,7 @@ export default function FreelancerSettings() {
                 onClick={() => navigate("/dashboard/freelancer/orders")}
               >
                 Open orders
-              </motion.button>
+              </Motion.button>
             </div>
           </form>
         </section>
@@ -356,7 +356,7 @@ export default function FreelancerSettings() {
             <article className="freelancerSettingsCard">
               <span className="freelancerDataLabel">Sign out</span>
               <strong className="freelancerDataValue--strong">End this session</strong>
-              <motion.button
+              <Motion.button
                 type="button"
                 className="profileEditor__btn profileEditor__btn--primary"
                 whileHover={{ y: -1 }}
@@ -366,7 +366,7 @@ export default function FreelancerSettings() {
               >
                 <LogOut className="profileEditor__btnIcon" />
                 <span>Sign out</span>
-              </motion.button>
+              </Motion.button>
             </article>
           </div>
         </section>

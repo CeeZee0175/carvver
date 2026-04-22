@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import React, { useCallback, useEffect, useState } from "react";
+import { AnimatePresence, motion as Motion} from "framer-motion";
 import { LoaderCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./profile.css";
@@ -195,7 +195,7 @@ export default function CustomerOrderDetail() {
   const [error, setError] = useState("");
   const [state, setState] = useState({ pending: false, error: "", success: "" });
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -207,11 +207,11 @@ export default function CustomerOrderDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId]);
 
   useEffect(() => {
     load();
-  }, [orderId]);
+  }, [load]);
 
   const handleConfirm = async () => {
     setState({ pending: true, error: "", success: "" });
@@ -251,8 +251,8 @@ export default function CustomerOrderDetail() {
                 <h1 className="workflowHero__title">
                   <TypewriterHeading text={order?.services?.title || "Order detail"} />
                 </h1>
-                <motion.svg className="workflowHero__line" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
-                  <motion.path
+                <Motion.svg className="workflowHero__line" viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true">
+                  <Motion.path
                     d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                     fill="none"
                     stroke="currentColor"
@@ -262,7 +262,7 @@ export default function CustomerOrderDetail() {
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 1.05, ease: "easeInOut", delay: 0.14 }}
                   />
-                </motion.svg>
+                </Motion.svg>
               </div>
 
               <p className="workflowHero__sub">
@@ -271,7 +271,7 @@ export default function CustomerOrderDetail() {
             </div>
 
             <div className="workflowHero__actions">
-              <motion.button
+              <Motion.button
                 type="button"
                 className="workflowActionBtn workflowActionBtn--ghost"
                 whileHover={{ y: -1.5 }}
@@ -280,7 +280,7 @@ export default function CustomerOrderDetail() {
                 onClick={() => navigate("/dashboard/customer/messages")}
               >
                 Open messages
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
 
@@ -449,7 +449,7 @@ export default function CustomerOrderDetail() {
                   </a>
                 ) : null}
                 {["pending", "active"].includes(order.status) ? (
-                  <motion.button
+                  <Motion.button
                     type="button"
                     className="workflowActionBtn workflowActionBtn--primary"
                     whileHover={{ y: -1.5 }}
@@ -460,7 +460,7 @@ export default function CustomerOrderDetail() {
                   >
                     {state.pending ? <LoaderCircle className="customerSettingsAction__spinner" /> : null}
                     <span>Confirm receipt</span>
-                  </motion.button>
+                  </Motion.button>
                 ) : null}
               </article>
             </aside>

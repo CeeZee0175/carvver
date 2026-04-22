@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion } from "framer-motion";
 import { LoaderCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -47,30 +47,11 @@ function getBillingStatusLabel(status) {
   }
 }
 
-function formatCardSummary(profile) {
-  if (
-    !profile?.defaultCardBrand ||
-    !profile?.defaultCardLast4 ||
-    !profile?.defaultCardExpMonth ||
-    !profile?.defaultCardExpYear
-  ) {
-    return "";
-  }
-
-  const brand = String(profile.defaultCardBrand || "")
-    .replace(/_/g, " ")
-    .trim();
-
-  return `${brand} ending in ${profile.defaultCardLast4} · ${String(
-    profile.defaultCardExpMonth
-  ).padStart(2, "0")}/${profile.defaultCardExpYear}`;
-}
-
 function InlineStatus({ tone = "neutral", message }) {
   if (!message) return null;
 
   return (
-    <motion.div
+    <Motion.div
       className={`customerSettingsStatus customerSettingsStatus--${tone}`}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
@@ -78,7 +59,7 @@ function InlineStatus({ tone = "neutral", message }) {
       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
     >
       {message}
-    </motion.div>
+    </Motion.div>
   );
 }
 
@@ -114,16 +95,12 @@ export default function CustomerSettings() {
     email,
     providerLabel,
     hasPasswordProvider,
-    billingProfile,
     billingHistory,
     billingAvailable,
     billingHistorySummary,
-    hasSavedWallet,
-    hasSavedCard,
     changePassword,
     sendPasswordRecovery,
     updateEmailAddress,
-    saveBillingProfile,
     deleteAccount,
   } = useCustomerAccountSettings();
 
@@ -134,10 +111,6 @@ export default function CustomerSettings() {
   });
   const [emailEditing, setEmailEditing] = useState(false);
   const [emailValue, setEmailValue] = useState("");
-  const [billingEditing, setBillingEditing] = useState(false);
-  const [billingValues, setBillingValues] = useState({
-    preferredPaymentMethod: "qrph",
-  });
   const [passwordState, setPasswordState] = useState({
     pending: false,
     error: "",
@@ -153,11 +126,6 @@ export default function CustomerSettings() {
     error: "",
     success: "",
   });
-  const [billingState, setBillingState] = useState({
-    pending: false,
-    error: "",
-    success: "",
-  });
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [deleteState, setDeleteState] = useState({
@@ -167,10 +135,12 @@ export default function CustomerSettings() {
 
   useEffect(() => {
     if (location.search.includes("emailChange=success")) {
-      setEmailState({
-        pending: false,
-        error: "",
-        success: "Your email change was confirmed.",
+      queueMicrotask(() => {
+        setEmailState({
+          pending: false,
+          error: "",
+          success: "Your email change was confirmed.",
+        });
       });
     }
   }, [location.search]);
@@ -193,28 +163,12 @@ export default function CustomerSettings() {
     [email, loading, providerLabel]
   );
 
-  const cardSummary = useMemo(
-    () => formatCardSummary(billingProfile),
-    [billingProfile]
-  );
-
-  const hasBillingSetup = useMemo(
-    () =>
-      Boolean(
-        billingProfile.preferredPaymentMethod || hasSavedWallet || hasSavedCard
-      ),
-    [billingProfile.preferredPaymentMethod, hasSavedCard, hasSavedWallet]
-  );
-
   const resetPasswordState = () =>
     setPasswordState({ pending: false, error: "", success: "" });
   const resetRecoveryState = () =>
     setRecoveryState({ pending: false, error: "", success: "" });
   const resetEmailState = () =>
     setEmailState({ pending: false, error: "", success: "" });
-  const resetBillingState = () =>
-    setBillingState({ pending: false, error: "", success: "" });
-
   const startEmailEdit = () => {
     setEmailValue(email || "");
     resetEmailState();
@@ -225,28 +179,6 @@ export default function CustomerSettings() {
     setEmailEditing(false);
     setEmailValue("");
     resetEmailState();
-  };
-
-  const startBillingEdit = () => {
-    setBillingValues({
-      preferredPaymentMethod:
-        billingProfile.preferredPaymentMethod === "card" && hasSavedCard
-          ? "card"
-          : "qrph",
-    });
-    resetBillingState();
-    setBillingEditing(true);
-  };
-
-  const cancelBillingEdit = () => {
-    setBillingEditing(false);
-    setBillingValues({
-      preferredPaymentMethod:
-        billingProfile.preferredPaymentMethod === "card" && hasSavedCard
-          ? "card"
-          : "qrph",
-    });
-    resetBillingState();
   };
 
   const handlePasswordChange = async (event) => {
@@ -319,28 +251,6 @@ export default function CustomerSettings() {
     }
   };
 
-  const handleBillingSave = async (event) => {
-    event.preventDefault();
-    resetBillingState();
-    setBillingState((prev) => ({ ...prev, pending: true }));
-
-    try {
-      await saveBillingProfile(billingValues);
-      setBillingEditing(false);
-      setBillingState({
-        pending: false,
-        error: "",
-        success: "Your payment preferences were saved.",
-      });
-    } catch (error) {
-      setBillingState({
-        pending: false,
-        error: error.message || "We couldn't save your payment preferences.",
-        success: "",
-      });
-    }
-  };
-
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -385,13 +295,13 @@ export default function CustomerSettings() {
               <h1 className="customerSettingsHero__title">
                 <TypewriterHeading text="Settings" />
               </h1>
-              <motion.svg
+              <Motion.svg
                 className="customerSettingsHero__line"
                 viewBox="0 0 248 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
+                <Motion.path
                   d="M 0,10 Q 62,0 124,10 Q 186,20 248,10"
                   fill="none"
                   stroke="currentColor"
@@ -401,7 +311,7 @@ export default function CustomerSettings() {
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 1.05, ease: "easeInOut", delay: 0.18 }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
 
             <p className="profileHero__sub">
@@ -424,7 +334,7 @@ export default function CustomerSettings() {
 
           <div className="customerSettingsOverview">
             {overviewItems.map((item, index) => (
-              <motion.div
+              <Motion.div
                 key={item.label}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -432,7 +342,7 @@ export default function CustomerSettings() {
                 transition={{ duration: 0.32, delay: index * 0.04 }}
               >
                 <OverviewItem label={item.label} value={item.value} />
-              </motion.div>
+              </Motion.div>
             ))}
           </div>
         </section>
@@ -523,7 +433,7 @@ export default function CustomerSettings() {
             </AnimatePresence>
 
             <div className="customerSettingsActionsRow customerSettingsActionsRow--split">
-              <motion.button
+              <Motion.button
                 type="submit"
                 className="profileEditor__btn profileEditor__btn--primary customerSettingsAction"
                 whileHover={{ y: -1.5 }}
@@ -535,9 +445,9 @@ export default function CustomerSettings() {
                   <LoaderCircle className="customerSettingsAction__spinner" />
                 ) : null}
                 <span>{hasPasswordProvider ? "Update password" : "Add password"}</span>
-              </motion.button>
+              </Motion.button>
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
                 whileHover={{ y: -1.5 }}
@@ -550,7 +460,7 @@ export default function CustomerSettings() {
                   <LoaderCircle className="customerSettingsAction__spinner" />
                 ) : null}
                 <span>Forgot password</span>
-              </motion.button>
+              </Motion.button>
             </div>
           </form>
         </section>
@@ -593,7 +503,7 @@ export default function CustomerSettings() {
               </AnimatePresence>
 
               <div className="customerSettingsActionsRow">
-                <motion.button
+                <Motion.button
                   type="submit"
                   className="profileEditor__btn profileEditor__btn--primary customerSettingsAction"
                   whileHover={{ y: -1.5 }}
@@ -605,9 +515,9 @@ export default function CustomerSettings() {
                     <LoaderCircle className="customerSettingsAction__spinner" />
                   ) : null}
                   <span>Save email</span>
-                </motion.button>
+                </Motion.button>
 
-                <motion.button
+                <Motion.button
                   type="button"
                   className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
                   whileHover={{ y: -1.5 }}
@@ -617,7 +527,7 @@ export default function CustomerSettings() {
                   disabled={emailState.pending}
                 >
                   Cancel
-                </motion.button>
+                </Motion.button>
               </div>
             </form>
           ) : (
@@ -630,7 +540,7 @@ export default function CustomerSettings() {
                   </span>
                 </div>
 
-                <motion.button
+                <Motion.button
                   type="button"
                   className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
                   whileHover={{ y: -1.5 }}
@@ -639,7 +549,7 @@ export default function CustomerSettings() {
                   onClick={startEmailEdit}
                 >
                   Change email
-                </motion.button>
+                </Motion.button>
               </div>
 
               <AnimatePresence mode="wait">
@@ -664,146 +574,14 @@ export default function CustomerSettings() {
             <div className="customerSettingsSectionIntro">
               <h2 className="profileSection__title">Billing</h2>
               <p className="customerSettingsSectionIntro__copy">
-                Keep GCash or Maya scan ready for QR checkout, with card available once a completed payment has returned saved card details.
+                Review completed checkout activity and payment references in one place.
               </p>
             </div>
           </div>
 
           {billingAvailable ? (
-            <div className="customerSettingsBillingLayout">
-              <div className="customerSettingsBillingBlock">
-                <div className="customerSettingsBillingBlock__head">
-                  <h3 className="customerSettingsSubheading">Payment methods</h3>
-                  {hasBillingSetup && !billingEditing ? (
-                    <motion.button
-                      type="button"
-                      className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
-                      whileHover={{ y: -1.5 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={PROFILE_SPRING}
-                      onClick={startBillingEdit}
-                    >
-                      Edit
-                    </motion.button>
-                  ) : null}
-                </div>
-
-                {billingEditing ? (
-                  <form className="customerSettingsForm" onSubmit={handleBillingSave}>
-                    <div className="customerSettingsChoiceGroup">
-                      <button
-                        type="button"
-                        className={`customerSettingsChoice ${
-                          billingValues.preferredPaymentMethod === "qrph"
-                            ? "customerSettingsChoice--active"
-                            : ""
-                        }`}
-                        onClick={() =>
-                          setBillingValues((prev) => ({
-                            ...prev,
-                            preferredPaymentMethod: "qrph",
-                          }))
-                        }
-                      >
-                        GCash or Maya scan
-                      </button>
-
-                      {hasSavedCard ? (
-                        <button
-                          type="button"
-                          className={`customerSettingsChoice ${
-                            billingValues.preferredPaymentMethod === "card"
-                              ? "customerSettingsChoice--active"
-                              : ""
-                          }`}
-                          onClick={() =>
-                            setBillingValues((prev) => ({
-                              ...prev,
-                              preferredPaymentMethod: "card",
-                            }))
-                          }
-                        >
-                          Card
-                        </button>
-                      ) : null}
-                    </div>
-
-                    <div className="customerSettingsCompactNote">
-                      GCash and Maya both scan through the same QR checkout, while card stays available once PayMongo has already returned saved card details.
-                    </div>
-
-                    <AnimatePresence mode="wait">
-                      {billingState.error ? (
-                        <InlineStatus key="billing-error" tone="danger" message={billingState.error} />
-                      ) : billingState.success ? (
-                        <InlineStatus
-                          key="billing-success"
-                          tone="success"
-                          message={billingState.success}
-                        />
-                      ) : null}
-                    </AnimatePresence>
-
-                    <div className="customerSettingsActionsRow">
-                      <motion.button
-                        type="submit"
-                        className="profileEditor__btn profileEditor__btn--primary customerSettingsAction"
-                        whileHover={{ y: -1.5 }}
-                        whileTap={{ scale: 0.98 }}
-                        transition={PROFILE_SPRING}
-                        disabled={billingState.pending}
-                      >
-                        {billingState.pending ? (
-                          <LoaderCircle className="customerSettingsAction__spinner" />
-                        ) : null}
-                        <span>Save payment method</span>
-                      </motion.button>
-
-                      <motion.button
-                        type="button"
-                        className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
-                        whileHover={{ y: -1.5 }}
-                        whileTap={{ scale: 0.98 }}
-                        transition={PROFILE_SPRING}
-                        onClick={cancelBillingEdit}
-                        disabled={billingState.pending}
-                      >
-                        Cancel
-                      </motion.button>
-                    </div>
-                  </form>
-                ) : hasBillingSetup ? (
-                  <div className="customerSettingsDetails">
-                    <DetailRow
-                      label="Checkout method"
-                      value={
-                        billingProfile.preferredPaymentMethod === "card"
-                          ? "Card"
-                          : hasSavedWallet
-                            ? "GCash or Maya scan"
-                            : "Not set"
-                      }
-                    />
-                    {hasSavedCard ? (
-                      <DetailRow label="Saved card" value={cardSummary} wrap />
-                    ) : null}
-                    {hasSavedWallet ? (
-                      <DetailRow label="QR checkout" value="GCash or Maya scan" />
-                    ) : null}
-                  </div>
-                ) : (
-                  <EmptySurface
-                    hideIcon
-                    title="No payment method saved yet"
-                    actionLabel="Set up GCash or Maya scan"
-                    onAction={startBillingEdit}
-                    className="customerSettingsBillingEmpty"
-                    actionButtonClassName="customerSettingsBillingEmpty__btn"
-                  />
-                )}
-              </div>
-
-              <div className="customerSettingsBillingBlock">
+            <div className="customerSettingsBillingLayout customerSettingsBillingLayout--historyOnly">
+              <div className="customerSettingsBillingBlock customerSettingsBillingBlock--historyOnly">
                 <div className="customerSettingsBillingBlock__head">
                   <h3 className="customerSettingsSubheading">Billing history</h3>
                 </div>
@@ -827,7 +605,7 @@ export default function CustomerSettings() {
 
                     <div className="customerSettingsHistoryList">
                       {billingHistory.map((entry, index) => (
-                        <motion.article
+                        <Motion.article
                           key={entry.id}
                           className="customerSettingsHistoryItem"
                           initial={{ opacity: 0, y: 12 }}
@@ -862,7 +640,7 @@ export default function CustomerSettings() {
                               </span>
                             ) : null}
                           </div>
-                        </motion.article>
+                        </Motion.article>
                       ))}
                     </div>
                   </>
@@ -906,7 +684,7 @@ export default function CustomerSettings() {
                     {email || "Signed in"}
                   </span>
                 </div>
-                <motion.button
+                <Motion.button
                   type="button"
                   className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
                   whileHover={{ y: -1.5 }}
@@ -915,7 +693,7 @@ export default function CustomerSettings() {
                   onClick={handleSignOut}
                 >
                   Sign out
-                </motion.button>
+                </Motion.button>
               </div>
             </div>
 
@@ -927,7 +705,7 @@ export default function CustomerSettings() {
                     This permanently removes your account and cannot be undone.
                   </span>
                 </div>
-                <motion.button
+                <Motion.button
                   type="button"
                   className="profileEditor__btn customerSettingsAction customerSettingsAction--dangerSolid"
                   whileHover={{ y: -1.5 }}
@@ -936,7 +714,7 @@ export default function CustomerSettings() {
                   onClick={() => setDeleteModalOpen(true)}
                 >
                   Delete account
-                </motion.button>
+                </Motion.button>
               </div>
             </div>
           </div>
@@ -945,14 +723,14 @@ export default function CustomerSettings() {
 
       <AnimatePresence>
         {deleteModalOpen ? (
-          <motion.div
+          <Motion.div
             className="customerSettingsModal"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeDeleteModal}
           >
-            <motion.div
+            <Motion.div
               className="customerSettingsModal__dialog"
               initial={{ opacity: 0, y: 20, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -995,7 +773,7 @@ export default function CustomerSettings() {
                 </AnimatePresence>
 
                 <div className="customerSettingsActionsRow">
-                  <motion.button
+                  <Motion.button
                     type="button"
                     className="profileEditor__btn profileEditor__btn--ghost customerSettingsAction customerSettingsAction--ghost"
                     whileHover={{ y: -1.5 }}
@@ -1005,9 +783,9 @@ export default function CustomerSettings() {
                     disabled={deleteState.pending}
                   >
                     Cancel
-                  </motion.button>
+                  </Motion.button>
 
-                  <motion.button
+                  <Motion.button
                     type="submit"
                     className="profileEditor__btn customerSettingsAction customerSettingsAction--dangerSolid"
                     whileHover={{ y: -1.5 }}
@@ -1019,11 +797,11 @@ export default function CustomerSettings() {
                       <LoaderCircle className="customerSettingsAction__spinner" />
                     ) : null}
                     <span>Delete account</span>
-                  </motion.button>
+                  </Motion.button>
                 </div>
               </form>
-            </motion.div>
-          </motion.div>
+            </Motion.div>
+          </Motion.div>
         ) : null}
       </AnimatePresence>
     </CustomerDashboardFrame>

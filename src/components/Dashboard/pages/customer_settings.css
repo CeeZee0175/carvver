@@ -285,6 +285,14 @@
   gap: 14px;
 }
 
+.customerSettingsBillingLayout--historyOnly {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.customerSettingsBillingBlock--historyOnly {
+  max-width: none;
+}
+
 .customerSettingsHistoryItem {
   display: grid;
   gap: 10px;

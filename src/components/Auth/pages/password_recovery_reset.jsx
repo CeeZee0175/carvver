@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion} from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getSession, signOut, updatePassword } from "../../../lib/supabase/auth";
 import {
@@ -7,15 +7,17 @@ import {
   PASSWORD_POLICY_HINT,
 } from "../../../lib/passwordPolicy";
 import {
+  InlineStatus,
+  PasswordRecoveryShell,
+  RecoveryButton,
+} from "./password_recovery_shared";
+import {
   buildRecoveryPath,
   clearStoredRecoveryState,
   getRecoveryEmail,
-  InlineStatus,
   isRecoveryVerified,
-  PasswordRecoveryShell,
-  RecoveryButton,
   useRecoveryLinkBridge,
-} from "./password_recovery_shared";
+} from "./password_recovery_state";
 import "./password_recovery.css";
 
 export default function PasswordRecoveryReset() {
@@ -127,7 +129,7 @@ export default function PasswordRecoveryReset() {
   return (
     <PasswordRecoveryShell title="Set a new password">
       {({ inView }) => (
-        <motion.form
+        <Motion.form
           className="passwordRecoveryForm"
           onSubmit={handleSubmit}
           initial={{ opacity: 0, y: 10 }}
@@ -275,7 +277,7 @@ export default function PasswordRecoveryReset() {
               Save new password
             </RecoveryButton>
           </div>
-        </motion.form>
+        </Motion.form>
       )}
     </PasswordRecoveryShell>
   );

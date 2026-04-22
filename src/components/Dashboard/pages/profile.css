@@ -113,7 +113,7 @@
 }
 
 .customerOrdersPage .profileHero {
-  align-items: start;
+  align-items: center;
 }
 
 .customerOrdersPage .profileHero__heading {
@@ -138,10 +138,6 @@
   height: 16px;
 }
 
-.customerOrdersPage .profileHero__stats--open {
-  padding-top: 6px;
-}
-
 .customerOrdersPage .profileSection {
   gap: 18px;
 }
@@ -156,6 +152,7 @@
 }
 
 .customerOrdersPage .profileOrderList {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -163,6 +160,37 @@
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.74);
   box-shadow: 0 14px 38px rgba(12, 7, 18, 0.045);
+}
+
+.customerOrderListingCard {
+  min-width: 0;
+}
+
+.customerOrderListingCard__media {
+  height: 156px;
+}
+
+.customerOrderListingCard .browseServiceCard__body {
+  gap: 12px;
+}
+
+.customerOrderListingCard .browseServiceCard__summary {
+  min-height: 44px;
+}
+
+.customerOrderListingCard__meta {
+  gap: 7px;
+}
+
+.customerOrderListingCard__meta .profileOrderCard__metaItem {
+  min-height: 30px;
+  padding-inline: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.customerOrderListingCard__detailBtn {
+  width: 100%;
 }
 
 .customerOrdersPage__empty.profileEmpty--iconless {
@@ -261,6 +289,21 @@
   gap: clamp(22px, 3.4vw, 38px);
   padding: 26px 28px;
   align-items: stretch;
+}
+
+.profileHero--centered {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  text-align: center;
+}
+
+.profileHero--centered .profileHero__heading {
+  display: grid;
+  justify-items: center;
+}
+
+.profileHero--centered .profileHero__sub {
+  margin-inline: auto;
 }
 
 .profileHero__heading {
@@ -1716,6 +1759,10 @@
     grid-template-columns: 1fr;
   }
 
+  .customerOrdersPage .profileOrderList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .profileProgress__grid,
   .profileReviewGrid,
   .profileBadgeSlots,
@@ -1740,6 +1787,10 @@
   .profileBadgeWall,
   .profileCatalogGrid {
     grid-template-columns: 1fr;
+  }
+
+  .customerOrdersPage .profileOrderList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .profileEditor__grid {
@@ -1790,6 +1841,10 @@
   }
 
   .profileHero__stats {
+    grid-template-columns: 1fr;
+  }
+
+  .customerOrdersPage .profileOrderList {
     grid-template-columns: 1fr;
   }
 

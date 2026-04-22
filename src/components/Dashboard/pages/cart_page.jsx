@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion} from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
@@ -96,7 +96,7 @@ function CartLineItem({ item, onRemove, removing }) {
 
       <div className="cartLineItem__right">
         <strong className="cartLineItem__price">{formatPeso(price)}</strong>
-        <motion.button
+        <Motion.button
           type="button"
           className="cartLineItem__remove"
           whileHover={{ y: -2, scale: 1.01 }}
@@ -107,7 +107,7 @@ function CartLineItem({ item, onRemove, removing }) {
         >
           <Trash2 className="cartLineItem__removeIcon" />
           <span>{removing ? "Removing..." : "Remove"}</span>
-        </motion.button>
+        </Motion.button>
       </div>
     </article>
   );
@@ -266,13 +266,13 @@ export default function CartPage() {
               <h1 className="cartHero__title">
                 <TypewriterHeading text="Cart" />
               </h1>
-              <motion.svg
+              <Motion.svg
                 className="cartHero__line"
                 viewBox="0 0 300 20"
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <motion.path
+                <Motion.path
                   d="M 0,10 L 300,10"
                   fill="none"
                   stroke="currentColor"
@@ -282,7 +282,7 @@ export default function CartPage() {
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 1.05, ease: "easeInOut", delay: 0.18 }}
                 />
-              </motion.svg>
+              </Motion.svg>
             </div>
 
             <p className="cartHero__sub">
@@ -386,7 +386,7 @@ export default function CartPage() {
                 </div>
 
                 {items.length > 0 && !loading && (
-                  <motion.button
+                  <Motion.button
                     type="button"
                     className="cartSection__linkBtn"
                     whileHover={{ y: -2, scale: 1.01 }}
@@ -396,7 +396,7 @@ export default function CartPage() {
                   >
                     <Trash2 className="cartSection__linkIcon" />
                     <span>Clear cart</span>
-                  </motion.button>
+                  </Motion.button>
                 )}
               </div>
 
@@ -450,7 +450,7 @@ export default function CartPage() {
                         move into checkout because they are no longer published.
                       </p>
                     </div>
-                    <motion.button
+                    <Motion.button
                       type="button"
                       className="cartWarning__btn"
                       whileHover={{ y: -2, scale: 1.01 }}
@@ -459,11 +459,11 @@ export default function CartPage() {
                       onClick={handleClearInvalid}
                     >
                       Remove invalid items
-                    </motion.button>
+                    </Motion.button>
                   </div>
                 )}
 
-                <motion.button
+                <Motion.button
                   type="button"
                   className="cartCheckoutBtn"
                   whileHover={{ y: -3, scale: 1.008 }}
@@ -481,9 +481,9 @@ export default function CartPage() {
                   <span className="cartCheckoutBtn__iconWrap" aria-hidden="true">
                     <CreditCard className="cartCheckoutBtn__icon" />
                   </span>
-                </motion.button>
+                </Motion.button>
 
-                <motion.button
+                <Motion.button
                   type="button"
                   className="cartBrowseBtn"
                   whileHover={{ y: -2, scale: 1.01 }}
@@ -493,7 +493,7 @@ export default function CartPage() {
                 >
                   <span>Add more listings</span>
                   <ArrowRight className="cartBrowseBtn__icon" />
-                </motion.button>
+                </Motion.button>
               </section>
             )}
           </Reveal>

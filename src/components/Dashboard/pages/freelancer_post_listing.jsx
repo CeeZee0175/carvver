@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion} from "framer-motion";
 import { LoaderCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./profile.css";
@@ -317,13 +317,13 @@ export default function FreelancerPostListing() {
                 <h1 className="freelancerMarketplaceHero__title">
                   <TypewriterHeading text={pageTitle} />
                 </h1>
-                <motion.svg
+                <Motion.svg
                   className="freelancerMarketplaceHero__line"
                   viewBox="0 0 300 20"
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <motion.path
+                  <Motion.path
                     d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                     fill="none"
                     stroke="currentColor"
@@ -333,7 +333,7 @@ export default function FreelancerPostListing() {
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 1.05, ease: "easeInOut", delay: 0.14 }}
                   />
-                </motion.svg>
+                </Motion.svg>
               </div>
 
               <p className="freelancerMarketplaceHero__sub">{subText}</p>
@@ -341,7 +341,7 @@ export default function FreelancerPostListing() {
 
           <div className="freelancerListingActions">
               {showDraftActions ? (
-                <motion.button
+                <Motion.button
                   type="button"
                   className="freelancerListingActionBtn--ghost"
                   whileHover={{ y: -1.5 }}
@@ -358,9 +358,9 @@ export default function FreelancerPostListing() {
                   ) : (
                     <span>Save draft</span>
                   )}
-                </motion.button>
+                </Motion.button>
               ) : (
-                <motion.button
+                <Motion.button
                   type="button"
                   className="freelancerListingActionBtn--ghost"
                   whileHover={{ y: -1.5 }}
@@ -370,10 +370,10 @@ export default function FreelancerPostListing() {
                   disabled={Boolean(submittingMode)}
                 >
                   Back to listings
-                </motion.button>
+                </Motion.button>
               )}
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className="freelancerListingActionBtn"
                 whileHover={{ y: -1.5 }}
@@ -390,7 +390,7 @@ export default function FreelancerPostListing() {
                 ) : (
                   <span>{listingPublished ? "Save changes" : "Publish listing"}</span>
                 )}
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
         </section>
@@ -408,7 +408,7 @@ export default function FreelancerPostListing() {
               </p>
             </div>
             <div className="workflowActions">
-              <motion.button
+              <Motion.button
                 type="button"
                 className="workflowActionBtn workflowActionBtn--ghost"
                 whileHover={{ y: -1.5 }}
@@ -417,7 +417,7 @@ export default function FreelancerPostListing() {
                 onClick={() => navigate("/dashboard/freelancer/settings")}
               >
                 Open settings
-              </motion.button>
+              </Motion.button>
             </div>
           </section>
         </Reveal>
@@ -625,7 +625,7 @@ export default function FreelancerPostListing() {
                 onChange={handleMediaPicked}
               />
 
-              <motion.button
+              <Motion.button
                 type="button"
                 className="freelancerListingUpload__button"
                 whileHover={{ y: -1.5 }}
@@ -634,7 +634,7 @@ export default function FreelancerPostListing() {
                 onClick={() => uploadRef.current?.click()}
               >
                 Add cover or gallery media
-              </motion.button>
+              </Motion.button>
 
               {mediaItems.length === 0 ? (
                 <EmptySurface
@@ -646,7 +646,7 @@ export default function FreelancerPostListing() {
                 />
               ) : (
                 <AnimatePresence>
-                  <motion.div
+                  <Motion.div
                     className="freelancerListingMediaGrid"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -654,7 +654,7 @@ export default function FreelancerPostListing() {
                     transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
                   >
                     {mediaItems.map((item, index) => (
-                      <motion.article
+                      <Motion.article
                         key={item.id}
                         className="freelancerListingMediaCard"
                         initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
@@ -685,9 +685,9 @@ export default function FreelancerPostListing() {
                             Remove
                           </button>
                         </div>
-                      </motion.article>
+                      </Motion.article>
                     ))}
-                  </motion.div>
+                  </Motion.div>
                 </AnimatePresence>
               )}
             </section>

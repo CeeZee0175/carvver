@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion} from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -28,7 +28,7 @@ function NotificationPreviewItem({ item, index, onOpen }) {
   const Icon = item.Icon;
 
   return (
-    <motion.button
+    <Motion.button
       type="button"
       className="dashbarNotifyItem"
       initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
@@ -62,7 +62,7 @@ function NotificationPreviewItem({ item, index, onOpen }) {
         </span>
         <span className="dashbarNotifyItem__title">{item.title}</span>
       </span>
-    </motion.button>
+    </Motion.button>
   );
 }
 
@@ -72,7 +72,6 @@ export default function DashBar() {
   const {
     loading: notificationsLoading,
     unreadNotifications,
-    unreadCount,
     hasUnread,
     markAllRead,
     markRead,
@@ -152,18 +151,22 @@ export default function DashBar() {
   }, []);
 
   useEffect(() => {
-    setOpenProfile(false);
-    setOpenNotifications(false);
+    queueMicrotask(() => {
+      setOpenProfile(false);
+      setOpenNotifications(false);
+    });
   }, [location.pathname]);
 
   useEffect(() => {
-    if (location.pathname === "/dashboard/customer/search") {
-      const params = new URLSearchParams(location.search);
-      setQuery(params.get("q") || "");
-      return;
-    }
+    queueMicrotask(() => {
+      if (location.pathname === "/dashboard/customer/search") {
+        const params = new URLSearchParams(location.search);
+        setQuery(params.get("q") || "");
+        return;
+      }
 
-    setQuery("");
+      setQuery("");
+    });
   }, [location.pathname, location.search]);
 
   const handleSearchSubmit = (e) => {
@@ -265,7 +268,7 @@ export default function DashBar() {
             </button>
           </div>
 
-          <motion.form
+          <Motion.form
             className="dashbar__searchWrap dashbarEnter dashbarEnter--2"
             onSubmit={handleSearchSubmit}
             initial={false}
@@ -282,10 +285,10 @@ export default function DashBar() {
                 onChange={(e) => setQuery(e.target.value)}
               />
             </label>
-          </motion.form>
+          </Motion.form>
 
           <div className="dashbar__right dashbarEnter dashbarEnter--3">
-            <motion.button
+            <Motion.button
               type="button"
               className="dashbarPill dashbarPill--pro"
               whileHover={{ y: -1 }}
@@ -298,9 +301,9 @@ export default function DashBar() {
               <span className="dashbarPill__text dashbarPill__text--pro">
                 Join Carvver Pro
               </span>
-            </motion.button>
+            </Motion.button>
 
-            <motion.button
+            <Motion.button
               type="button"
               className={`dashbarIconBtn ${onMessagesPage ? "dashbarIconBtn--active" : ""}`}
               whileHover={{ y: -1.5, scale: 1.03 }}
@@ -311,9 +314,9 @@ export default function DashBar() {
               onClick={() => navigate("/dashboard/customer/messages")}
             >
               <MessageCircle className="dashbarIconBtn__icon" />
-            </motion.button>
+            </Motion.button>
 
-            <motion.button
+            <Motion.button
               type="button"
               className={`dashbarIconBtn ${onCartPage ? "dashbarIconBtn--active" : ""}`}
               whileHover={{ y: -1.5, scale: 1.03 }}
@@ -326,7 +329,7 @@ export default function DashBar() {
               <ShoppingCart className="dashbarIconBtn__icon" />
               <AnimatePresence initial={false}>
                 {cartCount > 0 && (
-                  <motion.span
+                  <Motion.span
                     key={cartBadgeLabel}
                     className="dashbarIconBtn__count"
                     aria-hidden="true"
@@ -336,13 +339,13 @@ export default function DashBar() {
                     transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                   >
                     {cartBadgeLabel}
-                  </motion.span>
+                  </Motion.span>
                 )}
               </AnimatePresence>
-            </motion.button>
+            </Motion.button>
 
             <div className="dashbarNotifyWrap">
-              <motion.button
+              <Motion.button
                 type="button"
                 className={`dashbarIconBtn dashbarIconBtn--notify ${
                   openNotifications || onNotificationsPage
@@ -362,11 +365,11 @@ export default function DashBar() {
                 {hasUnread && (
                   <span className="dashbarIconBtn__dot" aria-hidden="true" />
                 )}
-              </motion.button>
+              </Motion.button>
 
               <AnimatePresence>
                 {openNotifications && (
-                  <motion.div
+                  <Motion.div
                     className="dashbarNotifyMenu"
                     role="menu"
                     initial={{ opacity: 0, y: 12, scale: 0.98, filter: "blur(8px)" }}
@@ -380,7 +383,7 @@ export default function DashBar() {
                       </div>
 
                       {hasUnread && (
-                        <motion.button
+                        <Motion.button
                           type="button"
                           className="dashbarNotifyMenu__markAll"
                           whileHover={{ y: -1 }}
@@ -390,7 +393,7 @@ export default function DashBar() {
                         >
                           <CheckCheck className="dashbarNotifyMenu__markAllIcon" />
                           <span>Mark all read</span>
-                        </motion.button>
+                        </Motion.button>
                       )}
                     </div>
 
@@ -424,7 +427,7 @@ export default function DashBar() {
                     </div>
 
                     <div className="dashbarNotifyMenu__footer">
-                      <motion.button
+                      <Motion.button
                         type="button"
                         className="dashbarNotifyMenu__seeMore"
                         whileHover={{ x: 1 }}
@@ -434,15 +437,15 @@ export default function DashBar() {
                       >
                         <span>See more</span>
                         <ArrowRight className="dashbarNotifyMenu__seeMoreIcon" />
-                      </motion.button>
+                      </Motion.button>
                     </div>
-                  </motion.div>
+                  </Motion.div>
                 )}
               </AnimatePresence>
             </div>
 
             <div className="dashbarProfileWrap">
-              <motion.button
+              <Motion.button
                 type="button"
                 className={`dashbarProfile ${openProfile ? "dashbarProfile--open" : ""}`}
                 whileHover={{ y: -1.5, scale: 1.02 }}
@@ -464,7 +467,7 @@ export default function DashBar() {
                     user.initials
                   )}
                 </span>
-              </motion.button>
+              </Motion.button>
 
               <div
                 className={`dashbarProfileMenu ${

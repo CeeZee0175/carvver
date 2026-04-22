@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion as Motion} from "framer-motion";
 import { LoaderCircle } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./profile.css";
@@ -21,7 +21,7 @@ function InlineStatus({ tone = "neutral", message }) {
   if (!message) return null;
 
   return (
-    <motion.div
+    <Motion.div
       className={`workflowStatus workflowStatus--${tone}`}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
@@ -29,7 +29,7 @@ function InlineStatus({ tone = "neutral", message }) {
       transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
     >
       {message}
-    </motion.div>
+    </Motion.div>
   );
 }
 
@@ -82,13 +82,13 @@ export default function CustomerRequestDetail() {
                 <h1 className="workflowHero__title">
                   <TypewriterHeading text={request?.title || "Request details"} />
                 </h1>
-                <motion.svg
+                <Motion.svg
                   className="workflowHero__line"
                   viewBox="0 0 300 20"
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <motion.path
+                  <Motion.path
                     d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
                     fill="none"
                     stroke="currentColor"
@@ -98,7 +98,7 @@ export default function CustomerRequestDetail() {
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 1.05, ease: "easeInOut", delay: 0.14 }}
                   />
-                </motion.svg>
+                </Motion.svg>
               </div>
 
               <p className="workflowHero__sub">
@@ -107,7 +107,7 @@ export default function CustomerRequestDetail() {
             </div>
 
             <div className="workflowHero__actions">
-              <motion.button
+              <Motion.button
                 type="button"
                 className="workflowActionBtn workflowActionBtn--ghost"
                 whileHover={{ y: -1.5 }}
@@ -116,7 +116,7 @@ export default function CustomerRequestDetail() {
                 onClick={() => navigate("/dashboard/customer/post-request")}
               >
                 Back to requests
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
 
@@ -245,7 +245,7 @@ export default function CustomerRequestDetail() {
                           <p className="workflowProposalCard__pitch">{proposal.pitch}</p>
 
                           <div className="workflowActions">
-                            <motion.button
+                            <Motion.button
                               type="button"
                               className="workflowActionBtn workflowActionBtn--ghost"
                               whileHover={{ y: -1.5 }}
@@ -260,10 +260,10 @@ export default function CustomerRequestDetail() {
                               }
                             >
                               Open chat
-                            </motion.button>
+                            </Motion.button>
 
                             {!accepted ? (
-                              <motion.button
+                              <Motion.button
                                 type="button"
                                 className="workflowActionBtn workflowActionBtn--primary"
                                 whileHover={{ y: -1.5 }}
@@ -276,7 +276,7 @@ export default function CustomerRequestDetail() {
                                   <LoaderCircle className="customerSettingsAction__spinner" />
                                 ) : null}
                                 <span>Accept proposal</span>
-                              </motion.button>
+                              </Motion.button>
                             ) : null}
                           </div>
                         </article>
