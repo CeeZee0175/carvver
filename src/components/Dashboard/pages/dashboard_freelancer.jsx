@@ -1,5 +1,5 @@
 import React from "react";
-import { motion as Motion} from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import "./profile.css";
 import "./freelancer_pages.css";
@@ -22,34 +22,13 @@ const SURFACE_MOTION = {
 
 export default function DashboardFreelancer() {
   const navigate = useNavigate();
-  const { profile, warning, displayName, locationLabel, reload } =
-    useFreelancerProfileData();
+  const { profile, warning, reload } = useFreelancerProfileData();
   const {
     requests,
     loading: requestsLoading,
     error: requestsError,
     reload: reloadRequests,
   } = useFreelancerRequestPreview(3);
-
-  const primaryCategory = String(profile?.freelancer_primary_category || "").trim();
-
-  const quickLinks = [
-    {
-      label: "Profile",
-      description: "Update the way customers see your name, bio, and location.",
-      action: () => navigate("/dashboard/freelancer/profile"),
-    },
-    {
-      label: "Settings",
-      description: "Manage your account details, billing, and sign-in controls.",
-      action: () => navigate("/dashboard/freelancer/settings"),
-    },
-    {
-      label: "Messages",
-      description: "Pick up customer conversations and reply without losing context.",
-      action: () => navigate("/dashboard/freelancer/messages"),
-    },
-  ];
 
   const workspaceItems = [
     {
@@ -84,24 +63,6 @@ export default function DashboardFreelancer() {
     },
   ];
 
-  const exploreCards = [
-    {
-      title: "Community",
-      description: "See updates, stories, and the people growing with Carvver.",
-      to: "/community",
-    },
-    {
-      title: "Pricing",
-      description: "Review Carvver Pro and the platform options around it.",
-      to: "/pricing",
-    },
-    {
-      title: "About Us",
-      description: "Learn more about the team and the platform behind your work.",
-      to: "/about-us",
-    },
-  ];
-
   return (
     <FreelancerDashboardFrame mainClassName="profilePage profilePage--details freelancerPage freelancerDashboardPage">
       <Reveal delay={0.04}>
@@ -120,7 +81,7 @@ export default function DashboardFreelancer() {
                 aria-hidden="true"
               >
                 <Motion.path
-                  d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                  d="M 0,10 L 300,10"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.2"
@@ -154,27 +115,6 @@ export default function DashboardFreelancer() {
                 Open messages
               </Motion.button>
             </div>
-
-            <div className="freelancerDashboardHero__facts">
-              <div className="freelancerDashboardHero__fact">
-                <span className="freelancerDashboardHero__factLabel">Display name</span>
-                <strong className="freelancerDashboardHero__factValue">{displayName}</strong>
-              </div>
-              <div className="freelancerDashboardHero__fact">
-                <span className="freelancerDashboardHero__factLabel">Main category</span>
-                <strong className="freelancerDashboardHero__factValue">
-                  {primaryCategory || "Choose your main category"}
-                </strong>
-              </div>
-              <div className="freelancerDashboardHero__fact">
-                <span className="freelancerDashboardHero__factLabel">Location</span>
-                <strong className="freelancerDashboardHero__factValue">
-                  {locationLabel === "No location added yet"
-                    ? "Add your location"
-                    : locationLabel}
-                </strong>
-              </div>
-            </div>
           </div>
         </section>
       </Reveal>
@@ -197,34 +137,6 @@ export default function DashboardFreelancer() {
       {profile ? (
         <>
           <Reveal delay={0.08}>
-            <section className="profileSection freelancerDashboardQuickLinks">
-              <div className="profileSection__head freelancerDashboardSection__head">
-                <div>
-                  <h2 className="profileSection__title">Quick access</h2>
-                  <p className="profileSection__sub">
-                    Move between the freelancer pages you open most often.
-                  </p>
-                </div>
-              </div>
-
-              <div className="freelancerDashboardQuickLinks__grid">
-                {quickLinks.map((item) => (
-                  <Motion.button
-                    key={item.label}
-                    type="button"
-                    className="freelancerDashboardQuickLinks__item"
-                    {...SURFACE_MOTION}
-                    onClick={item.action}
-                  >
-                    <span className="freelancerDashboardQuickLinks__label">{item.label}</span>
-                    <p className="freelancerDashboardQuickLinks__desc">{item.description}</p>
-                  </Motion.button>
-                ))}
-              </div>
-            </section>
-          </Reveal>
-
-          <Reveal delay={0.12}>
             <section className="profileSection freelancerDashboardSection">
               <div className="profileSection__head freelancerDashboardSection__head">
                 <div>
@@ -257,7 +169,7 @@ export default function DashboardFreelancer() {
             </section>
           </Reveal>
 
-          <Reveal delay={0.16}>
+          <Reveal delay={0.12}>
             <section className="profileSection freelancerDashboardSection">
               <div className="profileSection__head freelancerDashboardSection__head">
                 <div>
@@ -365,36 +277,6 @@ export default function DashboardFreelancer() {
                   ))}
                 </div>
               )}
-            </section>
-          </Reveal>
-
-          <Reveal delay={0.2}>
-            <section className="profileSection freelancerDashboardSection">
-              <div className="profileSection__head freelancerDashboardSection__head">
-                <div>
-                  <h2 className="profileSection__title">Explore Carvver</h2>
-                  <p className="profileSection__sub">
-                    Keep the wider platform pages close while you work inside the dashboard.
-                  </p>
-                </div>
-              </div>
-
-              <div className="freelancerExploreGrid freelancerDashboardExploreGrid">
-                {exploreCards.map((card) => (
-                  <Motion.button
-                    key={card.title}
-                    type="button"
-                    className="freelancerExploreCard freelancerDashboardExploreCard"
-                    {...SURFACE_MOTION}
-                    onClick={() => navigate(card.to)}
-                  >
-                    <div className="freelancerExploreCard__copy">
-                      <strong className="freelancerExploreCard__title">{card.title}</strong>
-                      <p className="freelancerExploreCard__desc">{card.description}</p>
-                    </div>
-                  </Motion.button>
-                ))}
-              </div>
             </section>
           </Reveal>
         </>

@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion as Motion } from "framer-motion";
+import { AnimatePresence, motion as Motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
+  ArrowRight,
   Bell,
+  CheckCheck,
   Home,
   LogOut,
   MessageCircle,
@@ -73,7 +75,6 @@ export default function FreelancerDashBar() {
   const {
     loading: notificationsLoading,
     unreadNotifications,
-    unreadCount,
     hasUnread,
     markAllRead,
     markRead,
@@ -207,6 +208,31 @@ export default function FreelancerDashBar() {
     }
   };
 
+  const toggleProfile = () => {
+    setOpenProfile((prev) => {
+      const next = !prev;
+      if (next) {
+        setOpenNotifications(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleNotifications = () => {
+    setOpenNotifications((prev) => {
+      const next = !prev;
+      if (next) {
+        setOpenProfile(false);
+      }
+      return next;
+    });
+  };
+
+  const handleOpenNotificationsPage = () => {
+    setOpenNotifications(false);
+    navigate("/dashboard/freelancer/notifications");
+  };
+
   const previewNotifications = unreadNotifications.slice(0, 4);
   const onNotificationsPage =
     location.pathname === "/dashboard/freelancer/notifications";
@@ -279,77 +305,99 @@ export default function FreelancerDashBar() {
                 whileTap={{ scale: 0.95 }}
                 transition={SPRING}
                 aria-label="Notifications"
+                aria-current={onNotificationsPage ? "page" : undefined}
                 aria-expanded={openNotifications}
                 aria-haspopup="menu"
-                onClick={() => {
-                  setOpenNotifications((prev) => {
-                    const next = !prev;
-                    if (next) setOpenProfile(false);
-                    return next;
-                  });
-                }}
+                onClick={toggleNotifications}
               >
                 <Bell className="dashbarIconBtn__icon" />
-                {unreadCount > 0 ? (
-                  <span className="dashbarNotifyBadge" aria-hidden="true">
-                    {unreadCount > 99 ? "99+" : unreadCount}
-                  </span>
+                {hasUnread ? (
+                  <span className="dashbarIconBtn__dot" aria-hidden="true" />
                 ) : null}
               </Motion.button>
 
-              <div
-                className={`dashbarNotifyMenu ${
-                  openNotifications ? "dashbarNotifyMenu--open" : ""
-                }`}
-                role="menu"
-              >
-                <div className="dashbarNotifyMenu__head">
-                  <div>
-                    <div className="dashbarNotifyMenu__eyebrow">Notifications</div>
-                    <div className="dashbarNotifyMenu__title">
-                      Freelancer updates
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    className="dashbarNotifyMenu__action"
-                    onClick={handleMarkAllRead}
-                    disabled={!hasUnread}
+              <AnimatePresence>
+                {openNotifications ? (
+                  <Motion.div
+                    className="dashbarNotifyMenu"
+                    role="menu"
+                    initial={{
+                      opacity: 0,
+                      y: 12,
+                      scale: 0.98,
+                      filter: "blur(8px)",
+                    }}
+                    animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, y: 10, scale: 0.98, filter: "blur(8px)" }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                   >
-                    Mark all read
-                  </button>
-                </div>
+                    <div className="dashbarNotifyMenu__header">
+                      <div>
+                        <h3 className="dashbarNotifyMenu__title">
+                          Freelancer updates
+                        </h3>
+                      </div>
 
-                <div className="dashbarNotifyMenu__list">
-                  {notificationsLoading ? (
-                    <div className="dashbarNotifyMenu__empty">Loading...</div>
-                  ) : previewNotifications.length > 0 ? (
-                    previewNotifications.map((item, index) => (
-                      <NotificationPreviewItem
-                        key={item.id}
-                        item={item}
-                        index={index}
-                        onOpen={handleOpenNotification}
-                      />
-                    ))
-                  ) : (
-                    <div className="dashbarNotifyMenu__empty">
-                      No recent notification
+                      {hasUnread ? (
+                        <Motion.button
+                          type="button"
+                          className="dashbarNotifyMenu__markAll"
+                          whileHover={{ y: -1 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={SPRING}
+                          onClick={handleMarkAllRead}
+                        >
+                          <CheckCheck className="dashbarNotifyMenu__markAllIcon" />
+                          <span>Mark all read</span>
+                        </Motion.button>
+                      ) : null}
                     </div>
-                  )}
-                </div>
 
-                <button
-                  type="button"
-                  className="dashbarNotifyMenu__footer"
-                  onClick={() => {
-                    setOpenNotifications(false);
-                    navigate("/dashboard/freelancer/notifications");
-                  }}
-                >
-                  Open notifications
-                </button>
-              </div>
+                    <div className="dashbarNotifyMenu__body">
+                      {notificationsLoading ? (
+                        Array.from({ length: 3 }).map((_, index) => (
+                          <div key={index} className="dashbarNotifySkeleton">
+                            <div className="dashbarNotifySkeleton__icon" />
+                            <div className="dashbarNotifySkeleton__copy">
+                              <div className="dashbarNotifySkeleton__line dashbarNotifySkeleton__line--small" />
+                              <div className="dashbarNotifySkeleton__line" />
+                            </div>
+                          </div>
+                        ))
+                      ) : previewNotifications.length > 0 ? (
+                        previewNotifications.map((item, index) => (
+                          <NotificationPreviewItem
+                            key={item.id}
+                            item={item}
+                            index={index}
+                            onOpen={handleOpenNotification}
+                          />
+                        ))
+                      ) : (
+                        <div className="dashbarNotifyEmpty">
+                          <p className="dashbarNotifyEmpty__title">
+                            No recent notification
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="dashbarNotifyMenu__footer">
+                      <Motion.button
+                        type="button"
+                        className="dashbarNotifyMenu__seeMore"
+                        whileHover={{ x: 1 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={SPRING}
+                        onClick={handleOpenNotificationsPage}
+                      >
+                        <span>See more</span>
+                        <ArrowRight className="dashbarNotifyMenu__seeMoreIcon" />
+                      </Motion.button>
+                    </div>
+                  </Motion.div>
+                ) : null}
+              </AnimatePresence>
             </div>
 
             <Motion.button
@@ -394,7 +442,7 @@ export default function FreelancerDashBar() {
                 aria-label="Profile"
                 aria-expanded={openProfile}
                 aria-haspopup="menu"
-                onClick={() => setOpenProfile((prev) => !prev)}
+                onClick={toggleProfile}
               >
                 <span className="dashbarProfile__avatar" aria-hidden="true">
                   {user.avatarUrl ? (

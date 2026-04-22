@@ -10,7 +10,9 @@
 
 .freelancerDashboardHero__heading {
   display: grid;
+  justify-items: center;
   gap: 0;
+  text-align: center;
 }
 
 .freelancerDashboardHero__titleWrap {
@@ -24,106 +26,28 @@
 }
 
 .freelancerDashboardHero__line {
-  left: 8%;
+  left: 9%;
   right: auto;
   width: 82%;
-  height: 16px;
+  height: 12px;
 }
 
 .freelancerDashboardHero__sub {
   max-width: 56ch;
-}
-
-.freelancerDashboardHero__facts {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px 24px;
-  margin-top: 22px;
-}
-
-.freelancerDashboardHero__fact {
-  position: relative;
-  display: grid;
-  gap: 6px;
-  min-width: 0;
-  padding-left: 18px;
-}
-
-.freelancerDashboardHero__fact::before {
-  content: "";
-  position: absolute;
-  top: 4px;
-  bottom: 4px;
-  left: 0;
-  width: 1px;
-  background: linear-gradient(
-    180deg,
-    rgba(42, 20, 80, 0.1) 0%,
-    rgba(124, 58, 237, 0.34) 48%,
-    rgba(242, 193, 78, 0.3) 100%
-  );
-}
-
-.freelancerDashboardHero__factLabel,
-.freelancerDashboardQuickLinks__label {
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  color: rgba(87, 34, 182, 0.72);
-}
-
-.freelancerDashboardHero__factValue {
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 16px;
-  line-height: 1.35;
-  font-weight: 800;
-  color: rgba(27, 16, 46, 0.94);
-  overflow-wrap: anywhere;
+  margin-inline: auto;
 }
 
 .freelancerDashboard__heroActions {
   margin-top: 22px;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
-.freelancerDashboardQuickLinks {
-  padding-top: 24px;
-}
-
-.freelancerDashboardQuickLinks__grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.freelancerDashboardQuickLinks__item {
-  min-width: 0;
-  min-height: 108px;
-  padding: 18px;
-  border: 1px solid rgba(42, 20, 80, 0.1);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 16px 44px rgba(12, 7, 18, 0.05);
-  display: grid;
-  gap: 6px;
-  align-content: center;
-  text-align: left;
-  cursor: pointer;
-}
-
-.freelancerDashboardQuickLinks__desc,
 .freelancerDashboardWorkspace__desc,
 .freelancerDashboardWorkspace__cta {
   font-family: Inter, system-ui, sans-serif;
   font-size: 14px;
   line-height: 1.66;
   color: rgba(27, 16, 46, 0.66);
-}
-
-.freelancerDashboardQuickLinks__desc {
-  margin: 0;
 }
 
 .freelancerDashboardSection {
@@ -153,8 +77,7 @@
   cursor: pointer;
 }
 
-.freelancerDashboardWorkspace__title,
-.freelancerExploreCard__title {
+.freelancerDashboardWorkspace__title {
   font-family: Inter, system-ui, sans-serif;
   font-size: 18px;
   line-height: 1.18;
@@ -168,29 +91,14 @@
   color: rgba(66, 29, 133, 0.96);
 }
 
-.freelancerDashboardExploreGrid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.freelancerDashboardExploreCard {
-  min-height: 170px;
-}
-
 @media (max-width: 1024px) {
-  .freelancerDashboardHero__facts,
-  .freelancerDashboardQuickLinks__grid,
-  .freelancerDashboardWorkspace,
-  .freelancerDashboardExploreGrid {
+  .freelancerDashboardWorkspace {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 640px) {
-  .freelancerDashboardHero__facts,
-  .freelancerDashboardQuickLinks__grid,
-  .freelancerDashboardWorkspace,
-  .freelancerDashboardExploreGrid {
+  .freelancerDashboardWorkspace {
     gap: 14px;
   }
 }
