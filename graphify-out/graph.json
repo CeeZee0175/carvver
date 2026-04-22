@@ -243,7 +243,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Auth\\pages\\auth_callback.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_auth_pages_auth_callback_jsx",
-      "community": 38,
+      "community": 39,
       "norm_label": "auth_callback.jsx"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Auth\\pages\\auth_callback.jsx",
       "source_location": "L28",
       "id": "auth_callback_getfriendlyerrormessage",
-      "community": 38,
+      "community": 39,
       "norm_label": "getfriendlyerrormessage()"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Auth\\pages\\auth_callback.jsx",
       "source_location": "L38",
       "id": "auth_callback_authcallback",
-      "community": 38,
+      "community": 39,
       "norm_label": "authcallback()"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\AuthGuardFeedback.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_backend_authguardfeedback_jsx",
-      "community": 39,
+      "community": 32,
       "norm_label": "authguardfeedback.jsx"
     },
     {
@@ -450,7 +450,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\AuthGuardFeedback.jsx",
       "source_location": "L3",
       "id": "authguardfeedback_authguardfallback",
-      "community": 39,
+      "community": 32,
       "norm_label": "authguardfallback()"
     },
     {
@@ -459,8 +459,17 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\AuthGuardFeedback.jsx",
       "source_location": "L49",
       "id": "authguardfeedback_authguarderror",
-      "community": 39,
+      "community": 32,
       "norm_label": "authguarderror()"
+    },
+    {
+      "label": "ExistingSessionPanel()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\AuthGuardFeedback.jsx",
+      "source_location": "L123",
+      "id": "authguardfeedback_existingsessionpanel",
+      "community": 32,
+      "norm_label": "existingsessionpanel()"
     },
     {
       "label": "authRouteState.js",
@@ -468,7 +477,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\authRouteState.js",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_backend_authroutestate_js",
-      "community": 4,
+      "community": 5,
       "norm_label": "authroutestate.js"
     },
     {
@@ -477,7 +486,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\authRouteState.js",
       "source_location": "L15",
       "id": "authroutestate_getauthroutemessage",
-      "community": 4,
+      "community": 15,
       "norm_label": "getauthroutemessage()"
     },
     {
@@ -486,7 +495,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\authRouteState.js",
       "source_location": "L26",
       "id": "authroutestate_clearinvalidsession",
-      "community": 4,
+      "community": 5,
       "norm_label": "clearinvalidsession()"
     },
     {
@@ -495,7 +504,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\authRouteState.js",
       "source_location": "L34",
       "id": "authroutestate_resolveauthenticatedprofile",
-      "community": 4,
+      "community": 5,
       "norm_label": "resolveauthenticatedprofile()"
     },
     {
@@ -594,14 +603,14 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\PublicOnlyRoute.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_backend_publiconlyroute_jsx",
-      "community": 4,
+      "community": 15,
       "norm_label": "publiconlyroute.jsx"
     },
     {
       "label": "getPublicRedirect()",
       "file_type": "code",
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\PublicOnlyRoute.jsx",
-      "source_location": "L17",
+      "source_location": "L22",
       "id": "publiconlyroute_getpublicredirect",
       "community": 15,
       "norm_label": "getpublicredirect()"
@@ -610,9 +619,9 @@
       "label": "PublicOnlyRoute()",
       "file_type": "code",
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\PublicOnlyRoute.jsx",
-      "source_location": "L35",
+      "source_location": "L40",
       "id": "publiconlyroute_publiconlyroute",
-      "community": 4,
+      "community": 15,
       "norm_label": "publiconlyroute()"
     },
     {
@@ -621,7 +630,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCart.js",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_hooks_usecart_js",
-      "community": 9,
+      "community": 8,
       "norm_label": "usecart.js"
     },
     {
@@ -630,7 +639,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCart.js",
       "source_location": "L9",
       "id": "usecart_roundcurrency",
-      "community": 9,
+      "community": 8,
       "norm_label": "roundcurrency()"
     },
     {
@@ -639,7 +648,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCart.js",
       "source_location": "L13",
       "id": "usecart_calculateplatformfee",
-      "community": 9,
+      "community": 8,
       "norm_label": "calculateplatformfee()"
     },
     {
@@ -648,7 +657,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCart.js",
       "source_location": "L17",
       "id": "usecart_calculatefreelancernet",
-      "community": 9,
+      "community": 8,
       "norm_label": "calculatefreelancernet()"
     },
     {
@@ -657,7 +666,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCart.js",
       "source_location": "L21",
       "id": "usecart_formatpeso",
-      "community": 9,
+      "community": 8,
       "norm_label": "formatpeso()"
     },
     {
@@ -666,7 +675,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCart.js",
       "source_location": "L28",
       "id": "usecart_friendlycartmessage",
-      "community": 9,
+      "community": 8,
       "norm_label": "friendlycartmessage()"
     },
     {
@@ -675,7 +684,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCart.js",
       "source_location": "L50",
       "id": "usecart_fetchcartitems",
-      "community": 9,
+      "community": 8,
       "norm_label": "fetchcartitems()"
     },
     {
@@ -684,7 +693,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCart.js",
       "source_location": "L94",
       "id": "usecart_normalizepackagesnapshot",
-      "community": 9,
+      "community": 8,
       "norm_label": "normalizepackagesnapshot()"
     },
     {
@@ -693,7 +702,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCart.js",
       "source_location": "L134",
       "id": "usecart_packagesnapshotmatches",
-      "community": 9,
+      "community": 8,
       "norm_label": "packagesnapshotmatches()"
     },
     {
@@ -702,7 +711,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCart.js",
       "source_location": "L145",
       "id": "usecart_usecart",
-      "community": 9,
+      "community": 8,
       "norm_label": "usecart()"
     },
     {
@@ -810,7 +819,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerFavoriteFreelancers.js",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_hooks_usecustomerfavoritefreelancers_js",
-      "community": 9,
+      "community": 8,
       "norm_label": "usecustomerfavoritefreelancers.js"
     },
     {
@@ -819,7 +828,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerFavoriteFreelancers.js",
       "source_location": "L6",
       "id": "usecustomerfavoritefreelancers_normalizesnapshot",
-      "community": 9,
+      "community": 8,
       "norm_label": "normalizesnapshot()"
     },
     {
@@ -828,7 +837,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerFavoriteFreelancers.js",
       "source_location": "L23",
       "id": "usecustomerfavoritefreelancers_usecustomerfavoritefreelancers",
-      "community": 9,
+      "community": 8,
       "norm_label": "usecustomerfavoritefreelancers()"
     },
     {
@@ -837,7 +846,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_hooks_usecustomerprofiledata_js",
-      "community": 5,
+      "community": 4,
       "norm_label": "usecustomerprofiledata.js"
     },
     {
@@ -846,7 +855,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L23",
       "id": "usecustomerprofiledata_friendlysupabasemessage",
-      "community": 5,
+      "community": 4,
       "norm_label": "friendlysupabasemessage()"
     },
     {
@@ -855,7 +864,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L49",
       "id": "usecustomerprofiledata_toobjectmap",
-      "community": 5,
+      "community": 4,
       "norm_label": "toobjectmap()"
     },
     {
@@ -864,7 +873,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L55",
       "id": "usecustomerprofiledata_sanitizefilename",
-      "community": 5,
+      "community": 4,
       "norm_label": "sanitizefilename()"
     },
     {
@@ -873,7 +882,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L63",
       "id": "usecustomerprofiledata_getfileextension",
-      "community": 5,
+      "community": 4,
       "norm_label": "getfileextension()"
     },
     {
@@ -882,7 +891,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L77",
       "id": "usecustomerprofiledata_fetchsaveditems",
-      "community": 5,
+      "community": 4,
       "norm_label": "fetchsaveditems()"
     },
     {
@@ -891,7 +900,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L95",
       "id": "usecustomerprofiledata_fetchsavedcount",
-      "community": 5,
+      "community": 4,
       "norm_label": "fetchsavedcount()"
     },
     {
@@ -900,7 +909,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L105",
       "id": "usecustomerprofiledata_fetchorders",
-      "community": 5,
+      "community": 4,
       "norm_label": "fetchorders()"
     },
     {
@@ -909,7 +918,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L136",
       "id": "usecustomerprofiledata_fetchreviews",
-      "community": 5,
+      "community": 4,
       "norm_label": "fetchreviews()"
     },
     {
@@ -918,7 +927,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L157",
       "id": "usecustomerprofiledata_fetchachievementunlockmap",
-      "community": 5,
+      "community": 4,
       "norm_label": "fetchachievementunlockmap()"
     },
     {
@@ -927,7 +936,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L167",
       "id": "usecustomerprofiledata_fetchbadgeshowcase",
-      "community": 5,
+      "community": 4,
       "norm_label": "fetchbadgeshowcase()"
     },
     {
@@ -936,7 +945,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L180",
       "id": "usecustomerprofiledata_validateavatarfile",
-      "community": 5,
+      "community": 4,
       "norm_label": "validateavatarfile()"
     },
     {
@@ -945,7 +954,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L194",
       "id": "usecustomerprofiledata_uploadavatarfile",
-      "community": 5,
+      "community": 4,
       "norm_label": "uploadavatarfile()"
     },
     {
@@ -954,7 +963,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L217",
       "id": "usecustomerprofiledata_usecustomerprofiledata",
-      "community": 5,
+      "community": 4,
       "norm_label": "usecustomerprofiledata()"
     },
     {
@@ -963,7 +972,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useCustomerProfileData.js",
       "source_location": "L637",
       "id": "usecustomerprofiledata_usecustomerordersdata",
-      "community": 5,
+      "community": 4,
       "norm_label": "usecustomerordersdata()"
     },
     {
@@ -1098,7 +1107,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerProfileData.js",
       "source_location": "L109",
       "id": "usefreelancerprofiledata_buildfreelancertasks",
-      "community": 14,
+      "community": 13,
       "norm_label": "buildfreelancertasks()"
     },
     {
@@ -1224,7 +1233,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_hooks_usefreelancerservicelistings_js",
-      "community": 8,
+      "community": 9,
       "norm_label": "usefreelancerservicelistings.js"
     },
     {
@@ -1233,7 +1242,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L39",
       "id": "usefreelancerservicelistings_normalizetext",
-      "community": 8,
+      "community": 9,
       "norm_label": "normalizetext()"
     },
     {
@@ -1242,7 +1251,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L43",
       "id": "usefreelancerservicelistings_normalizefulfillmenttype",
-      "community": 8,
+      "community": 9,
       "norm_label": "normalizefulfillmenttype()"
     },
     {
@@ -1251,7 +1260,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L49",
       "id": "usefreelancerservicelistings_sanitizefilename",
-      "community": 8,
+      "community": 9,
       "norm_label": "sanitizefilename()"
     },
     {
@@ -1260,7 +1269,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L57",
       "id": "usefreelancerservicelistings_getfileextension",
-      "community": 8,
+      "community": 9,
       "norm_label": "getfileextension()"
     },
     {
@@ -1269,7 +1278,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L75",
       "id": "usefreelancerservicelistings_getmediakind",
-      "community": 8,
+      "community": 9,
       "norm_label": "getmediakind()"
     },
     {
@@ -1278,7 +1287,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L80",
       "id": "usefreelancerservicelistings_ismissingcolumnerror",
-      "community": 8,
+      "community": 9,
       "norm_label": "ismissingcolumnerror()"
     },
     {
@@ -1287,7 +1296,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L85",
       "id": "usefreelancerservicelistings_ismissingtableerror",
-      "community": 8,
+      "community": 9,
       "norm_label": "ismissingtableerror()"
     },
     {
@@ -1296,7 +1305,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L90",
       "id": "usefreelancerservicelistings_hasvalidpayoutdestination",
-      "community": 8,
+      "community": 9,
       "norm_label": "hasvalidpayoutdestination()"
     },
     {
@@ -1314,7 +1323,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L104",
       "id": "usefreelancerservicelistings_normalizepackage",
-      "community": 8,
+      "community": 9,
       "norm_label": "normalizepackage()"
     },
     {
@@ -1323,7 +1332,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L124",
       "id": "usefreelancerservicelistings_buildservicepayload",
-      "community": 8,
+      "community": 9,
       "norm_label": "buildservicepayload()"
     },
     {
@@ -1332,7 +1341,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L173",
       "id": "usefreelancerservicelistings_getsignedinfreelancerid",
-      "community": 8,
+      "community": 9,
       "norm_label": "getsignedinfreelancerid()"
     },
     {
@@ -1341,7 +1350,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L185",
       "id": "usefreelancerservicelistings_ensurefreelancerpayoutdestinationready",
-      "community": 8,
+      "community": 9,
       "norm_label": "ensurefreelancerpayoutdestinationready()"
     },
     {
@@ -1350,7 +1359,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L201",
       "id": "usefreelancerservicelistings_fetchownedservices",
-      "community": 8,
+      "community": 9,
       "norm_label": "fetchownedservices()"
     },
     {
@@ -1359,7 +1368,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L233",
       "id": "usefreelancerservicelistings_fetchservicepackages",
-      "community": 8,
+      "community": 9,
       "norm_label": "fetchservicepackages()"
     },
     {
@@ -1368,7 +1377,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L248",
       "id": "usefreelancerservicelistings_fetchservicemedia",
-      "community": 8,
+      "community": 9,
       "norm_label": "fetchservicemedia()"
     },
     {
@@ -1377,7 +1386,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L263",
       "id": "usefreelancerservicelistings_groupby",
-      "community": 8,
+      "community": 9,
       "norm_label": "groupby()"
     },
     {
@@ -1386,7 +1395,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L274",
       "id": "usefreelancerservicelistings_uploadnewmediaitem",
-      "community": 8,
+      "community": 9,
       "norm_label": "uploadnewmediaitem()"
     },
     {
@@ -1395,7 +1404,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L308",
       "id": "usefreelancerservicelistings_syncservicemedia",
-      "community": 8,
+      "community": 9,
       "norm_label": "syncservicemedia()"
     },
     {
@@ -1404,7 +1413,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L370",
       "id": "usefreelancerservicelistings_normalizelistingsummary",
-      "community": 8,
+      "community": 9,
       "norm_label": "normalizelistingsummary()"
     },
     {
@@ -1413,7 +1422,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L396",
       "id": "usefreelancerservicelistings_upsertservicerow",
-      "community": 8,
+      "community": 9,
       "norm_label": "upsertservicerow()"
     },
     {
@@ -1422,7 +1431,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L467",
       "id": "usefreelancerservicelistings_listfreelancerservicelistings",
-      "community": 8,
+      "community": 9,
       "norm_label": "listfreelancerservicelistings()"
     },
     {
@@ -1431,7 +1440,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L489",
       "id": "usefreelancerservicelistings_fetchfreelancerlistingforedit",
-      "community": 8,
+      "community": 9,
       "norm_label": "fetchfreelancerlistingforedit()"
     },
     {
@@ -1440,7 +1449,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L506",
       "id": "usefreelancerservicelistings_savefreelancerservicelisting",
-      "community": 8,
+      "community": 9,
       "norm_label": "savefreelancerservicelisting()"
     },
     {
@@ -1449,7 +1458,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L616",
       "id": "usefreelancerservicelistings_createfreelancerservicelisting",
-      "community": 8,
+      "community": 9,
       "norm_label": "createfreelancerservicelisting()"
     },
     {
@@ -1458,7 +1467,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L620",
       "id": "usefreelancerservicelistings_setfreelancerlistingpublished",
-      "community": 8,
+      "community": 9,
       "norm_label": "setfreelancerlistingpublished()"
     },
     {
@@ -1467,7 +1476,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useFreelancerServiceListings.js",
       "source_location": "L670",
       "id": "usefreelancerservicelistings_deletefreelancerdraft",
-      "community": 8,
+      "community": 9,
       "norm_label": "deletefreelancerdraft()"
     },
     {
@@ -2007,7 +2016,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useNotifications.js",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_hooks_usenotifications_js",
-      "community": 13,
+      "community": 14,
       "norm_label": "usenotifications.js"
     },
     {
@@ -2016,7 +2025,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useNotifications.js",
       "source_location": "L27",
       "id": "usenotifications_emitreadstate",
-      "community": 13,
+      "community": 14,
       "norm_label": "emitreadstate()"
     },
     {
@@ -2025,7 +2034,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useNotifications.js",
       "source_location": "L39",
       "id": "usenotifications_formatnotificationtime",
-      "community": 13,
+      "community": 14,
       "norm_label": "formatnotificationtime()"
     },
     {
@@ -2034,7 +2043,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useNotifications.js",
       "source_location": "L58",
       "id": "usenotifications_normalizetext",
-      "community": 13,
+      "community": 14,
       "norm_label": "normalizetext()"
     },
     {
@@ -2043,7 +2052,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useNotifications.js",
       "source_location": "L62",
       "id": "usenotifications_resolvenotificationicon",
-      "community": 13,
+      "community": 14,
       "norm_label": "resolvenotificationicon()"
     },
     {
@@ -2052,7 +2061,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useNotifications.js",
       "source_location": "L78",
       "id": "usenotifications_buildbasenotifications",
-      "community": 14,
+      "community": 13,
       "norm_label": "buildbasenotifications()"
     },
     {
@@ -2061,7 +2070,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useNotifications.js",
       "source_location": "L260",
       "id": "usenotifications_normalizestorednotification",
-      "community": 13,
+      "community": 14,
       "norm_label": "normalizestorednotification()"
     },
     {
@@ -2070,7 +2079,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\hooks\\useNotifications.js",
       "source_location": "L277",
       "id": "usenotifications_usenotifications",
-      "community": 13,
+      "community": 14,
       "norm_label": "usenotifications()"
     },
     {
@@ -2142,7 +2151,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\layout\\dashbar.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_layout_dashbar_jsx",
-      "community": 13,
+      "community": 14,
       "norm_label": "dashbar.jsx"
     },
     {
@@ -2151,7 +2160,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\layout\\dashbar.jsx",
       "source_location": "L28",
       "id": "dashbar_notificationpreviewitem",
-      "community": 13,
+      "community": 14,
       "norm_label": "notificationpreviewitem()"
     },
     {
@@ -2160,7 +2169,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\layout\\dashbar.jsx",
       "source_location": "L70",
       "id": "dashbar_dashbar",
-      "community": 13,
+      "community": 14,
       "norm_label": "dashbar()"
     },
     {
@@ -2169,7 +2178,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\layout\\freelancer_dashbar.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_layout_freelancer_dashbar_jsx",
-      "community": 13,
+      "community": 14,
       "norm_label": "freelancer_dashbar.jsx"
     },
     {
@@ -2178,7 +2187,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\layout\\freelancer_dashbar.jsx",
       "source_location": "L28",
       "id": "freelancer_dashbar_notificationpreviewitem",
-      "community": 13,
+      "community": 14,
       "norm_label": "notificationpreviewitem()"
     },
     {
@@ -2187,7 +2196,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\layout\\freelancer_dashbar.jsx",
       "source_location": "L70",
       "id": "freelancer_dashbar_freelancerdashbar",
-      "community": 13,
+      "community": 14,
       "norm_label": "freelancerdashbar()"
     },
     {
@@ -2313,7 +2322,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\browse_categories.jsx",
       "source_location": "L1416",
       "id": "browse_categories_browsecategories",
-      "community": 9,
+      "community": 8,
       "norm_label": "browsecategories()"
     },
     {
@@ -2367,7 +2376,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\customerOrders.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_pages_customerorders_jsx",
-      "community": 5,
+      "community": 4,
       "norm_label": "customerorders.jsx"
     },
     {
@@ -2376,7 +2385,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\customerOrders.jsx",
       "source_location": "L40",
       "id": "customerorders_formatorderdate",
-      "community": 5,
+      "community": 4,
       "norm_label": "formatorderdate()"
     },
     {
@@ -2385,7 +2394,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\customerOrders.jsx",
       "source_location": "L51",
       "id": "customerorders_formatorderprice",
-      "community": 5,
+      "community": 4,
       "norm_label": "formatorderprice()"
     },
     {
@@ -2394,7 +2403,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\customerOrders.jsx",
       "source_location": "L55",
       "id": "customerorders_orderstat",
-      "community": 5,
+      "community": 4,
       "norm_label": "orderstat()"
     },
     {
@@ -2403,7 +2412,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\customerOrders.jsx",
       "source_location": "L64",
       "id": "customerorders_customerorders",
-      "community": 5,
+      "community": 4,
       "norm_label": "customerorders()"
     },
     {
@@ -2412,7 +2421,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\customer_freelancer_profile.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_pages_customer_freelancer_profile_jsx",
-      "community": 14,
+      "community": 13,
       "norm_label": "customer_freelancer_profile.jsx"
     },
     {
@@ -2421,7 +2430,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\customer_freelancer_profile.jsx",
       "source_location": "L36",
       "id": "customer_freelancer_profile_formatpeso",
-      "community": 14,
+      "community": 13,
       "norm_label": "formatpeso()"
     },
     {
@@ -2430,7 +2439,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\customer_freelancer_profile.jsx",
       "source_location": "L40",
       "id": "customer_freelancer_profile_customerfreelancerprofile",
-      "community": 14,
+      "community": 13,
       "norm_label": "customerfreelancerprofile()"
     },
     {
@@ -2709,7 +2718,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\customer_service_detail.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_pages_customer_service_detail_jsx",
-      "community": 9,
+      "community": 8,
       "norm_label": "customer_service_detail.jsx"
     },
     {
@@ -2718,7 +2727,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\customer_service_detail.jsx",
       "source_location": "L22",
       "id": "customer_service_detail_formatpeso",
-      "community": 9,
+      "community": 8,
       "norm_label": "formatpeso()"
     },
     {
@@ -2727,7 +2736,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\customer_service_detail.jsx",
       "source_location": "L29",
       "id": "customer_service_detail_packagesmatchcartitem",
-      "community": 9,
+      "community": 8,
       "norm_label": "packagesmatchcartitem()"
     },
     {
@@ -2736,7 +2745,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\customer_service_detail.jsx",
       "source_location": "L37",
       "id": "customer_service_detail_customerservicedetail",
-      "community": 9,
+      "community": 8,
       "norm_label": "customerservicedetail()"
     },
     {
@@ -2997,7 +3006,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\favBook.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_pages_favbook_jsx",
-      "community": 9,
+      "community": 8,
       "norm_label": "favbook.jsx"
     },
     {
@@ -3006,7 +3015,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\favBook.jsx",
       "source_location": "L82",
       "id": "favbook_getcategoryicon",
-      "community": 9,
+      "community": 8,
       "norm_label": "getcategoryicon()"
     },
     {
@@ -3015,7 +3024,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\favBook.jsx",
       "source_location": "L86",
       "id": "favbook_timeago",
-      "community": 9,
+      "community": 8,
       "norm_label": "timeago()"
     },
     {
@@ -3024,7 +3033,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\favBook.jsx",
       "source_location": "L107",
       "id": "favbook_scrollreveal",
-      "community": 9,
+      "community": 8,
       "norm_label": "scrollreveal()"
     },
     {
@@ -3033,7 +3042,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\favBook.jsx",
       "source_location": "L127",
       "id": "favbook_typewriterheading",
-      "community": 9,
+      "community": 8,
       "norm_label": "typewriterheading()"
     },
     {
@@ -3042,7 +3051,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\favBook.jsx",
       "source_location": "L169",
       "id": "favbook_favcard",
-      "community": 9,
+      "community": 8,
       "norm_label": "favcard()"
     },
     {
@@ -3051,7 +3060,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\favBook.jsx",
       "source_location": "L320",
       "id": "favbook_skeletoncard",
-      "community": 9,
+      "community": 8,
       "norm_label": "skeletoncard()"
     },
     {
@@ -3060,7 +3069,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\favBook.jsx",
       "source_location": "L342",
       "id": "favbook_emptystate",
-      "community": 9,
+      "community": 8,
       "norm_label": "emptystate()"
     },
     {
@@ -3069,7 +3078,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\favBook.jsx",
       "source_location": "L388",
       "id": "favbook_favbook",
-      "community": 9,
+      "community": 8,
       "norm_label": "favbook()"
     },
     {
@@ -3186,7 +3195,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\freelancer_orders.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_pages_freelancer_orders_jsx",
-      "community": 32,
+      "community": 35,
       "norm_label": "freelancer_orders.jsx"
     },
     {
@@ -3195,7 +3204,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\freelancer_orders.jsx",
       "source_location": "L16",
       "id": "freelancer_orders_formatpayoutstate",
-      "community": 32,
+      "community": 35,
       "norm_label": "formatpayoutstate()"
     },
     {
@@ -3204,7 +3213,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\freelancer_orders.jsx",
       "source_location": "L27",
       "id": "freelancer_orders_formatfulfillmentlabel",
-      "community": 32,
+      "community": 35,
       "norm_label": "formatfulfillmentlabel()"
     },
     {
@@ -3213,7 +3222,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\freelancer_orders.jsx",
       "source_location": "L33",
       "id": "freelancer_orders_freelancerorders",
-      "community": 32,
+      "community": 35,
       "norm_label": "freelancerorders()"
     },
     {
@@ -3294,7 +3303,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\freelancer_post_listing.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_pages_freelancer_post_listing_jsx",
-      "community": 35,
+      "community": 36,
       "norm_label": "freelancer_post_listing.jsx"
     },
     {
@@ -3303,7 +3312,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\freelancer_post_listing.jsx",
       "source_location": "L40",
       "id": "freelancer_post_listing_buildmediaerror",
-      "community": 35,
+      "community": 36,
       "norm_label": "buildmediaerror()"
     },
     {
@@ -3312,7 +3321,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\freelancer_post_listing.jsx",
       "source_location": "L50",
       "id": "freelancer_post_listing_normalizepackagesforform",
-      "community": 35,
+      "community": 36,
       "norm_label": "normalizepackagesforform()"
     },
     {
@@ -3321,7 +3330,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\freelancer_post_listing.jsx",
       "source_location": "L64",
       "id": "freelancer_post_listing_freelancerpostlisting",
-      "community": 35,
+      "community": 36,
       "norm_label": "freelancerpostlisting()"
     },
     {
@@ -3546,7 +3555,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\notifPage.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_pages_notifpage_jsx",
-      "community": 13,
+      "community": 14,
       "norm_label": "notifpage.jsx"
     },
     {
@@ -3555,7 +3564,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\notifPage.jsx",
       "source_location": "L29",
       "id": "notifpage_typewriterheading",
-      "community": 13,
+      "community": 14,
       "norm_label": "typewriterheading()"
     },
     {
@@ -3564,7 +3573,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\notifPage.jsx",
       "source_location": "L69",
       "id": "notifpage_notificationrow",
-      "community": 13,
+      "community": 14,
       "norm_label": "notificationrow()"
     },
     {
@@ -3573,7 +3582,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\notifPage.jsx",
       "source_location": "L145",
       "id": "notifpage_feedskeleton",
-      "community": 13,
+      "community": 14,
       "norm_label": "feedskeleton()"
     },
     {
@@ -3582,7 +3591,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\notifPage.jsx",
       "source_location": "L165",
       "id": "notifpage_emptystate",
-      "community": 13,
+      "community": 14,
       "norm_label": "emptystate()"
     },
     {
@@ -3591,7 +3600,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\notifPage.jsx",
       "source_location": "L209",
       "id": "notifpage_notifpage",
-      "community": 13,
+      "community": 14,
       "norm_label": "notifpage()"
     },
     {
@@ -3681,7 +3690,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\profile.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_pages_profile_jsx",
-      "community": 5,
+      "community": 4,
       "norm_label": "profile.jsx"
     },
     {
@@ -3690,7 +3699,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\profile.jsx",
       "source_location": "L51",
       "id": "profile_formatcompactdate",
-      "community": 5,
+      "community": 4,
       "norm_label": "formatcompactdate()"
     },
     {
@@ -3699,7 +3708,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\profile.jsx",
       "source_location": "L62",
       "id": "profile_formatreviewdate",
-      "community": 5,
+      "community": 4,
       "norm_label": "formatreviewdate()"
     },
     {
@@ -3708,7 +3717,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\profile.jsx",
       "source_location": "L72",
       "id": "profile_reviewstars",
-      "community": 5,
+      "community": 4,
       "norm_label": "reviewstars()"
     },
     {
@@ -3717,7 +3726,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\profile.jsx",
       "source_location": "L87",
       "id": "profile_statminicard",
-      "community": 5,
+      "community": 4,
       "norm_label": "statminicard()"
     },
     {
@@ -3726,7 +3735,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\profile.jsx",
       "source_location": "L97",
       "id": "profile_achievementbadgemedia",
-      "community": 5,
+      "community": 4,
       "norm_label": "achievementbadgemedia()"
     },
     {
@@ -3735,7 +3744,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\profile.jsx",
       "source_location": "L109",
       "id": "profile_profile",
-      "community": 5,
+      "community": 4,
       "norm_label": "profile()"
     },
     {
@@ -3744,7 +3753,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\profileAchievements.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_pages_profileachievements_jsx",
-      "community": 5,
+      "community": 4,
       "norm_label": "profileachievements.jsx"
     },
     {
@@ -3753,7 +3762,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\pages\\profileAchievements.jsx",
       "source_location": "L34",
       "id": "profileachievements_profileachievements",
-      "community": 5,
+      "community": 4,
       "norm_label": "profileachievements()"
     },
     {
@@ -3762,7 +3771,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\customerAchievements.js",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_shared_customerachievements_js",
-      "community": 14,
+      "community": 13,
       "norm_label": "customerachievements.js"
     },
     {
@@ -3771,7 +3780,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\customerAchievements.js",
       "source_location": "L85",
       "id": "customerachievements_buildbadge",
-      "community": 14,
+      "community": 13,
       "norm_label": "buildbadge()"
     },
     {
@@ -3780,7 +3789,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\customerAchievements.js",
       "source_location": "L98",
       "id": "customerachievements_makeachievement",
-      "community": 14,
+      "community": 13,
       "norm_label": "makeachievement()"
     },
     {
@@ -3789,7 +3798,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\customerAchievements.js",
       "source_location": "L124",
       "id": "customerachievements_buildreviewmetrics",
-      "community": 14,
+      "community": 13,
       "norm_label": "buildreviewmetrics()"
     },
     {
@@ -3798,7 +3807,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\customerAchievements.js",
       "source_location": "L140",
       "id": "customerachievements_buildordermetrics",
-      "community": 14,
+      "community": 13,
       "norm_label": "buildordermetrics()"
     },
     {
@@ -3807,7 +3816,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\customerAchievements.js",
       "source_location": "L183",
       "id": "customerachievements_buildsavedmetrics",
-      "community": 14,
+      "community": 13,
       "norm_label": "buildsavedmetrics()"
     },
     {
@@ -3816,7 +3825,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\customerAchievements.js",
       "source_location": "L202",
       "id": "customerachievements_buildcustomerachievementmetrics",
-      "community": 14,
+      "community": 13,
       "norm_label": "buildcustomerachievementmetrics()"
     },
     {
@@ -3825,7 +3834,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\customerAchievements.js",
       "source_location": "L723",
       "id": "customerachievements_resolvecustomerachievementstates",
-      "community": 14,
+      "community": 13,
       "norm_label": "resolvecustomerachievementstates()"
     },
     {
@@ -3834,7 +3843,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\customerAchievements.js",
       "source_location": "L767",
       "id": "customerachievements_getachievementbyid",
-      "community": 14,
+      "community": 13,
       "norm_label": "getachievementbyid()"
     },
     {
@@ -3852,7 +3861,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\customerIdentity.js",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_shared_customeridentity_js",
-      "community": 5,
+      "community": 4,
       "norm_label": "customeridentity.js"
     },
     {
@@ -3861,7 +3870,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\customerIdentity.js",
       "source_location": "L1",
       "id": "customeridentity_getcustomerdisplayname",
-      "community": 5,
+      "community": 4,
       "norm_label": "getcustomerdisplayname()"
     },
     {
@@ -3870,7 +3879,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\customerIdentity.js",
       "source_location": "L14",
       "id": "customeridentity_getcustomerrealname",
-      "community": 5,
+      "community": 4,
       "norm_label": "getcustomerrealname()"
     },
     {
@@ -3879,7 +3888,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\customerIdentity.js",
       "source_location": "L24",
       "id": "customeridentity_getcustomerinitials",
-      "community": 5,
+      "community": 4,
       "norm_label": "getcustomerinitials()"
     },
     {
@@ -3969,7 +3978,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\freelancerProfileFields.js",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_shared_freelancerprofilefields_js",
-      "community": 36,
+      "community": 37,
       "norm_label": "freelancerprofilefields.js"
     },
     {
@@ -3978,7 +3987,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\freelancerProfileFields.js",
       "source_location": "L27",
       "id": "freelancerprofilefields_validatefreelanceridentity",
-      "community": 36,
+      "community": 37,
       "norm_label": "validatefreelanceridentity()"
     },
     {
@@ -3987,7 +3996,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\freelancerProfileFields.js",
       "source_location": "L45",
       "id": "freelancerprofilefields_validatefreelancerwork",
-      "community": 36,
+      "community": 37,
       "norm_label": "validatefreelancerwork()"
     },
     {
@@ -3996,7 +4005,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\freelancerProfileFields.js",
       "source_location": "L79",
       "id": "freelancerprofilefields_validatefreelancerlocation",
-      "community": 36,
+      "community": 37,
       "norm_label": "validatefreelancerlocation()"
     },
     {
@@ -4059,7 +4068,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\profileIdentity.js",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_dashboard_shared_profileidentity_js",
-      "community": 14,
+      "community": 13,
       "norm_label": "profileidentity.js"
     },
     {
@@ -4068,7 +4077,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\profileIdentity.js",
       "source_location": "L1",
       "id": "profileidentity_getprofiledisplayname",
-      "community": 14,
+      "community": 13,
       "norm_label": "getprofiledisplayname()"
     },
     {
@@ -4077,7 +4086,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\profileIdentity.js",
       "source_location": "L14",
       "id": "profileidentity_getprofilerealname",
-      "community": 14,
+      "community": 13,
       "norm_label": "getprofilerealname()"
     },
     {
@@ -4086,7 +4095,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Dashboard\\shared\\profileIdentity.js",
       "source_location": "L24",
       "id": "profileidentity_getprofileinitials",
-      "community": 14,
+      "community": 13,
       "norm_label": "getprofileinitials()"
     },
     {
@@ -4788,7 +4797,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Homepage\\sections\\home_two.jsx",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_components_homepage_sections_home_two_jsx",
-      "community": 37,
+      "community": 38,
       "norm_label": "home_two.jsx"
     },
     {
@@ -4797,7 +4806,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Homepage\\sections\\home_two.jsx",
       "source_location": "L19",
       "id": "home_two_matrixtitle",
-      "community": 37,
+      "community": 38,
       "norm_label": "matrixtitle()"
     },
     {
@@ -4806,7 +4815,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Homepage\\sections\\home_two.jsx",
       "source_location": "L205",
       "id": "home_two_wrap",
-      "community": 37,
+      "community": 38,
       "norm_label": "wrap()"
     },
     {
@@ -4815,7 +4824,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Homepage\\sections\\home_two.jsx",
       "source_location": "L210",
       "id": "home_two_hometwo",
-      "community": 37,
+      "community": 38,
       "norm_label": "hometwo()"
     },
     {
@@ -4860,7 +4869,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\authFlowIntent.js",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_lib_authflowintent_js",
-      "community": 4,
+      "community": 5,
       "norm_label": "authflowintent.js"
     },
     {
@@ -4869,7 +4878,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\authFlowIntent.js",
       "source_location": "L3",
       "id": "authflowintent_isbrowser",
-      "community": 4,
+      "community": 5,
       "norm_label": "isbrowser()"
     },
     {
@@ -4878,7 +4887,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\authFlowIntent.js",
       "source_location": "L7",
       "id": "authflowintent_getauthflowintent",
-      "community": 4,
+      "community": 5,
       "norm_label": "getauthflowintent()"
     },
     {
@@ -4887,7 +4896,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\authFlowIntent.js",
       "source_location": "L21",
       "id": "authflowintent_clearauthflowintent",
-      "community": 4,
+      "community": 5,
       "norm_label": "clearauthflowintent()"
     },
     {
@@ -4896,7 +4905,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\authFlowIntent.js",
       "source_location": "L26",
       "id": "authflowintent_buildoauthcallbackurl",
-      "community": 4,
+      "community": 5,
       "norm_label": "buildoauthcallbackurl()"
     },
     {
@@ -4905,7 +4914,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\authFlowIntent.js",
       "source_location": "L37",
       "id": "authflowintent_buildpasswordrecoveryurl",
-      "community": 4,
+      "community": 5,
       "norm_label": "buildpasswordrecoveryurl()"
     },
     {
@@ -5031,7 +5040,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\customerOnboarding.js",
       "source_location": "L52",
       "id": "customeronboarding_resolveprofilerole",
-      "community": 4,
+      "community": 5,
       "norm_label": "resolveprofilerole()"
     },
     {
@@ -5355,7 +5364,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\phLocations.js",
       "source_location": "L151",
       "id": "phlocations_buildphilippineslocationlabel",
-      "community": 14,
+      "community": 13,
       "norm_label": "buildphilippineslocationlabel()"
     },
     {
@@ -5490,7 +5499,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L1",
       "id": "c_users_ieq3q_carvver_src_lib_supabase_auth_js",
-      "community": 4,
+      "community": 5,
       "norm_label": "auth.js"
     },
     {
@@ -5499,7 +5508,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L10",
       "id": "auth_totitlecase",
-      "community": 4,
+      "community": 5,
       "norm_label": "totitlecase()"
     },
     {
@@ -5508,7 +5517,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L18",
       "id": "auth_deriveprofilenames",
-      "community": 4,
+      "community": 5,
       "norm_label": "deriveprofilenames()"
     },
     {
@@ -5517,7 +5526,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L63",
       "id": "auth_getavatarurl",
-      "community": 4,
+      "community": 5,
       "norm_label": "getavatarurl()"
     },
     {
@@ -5526,7 +5535,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L68",
       "id": "auth_signup",
-      "community": 4,
+      "community": 5,
       "norm_label": "signup()"
     },
     {
@@ -5535,7 +5544,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L87",
       "id": "auth_signin",
-      "community": 4,
+      "community": 5,
       "norm_label": "signin()"
     },
     {
@@ -5544,7 +5553,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L109",
       "id": "auth_resolveadminemail",
-      "community": 4,
+      "community": 5,
       "norm_label": "resolveadminemail()"
     },
     {
@@ -5553,7 +5562,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L143",
       "id": "auth_signinadmin",
-      "community": 4,
+      "community": 5,
       "norm_label": "signinadmin()"
     },
     {
@@ -5562,7 +5571,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L167",
       "id": "auth_requestpasswordrecovery",
-      "community": 4,
+      "community": 5,
       "norm_label": "requestpasswordrecovery()"
     },
     {
@@ -5571,7 +5580,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L191",
       "id": "auth_verifypasswordrecoveryotp",
-      "community": 4,
+      "community": 5,
       "norm_label": "verifypasswordrecoveryotp()"
     },
     {
@@ -5580,7 +5589,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L213",
       "id": "auth_verifypasswordrecoverytokenhash",
-      "community": 4,
+      "community": 5,
       "norm_label": "verifypasswordrecoverytokenhash()"
     },
     {
@@ -5589,7 +5598,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L229",
       "id": "auth_updatepassword",
-      "community": 4,
+      "community": 5,
       "norm_label": "updatepassword()"
     },
     {
@@ -5598,7 +5607,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L244",
       "id": "auth_requestemailchange",
-      "community": 4,
+      "community": 5,
       "norm_label": "requestemailchange()"
     },
     {
@@ -5607,7 +5616,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L264",
       "id": "auth_exchangecodeforsession",
-      "community": 4,
+      "community": 5,
       "norm_label": "exchangecodeforsession()"
     },
     {
@@ -5616,7 +5625,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L270",
       "id": "auth_signout",
-      "community": 4,
+      "community": 5,
       "norm_label": "signout()"
     },
     {
@@ -5625,7 +5634,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L275",
       "id": "auth_getsession",
-      "community": 4,
+      "community": 5,
       "norm_label": "getsession()"
     },
     {
@@ -5634,7 +5643,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L280",
       "id": "auth_getprofile",
-      "community": 4,
+      "community": 5,
       "norm_label": "getprofile()"
     },
     {
@@ -5643,7 +5652,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L294",
       "id": "auth_getprofilebyid",
-      "community": 4,
+      "community": 5,
       "norm_label": "getprofilebyid()"
     },
     {
@@ -5652,7 +5661,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L305",
       "id": "auth_upsertprofile",
-      "community": 4,
+      "community": 5,
       "norm_label": "upsertprofile()"
     },
     {
@@ -5661,7 +5670,7 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\lib\\supabase\\auth.js",
       "source_location": "L314",
       "id": "auth_ensureprofileforsession",
-      "community": 4,
+      "community": 5,
       "norm_label": "ensureprofileforsession()"
     },
     {
@@ -6695,6 +6704,18 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\AuthGuardFeedback.jsx",
+      "source_location": "L123",
+      "weight": 1.0,
+      "_src": "c_users_ieq3q_carvver_src_components_backend_authguardfeedback_jsx",
+      "_tgt": "authguardfeedback_existingsessionpanel",
+      "source": "c_users_ieq3q_carvver_src_components_backend_authguardfeedback_jsx",
+      "target": "authguardfeedback_existingsessionpanel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\authRouteState.js",
       "source_location": "L15",
       "weight": 1.0,
@@ -6735,8 +6756,8 @@
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\PublicOnlyRoute.jsx",
       "source_location": "L78",
       "weight": 1.0,
-      "_src": "publiconlyroute_publiconlyroute",
-      "_tgt": "authroutestate_getauthroutemessage",
+      "_src": "authroutestate_getauthroutemessage",
+      "_tgt": "publiconlyroute_publiconlyroute",
       "source": "authroutestate_getauthroutemessage",
       "target": "publiconlyroute_publiconlyroute"
     },
@@ -6864,7 +6885,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\PublicOnlyRoute.jsx",
-      "source_location": "L17",
+      "source_location": "L22",
       "weight": 1.0,
       "_src": "c_users_ieq3q_carvver_src_components_backend_publiconlyroute_jsx",
       "_tgt": "publiconlyroute_getpublicredirect",
@@ -6876,7 +6897,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\ieq3q\\carvver\\src\\components\\Backend\\PublicOnlyRoute.jsx",
-      "source_location": "L35",
+      "source_location": "L40",
       "weight": 1.0,
       "_src": "c_users_ieq3q_carvver_src_components_backend_publiconlyroute_jsx",
       "_tgt": "publiconlyroute_publiconlyroute",

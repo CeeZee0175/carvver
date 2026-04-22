@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   CUSTOMER_WELCOME_PATH,
   DEFAULT_CUSTOMER_DESTINATION,
@@ -12,7 +12,12 @@ import {
   getAuthRouteMessage,
   resolveAuthenticatedProfile,
 } from "./authRouteState";
-import { AuthGuardError, AuthGuardFallback } from "./AuthGuardFeedback";
+import { signOut } from "../../lib/supabase/auth";
+import {
+  AuthGuardError,
+  AuthGuardFallback,
+  ExistingSessionPanel,
+} from "./AuthGuardFeedback";
 
 function getPublicRedirect(result) {
   if (result.status === AUTH_ROUTE_STATUS.ADMIN) return "/admin";
@@ -36,8 +41,9 @@ export default function PublicOnlyRoute({ children }) {
   const navigate = useNavigate();
   const [state, setState] = useState({
     loading: true,
-    redirectTo: "",
+    sessionResult: null,
     profileError: null,
+    signingOut: false,
   });
 
   useEffect(() => {
@@ -50,16 +56,19 @@ export default function PublicOnlyRoute({ children }) {
       if (result.status === AUTH_ROUTE_STATUS.INVALID_SESSION) {
         setState({
           loading: false,
-          redirectTo: "",
+          sessionResult: null,
           profileError: result.reason === "profile" ? result : null,
+          signingOut: false,
         });
         return;
       }
 
       setState({
         loading: false,
-        redirectTo: getPublicRedirect(result),
+        sessionResult:
+          result.status === AUTH_ROUTE_STATUS.SIGNED_OUT ? null : result,
         profileError: null,
+        signingOut: false,
       });
     }
 
@@ -69,6 +78,30 @@ export default function PublicOnlyRoute({ children }) {
       active = false;
     };
   }, []);
+
+  const handleContinue = () => {
+    const redirectTo = state.sessionResult
+      ? getPublicRedirect(state.sessionResult)
+      : "";
+
+    if (redirectTo) navigate(redirectTo, { replace: true });
+  };
+
+  const handleSignOut = async () => {
+    setState((current) => ({
+      ...current,
+      signingOut: true,
+    }));
+
+    await signOut().catch(() => {});
+
+    setState({
+      loading: false,
+      sessionResult: null,
+      profileError: null,
+      signingOut: false,
+    });
+  };
 
   if (state.loading) return <AuthGuardFallback />;
 
@@ -81,7 +114,21 @@ export default function PublicOnlyRoute({ children }) {
     );
   }
 
-  if (state.redirectTo) return <Navigate to={state.redirectTo} replace />;
+  if (state.sessionResult) {
+    return (
+      <ExistingSessionPanel
+        email={
+          state.sessionResult.profile?.email ||
+          state.sessionResult.user?.email ||
+          ""
+        }
+        role={state.sessionResult.status}
+        signingOut={state.signingOut}
+        onContinue={handleContinue}
+        onSignOut={handleSignOut}
+      />
+    );
+  }
 
   return children;
 }
