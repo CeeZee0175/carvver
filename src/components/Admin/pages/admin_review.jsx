@@ -14,7 +14,7 @@ import {
   fetchAdminPayoutReviewDetail,
   processAdminPayoutAction,
 } from "../../Dashboard/hooks/useMarketplaceWorkflow";
-import { signOut, getProfile } from "../../../lib/supabase/auth";
+import { signOut } from "../../../lib/supabase/auth";
 import {
   EmptySurface,
   Reveal,
@@ -205,7 +205,6 @@ function DeliveryReview({ order }) {
 
 export default function AdminReview() {
   const navigate = useNavigate();
-  const [adminName, setAdminName] = useState("Admin");
   const [loadingQueue, setLoadingQueue] = useState(true);
   const [queue, setQueue] = useState([]);
   const [filter, setFilter] = useState("all");
@@ -228,12 +227,7 @@ export default function AdminReview() {
     setError("");
 
     try {
-      const [profile, nextQueue] = await Promise.all([
-        getProfile().catch(() => null),
-        fetchAdminPayoutQueue(),
-      ]);
-
-      setAdminName(profile?.first_name || profile?.display_name || "Admin");
+      const nextQueue = await fetchAdminPayoutQueue();
       setQueue(nextQueue);
 
       const nextSelectedId =
@@ -360,7 +354,6 @@ export default function AdminReview() {
         <div className="adminBar__inner">
           <div className="adminBar__brandWrap">
             <span className="adminBar__brand">Carvver</span>
-            <span className="adminBar__meta">Admin</span>
           </div>
 
           <Motion.button
@@ -385,10 +378,6 @@ export default function AdminReview() {
                 <TypewriterHeading text="Admin Review" />
               </h1>
               <span className="adminHero__line" aria-hidden="true" />
-            </div>
-
-            <div className="adminHero__meta">
-              <span className="adminHero__welcome">Signed in as {adminName}</span>
             </div>
           </section>
         </Reveal>

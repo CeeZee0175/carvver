@@ -69,15 +69,6 @@
   color: rgba(42, 20, 80, 0.98);
 }
 
-.adminBar__meta {
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(87, 34, 182, 0.72);
-}
-
 .adminBar__button {
   min-height: 42px;
   padding: 0 16px;
@@ -108,7 +99,9 @@
 .adminHero {
   display: grid;
   gap: 14px;
+  justify-items: center;
   padding: 6px 0 2px;
+  text-align: center;
 }
 
 .adminHero__titleWrap {
@@ -142,13 +135,6 @@
     rgba(242, 193, 78, 0.92) 76%,
     rgba(242, 193, 78, 0) 100%
   );
-}
-
-.adminHero__welcome {
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: rgba(27, 16, 46, 0.64);
 }
 
 .adminLayout {
