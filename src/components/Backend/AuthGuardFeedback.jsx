@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 export function AuthGuardFallback({ message = "Checking your session" }) {
   return (
@@ -121,20 +122,10 @@ export function AuthGuardError({
 }
 
 export function ExistingSessionPanel({
-  email,
-  role,
   onContinue,
   onSignOut,
   signingOut = false,
 }) {
-  const normalizedRole = String(role || "user").toLowerCase();
-  const roleLabel =
-    normalizedRole === "admin"
-      ? "Admin"
-      : normalizedRole === "freelancer"
-        ? "Freelancer"
-        : "Customer";
-
   return (
     <div
       style={{
@@ -181,7 +172,7 @@ export function ExistingSessionPanel({
             color: "rgba(27,16,46,0.96)",
           }}
         >
-          You&apos;re already signed in
+          You&apos;re already signed in!
         </h1>
         <p
           style={{
@@ -192,9 +183,7 @@ export function ExistingSessionPanel({
             color: "rgba(27,16,46,0.68)",
           }}
         >
-          This browser is currently using a {roleLabel.toLowerCase()} account
-          {email ? ` for ${email}` : ""}. Continue with it, or sign out to use
-          another account.
+          Do you want to continue or log out?
         </p>
         <div
           style={{
@@ -204,9 +193,12 @@ export function ExistingSessionPanel({
             gap: 10,
           }}
         >
-          <button
+          <motion.button
             type="button"
             onClick={onContinue}
+            whileHover={{ y: -2, scale: 1.012 }}
+            whileTap={{ y: 0, scale: 0.985 }}
+            transition={{ type: "spring", stiffness: 340, damping: 22 }}
             style={{
               minHeight: 48,
               border: "1px solid rgba(42,20,80,0.16)",
@@ -220,11 +212,14 @@ export function ExistingSessionPanel({
             }}
           >
             Continue to dashboard
-          </button>
-          <button
+          </motion.button>
+          <motion.button
             type="button"
             onClick={onSignOut}
             disabled={signingOut}
+            whileHover={signingOut ? undefined : { y: -2, scale: 1.01 }}
+            whileTap={signingOut ? undefined : { y: 0, scale: 0.985 }}
+            transition={{ type: "spring", stiffness: 340, damping: 22 }}
             style={{
               minHeight: 46,
               border: "1px solid rgba(42,20,80,0.12)",
@@ -238,7 +233,7 @@ export function ExistingSessionPanel({
             }}
           >
             {signingOut ? "Signing out..." : "Sign out and use another account"}
-          </button>
+          </motion.button>
         </div>
       </section>
     </div>

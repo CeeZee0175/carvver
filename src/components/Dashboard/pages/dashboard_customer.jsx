@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
-  Bell,
-  Bookmark,
   Heart,
   MapPin,
   PackageSearch,
   PlusCircle,
-  ShoppingBag,
   Users,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -36,29 +33,6 @@ import { useCustomerRequests } from "../hooks/useCustomerRequests";
 import { useCustomerFavoriteFreelancers } from "../hooks/useCustomerFavoriteFreelancers";
 
 const supabase = createClient();
-
-const quickBoardItems = [
-  {
-    label: "Post a Request",
-    Icon: PlusCircle,
-    action: (navigate) => navigate("/dashboard/customer/post-request"),
-  },
-  {
-    label: "Saved Listings",
-    Icon: Bookmark,
-    action: (navigate) => navigate("/dashboard/customer/saved"),
-  },
-  {
-    label: "My Orders",
-    Icon: ShoppingBag,
-    action: (navigate) => navigate("/dashboard/customer/orders"),
-  },
-  {
-    label: "Notifications",
-    Icon: Bell,
-    action: (navigate) => navigate("/dashboard/customer/notifications"),
-  },
-];
 
 const HERO_BUTTON_MOTION = {
   whileHover: { y: -6, scale: 1.024 },
@@ -127,16 +101,11 @@ function QuietEmptyState({ title, desc, actionLabel, onAction }) {
 export default function DashboardCustomer() {
   const navigate = useNavigate();
   const location = useLocation();
-  const reduceMotion = useReducedMotion();
-  const [statsLoading, setStatsLoading] = useState(true);
-  const [savedCount, setSavedCount] = useState(0);
-  const [activeOrdersCount, setActiveOrdersCount] = useState(0);
   const [services, setServices] = useState([]);
   const [servicesLoading, setServicesLoading] = useState(true);
   const {
     loading: requestsLoading,
     requests,
-    openCount,
     error: requestsError,
     reload: reloadRequests,
   } = useCustomerRequests({ limit: 4 });
@@ -147,44 +116,6 @@ export default function DashboardCustomer() {
     favoriteFreelancers,
     toggleFavoriteFreelancer,
   } = useCustomerFavoriteFreelancers({ includeProfiles: true, limit: 4 });
-
-  useEffect(() => {
-    async function loadDashboardStats() {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (!session?.user?.id) {
-          setSavedCount(0);
-          setActiveOrdersCount(0);
-          return;
-        }
-
-        const [savedResult, ordersResult] = await Promise.all([
-          supabase
-            .from("saved_services")
-            .select("id", { count: "exact", head: true })
-            .eq("user_id", session.user.id),
-          supabase
-            .from("orders")
-            .select("id", { count: "exact", head: true })
-            .eq("customer_id", session.user.id)
-            .in("status", ["pending", "active"]),
-        ]);
-
-        setSavedCount(Number(savedResult.count || 0));
-        setActiveOrdersCount(Number(ordersResult.count || 0));
-      } catch {
-        setSavedCount(0);
-        setActiveOrdersCount(0);
-      } finally {
-        setStatsLoading(false);
-      }
-    }
-
-    loadDashboardStats();
-  }, []);
 
   useEffect(() => {
     async function loadRecommendedServices() {
@@ -220,25 +151,6 @@ export default function DashboardCustomer() {
 
     navigate(location.pathname, { replace: true, state: null });
   }, [location.pathname, location.state, navigate, reloadRequests]);
-
-  const quickStats = [
-    {
-      label: "Saved Listings",
-      value: statsLoading ? "..." : savedCount,
-    },
-    {
-      label: "Open Requests",
-      value: requestsLoading ? "..." : openCount,
-    },
-    {
-      label: "Active Orders",
-      value: statsLoading ? "..." : activeOrdersCount,
-    },
-    {
-      label: "Favorite Freelancers",
-      value: favoritesLoading ? "..." : favoriteFreelancers.length,
-    },
-  ];
 
   const handleFavoriteToggle = async (freelancerId, snapshot) => {
     try {
@@ -308,77 +220,6 @@ export default function DashboardCustomer() {
             </div>
           </div>
 
-          <div className="profileHero__stats dashLandingStats">
-            {quickStats.map((item, index) => (
-              <motion.article
-                key={item.label}
-                className="dashLandingStat"
-                initial={
-                  reduceMotion ? false : { opacity: 0, y: 18, filter: "blur(10px)" }
-                }
-                animate={
-                  reduceMotion
-                    ? { opacity: 1 }
-                    : { opacity: 1, y: 0, filter: "blur(0px)" }
-                }
-                transition={
-                  reduceMotion
-                    ? { duration: 0 }
-                    : {
-                        duration: 0.58,
-                        ease: [0.22, 1, 0.36, 1],
-                        delay: 0.18 + index * 0.08,
-                      }
-                }
-                whileHover={reduceMotion ? undefined : { y: -3 }}
-              >
-                <span className="profileMiniStat__label">{item.label}</span>
-                <strong className="profileMiniStat__value">{item.value}</strong>
-                {item.hint ? (
-                  <span className="profileMiniStat__hint">{item.hint}</span>
-                ) : null}
-              </motion.article>
-            ))}
-          </div>
-        </section>
-      </Reveal>
-
-      <Reveal delay={0.04}>
-        <section className="dashLandingSection dashLandingSection--quick">
-          <div className="dashLandingSection__head">
-            <div>
-              <h2 className="dashLandingSection__title">Quick board</h2>
-              <p className="dashLandingSection__desc">
-                Keep your main customer actions within reach.
-              </p>
-            </div>
-          </div>
-
-          <div className="dashLandingQuickBoard">
-            {quickBoardItems.map((item, index) => {
-              const Icon = item.Icon;
-              return (
-                <motion.button
-                  key={item.label}
-                  type="button"
-                  className="dashLandingQuickCard"
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.4 }}
-                  transition={{ duration: 0.42, delay: index * 0.05 }}
-                  {...SURFACE_BUTTON_MOTION}
-                  onClick={() => item.action(navigate)}
-                >
-                  <span className="dashLandingQuickCard__iconWrap" aria-hidden="true">
-                    <Icon className="dashLandingQuickCard__icon" />
-                  </span>
-                  <span className="dashLandingQuickCard__copy">
-                    <span className="dashLandingQuickCard__title">{item.label}</span>
-                  </span>
-                </motion.button>
-              );
-            })}
-          </div>
         </section>
       </Reveal>
 

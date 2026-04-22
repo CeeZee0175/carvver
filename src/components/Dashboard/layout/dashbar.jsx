@@ -9,7 +9,6 @@ import {
   MessageCircle,
   Search,
   Settings,
-  Sparkles,
   ShoppingBag,
   ShoppingCart,
   UserRound,
@@ -296,7 +295,6 @@ export default function DashBar() {
               aria-label="View Carvver Pro pricing"
             >
               <span className="dashbarPill__glow" aria-hidden="true" />
-              <Sparkles className="dashbarPill__icon" />
               <span className="dashbarPill__text dashbarPill__text--pro">
                 Join Carvver Pro
               </span>

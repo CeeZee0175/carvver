@@ -19,7 +19,6 @@ import {
   REQUEST_MEDIA_MAX_IMAGE_BYTES,
   REQUEST_MEDIA_MAX_VIDEO_BYTES,
   REQUEST_MEDIA_MAX_VIDEOS,
-  useCustomerRequests,
 } from "../hooks/useCustomerRequests";
 import {
   buildPhilippinesLocationLabel,
@@ -130,7 +129,6 @@ export default function PostRequest() {
   const deadlineButtonRef = useRef(null);
   const categoryListId = useId();
   const deadlineGridId = useId();
-  const { openCount } = useCustomerRequests({ limit: 2 });
   const [formValues, setFormValues] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -492,21 +490,6 @@ export default function PostRequest() {
             </p>
           </div>
 
-          <div className="requestPage__stats">
-            <div className="requestPage__stat">
-              <span className="requestPage__statLabel">Open requests</span>
-              <strong className="requestPage__statValue">{openCount}</strong>
-            </div>
-            <div className="requestPage__stat">
-              <span className="requestPage__statLabel">Attachments</span>
-              <strong className="requestPage__statValue">
-                {attachmentStats.images + attachmentStats.videos}
-              </strong>
-              <span className="requestPage__statHint">
-                {attachmentStats.images} image{attachmentStats.images === 1 ? "" : "s"} / {attachmentStats.videos} video
-              </span>
-            </div>
-          </div>
         </section>
       </Reveal>
 

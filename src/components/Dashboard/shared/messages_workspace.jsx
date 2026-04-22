@@ -279,17 +279,6 @@ export default function MessagesWorkspace({ role = "customer" }) {
             <p className="messagesHero__sub">{heroSubtext}</p>
           </div>
 
-          <div className="messagesHero__stats">
-            <div className="profileMiniStat profileMiniStat--open">
-              <span className="profileMiniStat__label">Threads</span>
-              <strong className="profileMiniStat__value">{threads.length}</strong>
-            </div>
-
-            <div className="profileMiniStat profileMiniStat--open">
-              <span className="profileMiniStat__label">Active</span>
-              <strong className="profileMiniStat__value">{activeThread ? "1" : "0"}</strong>
-            </div>
-          </div>
         </section>
       </Reveal>
 

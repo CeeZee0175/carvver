@@ -7,7 +7,6 @@ import {
   MessageCircle,
   Search,
   Settings,
-  Sparkles,
   UserRound,
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
@@ -260,7 +259,6 @@ export default function FreelancerDashBar() {
               aria-label="View Carvver Pro pricing"
             >
               <span className="dashbarPill__glow" aria-hidden="true" />
-              <Sparkles className="dashbarPill__icon" />
               <span className="dashbarPill__text dashbarPill__text--pro">
                 Join Carvver Pro
               </span>

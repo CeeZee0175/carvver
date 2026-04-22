@@ -288,16 +288,16 @@ export default function CartPage() {
             <p className="cartHero__sub">
               Review your listings here before you move to payment.
             </p>
-          </div>
 
-          <div className="cartHero__stats">
-            <div className="cartHeroStat cartHeroStat--open">
-              <span className="cartHeroStat__label">Listings</span>
-              <strong className="cartHeroStat__value">{heroListingsValue}</strong>
-            </div>
-            <div className="cartHeroStat cartHeroStat--open">
-              <span className="cartHeroStat__label">Customer total</span>
-              <strong className="cartHeroStat__value">{heroTotalValue}</strong>
+            <div className="cartHero__stats">
+              <div className="cartHeroStat cartHeroStat--open">
+                <span className="cartHeroStat__label">Listings</span>
+                <strong className="cartHeroStat__value">{heroListingsValue}</strong>
+              </div>
+              <div className="cartHeroStat cartHeroStat--open">
+                <span className="cartHeroStat__label">Customer total</span>
+                <strong className="cartHeroStat__value">{heroTotalValue}</strong>
+              </div>
             </div>
           </div>
         </section>

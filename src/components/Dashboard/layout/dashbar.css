@@ -273,6 +273,9 @@
 .dashbarPill--pro{
   position: relative;
   overflow: hidden;
+  min-width: max-content;
+  padding: 0 18px;
+  border-radius: 15px;
   background: linear-gradient(180deg, rgba(42,20,80,0.95), rgba(74,35,133,0.92));
   border-color: rgba(87,34,182,0.26);
   color: #fff;
@@ -294,6 +297,7 @@
 .dashbarPill__text--pro{
   position: relative;
   z-index: 1;
+  letter-spacing: 0.01em;
 }
 
 .dashbarPill__glow{
@@ -1180,12 +1184,18 @@
   }
 
   .dashbarPill--pro{
-    width: 42px;
-    padding: 0;
+    width: auto;
+    padding: 0 12px;
+    border-radius: 14px;
   }
 
   .dashbarPill__text{
     display: none;
+  }
+
+  .dashbarPill--pro .dashbarPill__text{
+    display: inline;
+    font-size: 11px;
   }
 
   .dashbarProfileMenu{
@@ -1245,6 +1255,12 @@
   .dashbarProfileMenu{
     right: 0;
     min-width: min(280px, calc(100vw - 20px));
+  }
+
+  .dashbarPill--pro{
+    width: auto;
+    padding-inline: 10px;
+    border-radius: 13px;
   }
 
   .dashbarNotifyMenu{

@@ -54,9 +54,18 @@
 
 .cartHero {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.94fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
+  justify-items: center;
   padding: 28px 0 8px;
+  text-align: center;
+}
+
+.cartHero__heading {
+  display: grid;
+  justify-items: center;
+  max-width: 760px;
+  margin-inline: auto;
 }
 
 .cartHero__eyebrow,
@@ -78,6 +87,7 @@
 .cartHero__titleWrap {
   position: relative;
   display: inline-block;
+  justify-self: center;
   padding-bottom: 16px;
 }
 
@@ -102,7 +112,7 @@
 }
 
 .cartHero__sub {
-  margin: 10px 0 0;
+  margin: 10px auto 0;
   max-width: 56ch;
   font-family: Inter, system-ui, sans-serif;
   font-size: 15px;
@@ -111,22 +121,24 @@
 }
 
 .cartHero__stats {
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  align-content: end;
-  gap: 18px 26px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px 34px;
+  margin-top: 24px;
 }
 
 .cartHeroStat {
   display: grid;
   gap: 10px;
+  justify-items: center;
   align-content: start;
 }
 
 .cartHeroStat--open {
   position: relative;
   min-height: auto;
-  padding: 8px 0 10px 20px;
+  padding: 8px 18px 10px;
   border: 0;
   border-radius: 0;
   background: transparent;

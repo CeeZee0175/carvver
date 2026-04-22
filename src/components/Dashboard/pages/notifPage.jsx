@@ -2,6 +2,7 @@ import React, { startTransition, useEffect, useMemo, useState } from "react";
 import {
   AnimatePresence,
   LayoutGroup,
+  motion,
   useReducedMotion,
 } from "framer-motion";
 import { useNavigate } from "react-router-dom";
