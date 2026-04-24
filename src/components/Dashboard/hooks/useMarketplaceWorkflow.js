@@ -7,6 +7,7 @@ import { REQUEST_MEDIA_BUCKET } from "./useCustomerRequests";
 const supabase = createClient();
 export const ORDER_DELIVERY_ASSET_BUCKET = "order-delivery-assets";
 export const ORDER_RECEIPT_BUCKET = "order-receipts";
+export const FREELANCER_VERIFICATION_BUCKET = "freelancer-verification-media";
 export const ORDER_DELIVERY_ACCEPTED_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",
@@ -108,6 +109,13 @@ function getPublicUrl(bucket, path) {
 
 function getReceiptPublicUrl(path) {
   return getPublicUrl(ORDER_RECEIPT_BUCKET, path);
+}
+
+async function getSignedUrl(bucket, path) {
+  if (!path) return "";
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 30);
+  if (error) return "";
+  return data?.signedUrl || "";
 }
 
 function groupBy(rows, key) {
@@ -981,6 +989,151 @@ export async function processAdminPayoutAction({
     throw new Error(String(data.error));
   }
 
+  return data;
+}
+
+function normalizeVerificationRequest(row) {
+  const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+
+  return {
+    id: row.id,
+    freelancerId: row.freelancer_id,
+    description: normalizeText(row.description),
+    status: normalizeText(row.status) || "pending",
+    adminNote: normalizeText(row.admin_note),
+    reviewedAt: row.reviewed_at,
+    reviewedAtLabel: formatDate(row.reviewed_at),
+    createdAt: row.created_at,
+    createdAtLabel: formatDate(row.created_at),
+    updatedAt: row.updated_at,
+    freelancerName: buildProfileName(profile, "Freelancer"),
+    freelancerEmail: "",
+    freelancerHeadline: normalizeText(profile?.freelancer_headline),
+    freelancerAvatarUrl: normalizeText(profile?.avatar_url),
+    freelancerVerified: Boolean(profile?.freelancer_verified_at),
+    media: [],
+  };
+}
+
+export async function fetchAdminVerificationQueue() {
+  const profile = await getSignedInProfile();
+  if (normalizeText(profile?.role).toLowerCase() !== "admin") {
+    throw new Error("Admin access is required to open this queue.");
+  }
+
+  const { data, error } = await supabase
+    .from("freelancer_verification_requests")
+    .select(
+      `
+      id,
+      freelancer_id,
+      description,
+      status,
+      admin_note,
+      reviewed_at,
+      created_at,
+      updated_at,
+      profiles!freelancer_verification_requests_freelancer_id_fkey (
+        id,
+        first_name,
+        last_name,
+        display_name,
+        avatar_url,
+        freelancer_headline,
+        freelancer_verified_at
+      )
+    `
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data || []).map(normalizeVerificationRequest);
+}
+
+export async function fetchAdminVerificationDetail(requestId) {
+  const profile = await getSignedInProfile();
+  if (normalizeText(profile?.role).toLowerCase() !== "admin") {
+    throw new Error("Admin access is required to open this review.");
+  }
+
+  const { data, error } = await supabase
+    .from("freelancer_verification_requests")
+    .select(
+      `
+      id,
+      freelancer_id,
+      description,
+      status,
+      admin_note,
+      reviewed_at,
+      created_at,
+      updated_at,
+      profiles!freelancer_verification_requests_freelancer_id_fkey (
+        id,
+        first_name,
+        last_name,
+        display_name,
+        avatar_url,
+        freelancer_headline,
+        freelancer_verified_at
+      ),
+      freelancer_verification_media (
+        id,
+        bucket_path,
+        media_kind,
+        mime_type,
+        original_name,
+        sort_order
+      )
+    `
+    )
+    .eq("id", requestId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) throw new Error("We couldn't find that verification request.");
+
+  const normalized = normalizeVerificationRequest(data);
+  const mediaRows = data.freelancer_verification_media || [];
+  const media = await Promise.all(
+    mediaRows
+      .slice()
+      .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
+      .map(async (item) => ({
+        id: item.id,
+        mediaKind: normalizeText(item.media_kind) || "image",
+        mimeType: normalizeText(item.mime_type),
+        originalName: normalizeText(item.original_name) || "Verification proof",
+        signedUrl: await getSignedUrl(FREELANCER_VERIFICATION_BUCKET, item.bucket_path),
+      }))
+  );
+
+  return {
+    ...normalized,
+    media,
+  };
+}
+
+export async function processAdminVerificationAction({
+  requestId,
+  action,
+  note,
+}) {
+  const profile = await getSignedInProfile();
+  if (normalizeText(profile?.role).toLowerCase() !== "admin") {
+    throw new Error("Admin access is required for verification actions.");
+  }
+
+  const { data, error } = await supabase.rpc(
+    "process_freelancer_verification_request",
+    {
+      p_request_id: requestId,
+      p_action: action,
+      p_admin_note: note,
+    }
+  );
+
+  if (error) throw error;
   return data;
 }
 

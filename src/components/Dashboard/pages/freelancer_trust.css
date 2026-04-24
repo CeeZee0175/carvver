@@ -1,0 +1,439 @@
+.freelancerTrustPage {
+  align-content: start;
+}
+
+.freelancerTrustHero .profileHero__line {
+  color: rgba(242, 193, 78, 0.98);
+}
+
+.freelancerTrustSection,
+.freelancerVerificationPanel {
+  position: relative;
+}
+
+.freelancerTrustFilters {
+  display: grid;
+  gap: 12px;
+}
+
+.freelancerTrustFilters__group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.freelancerTrustFilters__group--scroll {
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  padding-bottom: 4px;
+}
+
+.freelancerTrustFilterButton {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  padding: 8px 0;
+  cursor: pointer;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 850;
+  color: rgba(42, 20, 80, 0.58);
+  white-space: nowrap;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.freelancerTrustFilterButton:hover,
+.freelancerTrustFilterButton--active {
+  color: rgba(42, 20, 80, 0.96);
+  border-color: rgba(242, 193, 78, 0.95);
+}
+
+.freelancerTrustFilterButton:hover {
+  transform: translateY(-1px);
+}
+
+.freelancerAchievementGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.freelancerAchievementCard {
+  position: relative;
+  min-height: 286px;
+  border-radius: 18px;
+  border: 1px solid rgba(42, 20, 80, 0.08);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 16px 44px rgba(12, 7, 18, 0.045);
+  padding: 18px;
+  display: grid;
+  align-content: space-between;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.freelancerAchievementCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.5), transparent 44%),
+    radial-gradient(320px 160px at 18% 0%, rgba(242, 193, 78, 0.14), transparent 64%);
+  opacity: 0.5;
+}
+
+.freelancerAchievementCard--earned {
+  border-color: rgba(242, 193, 78, 0.24);
+  box-shadow: 0 20px 54px rgba(124, 58, 237, 0.08);
+}
+
+.freelancerAchievementCard--legendary {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 249, 235, 0.82)),
+    rgba(255, 255, 255, 0.82);
+}
+
+.freelancerAchievementCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.freelancerAchievementCard__top,
+.freelancerAchievementCard__meta,
+.freelancerAchievementCard__footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.freelancerAchievementCard__state,
+.freelancerAchievementCard__tier,
+.freelancerAchievementCard__metaLabel,
+.freelancerAchievementCard__lockedNote {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: rgba(42, 20, 80, 0.58);
+}
+
+.freelancerAchievementCard__tier {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: rgba(140, 92, 11, 0.9);
+}
+
+.freelancerAchievementCard__tierIcon,
+.freelancerAchievementCard__actionIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.freelancerAchievementCard__body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.freelancerAchievementCard__badge {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 1px solid var(--freelancer-badge-border, rgba(124, 58, 237, 0.18));
+  background: var(--freelancer-badge-bg, rgba(124, 58, 237, 0.12));
+  display: grid;
+  place-items: center;
+  box-shadow: 0 18px 34px rgba(42, 20, 80, 0.08);
+  overflow: hidden;
+}
+
+.freelancerAchievementCard__badgeImage {
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+  display: block;
+  color: var(--freelancer-badge-color, rgba(87, 34, 182, 0.96));
+}
+
+.freelancerAchievementCard__title {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.15;
+  font-weight: 900;
+  color: rgba(27, 16, 46, 0.96);
+}
+
+.freelancerAchievementCard__desc {
+  margin: 8px 0 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(42, 20, 80, 0.66);
+}
+
+.freelancerAchievementCard__meta {
+  padding-top: 12px;
+  border-top: 1px solid rgba(42, 20, 80, 0.08);
+}
+
+.freelancerAchievementCard__meta strong {
+  display: block;
+  margin-top: 4px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 850;
+  color: rgba(27, 16, 46, 0.9);
+}
+
+.freelancerAchievementCard__action,
+.freelancerVerificationUpload__button,
+.freelancerVerificationMedia__remove {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 850;
+  color: rgba(87, 34, 182, 0.92);
+}
+
+.freelancerAchievementCard__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  font-size: 13px;
+}
+
+.freelancerAchievementCard__action--active {
+  color: rgba(140, 92, 11, 0.96);
+}
+
+.freelancerAchievementCard__action:disabled {
+  cursor: not-allowed;
+  opacity: 0.54;
+}
+
+.freelancerAchievementCard--skeleton {
+  min-height: 280px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.62),
+    rgba(255, 255, 255, 0.92),
+    rgba(255, 255, 255, 0.62)
+  );
+  background-size: 220% 100%;
+  animation: freelancerTrustShimmer 1.1s linear infinite;
+}
+
+.freelancerVerificationPanel {
+  display: grid;
+  gap: 20px;
+}
+
+.freelancerVerificationPanel__summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+}
+
+.freelancerVerificationPanel__iconWrap {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(124, 58, 237, 0.1);
+  color: rgba(87, 34, 182, 0.96);
+}
+
+.freelancerVerificationPanel__icon {
+  width: 28px;
+  height: 28px;
+}
+
+.freelancerVerificationPanel__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.freelancerVerificationPanel__facts div {
+  min-width: 0;
+  border-top: 1px solid rgba(42, 20, 80, 0.1);
+  padding-top: 12px;
+}
+
+.freelancerVerificationPanel__facts span,
+.freelancerVerificationUpload__note {
+  display: block;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(42, 20, 80, 0.58);
+}
+
+.freelancerVerificationPanel__facts strong {
+  display: block;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  color: rgba(27, 16, 46, 0.94);
+}
+
+.freelancerVerificationPanel__actions,
+.freelancerVerificationForm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.freelancerVerificationForm {
+  display: grid;
+  gap: 18px;
+}
+
+.freelancerVerificationUpload {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.freelancerVerificationUpload__button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.freelancerVerificationUpload__button:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.freelancerVerificationUpload__icon {
+  width: 18px;
+  height: 18px;
+}
+
+.freelancerVerificationMediaGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.freelancerVerificationMedia {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.freelancerVerificationMedia__asset,
+.freelancerVerificationMedia__fallback {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  border: 1px solid rgba(42, 20, 80, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  object-fit: cover;
+  overflow: hidden;
+}
+
+.freelancerVerificationMedia__fallback {
+  display: grid;
+  place-items: center;
+}
+
+.freelancerVerificationMedia__fallbackIcon {
+  width: 28px;
+  height: 28px;
+  color: rgba(87, 34, 182, 0.72);
+}
+
+.freelancerVerificationMedia strong {
+  min-width: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 850;
+  color: rgba(27, 16, 46, 0.9);
+  overflow-wrap: anywhere;
+}
+
+.freelancerVerificationMedia__remove {
+  justify-self: start;
+  padding: 0;
+  font-size: 12px;
+}
+
+.freelancerTrustSpin {
+  animation: freelancerTrustSpin 0.9s linear infinite;
+}
+
+@keyframes freelancerTrustShimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -20% 0;
+  }
+}
+
+@keyframes freelancerTrustSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .freelancerAchievementCard--skeleton,
+  .freelancerTrustSpin {
+    animation: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .freelancerAchievementGrid,
+  .freelancerVerificationMediaGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .freelancerVerificationPanel__facts {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .freelancerAchievementGrid,
+  .freelancerVerificationMediaGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .freelancerAchievementCard__body,
+  .freelancerVerificationPanel__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .freelancerVerificationPanel__actions,
+  .freelancerVerificationForm__actions {
+    justify-content: stretch;
+  }
+
+  .freelancerVerificationPanel__actions .profileEditor__btn,
+  .freelancerVerificationForm__actions .profileEditor__btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

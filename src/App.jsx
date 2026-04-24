@@ -51,6 +51,12 @@ const FreelancerPostListing = lazy(() =>
   import("./components/Dashboard/pages/freelancer_post_listing")
 );
 const FreelancerProfile = lazy(() => import("./components/Dashboard/pages/freelancer_profile"));
+const FreelancerAchievements = lazy(() =>
+  import("./components/Dashboard/pages/freelancer_achievements")
+);
+const FreelancerVerification = lazy(() =>
+  import("./components/Dashboard/pages/freelancer_verification")
+);
 const FreelancerSettings = lazy(() => import("./components/Dashboard/pages/freelancer_settings"));
 const FreelancerMessages = lazy(() => import("./components/Dashboard/pages/freelancer_messages"));
 const DashboardAboutUs = lazy(() => import("./components/Dashboard/pages/dashboard_aboutUs"));
@@ -604,6 +610,26 @@ function AppRoutes() {
           <Suspense fallback={<RouteFallback />}>
             <FreelancerRoute>
               <FreelancerProfile />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer/profile/achievements"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerAchievements />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer/profile/verification"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <FreelancerVerification />
             </FreelancerRoute>
           </Suspense>
         }

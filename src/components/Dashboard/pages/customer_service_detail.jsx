@@ -13,6 +13,7 @@ import {
   TypewriterHeading,
 } from "../shared/customerProfileShared";
 import { useCustomerFavoriteFreelancers } from "../hooks/useCustomerFavoriteFreelancers";
+import VerifiedBadge from "../shared/VerifiedBadge";
 import { useCart } from "../hooks/useCart";
 import { useServiceListingDetail } from "../hooks/useServiceListingDetail";
 import "./service_listing_detail.css";
@@ -519,7 +520,11 @@ export default function CustomerServiceDetail() {
                   </div>
                   <div>
                     <div className="serviceDetailFreelancer__name">
-                      {service.freelancer.displayName}
+                      <span>{service.freelancer.displayName}</span>
+                      <VerifiedBadge
+                        verified={service.freelancer.verified}
+                        className="verifiedBadge--sm"
+                      />
                     </div>
                     {service.freelancer.headline ? (
                       <p className="serviceDetailFreelancer__headline">

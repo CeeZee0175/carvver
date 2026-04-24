@@ -2,6 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 import {
   CheckCircle2,
+  BadgeCheck,
+  FileVideo,
+  Image as ImageIcon,
   LoaderCircle,
   LogOut,
   ShieldCheck,
@@ -12,8 +15,12 @@ import { useNavigate } from "react-router-dom";
 import {
   fetchAdminPayoutQueue,
   fetchAdminPayoutReviewDetail,
+  fetchAdminVerificationDetail,
+  fetchAdminVerificationQueue,
   processAdminPayoutAction,
+  processAdminVerificationAction,
 } from "../../Dashboard/hooks/useMarketplaceWorkflow";
+import VerifiedBadge from "../../Dashboard/shared/VerifiedBadge";
 import { signOut } from "../../../lib/supabase/auth";
 import {
   EmptySurface,
@@ -82,6 +89,57 @@ function DeliveryAssetList({ assets = [] }) {
           </div>
         </article>
       ))}
+    </div>
+  );
+}
+
+function VerificationMediaList({ media = [] }) {
+  if (!media.length) {
+    return (
+      <EmptySurface
+        hideIcon
+        title="No proof files attached"
+        description="This request has no media available for review."
+        className="adminEmptySurface"
+      />
+    );
+  }
+
+  return (
+    <div className="adminVerificationMediaGrid">
+      {media.map((item) => {
+        const isVideo = item.mediaKind === "video";
+        const Icon = isVideo ? FileVideo : ImageIcon;
+
+        return (
+          <article key={item.id} className="adminVerificationMediaCard">
+            <div className="adminVerificationMediaCard__preview">
+              {item.signedUrl ? (
+                isVideo ? (
+                  <video src={item.signedUrl} controls preload="metadata" />
+                ) : (
+                  <img src={item.signedUrl} alt={item.originalName} />
+                )
+              ) : (
+                <Icon className="adminVerificationMediaCard__fallbackIcon" />
+              )}
+            </div>
+            <strong className="adminVerificationMediaCard__title">
+              {item.originalName}
+            </strong>
+            {item.signedUrl ? (
+              <a
+                className="workflowLink"
+                href={item.signedUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open file
+              </a>
+            ) : null}
+          </article>
+        );
+      })}
     </div>
   );
 }
@@ -205,12 +263,20 @@ function DeliveryReview({ order }) {
 
 export default function AdminReview() {
   const navigate = useNavigate();
+  const [activeQueue, setActiveQueue] = useState("payouts");
   const [loadingQueue, setLoadingQueue] = useState(true);
   const [queue, setQueue] = useState([]);
   const [filter, setFilter] = useState("all");
   const [selectedId, setSelectedId] = useState("");
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [verificationLoading, setVerificationLoading] = useState(true);
+  const [verificationQueue, setVerificationQueue] = useState([]);
+  const [verificationFilter, setVerificationFilter] = useState("pending");
+  const [selectedVerificationId, setSelectedVerificationId] = useState("");
+  const [verificationDetail, setVerificationDetail] = useState(null);
+  const [verificationDetailLoading, setVerificationDetailLoading] = useState(false);
+  const [verificationActionNote, setVerificationActionNote] = useState("");
   const [error, setError] = useState("");
   const [actionValues, setActionValues] = useState({
     providerReference: "",
@@ -245,8 +311,31 @@ export default function AdminReview() {
     }
   };
 
+  const loadVerificationQueue = async (preferredId = "") => {
+    setVerificationLoading(true);
+    setError("");
+
+    try {
+      const nextQueue = await fetchAdminVerificationQueue();
+      setVerificationQueue(nextQueue);
+
+      const filteredPreferred = preferredId && nextQueue.some((item) => item.id === preferredId);
+      const pendingFirst = nextQueue.find((item) => item.status === "pending")?.id;
+      setSelectedVerificationId(
+        filteredPreferred ? preferredId : pendingFirst || nextQueue[0]?.id || ""
+      );
+    } catch (nextError) {
+      setVerificationQueue([]);
+      setSelectedVerificationId("");
+      setError(nextError.message || "We couldn't load the verification queue.");
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadQueue();
+    loadVerificationQueue();
   }, []);
 
   useEffect(() => {
@@ -288,10 +377,51 @@ export default function AdminReview() {
     };
   }, [selectedId]);
 
+  useEffect(() => {
+    let active = true;
+
+    async function loadDetail() {
+      if (!selectedVerificationId) {
+        setVerificationDetail(null);
+        return;
+      }
+
+      setVerificationDetailLoading(true);
+
+      try {
+        const nextDetail = await fetchAdminVerificationDetail(selectedVerificationId);
+        if (!active) return;
+        setVerificationDetail(nextDetail);
+        setVerificationActionNote(nextDetail.adminNote || "");
+      } catch (nextError) {
+        if (!active) return;
+        setVerificationDetail(null);
+        setActionState({
+          pending: false,
+          error: nextError.message || "We couldn't load this verification review.",
+          success: "",
+        });
+      } finally {
+        if (active) setVerificationDetailLoading(false);
+      }
+    }
+
+    loadDetail();
+
+    return () => {
+      active = false;
+    };
+  }, [selectedVerificationId]);
+
   const filteredQueue = useMemo(() => {
     if (filter === "all") return queue;
     return queue.filter((item) => item.status === filter);
   }, [filter, queue]);
+
+  const filteredVerificationQueue = useMemo(() => {
+    if (verificationFilter === "all") return verificationQueue;
+    return verificationQueue.filter((item) => item.status === verificationFilter);
+  }, [verificationFilter, verificationQueue]);
 
   const releaseProviderReference = actionValues.providerReference.trim();
 
@@ -343,6 +473,48 @@ export default function AdminReview() {
       setActionState({
         pending: false,
         error: nextError.message || "We couldn't process that payout action.",
+        success: "",
+      });
+    }
+  };
+
+  const handleVerificationAction = async (action) => {
+    if (!selectedVerificationId) return;
+
+    if (action === "reject" && !verificationActionNote.trim()) {
+      setActionState({
+        pending: false,
+        error: "Add a short note before rejecting this verification request.",
+        success: "",
+      });
+      return;
+    }
+
+    setActionState({ pending: true, error: "", success: "" });
+
+    try {
+      await processAdminVerificationAction({
+        requestId: selectedVerificationId,
+        action,
+        note: verificationActionNote,
+      });
+
+      await loadVerificationQueue(selectedVerificationId);
+      const refreshedDetail = await fetchAdminVerificationDetail(selectedVerificationId);
+      setVerificationDetail(refreshedDetail);
+      setActionState({
+        pending: false,
+        error: "",
+        success:
+          action === "approve"
+            ? "Freelancer verified successfully."
+            : "Verification request rejected.",
+      });
+      toast.success(action === "approve" ? "Freelancer verified." : "Request rejected.");
+    } catch (nextError) {
+      setActionState({
+        pending: false,
+        error: nextError.message || "We couldn't process that verification action.",
         success: "",
       });
     }
@@ -408,7 +580,27 @@ export default function AdminReview() {
           </Reveal>
         ) : (
           <Reveal delay={0.08}>
+            <>
+            <div className="adminQueueTabs">
+              <button
+                type="button"
+                className={`adminQueueTab ${activeQueue === "payouts" ? "adminQueueTab--active" : ""}`}
+                onClick={() => setActiveQueue("payouts")}
+              >
+                Payouts
+              </button>
+              <button
+                type="button"
+                className={`adminQueueTab ${activeQueue === "verification" ? "adminQueueTab--active" : ""}`}
+                onClick={() => setActiveQueue("verification")}
+              >
+                Verification
+              </button>
+            </div>
+
             <section className="adminLayout">
+              {activeQueue === "payouts" ? (
+                <>
               <aside className="adminQueue">
                 <div className="adminPanel">
                   <div className="adminPanel__head">
@@ -679,7 +871,219 @@ export default function AdminReview() {
                   />
                 )}
               </div>
+                </>
+              ) : (
+                <>
+                  <aside className="adminQueue">
+                    <div className="adminPanel">
+                      <div className="adminPanel__head">
+                        <h2 className="adminPanel__title">Verification queue</h2>
+                        <span className="adminPanel__count">
+                          {filteredVerificationQueue.length} item{filteredVerificationQueue.length === 1 ? "" : "s"}
+                        </span>
+                      </div>
+
+                      <div className="adminFilters">
+                        {["all", "pending", "approved", "rejected"].map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            className={`adminFilterChip ${
+                              verificationFilter === item ? "adminFilterChip--active" : ""
+                            }`}
+                            onClick={() => setVerificationFilter(item)}
+                          >
+                            {item}
+                          </button>
+                        ))}
+                      </div>
+
+                      {verificationLoading ? (
+                        <div className="adminQueue__loading">Loading verification queue...</div>
+                      ) : filteredVerificationQueue.length ? (
+                        <div className="adminQueue__list">
+                          {filteredVerificationQueue.map((item) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              className={`adminQueueCard ${
+                                selectedVerificationId === item.id ? "adminQueueCard--active" : ""
+                              }`}
+                              onClick={() => setSelectedVerificationId(item.id)}
+                            >
+                              <div className="adminQueueCard__top">
+                                <div>
+                                  <strong className="adminQueueCard__title adminQueueCard__title--inline">
+                                    {item.freelancerName}
+                                    <VerifiedBadge
+                                      verified={item.freelancerVerified}
+                                      className="verifiedBadge--sm"
+                                    />
+                                  </strong>
+                                  <span className="adminQueueCard__meta">
+                                    {item.freelancerHeadline || "Freelancer verification"}
+                                  </span>
+                                </div>
+                                <span className="adminQueueCard__pill">{item.status}</span>
+                              </div>
+
+                              <div className="adminQueueCard__facts">
+                                <span>{item.createdAtLabel || "Recently"}</span>
+                                <span>{item.status}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <EmptySurface
+                          hideIcon
+                          title="Nothing in this queue state"
+                          description="Try another status filter to review a different set of verification requests."
+                          className="adminEmptySurface"
+                        />
+                      )}
+                    </div>
+                  </aside>
+
+                  <div className="adminDetail">
+                    {verificationDetailLoading ? (
+                      <div className="adminPanel adminPanel--loading">Loading verification...</div>
+                    ) : verificationDetail ? (
+                      <>
+                        <div className="adminPanel">
+                          <div className="adminPanel__head">
+                            <h2 className="adminPanel__title">Freelancer review</h2>
+                            <span className="adminQueueCard__pill">
+                              {verificationDetail.status}
+                            </span>
+                          </div>
+
+                          <div className="adminDetailGrid">
+                            <div className="adminDetailFact">
+                              <span className="adminDetailFact__label">Freelancer</span>
+                              <strong className="adminDetailFact__value adminDetailFact__value--inline">
+                                {verificationDetail.freelancerName}
+                                <VerifiedBadge
+                                  verified={verificationDetail.freelancerVerified}
+                                  className="verifiedBadge--sm"
+                                />
+                              </strong>
+                            </div>
+                            <div className="adminDetailFact">
+                              <span className="adminDetailFact__label">Headline</span>
+                              <strong className="adminDetailFact__value">
+                                {verificationDetail.freelancerHeadline || "Not added"}
+                              </strong>
+                            </div>
+                            <div className="adminDetailFact">
+                              <span className="adminDetailFact__label">Submitted</span>
+                              <strong className="adminDetailFact__value">
+                                {verificationDetail.createdAtLabel || "Recently"}
+                              </strong>
+                            </div>
+                          </div>
+
+                          <p className="adminVerificationDescription">
+                            {verificationDetail.description}
+                          </p>
+                        </div>
+
+                        <div className="adminPanel">
+                          <div className="adminPanel__head">
+                            <h2 className="adminPanel__title">Work proof</h2>
+                          </div>
+                          <VerificationMediaList media={verificationDetail.media} />
+                        </div>
+
+                        <div className="adminPanel">
+                          <div className="adminPanel__head">
+                            <h2 className="adminPanel__title">Verification controls</h2>
+                          </div>
+
+                          <label className="adminField adminField--wide">
+                            <span className="adminField__label">Admin note</span>
+                            <textarea
+                              className="adminField__control adminField__textarea"
+                              value={verificationActionNote}
+                              onChange={(event) => setVerificationActionNote(event.target.value)}
+                              placeholder="Add feedback for rejection, or an internal approval note."
+                            />
+                          </label>
+
+                          <AnimatePresence mode="wait">
+                            {actionState.error ? (
+                              <Motion.div
+                                className="workflowStatus workflowStatus--danger"
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                              >
+                                {actionState.error}
+                              </Motion.div>
+                            ) : actionState.success ? (
+                              <Motion.div
+                                className="workflowStatus workflowStatus--success"
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                              >
+                                {actionState.success}
+                              </Motion.div>
+                            ) : null}
+                          </AnimatePresence>
+
+                          <div className="adminActionRow">
+                            <Motion.button
+                              type="button"
+                              className="adminAction adminAction--release"
+                              whileHover={{ y: -1.5 }}
+                              whileTap={{ scale: 0.98 }}
+                              transition={SPRING}
+                              disabled={
+                                actionState.pending ||
+                                verificationDetail.status === "approved"
+                              }
+                              onClick={() => handleVerificationAction("approve")}
+                            >
+                              {actionState.pending ? (
+                                <LoaderCircle className="adminAction__icon adminAction__icon--spin" />
+                              ) : (
+                                <BadgeCheck className="adminAction__icon" />
+                              )}
+                              <span>Approve</span>
+                            </Motion.button>
+
+                            <Motion.button
+                              type="button"
+                              className="adminAction adminAction--fail"
+                              whileHover={{ y: -1.5 }}
+                              whileTap={{ scale: 0.98 }}
+                              transition={SPRING}
+                              disabled={
+                                actionState.pending ||
+                                verificationDetail.status === "rejected"
+                              }
+                              onClick={() => handleVerificationAction("reject")}
+                            >
+                              <XCircle className="adminAction__icon" />
+                              <span>Reject</span>
+                            </Motion.button>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <EmptySurface
+                        hideIcon
+                        title="Select a verification request"
+                        description="Choose an item from the queue to inspect submitted proof and approve or reject it."
+                        className="adminEmptySurface"
+                      />
+                    )}
+                  </div>
+                </>
+              )}
             </section>
+            </>
           </Reveal>
         )}
       </main>

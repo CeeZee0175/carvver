@@ -3,6 +3,7 @@ import { AnimatePresence, motion as Motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
+  BadgeCheck,
   Bell,
   CheckCheck,
   Home,
@@ -11,6 +12,7 @@ import {
   Newspaper,
   Search,
   Settings,
+  ShieldCheck,
   UserRound,
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
@@ -25,6 +27,7 @@ import {
   getProfileDisplayName,
   getProfileInitials,
 } from "../shared/profileIdentity";
+import VerifiedBadge from "../shared/VerifiedBadge";
 
 const SPRING = { type: "spring", stiffness: 340, damping: 24 };
 
@@ -90,6 +93,7 @@ export default function FreelancerDashBar() {
     email: "",
     initials: "F",
     avatarUrl: "",
+    verified: false,
   });
 
   useEffect(() => {
@@ -101,6 +105,7 @@ export default function FreelancerDashBar() {
         email: profile.email || "",
         initials: getProfileInitials(profile, "F"),
         avatarUrl: profile.avatar_url || "",
+        verified: Boolean(profile.freelancer_verified_at),
       });
     };
 
@@ -479,6 +484,10 @@ export default function FreelancerDashBar() {
                   <div className="dashbarProfileMenu__identity">
                     <p className="dashbarProfileMenu__name">
                       {user.fullName || "Freelancer"}
+                      <VerifiedBadge
+                        verified={user.verified}
+                        className="verifiedBadge--sm"
+                      />
                     </p>
                     <p className="dashbarProfileMenu__email">{user.email}</p>
                   </div>
@@ -522,6 +531,32 @@ export default function FreelancerDashBar() {
                   >
                     <Newspaper className="dashbarProfileMenu__itemIcon" />
                     <span>News Feed</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => {
+                      setOpenProfile(false);
+                      navigate("/dashboard/freelancer/profile/achievements");
+                    }}
+                  >
+                    <BadgeCheck className="dashbarProfileMenu__itemIcon" />
+                    <span>Achievements</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => {
+                      setOpenProfile(false);
+                      navigate("/dashboard/freelancer/profile/verification");
+                    }}
+                  >
+                    <ShieldCheck className="dashbarProfileMenu__itemIcon" />
+                    <span>{user.verified ? "Verification" : "Get Verified"}</span>
                   </button>
 
                   <button

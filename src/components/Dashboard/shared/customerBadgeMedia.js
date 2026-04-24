@@ -48,5 +48,5 @@ export const ORDERED_CUSTOMER_BADGE_MEDIA = [
   new URL("../../../assets/badges/9284659.gif", import.meta.url).href,
   new URL("../../../assets/badges/9534787.gif", import.meta.url).href,
   new URL("../../../assets/badges/9583338.gif", import.meta.url).href,
-  new URL("../../../assets/badges/verified.gif", import.meta.url).href,
+  new URL("../../../assets/badges_freelancer/verified.gif", import.meta.url).href,
 ];

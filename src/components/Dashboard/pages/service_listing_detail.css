@@ -155,6 +155,9 @@
 .serviceDetailCard__title,
 .serviceDetailPackage__title,
 .serviceDetailFreelancer__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: Inter, system-ui, sans-serif;
   font-size: 18px;
   line-height: 1.2;

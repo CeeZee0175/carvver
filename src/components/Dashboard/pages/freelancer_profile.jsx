@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion as Motion} from "framer-motion";
 import {
+  BadgeCheck,
   MessageCircle,
   Settings,
+  ShieldCheck,
   Upload,
   UserRound,
   X,
@@ -33,6 +35,7 @@ import {
   AVATAR_MAX_BYTES,
 } from "../hooks/useCustomerProfileData";
 import { useFreelancerProfileData } from "../hooks/useFreelancerProfileData";
+import VerifiedBadge from "../shared/VerifiedBadge";
 import "./profile.css";
 import "./freelancer_pages.css";
 
@@ -350,7 +353,13 @@ export default function FreelancerProfile() {
             </div>
 
             <div className="profileIdentity__copy">
-              <h2 className="profileIdentity__name">{displayName}</h2>
+              <h2 className="profileIdentity__name">
+                <span>{displayName}</span>
+                <VerifiedBadge
+                  verified={Boolean(profile?.freelancer_verified_at)}
+                  className="verifiedBadge--lg"
+                />
+              </h2>
               <p className="profileIdentity__email">
                 {profile?.email || "Signed-in freelancer"}
               </p>
@@ -744,6 +753,32 @@ export default function FreelancerProfile() {
           >
             <MessageCircle className="profileNavBand__icon" />
             <span className="profileNavBand__label">Messages</span>
+          </Motion.button>
+
+          <Motion.button
+            type="button"
+            className="profileNavBand__item"
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.985 }}
+            transition={PROFILE_SPRING}
+            onClick={() => navigate("/dashboard/freelancer/profile/achievements")}
+          >
+            <BadgeCheck className="profileNavBand__icon" />
+            <span className="profileNavBand__label">Achievements</span>
+          </Motion.button>
+
+          <Motion.button
+            type="button"
+            className="profileNavBand__item"
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.985 }}
+            transition={PROFILE_SPRING}
+            onClick={() => navigate("/dashboard/freelancer/profile/verification")}
+          >
+            <ShieldCheck className="profileNavBand__icon" />
+            <span className="profileNavBand__label">
+              {profile?.freelancer_verified_at ? "Verification" : "Get Verified"}
+            </span>
           </Motion.button>
 
           <Motion.button

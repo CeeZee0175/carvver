@@ -32,6 +32,7 @@ import {
 } from "../shared/customerProfileShared";
 import { useCustomerRequests } from "../hooks/useCustomerRequests";
 import { useCustomerFavoriteFreelancers } from "../hooks/useCustomerFavoriteFreelancers";
+import VerifiedBadge from "../shared/VerifiedBadge";
 
 const supabase = createClient();
 const SERVICE_MEDIA_BUCKET = "service-media";
@@ -126,6 +127,7 @@ function RecommendedServiceCard({
 }) {
   const creator = normalizeRelation(service.profiles);
   const creatorName = creator ? getCustomerDisplayName(creator) : "Freelancer";
+  const creatorVerified = Boolean(creator?.freelancer_verified_at || service.is_verified);
   const favoriteFreelancer = favoriteIds.includes(service.freelancer_id);
   const colors = ACCENT_COLORS[index % ACCENT_COLORS.length];
   const summaryText = String(service.description || "").trim()
@@ -227,7 +229,13 @@ function RecommendedServiceCard({
           <div className="browseServiceCard__creatorMain">
             <div className="browseServiceCard__avatar">{initials}</div>
             <div className="browseServiceCard__creatorBlock">
-              <span className="browseServiceCard__creator">{creatorName}</span>
+              <span className="browseServiceCard__creator">
+                <span>{creatorName}</span>
+                <VerifiedBadge
+                  verified={creatorVerified}
+                  className="verifiedBadge--sm"
+                />
+              </span>
               {service.is_verified ? (
                 <div className="browseServiceCard__trustRow">
                   <span className="browseServiceCard__trustChip browseServiceCard__trustChip--verified">
@@ -353,7 +361,7 @@ export default function DashboardCustomer() {
         const { data, error } = await supabase
           .from("services")
           .select(
-            "id, title, category, price, location, description, created_at, freelancer_id, is_pro, is_verified, average_rating, review_count, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline)"
+            "id, title, category, price, location, description, created_at, freelancer_id, is_pro, is_verified, average_rating, review_count, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline, freelancer_verified_at)"
           )
           .eq("is_published", true)
           .order("created_at", { ascending: false })
@@ -778,7 +786,11 @@ export default function DashboardCustomer() {
 
                         <div className="dashLandingFavoriteCard__identity">
                           <h3 className="dashLandingFavoriteCard__name">
-                            {getCustomerDisplayName(freelancer)}
+                            <span>{getCustomerDisplayName(freelancer)}</span>
+                            <VerifiedBadge
+                              verified={Boolean(freelancer.freelancer_verified_at)}
+                              className="verifiedBadge--sm"
+                            />
                           </h3>
                           <p className="dashLandingFavoriteCard__reason">
                             {freelancer.freelancer_headline || "Favorited freelancer"}

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { getCustomerDisplayName } from "../shared/customerIdentity";
 import { useCustomerOrdersData } from "../hooks/useCustomerProfileData";
+import VerifiedBadge from "../shared/VerifiedBadge";
 import {
   CustomerDashboardFrame,
   DashboardBreadcrumbs,
@@ -271,7 +272,13 @@ export default function CustomerOrders() {
                             {String(freelancerName || "F").charAt(0).toUpperCase()}
                           </div>
                           <div className="browseServiceCard__creatorBlock">
-                            <span className="browseServiceCard__creator">{freelancerName}</span>
+                            <span className="browseServiceCard__creator">
+                              <span>{freelancerName}</span>
+                              <VerifiedBadge
+                                verified={Boolean(order.freelancer?.freelancer_verified_at)}
+                                className="verifiedBadge--sm"
+                              />
+                            </span>
                             <div className="browseServiceCard__trustRow">
                               <span className="browseServiceCard__trustChip browseServiceCard__trustChip--verified">
                                 Order history

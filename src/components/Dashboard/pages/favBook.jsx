@@ -41,6 +41,7 @@ import {
   CustomerDashboardFrame,
   DashboardBreadcrumbs,
 } from "../shared/customerProfileShared";
+import VerifiedBadge from "../shared/VerifiedBadge";
 
 const supabase = createClient();
 
@@ -185,8 +186,12 @@ function FavCard({
   const categoryIcon = getCategoryIcon(service.category);
 
   const creatorName = service.profiles
-    ? `${service.profiles.first_name || ""} ${service.profiles.last_name || ""}`.trim()
+    ? service.profiles.display_name ||
+      `${service.profiles.first_name || ""} ${service.profiles.last_name || ""}`.trim()
     : "Unknown Creator";
+  const creatorVerified = Boolean(
+    service.profiles?.freelancer_verified_at || service.is_verified
+  );
 
   const initials = service.profiles
     ? `${service.profiles.first_name?.charAt(0) || ""}${service.profiles.last_name?.charAt(0) || ""}`.toUpperCase()
@@ -258,7 +263,10 @@ function FavCard({
       <div className="favCard__body">
         <div className="favCard__creatorRow">
           <div className="favCard__avatar">{initials}</div>
-          <span className="favCard__creator">{creatorName}</span>
+          <span className="favCard__creator">
+            <span>{creatorName}</span>
+            <VerifiedBadge verified={creatorVerified} className="verifiedBadge--sm" />
+          </span>
         </div>
 
         <h3 className="favCard__title">{service.title}</h3>
@@ -429,8 +437,10 @@ export default function FavBook() {
               is_pro,
               freelancer_id,
               profiles (
+                display_name,
                 first_name,
-                last_name
+                last_name,
+                freelancer_verified_at
               )
             )
           `

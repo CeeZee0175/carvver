@@ -655,6 +655,10 @@
 }
 
 .profileIdentity__name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
   font-size: clamp(34px, 4vw, 46px);
 }
 

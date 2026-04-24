@@ -143,6 +143,41 @@
   gap: 24px;
 }
 
+.adminQueueTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  justify-content: center;
+}
+
+.adminQueueTab {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  padding: 8px 0;
+  cursor: pointer;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(42, 20, 80, 0.6);
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.adminQueueTab:hover,
+.adminQueueTab--active {
+  color: rgba(27, 16, 46, 0.96);
+  border-color: rgba(242, 193, 78, 0.98);
+}
+
+.adminQueueTab:hover {
+  transform: translateY(-1px);
+}
+
 .adminQueue,
 .adminDetail {
   display: grid;
@@ -260,6 +295,68 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+}
+
+.adminQueueCard__title--inline,
+.adminDetailFact__value--inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.adminVerificationDescription {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(42, 20, 80, 0.72);
+}
+
+.adminVerificationMediaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.adminVerificationMediaCard {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.adminVerificationMediaCard__preview {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 18px;
+  border: 1px solid rgba(42, 20, 80, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.adminVerificationMediaCard__preview img,
+.adminVerificationMediaCard__preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.adminVerificationMediaCard__fallbackIcon {
+  width: 28px;
+  height: 28px;
+  color: rgba(87, 34, 182, 0.72);
+}
+
+.adminVerificationMediaCard__title {
+  min-width: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 850;
+  color: rgba(27, 16, 46, 0.9);
+  overflow-wrap: anywhere;
 }
 
 .adminQueueCard__title,

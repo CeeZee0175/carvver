@@ -29,6 +29,8 @@ import {
   getProfileRealName,
 } from "../shared/profileIdentity";
 import { useCustomerFavoriteFreelancers } from "../hooks/useCustomerFavoriteFreelancers";
+import VerifiedBadge from "../shared/VerifiedBadge";
+import { getFreelancerAchievementById } from "../shared/freelancerAchievements";
 import "./customer_freelancer_profile.css";
 
 const supabase = createClient();
@@ -44,6 +46,7 @@ export default function CustomerFreelancerProfile() {
   const [error, setError] = useState("");
   const [profile, setProfile] = useState(null);
   const [services, setServices] = useState([]);
+  const [showcasedBadges, setShowcasedBadges] = useState([]);
   const {
     favoriteIds,
     toggleFavoriteFreelancer,
@@ -60,7 +63,7 @@ export default function CustomerFreelancerProfile() {
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select(
-            "id, role, display_name, first_name, last_name, bio, avatar_url, country, region, city, barangay, freelancer_headline, freelancer_primary_category, freelancer_specialties, freelancer_experience_level, freelancer_portfolio_url"
+            "id, role, display_name, first_name, last_name, bio, avatar_url, country, region, city, barangay, freelancer_headline, freelancer_primary_category, freelancer_specialties, freelancer_experience_level, freelancer_portfolio_url, freelancer_verified_at"
           )
           .eq("id", freelancerId)
           .eq("role", "freelancer")
@@ -71,25 +74,40 @@ export default function CustomerFreelancerProfile() {
           throw new Error("Profile not found.");
         }
 
-        const { data: serviceData, error: serviceError } = await supabase
-          .from("services")
-          .select(
-            "id, title, category, price, location, description, is_pro, is_verified, is_published, created_at"
-          )
-          .eq("freelancer_id", freelancerId)
-          .eq("is_published", true)
-          .order("created_at", { ascending: false })
-          .limit(6);
+        const [serviceResult, showcaseResult] = await Promise.all([
+          supabase
+            .from("services")
+            .select(
+              "id, title, category, price, location, description, is_pro, is_verified, is_published, created_at"
+            )
+            .eq("freelancer_id", freelancerId)
+            .eq("is_published", true)
+            .order("created_at", { ascending: false })
+            .limit(6),
+          supabase
+            .from("freelancer_badge_showcase")
+            .select("slot, achievement_id")
+            .eq("user_id", freelancerId)
+            .order("slot", { ascending: true }),
+        ]);
 
-        if (serviceError) throw serviceError;
+        if (serviceResult.error) throw serviceResult.error;
         if (!active) return;
 
         setProfile(profileData);
-        setServices(serviceData || []);
+        setServices(serviceResult.data || []);
+        setShowcasedBadges(
+          showcaseResult.error
+            ? []
+            : (showcaseResult.data || [])
+                .map((row) => getFreelancerAchievementById(row.achievement_id))
+                .filter(Boolean)
+        );
       } catch {
         if (!active) return;
         setProfile(null);
         setServices([]);
+        setShowcasedBadges([]);
         setError("We couldn't load this freelancer right now.");
       } finally {
         if (active) setLoading(false);
@@ -198,6 +216,10 @@ export default function CustomerFreelancerProfile() {
               <div className="customerFreelancerHero__titleBlock">
                 <h1 className="customerFreelancerHero__title">
                   <TypewriterHeading text={displayName} />
+                  <VerifiedBadge
+                    verified={Boolean(profile?.freelancer_verified_at)}
+                    className="verifiedBadge--lg"
+                  />
                 </h1>
                 {realName ? (
                   <p className="customerFreelancerHero__realName">{realName}</p>
@@ -233,6 +255,20 @@ export default function CustomerFreelancerProfile() {
                 </a>
               ) : null}
             </div>
+
+            {showcasedBadges.length > 0 ? (
+              <div className="customerFreelancerHero__badges" aria-label="Displayed freelancer badges">
+                {showcasedBadges.map((achievement) => (
+                  <span
+                    key={achievement.id}
+                    className="customerFreelancerHero__badge"
+                    title={achievement.badge.label}
+                  >
+                    <img src={achievement.badge.media} alt={achievement.badge.label} />
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           <div className="customerFreelancerHero__actions">

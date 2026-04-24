@@ -53,6 +53,7 @@ import {
 } from "../../../lib/featuredCategoryIntent";
 import { useCart } from "../hooks/useCart";
 import { useCustomerFavoriteFreelancers } from "../hooks/useCustomerFavoriteFreelancers";
+import VerifiedBadge from "../shared/VerifiedBadge";
 
 const supabase = createClient();
 
@@ -1059,8 +1060,12 @@ function ServiceCard({
   const categoryIcon = getCategoryIcon(service.category);
 
   const creatorName = service.profiles
-    ? `${service.profiles.first_name} ${service.profiles.last_name}`
+    ? service.profiles.display_name ||
+      `${service.profiles.first_name || ""} ${service.profiles.last_name || ""}`.trim()
     : "Unknown Creator";
+  const creatorVerified = Boolean(
+    service.profiles?.freelancer_verified_at || service.is_verified
+  );
   const trustSignals = [
     service.is_verified ? "Verified creator" : null,
     service.is_pro ? "Carvver Pro" : null,
@@ -1166,7 +1171,13 @@ function ServiceCard({
             <div className="browseServiceCard__avatar">{initials}</div>
 
             <div className="browseServiceCard__creatorBlock">
-              <span className="browseServiceCard__creator">{creatorName}</span>
+              <span className="browseServiceCard__creator">
+                <span>{creatorName}</span>
+                <VerifiedBadge
+                  verified={creatorVerified}
+                  className="verifiedBadge--sm"
+                />
+              </span>
 
               {trustSignals.length ? (
                 <div className="browseServiceCard__trustRow">
@@ -1480,7 +1491,7 @@ export default function BrowseCategories() {
         const { data, error } = await supabase
           .from("services")
           .select(
-            "id, title, category, price, location, description, created_at, freelancer_id, is_published, is_pro, is_verified, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline)",
+              "id, title, category, price, location, description, created_at, freelancer_id, is_published, is_pro, is_verified, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline, freelancer_verified_at)",
           )
           .eq("is_published", true)
           .order("created_at", { ascending: false });

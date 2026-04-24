@@ -1476,13 +1476,21 @@
 }
 
 .browseServiceCard__creator {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 5px;
   min-width: 0;
   font-family: Inter, system-ui, sans-serif;
   font-size: 13.5px;
   font-weight: 850;
   color: rgba(27, 16, 46, 0.82);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.browseServiceCard__creator > span:first-child {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }

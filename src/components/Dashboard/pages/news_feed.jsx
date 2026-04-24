@@ -1,8 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { motion as Motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
+  ArrowUp,
   BriefcaseBusiness,
   ExternalLink,
   FileText,
@@ -23,6 +24,7 @@ import {
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import { useNewsFeed } from "../hooks/useNewsFeed";
+import VerifiedBadge from "../shared/VerifiedBadge";
 import "./profile.css";
 import "./news_feed.css";
 
@@ -85,9 +87,18 @@ function FeedAuthor({ post }) {
         )}
       </div>
       <div className="newsFeedCard__identity">
-        <strong className="newsFeedCard__authorName">{post.author.name}</strong>
+        <span className={`newsFeedCard__type newsFeedCard__type--${post.type}`}>
+          {post.typeLabel}
+        </span>
+        <strong className="newsFeedCard__authorName">
+          <span>{post.author.name}</span>
+          <VerifiedBadge
+            verified={Boolean(post.author.verified)}
+            className="verifiedBadge--sm"
+          />
+        </strong>
         <span className="newsFeedCard__authorMeta">
-          {post.author.headline} · {post.dateLabel || "Recently"}
+          {post.author.headline} - {post.dateLabel || "Recently"}
         </span>
       </div>
     </div>
@@ -95,6 +106,7 @@ function FeedAuthor({ post }) {
 }
 
 function NewsFeedCard({ post, role, currentUserId, onOpen }) {
+  const [shareOpen, setShareOpen] = useState(false);
   const shareLinks = useMemo(() => buildShareLinks(post), [post]);
   const canOpenPrimary =
     (role === "customer" && post.type === "service") ||
@@ -117,10 +129,16 @@ function NewsFeedCard({ post, role, currentUserId, onOpen }) {
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareLinks.url);
+      setShareOpen(false);
       toast.success("Feed post link copied.");
     } catch {
       toast.error("We couldn't copy the link.");
     }
+  };
+
+  const handleShareOpen = (url) => {
+    setShareOpen(false);
+    openShareWindow(url);
   };
 
   return (
@@ -132,17 +150,17 @@ function NewsFeedCard({ post, role, currentUserId, onOpen }) {
     >
       <div className="newsFeedCard__top">
         <FeedAuthor post={post} />
-        <span className={`newsFeedCard__type newsFeedCard__type--${post.type}`}>
-          {post.typeLabel}
-        </span>
       </div>
 
       <div className="newsFeedCard__body">
         <div className="newsFeedCard__copy">
-          <div className="newsFeedCard__chips">
+          <div className="newsFeedCard__labels">
             <span>{post.category}</span>
             {post.badges.map((badge) => (
-              <span key={badge}>{badge}</span>
+              <React.Fragment key={badge}>
+                <span className="newsFeedCard__labelDot" aria-hidden="true" />
+                <span>{badge}</span>
+              </React.Fragment>
             ))}
           </div>
 
@@ -164,7 +182,11 @@ function NewsFeedCard({ post, role, currentUserId, onOpen }) {
         </div>
       </div>
 
-      <div className="newsFeedCard__actions">
+      <div
+        className={`newsFeedCard__actions ${
+          canOpenPrimary ? "newsFeedCard__actions--split" : ""
+        }`}
+      >
         {canOpenPrimary ? (
           <Motion.button
             type="button"
@@ -177,55 +199,60 @@ function NewsFeedCard({ post, role, currentUserId, onOpen }) {
             <span>{primaryLabel}</span>
             <ArrowRight className="newsFeedCard__btnIcon" />
           </Motion.button>
-        ) : (
-          <span className="newsFeedCard__context">
-            Shared for visibility in the marketplace feed
-          </span>
-        )}
+        ) : null}
 
-        <div className="newsFeedCard__shareGroup" aria-label={`Share ${post.title}`}>
-          <Share2 className="newsFeedCard__shareIcon" aria-hidden="true" />
+        <div className="newsFeedCard__shareWrap">
           <Motion.button
             type="button"
-            className="newsFeedCard__shareBtn"
+            className="newsFeedCard__shareToggle"
+            aria-expanded={shareOpen}
+            aria-haspopup="menu"
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.98 }}
             transition={PROFILE_SPRING}
-            onClick={() => openShareWindow(shareLinks.facebook)}
+            onClick={() => setShareOpen((open) => !open)}
           >
-            Facebook
+            <Share2 className="newsFeedCard__btnIcon" />
+            <span>Share</span>
           </Motion.button>
-          <Motion.button
-            type="button"
-            className="newsFeedCard__shareBtn"
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.98 }}
-            transition={PROFILE_SPRING}
-            onClick={() => openShareWindow(shareLinks.twitter)}
-          >
-            X
-          </Motion.button>
-          <Motion.button
-            type="button"
-            className="newsFeedCard__shareBtn"
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.98 }}
-            transition={PROFILE_SPRING}
-            onClick={() => openShareWindow(shareLinks.reddit)}
-          >
-            Reddit
-          </Motion.button>
-          <Motion.button
-            type="button"
-            className="newsFeedCard__shareBtn newsFeedCard__shareBtn--icon"
-            aria-label="Copy feed post link"
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.98 }}
-            transition={PROFILE_SPRING}
-            onClick={handleCopyLink}
-          >
-            <LinkIcon className="newsFeedCard__btnIcon" />
-          </Motion.button>
+
+          {shareOpen ? (
+            <div className="newsFeedShareMenu" role="menu">
+              <button
+                type="button"
+                className="newsFeedShareMenu__item"
+                role="menuitem"
+                onClick={() => handleShareOpen(shareLinks.facebook)}
+              >
+                Facebook
+              </button>
+              <button
+                type="button"
+                className="newsFeedShareMenu__item"
+                role="menuitem"
+                onClick={() => handleShareOpen(shareLinks.twitter)}
+              >
+                X
+              </button>
+              <button
+                type="button"
+                className="newsFeedShareMenu__item"
+                role="menuitem"
+                onClick={() => handleShareOpen(shareLinks.reddit)}
+              >
+                Reddit
+              </button>
+              <button
+                type="button"
+                className="newsFeedShareMenu__item"
+                role="menuitem"
+                onClick={handleCopyLink}
+              >
+                <LinkIcon className="newsFeedShareMenu__icon" />
+                <span>Copy link</span>
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </Motion.article>
@@ -238,6 +265,10 @@ function NewsFeedPageContent({ role }) {
     limit: 24,
   });
   const homePath = role === "freelancer" ? "/dashboard/freelancer" : "/dashboard/customer";
+  const handleScrollToTop = () => {
+    if (typeof window === "undefined") return;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="newsFeedPage">
@@ -262,7 +293,7 @@ function NewsFeedPageContent({ role }) {
                 aria-hidden="true"
               >
                 <Motion.path
-                  d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                  d="M 0,10 L 300,10"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.2"
@@ -367,6 +398,18 @@ function NewsFeedPageContent({ role }) {
           )}
         </section>
       </Reveal>
+
+      <Motion.button
+        type="button"
+        className="newsFeedBackTop"
+        aria-label="Back to top"
+        whileHover={{ y: -2 }}
+        whileTap={{ scale: 0.96 }}
+        transition={PROFILE_SPRING}
+        onClick={handleScrollToTop}
+      >
+        <ArrowUp className="newsFeedBackTop__icon" />
+      </Motion.button>
     </div>
   );
 }

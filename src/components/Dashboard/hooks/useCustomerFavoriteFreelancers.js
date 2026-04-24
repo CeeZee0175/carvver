@@ -17,6 +17,7 @@ function normalizeSnapshot(snapshot, freelancerId) {
     city: snapshot.city || null,
     barangay: snapshot.barangay || null,
     freelancer_headline: snapshot.freelancer_headline || null,
+    freelancer_verified_at: snapshot.freelancer_verified_at || null,
   };
 }
 
@@ -79,7 +80,7 @@ export function useCustomerFavoriteFreelancers({ includeProfiles = true, limit =
       const { data: profiles, error: profileError } = await supabase
         .from("profiles")
         .select(
-          "id, display_name, first_name, last_name, bio, avatar_url, region, city, barangay, freelancer_headline"
+          "id, display_name, first_name, last_name, bio, avatar_url, region, city, barangay, freelancer_headline, freelancer_verified_at"
         )
         .in("id", visibleIds);
 

@@ -86,7 +86,7 @@ export function useServiceListingDetail(serviceId) {
       const { data: serviceRow, error: serviceError } = await supabase
         .from("services")
         .select(
-          "id, freelancer_id, title, category, price, location, description, fulfillment_type, listing_overview, listing_highlights, delivery_time_days, is_published, is_pro, is_verified, created_at, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline, freelancer_portfolio_url)"
+          "id, freelancer_id, title, category, price, location, description, fulfillment_type, listing_overview, listing_highlights, delivery_time_days, is_published, is_pro, is_verified, created_at, profiles(display_name, first_name, last_name, avatar_url, bio, region, city, barangay, freelancer_headline, freelancer_portfolio_url, freelancer_verified_at)"
         )
         .eq("id", serviceId)
         .eq("is_published", true)
@@ -161,6 +161,7 @@ export function useServiceListingDetail(serviceId) {
               barangay: profile?.barangay,
             }) || "Philippines",
           portfolioUrl: String(profile?.freelancer_portfolio_url || "").trim(),
+          verified: Boolean(profile?.freelancer_verified_at || serviceRow.is_verified),
         },
         packageCount: packages.length,
         startingPrice:

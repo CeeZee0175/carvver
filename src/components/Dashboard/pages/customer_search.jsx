@@ -12,6 +12,7 @@ import {
   TypewriterHeading,
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
+import VerifiedBadge from "../shared/VerifiedBadge";
 import {
   getProfileDisplayName,
   getProfileInitials,
@@ -168,7 +169,13 @@ function FreelancerResultCard({ item, index, onOpen }) {
 
           <div className="dashboardSearchCard__identityMeta">
             <span className="dashboardSearchCard__eyebrow">Freelancer</span>
-            <h2 className="dashboardSearchCard__title">{item.displayName}</h2>
+            <h2 className="dashboardSearchCard__title dashboardSearchCard__title--inline">
+              <span>{item.displayName}</span>
+              <VerifiedBadge
+                verified={Boolean(item.freelancer_verified_at)}
+                className="verifiedBadge--sm"
+              />
+            </h2>
             {item.headline ? (
               <p className="dashboardSearchCard__subtitle">{item.headline}</p>
             ) : null}
@@ -244,7 +251,7 @@ export default function CustomerSearch() {
           supabase
             .from("services")
             .select(
-              "id, freelancer_id, title, category, price, location, description, listing_overview, profiles(display_name, first_name, last_name, avatar_url, freelancer_headline, region, city, barangay)"
+              "id, freelancer_id, title, category, price, location, description, listing_overview, profiles(display_name, first_name, last_name, avatar_url, freelancer_headline, region, city, barangay, freelancer_verified_at)"
             )
             .eq("is_published", true)
             .or(
@@ -260,7 +267,7 @@ export default function CustomerSearch() {
           supabase
             .from("profiles")
             .select(
-              "id, display_name, first_name, last_name, avatar_url, bio, freelancer_headline, freelancer_primary_category, region, city, barangay"
+              "id, display_name, first_name, last_name, avatar_url, bio, freelancer_headline, freelancer_primary_category, region, city, barangay, freelancer_verified_at"
             )
             .eq("role", "freelancer")
             .or(

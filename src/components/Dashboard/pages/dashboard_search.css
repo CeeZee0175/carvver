@@ -233,6 +233,13 @@
   color: rgba(27, 16, 46, 0.96);
 }
 
+.dashboardSearchCard__title--inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .dashboardSearchCard__subtitle,
 .dashboardSearchCard__desc,
 .dashboardSearchCard__factValue {

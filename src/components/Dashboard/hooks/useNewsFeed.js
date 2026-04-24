@@ -20,7 +20,7 @@ const SERVICE_COLUMNS = `
   is_verified,
   created_at,
   updated_at,
-  profiles(display_name, first_name, last_name, avatar_url, freelancer_headline, region, city, barangay)
+  profiles(display_name, first_name, last_name, avatar_url, freelancer_headline, region, city, barangay, freelancer_verified_at)
 `;
 
 const REQUEST_COLUMNS = `
@@ -157,6 +157,7 @@ function normalizeServicePost(row, mediaRows, packageRows) {
       initials: buildInitials(profile, "F"),
       avatarUrl: profile?.avatar_url || "",
       headline: normalizeText(profile?.freelancer_headline) || "Freelancer",
+      verified: Boolean(profile?.freelancer_verified_at || row.is_verified),
     },
     badges: [
       row.is_pro ? "Pro" : "",

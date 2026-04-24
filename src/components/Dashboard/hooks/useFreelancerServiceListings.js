@@ -131,6 +131,7 @@ function buildServicePayload({
   highlights,
   packages,
   publish,
+  verified = false,
 }) {
   const validPackages = packages
     .map((item, index) => normalizePackage(item, index, highlights))
@@ -151,6 +152,7 @@ function buildServicePayload({
       location,
       price: sortedPrices[0] || 0,
       is_published: Boolean(publish),
+      is_verified: Boolean(verified),
     },
     extended: {
       freelancer_id: freelancerId,
@@ -161,6 +163,7 @@ function buildServicePayload({
       location,
       price: sortedPrices[0] || 0,
       is_published: Boolean(publish),
+      is_verified: Boolean(verified),
       listing_overview: description,
       listing_highlights: highlights,
       delivery_time_days: sortedDelivery[0] || null,
@@ -516,6 +519,11 @@ export async function saveFreelancerServiceListing({
   publish = true,
 }) {
   const freelancerId = await getSignedInFreelancerId();
+  const { data: freelancerProfile } = await supabase
+    .from("profiles")
+    .select("freelancer_verified_at")
+    .eq("id", freelancerId)
+    .maybeSingle();
   const normalizedTitle = normalizeText(title);
   const normalizedCategory = normalizeText(category);
   const normalizedFulfillmentType = normalizeFulfillmentType(fulfillmentType);
@@ -543,6 +551,7 @@ export async function saveFreelancerServiceListing({
     highlights: normalizedHighlights,
     packages,
     publish,
+    verified: Boolean(freelancerProfile?.freelancer_verified_at),
   });
 
   if (payload.packages.length === 0) {
