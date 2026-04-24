@@ -79,6 +79,9 @@ const CustomerRequestDetail = lazy(() =>
 const CustomerSearch = lazy(() =>
   import("./components/Dashboard/pages/customer_search")
 );
+const NewsFeedPage = lazy(() =>
+  import("./components/Dashboard/pages/news_feed")
+);
 const FreelancerListings = lazy(() =>
   import("./components/Dashboard/pages/freelancer_listings")
 );
@@ -496,6 +499,16 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/dashboard/customer/news-feed"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <CustomerRoute>
+              <NewsFeedPage role="customer" />
+            </CustomerRoute>
+          </Suspense>
+        }
+      />
+      <Route
         path="/dashboard/freelancer"
         element={
           <Suspense fallback={<RouteFallback />}>
@@ -511,6 +524,16 @@ function AppRoutes() {
           <Suspense fallback={<RouteFallback />}>
             <FreelancerRoute>
               <FreelancerSearch />
+            </FreelancerRoute>
+          </Suspense>
+        }
+      />
+      <Route
+        path="/dashboard/freelancer/news-feed"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <FreelancerRoute>
+              <NewsFeedPage role="freelancer" />
             </FreelancerRoute>
           </Suspense>
         }

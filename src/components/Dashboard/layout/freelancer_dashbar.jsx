@@ -8,6 +8,7 @@ import {
   Home,
   LogOut,
   MessageCircle,
+  Newspaper,
   Search,
   Settings,
   UserRound,
@@ -508,6 +509,19 @@ export default function FreelancerDashBar() {
                   >
                     <UserRound className="dashbarProfileMenu__itemIcon" />
                     <span>View Profile</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => {
+                      setOpenProfile(false);
+                      navigate("/dashboard/freelancer/news-feed");
+                    }}
+                  >
+                    <Newspaper className="dashbarProfileMenu__itemIcon" />
+                    <span>News Feed</span>
                   </button>
 
                   <button

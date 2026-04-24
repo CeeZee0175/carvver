@@ -7,6 +7,7 @@ import {
   CheckCheck,
   LogOut,
   MessageCircle,
+  Newspaper,
   Search,
   Settings,
   ShoppingBag,
@@ -504,6 +505,15 @@ export default function DashBar() {
                   >
                     <UserRound className="dashbarProfileMenu__itemIcon" />
                     <span>View Profile</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => handleProfileMenuNavigate("/dashboard/customer/news-feed")}
+                  >
+                    <Newspaper className="dashbarProfileMenu__itemIcon" />
+                    <span>News Feed</span>
                   </button>
                   <button
                     type="button"
