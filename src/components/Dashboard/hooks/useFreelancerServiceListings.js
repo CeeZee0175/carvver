@@ -121,6 +121,57 @@ function normalizePackage(item, index, fallbackIncludedItems = []) {
   };
 }
 
+function collectListingPublishIssues(service, packageRows = []) {
+  const issues = [];
+  const overview = normalizeText(service?.description || service?.listing_overview);
+  const validPackageCount = (packageRows || [])
+    .map((item, index) => normalizePackage(item, index, item?.included_items || []))
+    .filter((item) => Number.isFinite(item.price) && item.price > 0).length;
+
+  if (!normalizeText(service?.title)) issues.push("a title");
+  if (!normalizeText(service?.category)) issues.push("a category");
+  if (!overview) issues.push("an overview");
+  if (!normalizeText(service?.location)) issues.push("a service location");
+  if (validPackageCount === 0) issues.push("at least one package with a valid price");
+
+  return issues;
+}
+
+function formatPublishIssues(issues) {
+  if (!Array.isArray(issues) || issues.length === 0) return "";
+  if (issues.length === 1) return issues[0];
+  if (issues.length === 2) return `${issues[0]} and ${issues[1]}`;
+  return `${issues.slice(0, -1).join(", ")}, and ${issues[issues.length - 1]}`;
+}
+
+async function ensureListingReadyToPublish(freelancerId, listingId) {
+  const services = await fetchOwnedServices(freelancerId, listingId);
+  const service = services[0];
+
+  if (!service) {
+    throw new Error("We couldn't find this draft. Refresh My Listings and try again.");
+  }
+
+  let packageRows = [];
+  try {
+    packageRows = await fetchServicePackages([service.id]);
+  } catch (error) {
+    if (isMissingTableError(error) || isMissingColumnError(error)) {
+      throw new Error(
+        "Run the latest listing package snapshot SQL before publishing marketplace listings."
+      );
+    }
+    throw error;
+  }
+  const issues = collectListingPublishIssues(service, packageRows);
+
+  if (issues.length > 0) {
+    throw new Error(
+      `Open this draft and add ${formatPublishIssues(issues)} before publishing.`
+    );
+  }
+}
+
 function buildServicePayload({
   freelancerId,
   title,
@@ -379,10 +430,13 @@ function normalizeListingSummary(service, packageRows, mediaRows) {
     publicUrl: getPublicServiceMediaUrl(item.bucket_path),
   }));
   const previewMedia = normalizedMedia.find((item) => item.is_cover) || normalizedMedia[0] || null;
-  const startingPrice =
-    normalizedPackages.length > 0
-      ? Math.min(...normalizedPackages.map((item) => Number(item.price || 0)).filter((value) => value > 0))
-      : Number(service.price || 0);
+  const priceOptions = [
+    ...normalizedPackages
+      .map((item) => Number(item.price || 0))
+      .filter((value) => value > 0),
+    Number(service.price || 0),
+  ].filter((value) => value > 0);
+  const startingPrice = priceOptions.length > 0 ? Math.min(...priceOptions) : 0;
 
   return {
     ...service,
@@ -631,6 +685,7 @@ export async function setFreelancerListingPublished(listingId, publish = true) {
   const timestamp = new Date().toISOString();
 
   if (publish) {
+    await ensureListingReadyToPublish(freelancerId, listingId);
     await ensureFreelancerPayoutDestinationReady(freelancerId);
   }
 

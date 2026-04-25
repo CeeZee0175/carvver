@@ -275,8 +275,13 @@ export default function AdminReview() {
     providerReference: "",
     note: "",
   });
-  const [actionState, setActionState] = useState({
-    pending: false,
+  const [payoutActionState, setPayoutActionState] = useState({
+    pendingAction: "",
+    error: "",
+    success: "",
+  });
+  const [verificationActionState, setVerificationActionState] = useState({
+    pendingAction: "",
     error: "",
     success: "",
   });
@@ -341,6 +346,11 @@ export default function AdminReview() {
       }
 
       setDetailLoading(true);
+      setPayoutActionState({
+        pendingAction: "",
+        error: "",
+        success: "",
+      });
 
       try {
         const nextDetail = await fetchAdminPayoutReviewDetail(selectedId);
@@ -353,8 +363,8 @@ export default function AdminReview() {
       } catch (nextError) {
         if (!active) return;
         setDetail(null);
-        setActionState({
-          pending: false,
+        setPayoutActionState({
+          pendingAction: "",
           error: nextError.message || "We couldn't load this payout review.",
           success: "",
         });
@@ -380,6 +390,11 @@ export default function AdminReview() {
       }
 
       setVerificationDetailLoading(true);
+      setVerificationActionState({
+        pendingAction: "",
+        error: "",
+        success: "",
+      });
 
       try {
         const nextDetail = await fetchAdminVerificationDetail(selectedVerificationId);
@@ -389,8 +404,8 @@ export default function AdminReview() {
       } catch (nextError) {
         if (!active) return;
         setVerificationDetail(null);
-        setActionState({
-          pending: false,
+        setVerificationActionState({
+          pendingAction: "",
           error: nextError.message || "We couldn't load this verification review.",
           success: "",
         });
@@ -417,6 +432,15 @@ export default function AdminReview() {
   }, [verificationFilter, verificationQueue]);
 
   const releaseProviderReference = actionValues.providerReference.trim();
+  const payoutPendingAction = payoutActionState.pendingAction;
+  const verificationPendingAction = verificationActionState.pendingAction;
+  const isPayoutActionPending = Boolean(payoutPendingAction);
+  const isVerificationActionPending = Boolean(verificationPendingAction);
+
+  const retryAdminQueues = () => {
+    loadQueue(selectedId);
+    loadVerificationQueue(selectedVerificationId);
+  };
 
   const handleAction = async (action) => {
     if (!selectedId) return;
@@ -424,15 +448,15 @@ export default function AdminReview() {
     const trimmedProviderReference = actionValues.providerReference.trim();
 
     if (action === "release" && !trimmedProviderReference) {
-      setActionState({
-        pending: false,
+      setPayoutActionState({
+        pendingAction: "",
         error: "Add a provider reference before releasing this payout.",
         success: "",
       });
       return;
     }
 
-    setActionState({ pending: true, error: "", success: "" });
+    setPayoutActionState({ pendingAction: action, error: "", success: "" });
 
     try {
       await processAdminPayoutAction({
@@ -445,8 +469,12 @@ export default function AdminReview() {
       await loadQueue(selectedId);
       const refreshedDetail = await fetchAdminPayoutReviewDetail(selectedId);
       setDetail(refreshedDetail);
-      setActionState({
-        pending: false,
+      setActionValues({
+        providerReference: refreshedDetail.adminPayoutRequest?.providerReference || "",
+        note: refreshedDetail.adminPayoutRequest?.opsNote || "",
+      });
+      setPayoutActionState({
+        pendingAction: "",
         error: "",
         success:
           action === "release"
@@ -463,8 +491,8 @@ export default function AdminReview() {
             : "Payout failed."
       );
     } catch (nextError) {
-      setActionState({
-        pending: false,
+      setPayoutActionState({
+        pendingAction: "",
         error: nextError.message || "We couldn't process that payout action.",
         success: "",
       });
@@ -475,15 +503,15 @@ export default function AdminReview() {
     if (!selectedVerificationId) return;
 
     if (action === "reject" && !verificationActionNote.trim()) {
-      setActionState({
-        pending: false,
+      setVerificationActionState({
+        pendingAction: "",
         error: "Add a short note before rejecting this verification request.",
         success: "",
       });
       return;
     }
 
-    setActionState({ pending: true, error: "", success: "" });
+    setVerificationActionState({ pendingAction: action, error: "", success: "" });
 
     try {
       await processAdminVerificationAction({
@@ -495,8 +523,9 @@ export default function AdminReview() {
       await loadVerificationQueue(selectedVerificationId);
       const refreshedDetail = await fetchAdminVerificationDetail(selectedVerificationId);
       setVerificationDetail(refreshedDetail);
-      setActionState({
-        pending: false,
+      setVerificationActionNote(refreshedDetail.adminNote || "");
+      setVerificationActionState({
+        pendingAction: "",
         error: "",
         success:
           action === "approve"
@@ -505,8 +534,8 @@ export default function AdminReview() {
       });
       toast.success(action === "approve" ? "Freelancer verified." : "Request rejected.");
     } catch (nextError) {
-      setActionState({
-        pending: false,
+      setVerificationActionState({
+        pendingAction: "",
         error: nextError.message || "We couldn't process that verification action.",
         success: "",
       });
@@ -564,7 +593,7 @@ export default function AdminReview() {
               title="We couldn't load the admin queue"
               description={error}
               actionLabel="Try again"
-              onAction={() => loadQueue(selectedId)}
+              onAction={retryAdminQueues}
               className="adminEmptySurface"
             />
           </Reveal>
@@ -760,23 +789,23 @@ export default function AdminReview() {
                       </div>
 
                       <AnimatePresence mode="wait">
-                        {actionState.error ? (
+                        {payoutActionState.error ? (
                           <Motion.div
                             className="workflowStatus workflowStatus--danger"
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -6 }}
                           >
-                            {actionState.error}
+                            {payoutActionState.error}
                           </Motion.div>
-                        ) : actionState.success ? (
+                        ) : payoutActionState.success ? (
                           <Motion.div
                             className="workflowStatus workflowStatus--success"
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -6 }}
                           >
-                            {actionState.success}
+                            {payoutActionState.success}
                           </Motion.div>
                         ) : null}
                       </AnimatePresence>
@@ -788,10 +817,13 @@ export default function AdminReview() {
                           whileHover={{ y: -1.5 }}
                           whileTap={{ scale: 0.98 }}
                           transition={SPRING}
-                          disabled={actionState.pending || !releaseProviderReference}
+                          disabled={isPayoutActionPending || !releaseProviderReference}
+                          aria-busy={payoutPendingAction === "release"}
                           onClick={() => handleAction("release")}
                         >
-                          <span>{actionState.pending ? "Processing..." : "Release"}</span>
+                          <span>
+                            {payoutPendingAction === "release" ? "Processing..." : "Release"}
+                          </span>
                         </Motion.button>
 
                         <Motion.button
@@ -800,10 +832,13 @@ export default function AdminReview() {
                           whileHover={{ y: -1.5 }}
                           whileTap={{ scale: 0.98 }}
                           transition={SPRING}
-                          disabled={actionState.pending}
+                          disabled={isPayoutActionPending}
+                          aria-busy={payoutPendingAction === "block"}
                           onClick={() => handleAction("block")}
                         >
-                          <span>Block</span>
+                          <span>
+                            {payoutPendingAction === "block" ? "Processing..." : "Block"}
+                          </span>
                         </Motion.button>
 
                         <Motion.button
@@ -812,10 +847,13 @@ export default function AdminReview() {
                           whileHover={{ y: -1.5 }}
                           whileTap={{ scale: 0.98 }}
                           transition={SPRING}
-                          disabled={actionState.pending}
+                          disabled={isPayoutActionPending}
+                          aria-busy={payoutPendingAction === "fail"}
                           onClick={() => handleAction("fail")}
                         >
-                          <span>Fail</span>
+                          <span>
+                            {payoutPendingAction === "fail" ? "Processing..." : "Fail"}
+                          </span>
                         </Motion.button>
                       </div>
 
@@ -991,23 +1029,23 @@ export default function AdminReview() {
                           </label>
 
                           <AnimatePresence mode="wait">
-                            {actionState.error ? (
+                            {verificationActionState.error ? (
                               <Motion.div
                                 className="workflowStatus workflowStatus--danger"
                                 initial={{ opacity: 0, y: 8 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -6 }}
                               >
-                                {actionState.error}
+                                {verificationActionState.error}
                               </Motion.div>
-                            ) : actionState.success ? (
+                            ) : verificationActionState.success ? (
                               <Motion.div
                                 className="workflowStatus workflowStatus--success"
                                 initial={{ opacity: 0, y: 8 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -6 }}
                               >
-                                {actionState.success}
+                                {verificationActionState.success}
                               </Motion.div>
                             ) : null}
                           </AnimatePresence>
@@ -1020,12 +1058,17 @@ export default function AdminReview() {
                               whileTap={{ scale: 0.98 }}
                               transition={SPRING}
                               disabled={
-                                actionState.pending ||
+                                isVerificationActionPending ||
                                 verificationDetail.status === "approved"
                               }
+                              aria-busy={verificationPendingAction === "approve"}
                               onClick={() => handleVerificationAction("approve")}
                             >
-                              <span>{actionState.pending ? "Processing..." : "Approve"}</span>
+                              <span>
+                                {verificationPendingAction === "approve"
+                                  ? "Processing..."
+                                  : "Approve"}
+                              </span>
                             </Motion.button>
 
                             <Motion.button
@@ -1035,12 +1078,17 @@ export default function AdminReview() {
                               whileTap={{ scale: 0.98 }}
                               transition={SPRING}
                               disabled={
-                                actionState.pending ||
+                                isVerificationActionPending ||
                                 verificationDetail.status === "rejected"
                               }
+                              aria-busy={verificationPendingAction === "reject"}
                               onClick={() => handleVerificationAction("reject")}
                             >
-                              <span>Reject</span>
+                              <span>
+                                {verificationPendingAction === "reject"
+                                  ? "Processing..."
+                                  : "Reject"}
+                              </span>
                             </Motion.button>
                           </div>
                         </div>

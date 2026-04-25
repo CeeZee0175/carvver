@@ -215,6 +215,14 @@
   background: #fff;
   object-fit: cover;
   box-shadow: 0 16px 32px rgba(51, 31, 72, 0.08);
+  transition:
+    filter 180ms ease,
+    opacity 180ms ease;
+}
+
+.customerPaymentQrCard__image--expired {
+  filter: grayscale(1);
+  opacity: 0.54;
 }
 
 .customerPaymentQrCard__loading {
@@ -300,6 +308,16 @@
 .customerPaymentAction .customerPaymentSpinner {
   width: 0.92rem;
   height: 0.92rem;
+}
+
+.customerPaymentAction:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  transform: none !important;
+}
+
+.customerPaymentAction[aria-busy="true"] {
+  cursor: progress;
 }
 
 .customerPaymentPage__empty.profileEmpty {

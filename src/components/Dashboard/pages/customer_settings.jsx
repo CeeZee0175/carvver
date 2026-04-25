@@ -121,6 +121,7 @@ export default function CustomerSettings() {
     error: "",
     success: "",
   });
+  const [signOutPending, setSignOutPending] = useState(false);
   const [emailState, setEmailState] = useState({
     pending: false,
     error: "",
@@ -253,9 +254,11 @@ export default function CustomerSettings() {
 
   const handleSignOut = async () => {
     try {
+      setSignOutPending(true);
       await signOut();
       navigate("/sign-in", { replace: true });
     } catch {
+      setSignOutPending(false);
       toast.error("We couldn't sign you out. Please try again.");
     }
   };
@@ -691,8 +694,12 @@ export default function CustomerSettings() {
                   whileTap={{ scale: 0.98 }}
                   transition={PROFILE_SPRING}
                   onClick={handleSignOut}
+                  disabled={signOutPending}
                 >
-                  Sign out
+                  {signOutPending ? (
+                    <LoaderCircle className="customerSettingsAction__spinner" />
+                  ) : null}
+                  <span>{signOutPending ? "Signing out..." : "Sign out"}</span>
                 </Motion.button>
               </div>
             </div>

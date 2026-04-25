@@ -45,6 +45,8 @@ export default function CustomerServiceDetail() {
   const { items, addItem, serviceIds: cartServiceIds } = useCart();
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [cartActionLoading, setCartActionLoading] = useState(false);
+  const [favoriteActionLoading, setFavoriteActionLoading] = useState(false);
   const [activeMediaId, setActiveMediaId] = useState("");
   const [selectedPackageId, setSelectedPackageId] = useState("");
 
@@ -178,6 +180,7 @@ export default function CustomerServiceDetail() {
     if (!service?.freelancer?.id) return;
 
     try {
+      setFavoriteActionLoading(true);
       const result = await toggleFavoriteFreelancer(service.freelancer.id, {
         id: service.freelancer.id,
         display_name: service.freelancer.displayName,
@@ -191,6 +194,8 @@ export default function CustomerServiceDetail() {
       );
     } catch (nextError) {
       toast.error(nextError.message || "We couldn't update your favorites.");
+    } finally {
+      setFavoriteActionLoading(false);
     }
   };
 
@@ -213,6 +218,7 @@ export default function CustomerServiceDetail() {
     }
 
     try {
+      setCartActionLoading(true);
       const result = await addItem({
         service,
         selectedPackage,
@@ -231,9 +237,12 @@ export default function CustomerServiceDetail() {
       toast.success("Added to cart.");
     } catch (nextError) {
       toast.error(nextError.message || "We couldn't update your cart.");
+    } finally {
+      setCartActionLoading(false);
     }
   };
 
+  const packageActionBusyLabel = inCart ? "Updating..." : "Adding...";
   const packageActionLabel = selectedPackageInCart
     ? "In cart"
     : inCart
@@ -294,7 +303,7 @@ export default function CustomerServiceDetail() {
                 disabled={saving}
               >
                 <Bookmark style={{ width: 14, height: 14 }} />
-                <span>{saved ? "Saved" : "Save listing"}</span>
+                <span>{saving ? "Saving..." : saved ? "Saved" : "Save listing"}</span>
               </Motion.button>
 
               <Motion.button
@@ -304,6 +313,7 @@ export default function CustomerServiceDetail() {
                 whileTap={{ scale: 0.98 }}
                 transition={PROFILE_SPRING}
                 onClick={handleOpenMessage}
+                disabled={!service?.freelancer?.id}
               >
                 <MessageCircle style={{ width: 14, height: 14 }} />
                 <span>Message</span>
@@ -318,6 +328,7 @@ export default function CustomerServiceDetail() {
                 onClick={() =>
                   navigate(`/dashboard/customer/freelancers/${service?.freelancer?.id}`)
                 }
+                disabled={!service?.freelancer?.id}
               >
                 <span>View freelancer</span>
                 <ArrowRight style={{ width: 14, height: 14 }} />
@@ -561,9 +572,16 @@ export default function CustomerServiceDetail() {
                     whileTap={{ scale: 0.98 }}
                     transition={PROFILE_SPRING}
                     onClick={handleFavoriteToggle}
+                    disabled={favoriteActionLoading || !service?.freelancer?.id}
                   >
                     <Heart style={{ width: 14, height: 14 }} fill={favoriteFreelancer ? "currentColor" : "none"} />
-                    <span>{favoriteFreelancer ? "Favorited" : "Favorite freelancer"}</span>
+                    <span>
+                      {favoriteActionLoading
+                        ? "Updating..."
+                        : favoriteFreelancer
+                          ? "Favorited"
+                          : "Favorite freelancer"}
+                    </span>
                   </Motion.button>
 
                   <Motion.button
@@ -573,6 +591,7 @@ export default function CustomerServiceDetail() {
                     whileTap={{ scale: 0.98 }}
                     transition={PROFILE_SPRING}
                     onClick={handleOpenMessage}
+                    disabled={!service?.freelancer?.id}
                   >
                     <MessageCircle style={{ width: 14, height: 14 }} />
                     <span>Message</span>
@@ -624,8 +643,9 @@ export default function CustomerServiceDetail() {
                     whileTap={{ scale: 0.98 }}
                     transition={PROFILE_SPRING}
                     onClick={handleCartAction}
+                    disabled={cartActionLoading || !selectedPackage}
                   >
-                    {packageActionLabel}
+                    {cartActionLoading ? packageActionBusyLabel : packageActionLabel}
                   </Motion.button>
 
                   {selectedPackageInCart ? (

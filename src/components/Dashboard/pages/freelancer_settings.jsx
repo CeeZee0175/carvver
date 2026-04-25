@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion as Motion} from "framer-motion";
-import { LogOut, MessageCircle, Sparkles, UserRound } from "lucide-react";
+import { LoaderCircle, LogOut, MessageCircle, Sparkles, UserRound } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "../../../lib/supabase/auth";
@@ -33,6 +33,7 @@ export default function FreelancerSettings() {
     error: "",
     success: "",
   });
+  const [signOutPending, setSignOutPending] = useState(false);
 
   useEffect(() => {
     fetchFreelancerPayoutMethod()
@@ -48,9 +49,11 @@ export default function FreelancerSettings() {
 
   const handleSignOut = async () => {
     try {
+      setSignOutPending(true);
       await signOut();
       navigate("/sign-in", { replace: true });
     } catch {
+      setSignOutPending(false);
       toast.error("Failed to sign out. Please try again.");
     }
   };
@@ -363,9 +366,14 @@ export default function FreelancerSettings() {
                 whileTap={{ scale: 0.98 }}
                 transition={PROFILE_SPRING}
                 onClick={handleSignOut}
+                disabled={signOutPending}
               >
-                <LogOut className="profileEditor__btnIcon" />
-                <span>Sign out</span>
+                {signOutPending ? (
+                  <LoaderCircle className="customerSettingsAction__spinner" />
+                ) : (
+                  <LogOut className="profileEditor__btnIcon" />
+                )}
+                <span>{signOutPending ? "Signing out..." : "Sign out"}</span>
               </Motion.button>
             </article>
           </div>

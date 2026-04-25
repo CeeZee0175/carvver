@@ -161,6 +161,7 @@ Deno.serve(async (request: Request) => {
 
     const body = await request.json().catch(() => ({}));
     const method = assertPaymentMethod(body?.method);
+    const forceNew = method === "qrph" && body?.forceNew === true;
 
     const { data: cartItems, error: cartError } = await supabase
       .from("cart_items")
@@ -237,6 +238,7 @@ Deno.serve(async (request: Request) => {
 
     if (
       method === "qrph" &&
+      !forceNew &&
       existingSession?.qr_image_url &&
       existingSession?.qr_expires_at &&
       new Date(existingSession.qr_expires_at).getTime() > now

@@ -29,7 +29,7 @@ const CART_ACTION_SPRING = {
   mass: 0.92,
 };
 
-function CartLineItem({ item, onRemove, removing }) {
+function CartLineItem({ item, onRemove, removing, disabled = false }) {
   const service = item.services;
   const creatorName = service?.profiles
     ? getCustomerDisplayName(service.profiles)
@@ -103,7 +103,7 @@ function CartLineItem({ item, onRemove, removing }) {
           whileTap={{ scale: 0.985 }}
           transition={CART_ACTION_SPRING}
           onClick={() => onRemove(item.service_id)}
-          disabled={removing}
+          disabled={removing || disabled}
         >
           <Trash2 className="cartLineItem__removeIcon" />
           <span>{removing ? "Removing..." : "Remove"}</span>
@@ -169,6 +169,7 @@ export default function CartPage() {
     reload,
   } = useCart();
   const [removingId, setRemovingId] = React.useState("");
+  const [clearingAction, setClearingAction] = React.useState("");
   const searchParams = useMemo(
     () => new URLSearchParams(location.search),
     [location.search]
@@ -233,25 +234,33 @@ export default function CartPage() {
 
   const handleClearInvalid = async () => {
     try {
+      setClearingAction("invalid");
       await clearCart(invalidItems.map((item) => item.service_id));
       toast.success("Unavailable listings removed from cart.");
     } catch (nextError) {
       toast.error(nextError.message || "Couldn't clean up your cart.");
+    } finally {
+      setClearingAction("");
     }
   };
 
   const handleClearCart = async () => {
     try {
+      setClearingAction("all");
       await clearCart();
       toast.success("Cart cleared.");
     } catch (nextError) {
       toast.error(nextError.message || "Couldn't clear your cart.");
+    } finally {
+      setClearingAction("");
     }
   };
 
   const handleCheckout = async () => {
     navigate("/dashboard/customer/payment");
   };
+
+  const cartActionBusy = Boolean(removingId || clearingAction);
 
   return (
     <CustomerDashboardFrame mainClassName="cartPage">
@@ -393,9 +402,10 @@ export default function CartPage() {
                     whileTap={{ scale: 0.985 }}
                     transition={CART_ACTION_SPRING}
                     onClick={handleClearCart}
+                    disabled={cartActionBusy}
                   >
                     <Trash2 className="cartSection__linkIcon" />
-                    <span>Clear cart</span>
+                    <span>{clearingAction === "all" ? "Clearing..." : "Clear cart"}</span>
                   </Motion.button>
                 )}
               </div>
@@ -411,6 +421,7 @@ export default function CartPage() {
                         item={item}
                         onRemove={handleRemove}
                         removing={removingId === item.service_id}
+                        disabled={Boolean(clearingAction)}
                       />
                     ))}
               </div>
@@ -457,8 +468,9 @@ export default function CartPage() {
                       whileTap={{ scale: 0.985 }}
                       transition={CART_ACTION_SPRING}
                       onClick={handleClearInvalid}
+                      disabled={cartActionBusy}
                     >
-                      Remove invalid items
+                      {clearingAction === "invalid" ? "Removing..." : "Remove invalid items"}
                     </Motion.button>
                   </div>
                 )}
@@ -469,7 +481,11 @@ export default function CartPage() {
                   whileHover={{ y: -3, scale: 1.008 }}
                   whileTap={{ scale: 0.992 }}
                   transition={CART_ACTION_SPRING}
-                  disabled={validItems.length === 0 || invalidItems.length > 0}
+                  disabled={
+                    validItems.length === 0 ||
+                    invalidItems.length > 0 ||
+                    cartActionBusy
+                  }
                   onClick={handleCheckout}
                 >
                   <span className="cartCheckoutBtn__copy">

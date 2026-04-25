@@ -268,6 +268,7 @@ export default function FreelancerListings() {
                 const cover = listing.previewMedia?.publicUrl || "";
                 const publishBusy = busyKey === `publish:${listing.id}`;
                 const deleteBusy = busyKey === `delete:${listing.id}`;
+                const actionsLocked = Boolean(busyKey);
 
                 return (
                   <Motion.article
@@ -323,6 +324,7 @@ export default function FreelancerListings() {
                           onClick={() =>
                             navigate(`/dashboard/freelancer/listings/${listing.id}/edit`)
                           }
+                          disabled={actionsLocked}
                         >
                           Edit
                         </Motion.button>
@@ -337,6 +339,7 @@ export default function FreelancerListings() {
                             onClick={() =>
                               navigate(`/dashboard/freelancer/listings/${listing.id}`)
                             }
+                            disabled={actionsLocked}
                           >
                             View listing
                           </Motion.button>
@@ -349,7 +352,7 @@ export default function FreelancerListings() {
                               whileTap={{ scale: 0.98 }}
                               transition={PROFILE_SPRING}
                               onClick={() => handlePublish(listing.id)}
-                              disabled={publishBusy}
+                              disabled={actionsLocked}
                             >
                               {publishBusy ? "Publishing..." : "Publish"}
                             </Motion.button>
@@ -361,7 +364,7 @@ export default function FreelancerListings() {
                               whileTap={{ scale: 0.98 }}
                               transition={PROFILE_SPRING}
                               onClick={() => handleDeleteDraft(listing.id)}
-                              disabled={deleteBusy}
+                              disabled={actionsLocked}
                             >
                               {deleteBusy ? "Deleting..." : "Delete draft"}
                             </Motion.button>

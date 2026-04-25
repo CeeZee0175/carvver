@@ -1,5 +1,5 @@
 .freelancerPage {
-  gap: 24px;
+  gap: clamp(26px, 3vw, 40px);
 }
 
 .freelancerPage .profileHero {
@@ -26,7 +26,7 @@
 
 .freelancerHero__signal {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   align-content: start;
 }
 
@@ -35,7 +35,7 @@
   font-size: clamp(32px, 5vw, 52px);
   line-height: 0.92;
   font-weight: 850;
-  letter-spacing: -0.05em;
+  letter-spacing: 0;
   color: rgba(27, 16, 46, 0.96);
 }
 
@@ -50,7 +50,7 @@
 .freelancerFormMeta {
   font-family: Inter, system-ui, sans-serif;
   font-size: 14px;
-  line-height: 1.65;
+  line-height: 1.72;
   color: rgba(27, 16, 46, 0.62);
 }
 
@@ -89,7 +89,7 @@
 .freelancerExploreGrid,
 .freelancerDataGrid {
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
 
 .freelancerQuickGrid,
@@ -121,12 +121,12 @@
 .freelancerExploreCard,
 .freelancerSettingsCard {
   text-align: left;
-  padding: 18px;
+  padding: 20px;
 }
 
 .freelancerQuickAction {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
 }
 
@@ -166,12 +166,12 @@
 .freelancerExploreCard__copy,
 .freelancerSettingsCard__copy {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .freelancerTeaserCard {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
 .freelancerTeaserCard__top {
@@ -196,9 +196,9 @@
 }
 
 .freelancerDataItem {
-  padding: 16px;
+  padding: 18px;
   display: grid;
-  gap: 6px;
+  gap: 9px;
   align-content: start;
 }
 
@@ -283,12 +283,12 @@
 .freelancerSettingsGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 20px;
 }
 
 .freelancerSettingsCard {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .freelancerMessageEmpty {
@@ -305,7 +305,7 @@
   font-size: 24px;
   line-height: 1.08;
   font-weight: 850;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   color: rgba(27, 16, 46, 0.96);
 }
 

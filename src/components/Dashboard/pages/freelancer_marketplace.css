@@ -1,25 +1,25 @@
 @import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap");
 
 .freelancerMarketplacePage {
-  gap: clamp(20px, 2.8vw, 30px);
+  gap: clamp(24px, 3vw, 38px);
 }
 
 .freelancerMarketplaceHero {
   display: grid;
-  gap: 14px;
-  padding: 8px 0 4px;
+  gap: 18px;
+  padding: 10px 0 6px;
 }
 
 .freelancerMarketplaceHero__top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 18px;
+  gap: clamp(20px, 4vw, 42px);
 }
 
 .freelancerMarketplaceHero__copy {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
 }
 
@@ -36,7 +36,7 @@
   font-size: clamp(56px, 6vw, 86px);
   line-height: 0.94;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   color: rgba(27, 16, 46, 0.98);
 }
 
@@ -54,7 +54,7 @@
   max-width: 58ch;
   font-family: Inter, system-ui, sans-serif;
   font-size: 15px;
-  line-height: 1.7;
+  line-height: 1.76;
   color: rgba(27, 16, 46, 0.68);
 }
 
@@ -62,7 +62,7 @@
 .freelancerListingActions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
 }
 
 .freelancerMarketplaceHero__action,
@@ -132,6 +132,21 @@
 .freelancerListingMediaCard__remove:hover {
   border-color: rgba(124, 58, 237, 0.18);
   background: rgba(124, 58, 237, 0.06);
+}
+
+.freelancerMarketplaceHero__action:disabled,
+.freelancerMarketplaceHero__ghost:disabled,
+.freelancerListingActionBtn:disabled,
+.freelancerListingActionBtn--ghost:disabled,
+.freelancerRequestCard__btn:disabled,
+.freelancerRequestDetail__action:disabled,
+.freelancerRequestDetail__ghost:disabled,
+.freelancerListingUpload__button:disabled,
+.freelancerListingMediaCard__remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none !important;
+  box-shadow: none;
 }
 
 .freelancerRequestCard__label,
@@ -443,19 +458,19 @@
 
 .freelancerListingForm {
   display: grid;
-  gap: 22px;
-  padding-top: 18px;
+  gap: clamp(26px, 3vw, 36px);
+  padding-top: 20px;
 }
 
 .freelancerListingGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px 18px;
+  gap: 18px 22px;
 }
 
 .freelancerListingField {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .freelancerListingField--wide {
@@ -470,16 +485,16 @@
 .freelancerListingPackages {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 20px;
 }
 
 .freelancerListingPackageCard {
   border-radius: 20px;
   border: 1px solid rgba(42, 20, 80, 0.1);
   background: rgba(255, 255, 255, 0.76);
-  padding: 16px;
+  padding: 20px;
   display: grid;
-  gap: 12px;
+  gap: 16px;
 }
 
 .freelancerListingPackageCard__title {
@@ -493,7 +508,7 @@
 .freelancerListingMediaGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 14px;
+  gap: 18px;
 }
 
 .freelancerListingMediaCard {
@@ -514,9 +529,9 @@
 }
 
 .freelancerListingMediaCard__body {
-  padding: 14px;
+  padding: 16px;
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .freelancerListingMediaCard__name {
@@ -543,17 +558,23 @@
   color: rgba(184, 52, 81, 0.92);
 }
 
+.freelancerListingInputError--surface {
+  padding: 14px 0 0;
+  border-top: 1px solid rgba(184, 52, 81, 0.18);
+  max-width: 72ch;
+}
+
 .freelancerListingSection__head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 14px;
+  gap: 20px;
 }
 
 .freelancerListingSection__head > div {
   min-width: 0;
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .freelancerListingSection__title {
@@ -563,7 +584,7 @@
 .freelancerListingsGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 20px;
 }
 
 .freelancerListingCard {
@@ -606,22 +627,22 @@
 }
 
 .freelancerListingCard__body {
-  padding: 18px;
+  padding: 20px;
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .freelancerListingCard__facts,
 .freelancerListingCard__actions,
 .freelancerPreviewPackages {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .freelancerListingCard__facts {
   font-family: Inter, system-ui, sans-serif;
   font-size: 13px;
-  line-height: 1.55;
+  line-height: 1.65;
   color: rgba(27, 16, 46, 0.56);
 }
 

@@ -284,6 +284,15 @@ export default function CustomerPayment() {
     }
   };
 
+  const handleQrSessionAction = useCallback(() => {
+    startPaymentSession(
+      "qrph",
+      paymentSession?.qrImageUrl ? { forceNew: true } : {}
+    ).catch((error) => {
+      toast.error(error.message || "We couldn't prepare a QR code.");
+    });
+  }, [paymentSession?.qrImageUrl, startPaymentSession]);
+
   useEffect(() => {
     if (cartLoading) return;
 
@@ -355,7 +364,30 @@ export default function CustomerPayment() {
     return formatCountdown(paymentSession?.qrExpiresAt);
   }, [countdownNow, paymentSession?.qrExpiresAt]);
 
-  const showPaidState = String(paymentSession?.status || "").toLowerCase() === "paid";
+  const paymentStatus = String(paymentSession?.status || "").toLowerCase();
+  const qrExpiresAtMs = paymentSession?.qrExpiresAt
+    ? new Date(paymentSession.qrExpiresAt).getTime()
+    : null;
+  const qrHasImage = Boolean(paymentSession?.qrImageUrl);
+  const qrExpired =
+    selectedMethod === "qrph" &&
+    paymentStatus === "pending" &&
+    qrExpiresAtMs !== null &&
+    qrExpiresAtMs <= countdownNow;
+  const qrActionLabel = creatingSession
+    ? qrHasImage
+      ? "Refreshing QR..."
+      : "Generating QR..."
+    : qrHasImage
+      ? qrExpired
+        ? "Generate fresh QR"
+        : "Refresh QR"
+      : "Generate QR";
+  const paymentTitle = qrExpired ? "QR code expired" : resolvePaymentTitle(paymentSession);
+  const paymentCopy = qrExpired
+    ? "This QR code expired before payment completed. Generate a fresh one to continue."
+    : resolvePaymentCopy(paymentSession, selectedMethod);
+  const showPaidState = paymentStatus === "paid";
   const showEmptyState = !cartLoading && items.length === 0 && !paymentSession;
 
   return (
@@ -460,9 +492,9 @@ export default function CustomerPayment() {
             <section className="profileSection customerPaymentSection customerPaymentPanel">
               <div className="profileSection__head customerPaymentSection__head">
                 <div className="customerSettingsSectionIntro">
-                  <h2 className="profileSection__title">{resolvePaymentTitle(paymentSession)}</h2>
+                  <h2 className="profileSection__title">{paymentTitle}</h2>
                   <p className="customerSettingsSectionIntro__copy">
-                    {resolvePaymentCopy(paymentSession, selectedMethod)}
+                    {paymentCopy}
                   </p>
                 </div>
                 {selectedMethod === "qrph" && paymentSession?.qrExpiresAt ? (
@@ -476,6 +508,22 @@ export default function CustomerPayment() {
               <AnimatePresence mode="wait">
                 {sessionError ? (
                   <InlineStatus key="payment-error" tone="danger" message={sessionError} />
+                ) : selectedMethod === "qrph" && creatingSession ? (
+                  <InlineStatus
+                    key="payment-qr-refresh"
+                    tone="neutral"
+                    message={
+                      qrHasImage
+                        ? "Creating a fresh QR code now."
+                        : "Preparing your QR code now."
+                    }
+                  />
+                ) : qrExpired ? (
+                  <InlineStatus
+                    key="payment-qr-expired"
+                    tone="danger"
+                    message="This QR code has expired. Generate a fresh QR to continue."
+                  />
                 ) : returnState === "success" && paymentSession?.method === "card" && !showPaidState ? (
                   <InlineStatus
                     key="payment-sync"
@@ -508,7 +556,9 @@ export default function CustomerPayment() {
                       </div>
                     ) : paymentSession?.qrImageUrl ? (
                       <img
-                        className="customerPaymentQrCard__image"
+                        className={`customerPaymentQrCard__image ${
+                          qrExpired ? "customerPaymentQrCard__image--expired" : ""
+                        }`}
                         src={paymentSession.qrImageUrl}
                         alt="GCash or Maya payment QR code"
                       />
@@ -542,15 +592,14 @@ export default function CustomerPayment() {
                         whileHover={{ y: -1.5 }}
                         whileTap={{ scale: 0.98 }}
                         transition={PROFILE_SPRING}
-                        onClick={() => startPaymentSession("qrph")}
+                        onClick={handleQrSessionAction}
                         disabled={creatingSession}
+                        aria-busy={creatingSession}
                       >
                         {creatingSession ? (
                           <LoaderCircle className="customerPaymentSpinner" />
                         ) : null}
-                        <span>
-                          {paymentSession?.qrImageUrl ? "Generate new QR" : "Generate QR"}
-                        </span>
+                        <span>{qrActionLabel}</span>
                       </Motion.button>
 
                       {pollPaused && paymentSession?.sessionId ? (

@@ -52,7 +52,7 @@
 }
 
 .profilePage--details {
-  gap: clamp(20px, 2.8vw, 30px);
+  gap: clamp(24px, 3vw, 38px);
 }
 
 .profilePage--details .profileHero,
@@ -97,11 +97,11 @@
 .profilePage--details .profileNotice,
 .profilePage--details .profileNavBand,
 .profilePage--details .profileSection {
-  padding: 22px 0 0;
+  padding: clamp(26px, 3vw, 36px) 0 0;
 }
 
 .profilePage--details .profileEditorBand {
-  padding: 22px 0 0;
+  padding: clamp(26px, 3vw, 36px) 0 0;
 }
 
 .profilePage--details .profileEmpty {
@@ -344,7 +344,7 @@
   font-size: clamp(56px, 6vw, 84px);
   line-height: 0.94;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   color: rgba(27, 16, 46, 0.98);
 }
 
@@ -420,7 +420,7 @@
   font-size: 30px;
   line-height: 1;
   font-weight: 850;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
   color: rgba(27, 16, 46, 0.98);
 }
 
@@ -505,16 +505,16 @@
   font-size: 22px;
   line-height: 1.08;
   font-weight: 850;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   color: rgba(27, 16, 46, 0.96);
 }
 
 .profileSection__sub {
   margin: 0;
-  max-width: 62ch;
+  max-width: 68ch;
   font-family: Inter, system-ui, sans-serif;
   font-size: 14px;
-  line-height: 1.68;
+  line-height: 1.74;
   color: rgba(27, 16, 46, 0.64);
 }
 
@@ -531,7 +531,7 @@
   margin: 0;
   font-family: Inter, system-ui, sans-serif;
   font-size: 14px;
-  line-height: 1.68;
+  line-height: 1.74;
   color: rgba(27, 16, 46, 0.62);
 }
 
@@ -576,7 +576,7 @@
   font-family: Inter, system-ui, sans-serif;
   font-size: clamp(42px, 5vw, 56px);
   font-weight: 850;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
   color: rgba(42, 20, 80, 0.88);
 }
 
@@ -845,7 +845,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 14px;
+  gap: clamp(18px, 2.4vw, 28px);
 }
 
 .profileEditor__head > div,
@@ -856,7 +856,7 @@
 .profileEditor__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   justify-content: flex-end;
 }
 
@@ -884,12 +884,12 @@
 .profileEditor__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px 18px;
+  gap: 18px 22px;
 }
 
 .profileField {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .profileField--wide {
@@ -952,7 +952,7 @@
 .profileNavBand {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 18px;
   padding: 14px 0 0;
 }
 
@@ -1001,7 +1001,7 @@
 .profileSection {
   padding: 22px;
   display: grid;
-  gap: 20px;
+  gap: clamp(22px, 2.4vw, 30px);
 }
 
 .profileBadgePicker {
@@ -1043,7 +1043,7 @@
   font-size: 22px;
   line-height: 1.08;
   font-weight: 850;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   color: rgba(27, 16, 46, 0.96);
 }
 
@@ -1239,7 +1239,7 @@
   font-family: Inter, system-ui, sans-serif;
   font-size: 30px;
   font-weight: 850;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
   color: rgba(27, 16, 46, 0.96);
 }
 
@@ -1752,7 +1752,7 @@
   font-family: Inter, system-ui, sans-serif;
   font-size: 22px;
   font-weight: 850;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   color: rgba(27, 16, 46, 0.94);
 }
 

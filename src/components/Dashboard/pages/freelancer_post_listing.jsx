@@ -283,7 +283,13 @@ export default function FreelancerPostListing() {
         },
       });
     } catch (nextError) {
-      setError(String(nextError?.message || "We couldn't save your listing right now."));
+      const message = String(
+        nextError?.message || "We couldn't save your listing right now."
+      );
+      if (/payout destination/i.test(message)) {
+        setPayoutReady(false);
+      }
+      setError(message);
     } finally {
       setSubmittingMode("");
     }
@@ -420,6 +426,14 @@ export default function FreelancerPostListing() {
               </Motion.button>
             </div>
           </section>
+        </Reveal>
+      ) : null}
+
+      {error && (!isEditMode || title) ? (
+        <Reveal delay={0.07}>
+          <p className="freelancerListingInputError freelancerListingInputError--surface">
+            {error}
+          </p>
         </Reveal>
       ) : null}
 
@@ -691,10 +705,6 @@ export default function FreelancerPostListing() {
                 </AnimatePresence>
               )}
             </section>
-
-            {error && (!isEditMode || title) ? (
-              <p className="freelancerListingInputError">{error}</p>
-            ) : null}
           </div>
         </Reveal>
       )}

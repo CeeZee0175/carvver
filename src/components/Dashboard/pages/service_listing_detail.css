@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap");
 
 .serviceDetailPage {
-  gap: clamp(20px, 2.8vw, 30px);
+  gap: clamp(24px, 3vw, 38px);
 }
 
 .serviceDetailHero {
@@ -14,12 +14,12 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 18px;
+  gap: clamp(20px, 4vw, 42px);
 }
 
 .serviceDetailHero__copy {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
 }
 
@@ -36,7 +36,7 @@
   font-size: clamp(56px, 6vw, 84px);
   line-height: 0.94;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   color: rgba(27, 16, 46, 0.98);
 }
 
@@ -59,7 +59,7 @@
   margin: 0;
   font-family: Inter, system-ui, sans-serif;
   font-size: 14px;
-  line-height: 1.66;
+  line-height: 1.74;
   color: rgba(27, 16, 46, 0.66);
 }
 
@@ -107,6 +107,14 @@
   border: 1px solid rgba(42, 20, 80, 0.12);
   background: rgba(255, 255, 255, 0.82);
   color: rgba(27, 16, 46, 0.84);
+}
+
+.serviceDetailBtnGhost:disabled,
+.serviceDetailTagBtn:disabled,
+.serviceDetailPackage__cta:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  transform: none !important;
 }
 
 .serviceDetailHero__meta {
@@ -170,22 +178,22 @@
   max-width: 58ch;
   font-family: Inter, system-ui, sans-serif;
   font-size: 14px;
-  line-height: 1.66;
+  line-height: 1.74;
   color: rgba(27, 16, 46, 0.62);
 }
 
 .serviceDetailLayout {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.78fr);
-  gap: 24px;
-  padding-top: 18px;
+  gap: clamp(24px, 3vw, 36px);
+  padding-top: 22px;
 }
 
 .serviceDetailMain,
 .serviceDetailSide {
   display: grid;
   align-content: start;
-  gap: 18px;
+  gap: 22px;
 }
 
 .serviceDetailCard,
@@ -201,17 +209,17 @@
 .serviceDetailCard,
 .serviceDetailPackage,
 .serviceDetailFreelancer {
-  padding: 20px;
+  padding: 22px;
 }
 
 .serviceDetailCard {
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
 
 .serviceDetailCard__head {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .serviceDetailMediaStage {
@@ -238,7 +246,7 @@
 .serviceDetailMediaGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .serviceDetailMediaThumb {
@@ -256,9 +264,9 @@
 }
 
 .serviceDetailMediaThumb__body {
-  padding: 12px;
+  padding: 14px;
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 
 .serviceDetailPillRow,
@@ -281,12 +289,12 @@
 
 .serviceDetailPackages {
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
 
 .serviceDetailPackage {
   display: grid;
-  gap: 14px;
+  gap: 18px;
   transition:
     transform 160ms ease,
     box-shadow 220ms ease,
@@ -311,7 +319,7 @@
   font-family: Inter, system-ui, sans-serif;
   font-size: 22px;
   font-weight: 900;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   color: rgba(27, 16, 46, 0.98);
 }
 
@@ -323,12 +331,12 @@
 
 .serviceDetailPackage__fact {
   display: grid;
-  gap: 4px;
+  gap: 7px;
 }
 
 .serviceDetailFreelancer {
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 
 .serviceDetailFreelancer__top {
@@ -356,7 +364,7 @@
   margin: 4px 0 0;
   font-family: Inter, system-ui, sans-serif;
   font-size: 13px;
-  line-height: 1.55;
+  line-height: 1.68;
   color: rgba(27, 16, 46, 0.56);
 }
 
