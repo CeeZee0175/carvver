@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { motion as Motion} from "framer-motion";
+import { motion as Motion, useReducedMotion} from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -31,8 +31,21 @@ const FILTER_OPTIONS = [
   { label: "Legendary", value: "legendary" },
 ];
 
+function BadgeMedia({ achievement, className = "", alt = "" }) {
+  const mediaSrc = achievement?.badge?.media || "";
+  const badgeLabel = achievement?.badge?.label || achievement?.title || "Badge";
+
+  if (mediaSrc) {
+    return <img src={mediaSrc} alt={alt || badgeLabel} className={className} />;
+  }
+
+  const Icon = achievement?.badge?.Icon || Trophy;
+  return <Icon className={className} aria-hidden={alt ? undefined : "true"} />;
+}
+
 export default function ProfileAchievements() {
   const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
   const {
     loading,
     warnings,
@@ -260,12 +273,11 @@ export default function ProfileAchievements() {
             />
           ) : (
             <div className="profileCatalogGrid">
-              {filteredAchievements.map((achievement) => {
-                const Icon = achievement.badge.Icon;
+              {filteredAchievements.map((achievement, index) => {
                 const isDisplayed = showcaseIds.includes(achievement.id);
 
                 return (
-                  <article
+                  <Motion.article
                     key={achievement.id}
                     className={`profileCatalogCard ${
                       achievement.legendary ? "profileCatalogCard--legendary" : ""
@@ -275,6 +287,10 @@ export default function ProfileAchievements() {
                       "--catalog-badge-border": achievement.badge.border,
                       "--catalog-badge-color": achievement.badge.color,
                     }}
+                    initial={reduceMotion ? false : { opacity: 0, y: 18, rotateX: -8 }}
+                    animate={reduceMotion ? undefined : { opacity: 1, y: 0, rotateX: 0 }}
+                    transition={{ duration: 0.42, delay: index * 0.025, ease: [0.22, 1, 0.36, 1] }}
+                    whileHover={reduceMotion ? undefined : { y: achievement.earned ? -6 : -2 }}
                   >
                     <div className="profileCatalogCard__top">
                       <span className="profileCatalogCard__state">
@@ -293,9 +309,22 @@ export default function ProfileAchievements() {
                     </div>
 
                     <div className="profileCatalogCard__body">
-                      <span className="profileCatalogCard__badge" aria-hidden="true">
-                        <Icon className="profileCatalogCard__badgeIcon" />
-                      </span>
+                      <Motion.span
+                        className="profileCatalogCard__badge"
+                        aria-hidden="true"
+                        animate={
+                          achievement.earned && !reduceMotion
+                            ? { y: [0, -4, 0], rotate: [0, -2, 2, 0] }
+                            : undefined
+                        }
+                        transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <BadgeMedia
+                          achievement={achievement}
+                          className="profileCatalogCard__badgeImage"
+                          alt={achievement.badge.label}
+                        />
+                      </Motion.span>
                       <div>
                         <h3 className="profileCatalogCard__title">{achievement.title}</h3>
                         <p className="profileCatalogCard__desc">{achievement.description}</p>
@@ -337,7 +366,7 @@ export default function ProfileAchievements() {
                         </span>
                       )}
                     </div>
-                  </article>
+                  </Motion.article>
                 );
               })}
             </div>

@@ -509,9 +509,21 @@ export default function SignUp() {
                 </span>
                 <span className="signUpCheck__text">
                   I agree to the{" "}
-                  <button type="button" className="signUpCheck__linkBtn">Terms and Conditions</button>
+                  <button
+                    type="button"
+                    className="signUpCheck__linkBtn"
+                    onClick={() => navigate("/terms")}
+                  >
+                    Terms and Conditions
+                  </button>
                   {" "}and{" "}
-                  <button type="button" className="signUpCheck__linkBtn">Privacy Policy</button>.
+                  <button
+                    type="button"
+                    className="signUpCheck__linkBtn"
+                    onClick={() => navigate("/privacy-policy")}
+                  >
+                    Privacy Policy
+                  </button>.
                 </span>
               </label>
 

@@ -24,6 +24,7 @@ const HomeCommunity = lazy(() => import("./components/Homepage/pages/home_commun
 const FeaturesPageContent = lazy(() => import("./components/Homepage/pages/features_page"));
 const FaqPageContent = lazy(() => import("./components/Homepage/pages/faq_page"));
 const PricingPageContent = lazy(() => import("./components/Homepage/pages/pricing_page"));
+const LegalPageContent = lazy(() => import("./components/Homepage/pages/legal_pages"));
 const AuthCallback = lazy(() => import("./components/Auth/pages/auth_callback"));
 const PasswordRecovery = lazy(() =>
   import("./components/Auth/pages/password_recovery")
@@ -320,6 +321,38 @@ function PricingPage() {
   );
 }
 
+function TermsPage() {
+  return (
+    <BrandPageShell>
+      <LegalPageContent page="terms" />
+    </BrandPageShell>
+  );
+}
+
+function PrivacyPolicyPage() {
+  return (
+    <BrandPageShell>
+      <LegalPageContent page="privacy" />
+    </BrandPageShell>
+  );
+}
+
+function ContactUsPage() {
+  return (
+    <BrandPageShell>
+      <LegalPageContent page="contact" />
+    </BrandPageShell>
+  );
+}
+
+function HelpCenterPage() {
+  return (
+    <BrandPageShell>
+      <LegalPageContent page="help" />
+    </BrandPageShell>
+  );
+}
+
 function AppRoutes() {
   const location = useLocation();
   useRouteShellFamily(location.pathname);
@@ -387,6 +420,38 @@ function AppRoutes() {
         element={
           <Suspense fallback={<RouteFallback />}>
             <PricingPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/terms"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <TermsPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/privacy-policy"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <PrivacyPolicyPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/contact-us"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <ContactUsPage />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/help-center"
+        element={
+          <Suspense fallback={<RouteFallback />}>
+            <HelpCenterPage />
           </Suspense>
         }
       />

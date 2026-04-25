@@ -71,13 +71,13 @@
 
 .adminBar__button {
   min-height: 42px;
-  padding: 0 16px;
-  border-radius: 999px;
+  padding: 0 4px;
+  border-radius: 0;
   border: 1px solid rgba(42, 20, 80, 0.12);
-  background: rgba(255, 255, 255, 0.8);
+  border-width: 0 0 1px;
+  background: transparent;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
   cursor: pointer;
   font-family: Inter, system-ui, sans-serif;
   font-size: 13px;
@@ -85,76 +85,58 @@
   color: rgba(27, 16, 46, 0.84);
 }
 
-.adminBar__buttonIcon {
-  width: 16px;
-  height: 16px;
-}
-
 .adminPage__main {
-  padding: 26px 0 54px;
+  padding: 34px 0 68px;
   display: grid;
-  gap: 24px;
+  gap: 32px;
 }
 
 .adminHero {
   display: grid;
-  gap: 14px;
-  justify-items: center;
-  padding: 6px 0 2px;
-  text-align: center;
-}
-
-.adminHero__titleWrap {
-  position: relative;
-  width: fit-content;
-  max-width: 100%;
-  padding-bottom: 16px;
+  gap: 12px;
+  justify-items: start;
+  max-width: 760px;
+  padding: 12px 0 2px;
+  text-align: left;
 }
 
 .adminHero__title {
   margin: 0;
-  font-family: "Dancing Script", cursive;
-  font-size: clamp(58px, 6vw, 88px);
-  line-height: 0.94;
-  font-weight: 700;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: clamp(38px, 5vw, 62px);
+  line-height: 1;
+  font-weight: 900;
   color: rgba(27, 16, 46, 0.98);
 }
 
-.adminHero__line {
-  position: absolute;
-  left: 8%;
-  width: 82%;
-  bottom: 0;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    rgba(242, 193, 78, 0) 0%,
-    rgba(242, 193, 78, 0.92) 24%,
-    rgba(242, 193, 78, 1) 50%,
-    rgba(242, 193, 78, 0.92) 76%,
-    rgba(242, 193, 78, 0) 100%
-  );
+.adminHero__sub {
+  max-width: 62ch;
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.68;
+  color: rgba(27, 16, 46, 0.64);
 }
 
 .adminLayout {
   display: grid;
-  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
-  gap: 24px;
+  grid-template-columns: minmax(320px, 0.76fr) minmax(0, 1.24fr);
+  gap: clamp(26px, 3vw, 40px);
 }
 
 .adminQueueTabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 18px;
-  justify-content: center;
+  gap: 24px;
+  justify-content: flex-start;
+  border-bottom: 1px solid rgba(42, 20, 80, 0.1);
 }
 
 .adminQueueTab {
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
-  padding: 8px 0;
+  padding: 0 0 14px;
   cursor: pointer;
   font-family: Inter, system-ui, sans-serif;
   font-size: 13px;
@@ -182,17 +164,17 @@
 .adminDetail {
   display: grid;
   align-content: start;
-  gap: 18px;
+  gap: 24px;
 }
 
 .adminPanel {
-  border-radius: 28px;
+  border-radius: 18px;
   border: 1px solid rgba(42, 20, 80, 0.1);
   background: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 20px 60px rgba(12, 7, 18, 0.06);
-  padding: 22px;
+  box-shadow: 0 14px 42px rgba(12, 7, 18, 0.045);
+  padding: clamp(22px, 2.4vw, 30px);
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
 
 .adminPanel--loading {
@@ -209,7 +191,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 18px;
 }
 
 .adminPanel__title {
@@ -232,16 +214,18 @@
 .adminFilters {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 14px;
+  border-bottom: 1px solid rgba(42, 20, 80, 0.08);
 }
 
 .adminFilterChip,
 .adminQueueCard__pill {
-  min-height: 34px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(42, 20, 80, 0.1);
-  background: rgba(255, 255, 255, 0.84);
+  min-height: 32px;
+  padding: 0;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -258,25 +242,25 @@
 }
 
 .adminFilterChip--active {
-  border-color: rgba(124, 58, 237, 0.18);
-  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(180, 83, 9, 0.72);
+  background: transparent;
   color: rgba(66, 29, 133, 0.94);
 }
 
 .adminQueue__list,
 .adminDeliveryStack {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .adminQueueCard,
 .adminDeliveryCard {
-  border-radius: 20px;
+  border-radius: 16px;
   border: 1px solid rgba(42, 20, 80, 0.08);
   background: rgba(255, 255, 255, 0.86);
-  padding: 16px;
+  padding: 18px;
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .adminQueueCard {
@@ -391,7 +375,7 @@
 .adminDetailGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 18px;
 }
 
 .adminDetailGrid--compact {
@@ -437,10 +421,11 @@
 .adminField__control {
   min-height: 48px;
   width: 100%;
-  padding: 14px 16px;
-  border-radius: 16px;
+  padding: 14px 0;
+  border-radius: 0;
   border: 1px solid rgba(42, 20, 80, 0.12);
-  background: rgba(255, 255, 255, 0.84);
+  border-width: 0 0 1px;
+  background: transparent;
   outline: none;
   font-family: Inter, system-ui, sans-serif;
   font-size: 14px;
@@ -451,6 +436,10 @@
 .adminField__textarea {
   min-height: 124px;
   resize: vertical;
+  padding: 14px;
+  border-width: 1px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.62);
 }
 
 .adminDeliveryCard__note,
@@ -466,18 +455,17 @@
 .adminReceiptRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 14px;
 }
 
 .adminAction {
   min-height: 46px;
-  padding: 0 16px;
-  border-radius: 16px;
+  padding: 0 18px;
+  border-radius: 10px;
   border: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   cursor: pointer;
   font-family: Inter, system-ui, sans-serif;
   font-size: 13px;
@@ -502,26 +490,8 @@
   opacity: 0.76;
 }
 
-.adminAction__icon {
-  width: 16px;
-  height: 16px;
-}
-
-.adminAction__icon--spin {
-  animation: adminSpin 0.9s linear infinite;
-}
-
 .adminEmptySurface {
   padding: 42px 0;
-}
-
-@keyframes adminSpin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 @media (max-width: 1080px) {
@@ -538,13 +508,9 @@
     width: min(1240px, calc(100% - 28px));
   }
 
-  .adminHero__title {
-    font-size: clamp(50px, 16vw, 72px);
-  }
-
   .adminPanel,
   .adminQueueCard,
   .adminDeliveryCard {
-    padding: 16px;
+    padding: 18px;
   }
 }

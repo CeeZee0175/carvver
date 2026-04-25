@@ -276,103 +276,168 @@ function EmailInput({
   );
 }
 
-function Decorations() {
+const DECORATIONS = [
+  { id: "plane-a", kind: "plane", className: "homeFour__decor--planeA", float: { y: [0, -8, 0], rotate: [0, -4, 0] }, duration: 5.6 },
+  { id: "plane-b", kind: "plane", className: "homeFour__decor--planeB", float: { y: [0, 10, 0], rotate: [0, 5, 0] }, duration: 6.2 },
+  { id: "star-a", kind: "star", className: "homeFour__decor--star", float: { rotate: [0, 10, 0], scale: [1, 1.04, 1] }, duration: 4.8 },
+  { id: "ring-a", kind: "ring", className: "homeFour__decor--ring", float: { rotate: [0, 360] }, duration: 14, ease: "linear" },
+  { id: "scribble-a", kind: "scribbleA", className: "homeFour__decor--scribbleA", float: { x: [0, 8, 0], y: [0, -4, 0] }, duration: 5.4 },
+  { id: "scribble-b", kind: "scribbleB", className: "homeFour__decor--scribbleB", float: { x: [0, -6, 0], y: [0, 5, 0] }, duration: 6.1 },
+  { id: "spark-a", kind: "spark", className: "homeFour__decor--sparkA", float: { y: [0, -7, 0], rotate: [0, 8, 0] }, duration: 4.2 },
+  { id: "spark-b", kind: "spark", className: "homeFour__decor--sparkB", float: { y: [0, 6, 0], rotate: [0, -10, 0] }, duration: 4.7 },
+  { id: "spark-c", kind: "spark", className: "homeFour__decor--sparkC", float: { scale: [1, 1.1, 1], rotate: [0, 6, 0] }, duration: 5.1 },
+  { id: "dash-a", kind: "dash", className: "homeFour__decor--dashA", float: { x: [0, 6, 0] }, duration: 5 },
+  { id: "dash-b", kind: "dash", className: "homeFour__decor--dashB", float: { x: [0, -5, 0] }, duration: 5.5 },
+  { id: "dash-c", kind: "dash", className: "homeFour__decor--dashC", float: { y: [0, -5, 0] }, duration: 4.6 },
+  { id: "dot-a", kind: "dot", className: "homeFour__decor--dotA", float: { scale: [1, 1.18, 1] }, duration: 3.9 },
+  { id: "dot-b", kind: "dot", className: "homeFour__decor--dotB", float: { scale: [1, 1.16, 1] }, duration: 4.4 },
+  { id: "burst-a", kind: "burst", className: "homeFour__decor--burstA", float: { rotate: [0, 14, 0], scale: [1, 1.06, 1] }, duration: 5.2 },
+  { id: "burst-b", kind: "burst", className: "homeFour__decor--burstB", float: { rotate: [0, -12, 0], scale: [1, 1.05, 1] }, duration: 5.8 },
+];
+
+function DecorationShape({ kind }) {
+  if (kind === "plane") {
+    return (
+      <svg viewBox="0 0 120 120">
+        <path
+          d="M18 60L98 24L70 96L55 68L18 60Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeLinejoin="round"
+        />
+        <path d="M55 68L98 24" fill="none" stroke="currentColor" strokeWidth="4" />
+      </svg>
+    );
+  }
+
+  if (kind === "star") {
+    return (
+      <svg viewBox="0 0 100 100">
+        <path
+          d="M50 10L58 38L88 50L58 62L50 90L42 62L12 50L42 38L50 10Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
+  if (kind === "ring") {
+    return (
+      <svg viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="34" fill="none" stroke="currentColor" strokeWidth="4" />
+        <circle cx="60" cy="60" r="50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="7 7" />
+      </svg>
+    );
+  }
+
+  if (kind === "scribbleA") {
+    return (
+      <svg viewBox="0 0 220 80">
+        <path
+          d="M8 48C28 22 54 18 74 38C94 58 118 60 140 38C162 16 188 18 210 40"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
+
+  if (kind === "scribbleB") {
+    return (
+      <svg viewBox="0 0 220 80">
+        <path
+          d="M10 34C35 58 56 58 82 36C108 14 132 14 156 36C180 58 198 58 212 46"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
+
+  if (kind === "spark") {
+    return (
+      <svg viewBox="0 0 80 80">
+        <path d="M40 8V72M8 40H72M18 18L62 62M62 18L18 62" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  if (kind === "dash") {
+    return (
+      <svg viewBox="0 0 120 40">
+        <path d="M10 20H110" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  if (kind === "burst") {
+    return (
+      <svg viewBox="0 0 100 100">
+        <path d="M50 8L56 36L84 22L66 48L94 58L64 62L72 92L50 70L28 92L36 62L6 58L34 48L16 22L44 36L50 8Z" fill="none" stroke="currentColor" strokeWidth="4" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 40 40">
+      <circle cx="20" cy="20" r="14" fill="currentColor" />
+    </svg>
+  );
+}
+
+function Decorations({ active }) {
   const reduceMotion = useReducedMotion();
 
   return (
     <div className="homeFour__decorLayer" aria-hidden="true">
-      <Motion.div
-        className="homeFour__decor homeFour__decor--planeA"
-        animate={reduceMotion ? {} : { y: [0, -8, 0], rotate: [0, -4, 0] }}
-        transition={{ duration: 5.6, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <svg viewBox="0 0 120 120">
-          <path
-            d="M18 60L98 24L70 96L55 68L18 60Z"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="4"
-            strokeLinejoin="round"
-          />
-          <path d="M55 68L98 24" fill="none" stroke="currentColor" strokeWidth="4" />
-        </svg>
-      </Motion.div>
-
-      <Motion.div
-        className="homeFour__decor homeFour__decor--planeB"
-        animate={reduceMotion ? {} : { y: [0, 10, 0], rotate: [0, 5, 0] }}
-        transition={{ duration: 6.2, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
-      >
-        <svg viewBox="0 0 120 120">
-          <path
-            d="M20 62L96 30L72 92L56 70L20 62Z"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="4"
-            strokeLinejoin="round"
-          />
-          <path d="M56 70L96 30" fill="none" stroke="currentColor" strokeWidth="4" />
-        </svg>
-      </Motion.div>
-
-      <Motion.div
-        className="homeFour__decor homeFour__decor--star"
-        animate={reduceMotion ? {} : { rotate: [0, 10, 0], scale: [1, 1.04, 1] }}
-        transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <svg viewBox="0 0 100 100">
-          <path
-            d="M50 10L58 38L88 50L58 62L50 90L42 62L12 50L42 38L50 10Z"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="4"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </Motion.div>
-
-      <Motion.div
-        className="homeFour__decor homeFour__decor--ring"
-        animate={reduceMotion ? {} : { rotate: [0, 360] }}
-        transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
-      >
-        <svg viewBox="0 0 120 120">
-          <circle cx="60" cy="60" r="34" fill="none" stroke="currentColor" strokeWidth="4" />
-          <circle cx="60" cy="60" r="50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="7 7" />
-        </svg>
-      </Motion.div>
-
-      <Motion.div
-        className="homeFour__decor homeFour__decor--scribbleA"
-        animate={reduceMotion ? {} : { x: [0, 8, 0], y: [0, -4, 0] }}
-        transition={{ duration: 5.4, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <svg viewBox="0 0 220 80">
-          <path
-            d="M8 48C28 22 54 18 74 38C94 58 118 60 140 38C162 16 188 18 210 40"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="4"
-            strokeLinecap="round"
-          />
-        </svg>
-      </Motion.div>
-
-      <Motion.div
-        className="homeFour__decor homeFour__decor--scribbleB"
-        animate={reduceMotion ? {} : { x: [0, -6, 0], y: [0, 5, 0] }}
-        transition={{ duration: 6.1, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
-      >
-        <svg viewBox="0 0 220 80">
-          <path
-            d="M10 34C35 58 56 58 82 36C108 14 132 14 156 36C180 58 198 58 212 46"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="4"
-            strokeLinecap="round"
-          />
-        </svg>
-      </Motion.div>
+      {DECORATIONS.map((decor, index) => (
+        <Motion.div
+          key={decor.id}
+          className={`homeFour__decor ${decor.className}`}
+          initial={
+            reduceMotion
+              ? false
+              : { x: "-50%", y: "-50%", scale: 0.12, rotate: -18, opacity: 0 }
+          }
+          animate={
+            reduceMotion || active
+              ? {
+                  x: "calc(-50% + var(--pop-x))",
+                  y: "calc(-50% + var(--pop-y))",
+                  scale: 1,
+                  rotate: "var(--pop-rotate)",
+                  opacity: 1,
+                }
+              : {}
+          }
+          transition={{
+            duration: 0.72,
+            delay: index * 0.035,
+            ease: [0.18, 0.92, 0.28, 1],
+          }}
+        >
+          <Motion.div
+            className="homeFour__decorFloat"
+            animate={reduceMotion ? {} : decor.float}
+            transition={{
+              duration: decor.duration,
+              repeat: Infinity,
+              ease: decor.ease || "easeInOut",
+              delay: index * 0.08,
+            }}
+          >
+            <DecorationShape kind={decor.kind} />
+          </Motion.div>
+        </Motion.div>
+      ))}
     </div>
   );
 }
@@ -468,7 +533,7 @@ export default function HomeFour() {
 
   return (
     <section className="homeFour" ref={ref} aria-labelledby="homeFour-title">
-      <Decorations />
+      <Decorations active={inView} />
 
       <div className="homeFour__inner">
         <h2 id="homeFour-title" className="homeFour__title">

@@ -32,11 +32,11 @@ const exploreLinks = [
 ];
 
 const supportLinks = [
-  { label: "Contact Us", target: null },
-  { label: "Help Center", target: null },
+  { label: "Contact Us", routeKey: "contact-us" },
+  { label: "Help Center", routeKey: "help-center" },
   { label: "FAQs", routeKey: "faq" },
-  { label: "Terms", target: null },
-  { label: "Privacy Policy", target: null },
+  { label: "Terms", routeKey: "terms" },
+  { label: "Privacy Policy", routeKey: "privacy-policy" },
 ];
 
 const socials = [
@@ -205,6 +205,22 @@ export default function HomeFooter({ fullBleed = false }) {
   const resolvedSupportLinks = supportLinks.map((item) => {
     if (item.routeKey === "faq") {
       return { ...item, route: "/faq" };
+    }
+
+    if (item.routeKey === "contact-us") {
+      return { ...item, route: "/contact-us" };
+    }
+
+    if (item.routeKey === "help-center") {
+      return { ...item, route: "/help-center" };
+    }
+
+    if (item.routeKey === "terms") {
+      return { ...item, route: "/terms" };
+    }
+
+    if (item.routeKey === "privacy-policy") {
+      return { ...item, route: "/privacy-policy" };
     }
 
     return item;

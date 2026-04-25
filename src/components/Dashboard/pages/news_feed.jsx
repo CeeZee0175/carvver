@@ -20,17 +20,29 @@ import {
   EmptySurface,
   FreelancerDashboardFrame,
   Reveal,
-  TypewriterHeading,
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import { useNewsFeed } from "../hooks/useNewsFeed";
 import VerifiedBadge from "../shared/VerifiedBadge";
+import carvverIcon from "../../../assets/carvver_icon.png";
 import "./profile.css";
 import "./news_feed.css";
 
 function buildAbsoluteUrl(path) {
   if (typeof window === "undefined") return path;
   return `${window.location.origin}${path}`;
+}
+
+function buildSharePreviewUrl(post, targetUrl) {
+  const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  if (!supabaseUrl || typeof window === "undefined") return targetUrl;
+
+  const url = new URL(`${supabaseUrl}/functions/v1/share-preview`);
+  url.searchParams.set("type", post.type);
+  url.searchParams.set("id", post.sourceId);
+  url.searchParams.set("origin", window.location.origin);
+  url.searchParams.set("image", new URL(carvverIcon, window.location.origin).toString());
+  return url.toString();
 }
 
 function openShareWindow(url) {
@@ -41,11 +53,15 @@ function openShareWindow(url) {
 function buildShareLinks(post) {
   const url = buildAbsoluteUrl(post.sharePath);
   const title = `${post.title} on Carvver`;
+  const text = [post.description, post.priceLabel, post.location]
+    .filter(Boolean)
+    .join(" - ");
+  const facebookPreviewUrl = buildSharePreviewUrl(post, url);
 
   return {
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-    twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
-    reddit: `https://www.reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(facebookPreviewUrl)}`,
+    twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(`${title} - ${text}`)}`,
+    reddit: `https://www.reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(`${title} - ${text}`)}`,
     url,
   };
 }
@@ -283,26 +299,7 @@ function NewsFeedPageContent({ role }) {
         <section className="newsFeedHero">
           <div className="newsFeedHero__copy">
             <div className="newsFeedHero__titleWrap">
-              <h1 className="newsFeedHero__title">
-                <TypewriterHeading text="News Feed" />
-              </h1>
-              <Motion.svg
-                className="newsFeedHero__line"
-                viewBox="0 0 300 20"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                <Motion.path
-                  d="M 0,10 L 300,10"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 1.05, ease: "easeInOut", delay: 0.14 }}
-                />
-              </Motion.svg>
+              <h1 className="newsFeedHero__title">News Feed</h1>
             </div>
             <p className="newsFeedHero__sub">
               Follow fresh service listings and open customer requests across Carvver.

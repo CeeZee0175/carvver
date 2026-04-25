@@ -1,10 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion as Motion} from "framer-motion";
+import { AnimatePresence, motion as Motion} from "framer-motion";
 import {
   BadgeCheck,
+  Check,
   MessageCircle,
+  Minus,
+  Plus,
   Settings,
   ShieldCheck,
+  Trophy,
   Upload,
   UserRound,
   X,
@@ -21,6 +25,7 @@ import {
 } from "../../../lib/phLocations";
 import {
   DashboardBreadcrumbs,
+  EmptySurface,
   FreelancerDashboardFrame,
   Reveal,
   TypewriterHeading,
@@ -35,9 +40,23 @@ import {
   AVATAR_MAX_BYTES,
 } from "../hooks/useCustomerProfileData";
 import { useFreelancerProfileData } from "../hooks/useFreelancerProfileData";
+import { useFreelancerTrustData } from "../hooks/useFreelancerTrustData";
+import { FREELANCER_SHOWCASE_SLOT_LIMIT } from "../shared/freelancerAchievements";
 import VerifiedBadge from "../shared/VerifiedBadge";
 import "./profile.css";
 import "./freelancer_pages.css";
+
+function AchievementBadgeMedia({ achievement, className = "", alt = "" }) {
+  const mediaSrc = achievement?.badge?.media || "";
+  const badgeLabel = achievement?.badge?.label || achievement?.title || "Badge";
+
+  if (mediaSrc) {
+    return <img src={mediaSrc} alt={alt || badgeLabel} className={className} />;
+  }
+
+  const Icon = achievement?.badge?.Icon || Trophy;
+  return <Icon className={className} aria-hidden={alt ? undefined : "true"} />;
+}
 
 export default function FreelancerProfile() {
   const navigate = useNavigate();
@@ -55,9 +74,20 @@ export default function FreelancerProfile() {
     completion,
     saveProfile,
   } = useFreelancerProfileData();
+  const {
+    loading: trustLoading,
+    warnings: trustWarnings,
+    earnedAchievements,
+    showcasedBadges,
+    showcaseIds,
+    capabilities: trustCapabilities,
+    saveBadgeShowcase,
+  } = useFreelancerTrustData();
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showcaseSaving, setShowcaseSaving] = useState(false);
+  const [badgePickerOpen, setBadgePickerOpen] = useState(false);
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("");
   const [removeAvatar, setRemoveAvatar] = useState(false);
@@ -126,7 +156,53 @@ export default function FreelancerProfile() {
   const specialties = Array.isArray(profile?.freelancer_specialties)
     ? profile.freelancer_specialties.filter(Boolean)
     : [];
+  const displayedBadges = useMemo(
+    () => showcasedBadges.slice(0, FREELANCER_SHOWCASE_SLOT_LIMIT),
+    [showcasedBadges]
+  );
+  const previewAchievements = earnedAchievements.slice(0, 6);
+  const hasSelectableBadges = earnedAchievements.length > 0;
+  const canEditDisplayedBadges =
+    editing &&
+    trustCapabilities.canPersistShowcase &&
+    showcaseIds.length < FREELANCER_SHOWCASE_SLOT_LIMIT &&
+    earnedAchievements.some((achievement) => !showcaseIds.includes(achievement.id));
   const showProfileProgress = !loading && completion.completed < completion.total;
+
+  const handleShowcaseUpdate = async (nextIds, successMessage) => {
+    try {
+      setShowcaseSaving(true);
+      await saveBadgeShowcase(nextIds);
+      toast.success(successMessage);
+    } catch (error) {
+      toast.error(error.message || "We couldn't update your displayed badges.");
+    } finally {
+      setShowcaseSaving(false);
+    }
+  };
+
+  const handleRemoveDisplayedBadge = async (achievementId) => {
+    if (!editing || showcaseSaving) return;
+
+    await handleShowcaseUpdate(
+      showcaseIds.filter((id) => id !== achievementId),
+      "Badge removed from your profile."
+    );
+  };
+
+  const handleAddDisplayedBadge = async (achievementId) => {
+    if (!editing || showcaseSaving || showcaseIds.includes(achievementId)) return;
+    if (showcaseIds.length >= FREELANCER_SHOWCASE_SLOT_LIMIT) {
+      toast.error(`You can display up to ${FREELANCER_SHOWCASE_SLOT_LIMIT} badges.`);
+      return;
+    }
+
+    await handleShowcaseUpdate(
+      [...showcaseIds, achievementId],
+      "Badge added to your profile."
+    );
+    setBadgePickerOpen(false);
+  };
 
   const resetEditor = () => {
     const normalizedLocation = coercePhilippinesLocation({
@@ -243,6 +319,7 @@ export default function FreelancerProfile() {
       });
 
       toast.success("Your freelancer profile is up to date.");
+      setBadgePickerOpen(false);
       setEditing(false);
       resetEditor();
     } catch (error) {
@@ -363,6 +440,70 @@ export default function FreelancerProfile() {
               <p className="profileIdentity__email">
                 {profile?.email || "Signed-in freelancer"}
               </p>
+
+              {displayedBadges.length > 0 || (editing && hasSelectableBadges) ? (
+                <Motion.div
+                  className="profileIdentity__badges"
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{ duration: 0.42, delay: 0.08 }}
+                >
+                  {displayedBadges.map((achievement, index) => (
+                    <Motion.span
+                      key={achievement.id}
+                      className={`profileIdentity__badge ${
+                        editing ? "profileIdentity__badge--editable" : ""
+                      }`}
+                      title={achievement.badge.label}
+                      initial={{ opacity: 0, y: 8, scale: 0.94 }}
+                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                      viewport={{ once: true, amount: 0.5 }}
+                      transition={{ duration: 0.34, delay: 0.1 + index * 0.04 }}
+                      whileHover={{ y: -3, scale: 1.04 }}
+                    >
+                      <AchievementBadgeMedia
+                        achievement={achievement}
+                        className="profileIdentity__badgeImage"
+                        alt={achievement.badge.label}
+                      />
+                      {editing && trustCapabilities.canPersistShowcase ? (
+                        <button
+                          type="button"
+                          className="profileIdentity__badgeControl"
+                          onClick={() => handleRemoveDisplayedBadge(achievement.id)}
+                          disabled={showcaseSaving}
+                          aria-label={`Remove ${achievement.badge.label} from your profile`}
+                        >
+                          <Minus className="profileIdentity__badgeControlIcon" />
+                        </button>
+                      ) : null}
+                    </Motion.span>
+                  ))}
+
+                  {canEditDisplayedBadges ? (
+                    <Motion.button
+                      type="button"
+                      className="profileIdentity__badgeAdder"
+                      initial={{ opacity: 0, y: 8, scale: 0.94 }}
+                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                      viewport={{ once: true, amount: 0.5 }}
+                      transition={{
+                        duration: 0.34,
+                        delay: 0.1 + displayedBadges.length * 0.04,
+                      }}
+                      whileHover={{ y: -3, scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setBadgePickerOpen(true)}
+                      disabled={showcaseSaving}
+                      aria-label="Add a badge to your profile"
+                    >
+                      <Plus className="profileIdentity__badgeAdderIcon" />
+                    </Motion.button>
+                  ) : null}
+                </Motion.div>
+              ) : null}
+
               <div className="profileIdentity__facts">
                 <div className="profileIdentity__fact">
                   <span className="profileIdentity__factLabel">Real name</span>
@@ -411,6 +552,7 @@ export default function FreelancerProfile() {
                       transition={PROFILE_SPRING}
                       onClick={() => {
                         resetEditor();
+                        setBadgePickerOpen(false);
                         setEditing(false);
                       }}
                       disabled={saving}
@@ -837,6 +979,169 @@ export default function FreelancerProfile() {
           </section>
         </Reveal>
       ) : null}
+
+      <Reveal delay={0.2}>
+        <section className="profileSection">
+          <div className="profileSection__head">
+            <div>
+              <h2 className="profileSection__title">Achievements</h2>
+              <p className="profileSection__sub">
+                Show the badges you earned through profile strength, listings, orders, reviews, and trust checks.
+              </p>
+            </div>
+            <Motion.button
+              type="button"
+              className="profileSection__linkBtn"
+              whileHover={{ x: 1.5 }}
+              whileTap={{ scale: 0.98 }}
+              transition={PROFILE_SPRING}
+              onClick={() => navigate("/dashboard/freelancer/profile/achievements")}
+            >
+              <span>View all achievements</span>
+            </Motion.button>
+          </div>
+
+          {trustLoading ? (
+            <div className="profileAchievementGrid profileAchievementGrid--skeleton">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div key={index} className="profileAchievement profileAchievement--skeleton" />
+              ))}
+            </div>
+          ) : previewAchievements.length === 0 ? (
+            <EmptySurface icon={Trophy} title="No achievements earned yet" />
+          ) : (
+            <div className="profileAchievementGrid">
+              {previewAchievements.map((achievement, index) => (
+                <Motion.article
+                  key={achievement.id}
+                  className={`profileAchievement ${
+                    achievement.legendary ? "profileAchievement--legendary" : ""
+                  }`}
+                  style={{
+                    "--achievement-badge-bg": achievement.badge.bg,
+                    "--achievement-badge-border": achievement.badge.border,
+                    "--achievement-badge-color": achievement.badge.color,
+                  }}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.42, delay: index * 0.04 }}
+                  whileHover={{ y: -4, scale: 1.01 }}
+                >
+                  <div className="profileAchievement__top">
+                    <div className="profileAchievement__headline">
+                      <span className="profileAchievement__badgeMediaWrap" aria-hidden="true">
+                        <AchievementBadgeMedia
+                          achievement={achievement}
+                          className="profileAchievement__badgeMedia"
+                        />
+                      </span>
+                      <div className="profileAchievement__copy">
+                        <span className="profileAchievement__category">
+                          {achievement.category}
+                        </span>
+                        <h3 className="profileAchievement__title">{achievement.title}</h3>
+                      </div>
+                    </div>
+                    <span className="profileAchievement__tier">
+                      {achievement.legendary ? "Legendary" : "Earned"}
+                    </span>
+                  </div>
+
+                  <p className="profileAchievement__desc">{achievement.description}</p>
+                </Motion.article>
+              ))}
+            </div>
+          )}
+        </section>
+      </Reveal>
+
+      {trustWarnings.length > 0 ? (
+        <Reveal delay={0.22}>
+          <section className="profileNotice">
+            <div className="profileNotice__copy">
+              <h2 className="profileNotice__title">Some achievement details couldn't be loaded</h2>
+              <p className="profileNotice__desc">{trustWarnings[0]}</p>
+            </div>
+          </section>
+        </Reveal>
+      ) : null}
+
+      <AnimatePresence>
+        {badgePickerOpen && editing ? (
+          <Motion.div
+            className="profileBadgePicker"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setBadgePickerOpen(false)}
+          >
+            <Motion.div
+              className="profileBadgePicker__dialog"
+              initial={{ opacity: 0, y: 18, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.98 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              onClick={(event) => event.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="freelancer-badge-picker-title"
+            >
+              <div className="profileBadgePicker__head">
+                <h2 id="freelancer-badge-picker-title" className="profileBadgePicker__title">
+                  Display badges
+                </h2>
+                <button
+                  type="button"
+                  className="profileBadgePicker__close"
+                  onClick={() => setBadgePickerOpen(false)}
+                  aria-label="Close badge picker"
+                >
+                  <X className="profileBadgePicker__closeIcon" />
+                </button>
+              </div>
+
+              <div className="profileBadgePicker__grid">
+                {earnedAchievements.map((achievement, index) => {
+                  const isDisplayed = showcaseIds.includes(achievement.id);
+
+                  return (
+                    <Motion.button
+                      key={achievement.id}
+                      type="button"
+                      className={`profileBadgePicker__option ${
+                        isDisplayed ? "profileBadgePicker__option--selected" : ""
+                      }`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.24, delay: index * 0.012 }}
+                      onClick={() => handleAddDisplayedBadge(achievement.id)}
+                      disabled={isDisplayed || showcaseSaving}
+                      aria-label={
+                        isDisplayed
+                          ? `${achievement.badge.label} is already displayed`
+                          : `Display ${achievement.badge.label}`
+                      }
+                      title={achievement.badge.label}
+                    >
+                      <AchievementBadgeMedia
+                        achievement={achievement}
+                        className="profileBadgePicker__image"
+                        alt={achievement.badge.label}
+                      />
+                      {isDisplayed ? (
+                        <span className="profileBadgePicker__selectedMark" aria-hidden="true">
+                          <Check className="profileBadgePicker__selectedIcon" />
+                        </span>
+                      ) : null}
+                    </Motion.button>
+                  );
+                })}
+              </div>
+            </Motion.div>
+          </Motion.div>
+        ) : null}
+      </AnimatePresence>
     </FreelancerDashboardFrame>
   );
 }

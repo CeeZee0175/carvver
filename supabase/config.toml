@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.release-freelancer-payout]
 verify_jwt = false
+
+[functions.share-preview]
+verify_jwt = false

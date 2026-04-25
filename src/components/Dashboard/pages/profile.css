@@ -1371,9 +1371,9 @@
   border-radius: 16px;
   display: grid;
   place-items: center;
-  background: var(--badge-bg, rgba(124, 58, 237, 0.12));
-  border: 1px solid var(--badge-border, rgba(124, 58, 237, 0.18));
-  color: var(--badge-color, rgba(87, 34, 182, 0.96));
+  background: var(--catalog-badge-bg, var(--badge-bg, rgba(124, 58, 237, 0.12)));
+  border: 1px solid var(--catalog-badge-border, var(--badge-border, rgba(124, 58, 237, 0.18)));
+  color: var(--catalog-badge-color, var(--badge-color, rgba(87, 34, 182, 0.96)));
 }
 
 .profileBadgeSlot__icon,
@@ -1602,27 +1602,46 @@
 }
 
 .profileCatalogGrid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .profileCatalogCard,
 .profileOrderCard {
-  border-radius: 24px;
-  border: 1px solid rgba(42, 20, 80, 0.1);
+  border-radius: 18px;
+  border: 1px solid rgba(42, 20, 80, 0.08);
   background: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 16px 46px rgba(12, 7, 18, 0.05);
+  box-shadow: 0 16px 44px rgba(12, 7, 18, 0.045);
 }
 
 .profileCatalogCard {
-  min-height: 264px;
+  position: relative;
+  min-height: 286px;
   padding: 18px;
   display: grid;
   gap: 16px;
   align-content: start;
+  overflow: hidden;
+}
+
+.profileCatalogCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.5), transparent 44%),
+    radial-gradient(320px 160px at 18% 0%, rgba(242, 193, 78, 0.14), transparent 64%);
+  opacity: 0.5;
+}
+
+.profileCatalogCard > * {
+  position: relative;
+  z-index: 1;
 }
 
 .profileCatalogCard--earned {
-  border-color: rgba(124, 58, 237, 0.16);
+  border-color: rgba(242, 193, 78, 0.24);
+  box-shadow: 0 20px 54px rgba(124, 58, 237, 0.08);
 }
 
 .profileCatalogCard--legendary {
@@ -1656,9 +1675,27 @@
 }
 
 .profileCatalogCard__body {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 14px;
-  align-items: flex-start;
+  align-items: center;
+}
+
+.profileCatalogCard__badge {
+  width: 76px;
+  height: 76px;
+  flex: 0 0 76px;
+  border-radius: 50%;
+  box-shadow: 0 18px 34px rgba(42, 20, 80, 0.08);
+  overflow: hidden;
+}
+
+.profileCatalogCard__badgeImage {
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+  display: block;
+  color: var(--catalog-badge-color, rgba(87, 34, 182, 0.96));
 }
 
 .profileCatalogCard__badgeMeta {

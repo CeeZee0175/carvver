@@ -1,14 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 import {
-  CheckCircle2,
-  BadgeCheck,
   FileVideo,
   Image as ImageIcon,
-  LoaderCircle,
-  LogOut,
-  ShieldCheck,
-  XCircle,
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +19,6 @@ import { signOut } from "../../../lib/supabase/auth";
 import {
   EmptySurface,
   Reveal,
-  TypewriterHeading,
 } from "../../Dashboard/shared/customerProfileShared";
 import "../../Dashboard/pages/workflow_pages.css";
 import "./admin_review.css";
@@ -549,7 +542,6 @@ export default function AdminReview() {
             transition={SPRING}
             onClick={handleSignOut}
           >
-            <LogOut className="adminBar__buttonIcon" />
             <span>Sign Out</span>
           </Motion.button>
         </div>
@@ -558,12 +550,10 @@ export default function AdminReview() {
       <main className="adminPage__main">
         <Reveal>
           <section className="adminHero">
-            <div className="adminHero__titleWrap">
-              <h1 className="adminHero__title">
-                <TypewriterHeading text="Admin Review" />
-              </h1>
-              <span className="adminHero__line" aria-hidden="true" />
-            </div>
+            <h1 className="adminHero__title">Admin Review</h1>
+            <p className="adminHero__sub">
+              Review payouts and verification requests with clear status, proof, and controls.
+            </p>
           </section>
         </Reveal>
 
@@ -746,7 +736,6 @@ export default function AdminReview() {
                                 providerReference: event.target.value,
                               }))
                             }
-                            placeholder="Required for release"
                             required={false}
                           />
                           <span className="adminField__hint">
@@ -766,7 +755,6 @@ export default function AdminReview() {
                                 note: event.target.value,
                               }))
                             }
-                            placeholder="Optional release note or issue detail"
                           />
                         </label>
                       </div>
@@ -803,12 +791,7 @@ export default function AdminReview() {
                           disabled={actionState.pending || !releaseProviderReference}
                           onClick={() => handleAction("release")}
                         >
-                          {actionState.pending ? (
-                            <LoaderCircle className="adminAction__icon adminAction__icon--spin" />
-                          ) : (
-                            <CheckCircle2 className="adminAction__icon" />
-                          )}
-                          <span>Release</span>
+                          <span>{actionState.pending ? "Processing..." : "Release"}</span>
                         </Motion.button>
 
                         <Motion.button
@@ -820,7 +803,6 @@ export default function AdminReview() {
                           disabled={actionState.pending}
                           onClick={() => handleAction("block")}
                         >
-                          <ShieldCheck className="adminAction__icon" />
                           <span>Block</span>
                         </Motion.button>
 
@@ -833,7 +815,6 @@ export default function AdminReview() {
                           disabled={actionState.pending}
                           onClick={() => handleAction("fail")}
                         >
-                          <XCircle className="adminAction__icon" />
                           <span>Fail</span>
                         </Motion.button>
                       </div>
@@ -1006,7 +987,6 @@ export default function AdminReview() {
                               className="adminField__control adminField__textarea"
                               value={verificationActionNote}
                               onChange={(event) => setVerificationActionNote(event.target.value)}
-                              placeholder="Add feedback for rejection, or an internal approval note."
                             />
                           </label>
 
@@ -1045,12 +1025,7 @@ export default function AdminReview() {
                               }
                               onClick={() => handleVerificationAction("approve")}
                             >
-                              {actionState.pending ? (
-                                <LoaderCircle className="adminAction__icon adminAction__icon--spin" />
-                              ) : (
-                                <BadgeCheck className="adminAction__icon" />
-                              )}
-                              <span>Approve</span>
+                              <span>{actionState.pending ? "Processing..." : "Approve"}</span>
                             </Motion.button>
 
                             <Motion.button
@@ -1065,7 +1040,6 @@ export default function AdminReview() {
                               }
                               onClick={() => handleVerificationAction("reject")}
                             >
-                              <XCircle className="adminAction__icon" />
                               <span>Reject</span>
                             </Motion.button>
                           </div>

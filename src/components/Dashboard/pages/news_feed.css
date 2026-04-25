@@ -1,25 +1,25 @@
 @import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap");
 
 .newsFeedFrame {
-  gap: clamp(20px, 2.8vw, 30px);
+  gap: clamp(24px, 3vw, 36px);
 }
 
 .newsFeedPage {
   display: grid;
-  gap: clamp(20px, 2.8vw, 30px);
+  gap: clamp(24px, 3vw, 38px);
 }
 
 .newsFeedHero {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 18px;
-  padding: 8px 0 4px;
+  gap: clamp(22px, 4vw, 46px);
+  padding: 10px 0 8px;
 }
 
 .newsFeedHero__copy {
   display: grid;
-  gap: 10px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -27,25 +27,15 @@
   position: relative;
   display: inline-block;
   max-width: fit-content;
-  padding-bottom: 16px;
 }
 
 .newsFeedHero__title {
   margin: 0;
-  font-family: "Dancing Script", cursive;
-  font-size: clamp(56px, 6vw, 86px);
-  line-height: 0.94;
-  font-weight: 700;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: clamp(38px, 5vw, 62px);
+  line-height: 1;
+  font-weight: 900;
   color: rgba(27, 16, 46, 0.98);
-}
-
-.newsFeedHero__line {
-  position: absolute;
-  left: 9%;
-  width: 82%;
-  bottom: 0;
-  height: 12px;
-  color: rgba(242, 193, 78, 0.96);
 }
 
 .newsFeedHero__sub,
@@ -62,7 +52,8 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 12px;
+  padding-top: 4px;
 }
 
 .newsFeedHero__action,
@@ -120,8 +111,8 @@
 
 .newsFeedNotice {
   min-height: 44px;
-  padding: 13px 16px;
-  border-radius: 16px;
+  padding: 15px 18px;
+  border-radius: 12px;
   border: 1px solid rgba(242, 193, 78, 0.28);
   background: rgba(255, 255, 255, 0.72);
   font-family: Inter, system-ui, sans-serif;
@@ -133,8 +124,8 @@
 .newsFeedSection {
   position: relative;
   display: grid;
-  gap: 18px;
-  padding-top: 22px;
+  gap: 22px;
+  padding-top: 26px;
 }
 
 .newsFeedSection::before {
@@ -176,17 +167,17 @@
 }
 
 .newsFeedList {
-  width: min(840px, 100%);
+  width: min(920px, 100%);
   margin-inline: auto;
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
 
 .newsFeedCard {
-  border-radius: 22px;
+  border-radius: 18px;
   border: 1px solid rgba(42, 20, 80, 0.1);
   background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 16px 44px rgba(12, 7, 18, 0.055);
+  box-shadow: 0 14px 40px rgba(12, 7, 18, 0.045);
   overflow: hidden;
 }
 
@@ -200,7 +191,7 @@
 }
 
 .newsFeedCard__top {
-  padding: 16px 16px 0;
+  padding: 20px 20px 0;
 }
 
 .newsFeedCard__author {
@@ -302,15 +293,15 @@
 
 .newsFeedCard__body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.42fr);
-  gap: 16px;
-  padding: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.42fr);
+  gap: 22px;
+  padding: 18px 20px 20px;
 }
 
 .newsFeedCard__copy {
   min-width: 0;
   display: grid;
-  gap: 11px;
+  gap: 13px;
 }
 
 .newsFeedCard__facts {
@@ -347,8 +338,8 @@
 }
 
 .newsFeedCard__media {
-  min-height: 190px;
-  border-radius: 18px;
+  min-height: 210px;
+  border-radius: 14px;
   overflow: hidden;
   background:
     radial-gradient(180px 140px at 16% 10%, rgba(124, 58, 237, 0.15), transparent 70%),
@@ -359,13 +350,13 @@
 .newsFeedCard__mediaAsset {
   width: 100%;
   height: 100%;
-  min-height: 190px;
+  min-height: 210px;
   display: block;
   object-fit: cover;
 }
 
 .newsFeedCard__mediaFallback {
-  min-height: 190px;
+  min-height: 210px;
   height: 100%;
   display: grid;
   place-items: center;
@@ -388,10 +379,10 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 14px;
-  padding: 0 16px 16px;
+  gap: 16px;
+  padding: 0 20px 20px;
   border-top: 1px solid rgba(42, 20, 80, 0.08);
-  padding-top: 14px;
+  padding-top: 16px;
 }
 
 .newsFeedCard__actions--split {
@@ -407,7 +398,7 @@
 .newsFeedCard__shareToggle {
   min-height: 36px;
   padding-inline: 12px;
-  border-radius: 12px;
+  border-radius: 10px;
   font-size: 12px;
 }
 
@@ -418,7 +409,7 @@
   z-index: 12;
   width: 168px;
   padding: 8px;
-  border-radius: 16px;
+  border-radius: 12px;
   border: 1px solid rgba(42, 20, 80, 0.12);
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 18px 46px rgba(12, 7, 18, 0.14);
@@ -431,7 +422,7 @@
   min-height: 36px;
   justify-content: flex-start;
   padding: 0 10px;
-  border-radius: 10px;
+  border-radius: 8px;
   background: transparent;
   color: rgba(27, 16, 46, 0.84);
   font-size: 12px;
@@ -521,7 +512,7 @@
 
 @media (max-width: 560px) {
   .newsFeedHero__title {
-    font-size: clamp(48px, 15vw, 62px);
+    font-size: clamp(38px, 12vw, 52px);
   }
 
   .newsFeedHero__action,

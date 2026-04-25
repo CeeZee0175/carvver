@@ -1,12 +1,12 @@
-# Graph Report - C:\Users\ieq3q\carvver  (2026-04-24)
+# Graph Report - C:\Users\ieq3q\carvver  (2026-04-25)
 
 ## Corpus Check
-- 124 files · ~8,205,864 words
+- 126 files · ~8,211,558 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 764 nodes · 1073 edges · 73 communities detected
-- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 99 edges (avg confidence: 0.8)
+- 788 nodes · 1114 edges · 73 communities detected
+- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 101 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -90,101 +90,101 @@
 3. `fetchOrderDetail()` - 14 edges
 4. `buildPhilippinesLocationLabel()` - 12 edges
 5. `saveFreelancerServiceListing()` - 11 edges
-6. `getPublicUrl()` - 10 edges
-7. `normalizePayoutReleaseRequest()` - 8 edges
-8. `submitFreelancerOrderDelivery()` - 8 edges
-9. `normalizeServicePost()` - 8 edges
-10. `useCart()` - 7 edges
+6. `getPublicUrl()` - 11 edges
+7. `normalizeText()` - 11 edges
+8. `formatPeso()` - 9 edges
+9. `normalizePayoutReleaseRequest()` - 8 edges
+10. `submitFreelancerOrderDelivery()` - 8 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `buildFreelancerTasks()` --calls--> `buildPhilippinesLocationLabel()`  [INFERRED]
+  C:\Users\ieq3q\carvver\src\components\Dashboard\hooks\useFreelancerProfileData.js → C:\Users\ieq3q\carvver\src\lib\phLocations.js
 - `buildCounterpartMeta()` --calls--> `buildPhilippinesLocationLabel()`  [INFERRED]
   C:\Users\ieq3q\carvver\src\components\Dashboard\hooks\useMessagesInbox.js → C:\Users\ieq3q\carvver\src\lib\phLocations.js
+- `buildBaseNotifications()` --calls--> `buildPhilippinesLocationLabel()`  [INFERRED]
+  C:\Users\ieq3q\carvver\src\components\Dashboard\hooks\useNotifications.js → C:\Users\ieq3q\carvver\src\lib\phLocations.js
 - `useServiceListingDetail()` --calls--> `CustomerServiceDetail()`  [INFERRED]
   C:\Users\ieq3q\carvver\src\components\Dashboard\hooks\useServiceListingDetail.js → C:\Users\ieq3q\carvver\src\components\Dashboard\pages\customer_service_detail.jsx
 - `getPublicServiceMediaUrl()` --calls--> `getPublicUrl()`  [INFERRED]
   C:\Users\ieq3q\carvver\src\components\Dashboard\pages\dashboard_customer.jsx → C:\Users\ieq3q\carvver\src\components\Dashboard\pages\freelancer_search.jsx
-- `SignIn()` --calls--> `resolveFeaturedCategoryIntent()`  [INFERRED]
-  C:\Users\ieq3q\carvver\src\components\Auth\pages\sign-in.jsx → C:\Users\ieq3q\carvver\src\lib\featuredCategoryIntent.js
-- `SignUpSuccess()` --calls--> `resolveFeaturedCategoryIntent()`  [INFERRED]
-  C:\Users\ieq3q\carvver\src\components\Auth\pages\sign-up-success.jsx → C:\Users\ieq3q\carvver\src\lib\featuredCategoryIntent.js
 
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.1
-Nodes (51): FreelancerOrders(), acceptRequestProposal(), buildDeliveryAssetError(), buildProfileInitials(), buildProfileName(), confirmOrderCompletion(), createFreelancerOrderUpdate(), createRequestProposal() (+43 more)
+Cohesion: 0.05
+Nodes (37): finalizeSuccessfulCheckoutSession(), updateCheckoutSession(), extractBearerToken(), buildDisplayName(), buildHtml(), buildReceiptPdf(), buildSessionResponse(), drawReceiptText() (+29 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.06
-Nodes (28): finalizeSuccessfulCheckoutSession(), updateCheckoutSession(), extractBearerToken(), buildDisplayName(), buildReceiptPdf(), buildSessionResponse(), drawReceiptText(), enforceReceiptPdfAscii() (+20 more)
+Cohesion: 0.09
+Nodes (53): CustomerRequestDetail(), FreelancerOrders(), acceptRequestProposal(), buildDeliveryAssetError(), buildProfileInitials(), buildProfileName(), confirmOrderCompletion(), createFreelancerOrderUpdate() (+45 more)
 
 ### Community 2 - "Community 2"
+Cohesion: 0.05
+Nodes (21): BrowseCategories(), CartLineItem(), CartPage(), CustomerPayment(), PaymentOverview(), resolvePaymentCopy(), resolvePaymentTitle(), CustomerServiceDetail() (+13 more)
+
+### Community 3 - "Community 3"
 Cohesion: 0.06
 Nodes (22): getPublicServiceMediaUrl(), formatPeso(), getPublicServiceMediaUrl(), ServiceResultCard(), CustomerOrders(), getPublicUrl(), fetchAchievementUnlockMap(), getFileExtension() (+14 more)
 
-### Community 3 - "Community 3"
+### Community 4 - "Community 4"
 Cohesion: 0.08
 Nodes (17): deriveInitialValues(), deriveInitialValues(), coercePhilippinesLocation(), filterLocationOptions(), findBarangay(), findCity(), findRegion(), getBarangaysByRegionCity() (+9 more)
 
-### Community 4 - "Community 4"
-Cohesion: 0.08
-Nodes (17): BrowseCategories(), CustomerFreelancerProfile(), CustomerServiceDetail(), formatPeso(), packagesMatchCartItem(), FavBook(), FavCard(), getCategoryIcon() (+9 more)
-
 ### Community 5 - "Community 5"
 Cohesion: 0.1
-Nodes (25): deriveProfileNames(), ensureProfileForSession(), getAvatarUrl(), getProfile(), getProfileById(), getSession(), readResolvedAdminEmail(), requestEmailChange() (+17 more)
+Nodes (24): deriveProfileNames(), ensureProfileForSession(), getAvatarUrl(), getProfile(), getProfileById(), getSession(), readResolvedAdminEmail(), requestEmailChange() (+16 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.09
-Nodes (19): DashboardFreelancer(), FreelancerBrowseRequests(), FreelancerProfile(), FreelancerRequestDetail(), FreelancerSettings(), getFileExtension(), sanitizeFileName(), uploadAvatarFile() (+11 more)
+Cohesion: 0.12
+Nodes (22): CustomerFreelancerProfile(), buildBadge(), buildCustomerAchievementMetrics(), buildOrderMetrics(), buildReviewMetrics(), buildSavedMetrics(), makeAchievement(), buildPhilippinesLocationLabel() (+14 more)
 
 ### Community 7 - "Community 7"
-Cohesion: 0.18
-Nodes (26): buildServicePayload(), createFreelancerServiceListing(), deleteFreelancerDraft(), ensureFreelancerPayoutDestinationReady(), fetchFreelancerListingForEdit(), fetchOwnedServices(), fetchServiceMedia(), fetchServicePackages() (+18 more)
-
-### Community 8 - "Community 8"
-Cohesion: 0.09
-Nodes (9): FreelancerAchievements(), formatStatusLabel(), FreelancerVerification(), fetchUnlockMap(), getFileExtension(), sanitizeFileName(), toObjectMap(), uploadVerificationFile() (+1 more)
-
-### Community 9 - "Community 9"
 Cohesion: 0.11
 Nodes (16): buildCategoryPath(), clearFeaturedCategoryIntent(), getFeaturedCategoryFromSearch(), getFeaturedCategoryIntent(), getIntentStorage(), normalizeFeaturedCategory(), persistFeaturedCategoryFromSearch(), resolveFeaturedCategoryIntent() (+8 more)
 
+### Community 8 - "Community 8"
+Cohesion: 0.18
+Nodes (26): buildServicePayload(), createFreelancerServiceListing(), deleteFreelancerDraft(), ensureFreelancerPayoutDestinationReady(), fetchFreelancerListingForEdit(), fetchOwnedServices(), fetchServiceMedia(), fetchServicePackages() (+18 more)
+
+### Community 9 - "Community 9"
+Cohesion: 0.1
+Nodes (13): DashboardFreelancer(), FreelancerAchievements(), FreelancerProfile(), FreelancerSettings(), formatStatusLabel(), FreelancerVerification(), buildFreelancerTasks(), getFileExtension() (+5 more)
+
 ### Community 10 - "Community 10"
-Cohesion: 0.13
-Nodes (18): buildAbsoluteUrl(), buildShareLinks(), NewsFeedPageContent(), buildPhilippinesLocationLabel(), buildFreelancerTasks(), buildDisplayName(), buildInitials(), formatFeedDate() (+10 more)
-
-### Community 11 - "Community 11"
-Cohesion: 0.12
-Nodes (9): CartLineItem(), CartPage(), CustomerPayment(), PaymentOverview(), resolvePaymentCopy(), resolvePaymentTitle(), formatPeso(), ListingResultCard() (+1 more)
-
-### Community 12 - "Community 12"
 Cohesion: 0.12
 Nodes (10): getCustomerDisplayName(), getCustomerInitials(), getCustomerRealName(), formatPeso(), getPublicServiceMediaUrl(), normalizeRelation(), RecommendedServiceCard(), Profile() (+2 more)
 
+### Community 11 - "Community 11"
+Cohesion: 0.14
+Nodes (12): DashBar(), NotificationPreviewItem(), FreelancerDashBar(), NotificationPreviewItem(), NotificationRow(), NotifPage(), buildBaseNotifications(), formatNotificationTime() (+4 more)
+
+### Community 12 - "Community 12"
+Cohesion: 0.19
+Nodes (17): getAuthRouteMessage(), clearCustomerWelcomeDestination(), clearDestination(), clearFreelancerWelcomeDestination(), getCustomerWelcomeDestination(), getDestination(), getFreelancerWelcomeDestination(), hasOwn() (+9 more)
+
 ### Community 13 - "Community 13"
-Cohesion: 0.15
-Nodes (11): DashBar(), NotificationPreviewItem(), FreelancerDashBar(), NotificationPreviewItem(), NotificationRow(), NotifPage(), formatNotificationTime(), normalizeStoredNotification() (+3 more)
+Cohesion: 0.12
+Nodes (5): fetchUnlockMap(), getFileExtension(), sanitizeFileName(), toObjectMap(), uploadVerificationFile()
 
 ### Community 14 - "Community 14"
 Cohesion: 0.13
-Nodes (6): CustomerSettings(), fetchBillingHistory(), fetchBillingProfile(), normalizeBillingHistory(), normalizeBillingProfile(), useCustomerAccountSettings()
+Nodes (5): AppRoutes(), BrandPageShell(), HomePage(), useCustomerBrandShell(), useRouteShellFamily()
 
 ### Community 15 - "Community 15"
-Cohesion: 0.14
-Nodes (10): formatConversationStarted(), formatFileSize(), MessageBubble(), MessagesWorkspace(), MessageThreadButton(), buildCounterpartMeta(), enrichAttachmentMessages(), fetchThreadMessages() (+2 more)
+Cohesion: 0.13
+Nodes (6): CustomerSettings(), fetchBillingHistory(), fetchBillingProfile(), normalizeBillingHistory(), normalizeBillingProfile(), useCustomerAccountSettings()
 
 ### Community 16 - "Community 16"
-Cohesion: 0.2
-Nodes (16): clearCustomerWelcomeDestination(), clearDestination(), clearFreelancerWelcomeDestination(), getCustomerWelcomeDestination(), getDestination(), getFreelancerWelcomeDestination(), hasOwn(), isBrowser() (+8 more)
-
-### Community 17 - "Community 17"
 Cohesion: 0.18
 Nodes (14): DashboardCustomer(), buildCalendarDays(), createDateFromValue(), formatDateKey(), formatDeadlineValue(), formatMonthLabel(), getTodayDateValue(), PostRequest() (+6 more)
 
+### Community 17 - "Community 17"
+Cohesion: 0.14
+Nodes (10): formatConversationStarted(), formatFileSize(), MessageBubble(), MessagesWorkspace(), MessageThreadButton(), buildCounterpartMeta(), enrichAttachmentMessages(), fetchThreadMessages() (+2 more)
+
 ### Community 18 - "Community 18"
 Cohesion: 0.18
-Nodes (5): AppRoutes(), BrandPageShell(), HomePage(), useCustomerBrandShell(), useRouteShellFamily()
+Nodes (11): FreelancerBrowseRequests(), FreelancerRequestDetail(), buildCustomerInitials(), buildCustomerName(), formatDeadline(), formatPeso(), normalizeRequest(), useFreelancerRequestDetail() (+3 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.14
@@ -195,28 +195,28 @@ Cohesion: 0.17
 Nodes (0): 
 
 ### Community 21 - "Community 21"
-Cohesion: 0.2
-Nodes (2): FoundersBand(), getFounderInitials()
+Cohesion: 0.22
+Nodes (5): buildAbsoluteUrl(), buildShareLinks(), buildSharePreviewUrl(), NewsFeedPageContent(), useNewsFeed()
 
 ### Community 22 - "Community 22"
-Cohesion: 0.31
-Nodes (7): buildBadge(), buildFreelancerAchievementMetrics(), buildListingMetrics(), buildOrderMetrics(), buildProposalMetrics(), buildReviewMetrics(), makeAchievement()
+Cohesion: 0.2
+Nodes (2): FoundersBand(), getFounderInitials()
 
 ### Community 23 - "Community 23"
 Cohesion: 0.22
 Nodes (3): DashboardFrame(), EmptySurface(), cn()
 
 ### Community 24 - "Community 24"
-Cohesion: 0.33
-Nodes (6): buildBadge(), buildCustomerAchievementMetrics(), buildOrderMetrics(), buildReviewMetrics(), buildSavedMetrics(), makeAchievement()
+Cohesion: 0.31
+Nodes (7): buildBadge(), buildFreelancerAchievementMetrics(), buildListingMetrics(), buildOrderMetrics(), buildProposalMetrics(), buildReviewMetrics(), makeAchievement()
 
 ### Community 25 - "Community 25"
-Cohesion: 0.36
-Nodes (4): buildAcceptedDeliveryAssetTypes(), formatFulfillmentLabel(), formatPayoutState(), FreelancerOrderDetail()
+Cohesion: 0.22
+Nodes (0): 
 
 ### Community 26 - "Community 26"
-Cohesion: 0.25
-Nodes (0): 
+Cohesion: 0.36
+Nodes (4): buildAcceptedDeliveryAssetTypes(), formatFulfillmentLabel(), formatPayoutState(), FreelancerOrderDetail()
 
 ### Community 27 - "Community 27"
 Cohesion: 0.25
@@ -235,7 +235,7 @@ Cohesion: 0.29
 Nodes (0): 
 
 ### Community 31 - "Community 31"
-Cohesion: 0.33
+Cohesion: 0.29
 Nodes (0): 
 
 ### Community 32 - "Community 32"
@@ -243,28 +243,28 @@ Cohesion: 0.33
 Nodes (0): 
 
 ### Community 33 - "Community 33"
+Cohesion: 0.33
+Nodes (0): 
+
+### Community 34 - "Community 34"
 Cohesion: 0.6
 Nodes (5): navigateToHomeSection(), navigateToPublicRoute(), resolveBehavior(), scrollToSectionId(), scrollWindowToTop()
 
-### Community 34 - "Community 34"
+### Community 35 - "Community 35"
 Cohesion: 0.8
 Nodes (4): buildSmokeReceiptPdf(), drawReceiptText(), enforceReceiptPdfAscii(), toReceiptPdfText()
-
-### Community 35 - "Community 35"
-Cohesion: 0.4
-Nodes (0): 
 
 ### Community 36 - "Community 36"
 Cohesion: 0.4
 Nodes (0): 
 
 ### Community 37 - "Community 37"
-Cohesion: 0.5
+Cohesion: 0.4
 Nodes (0): 
 
 ### Community 38 - "Community 38"
 Cohesion: 0.5
-Nodes (2): CustomerRequestDetail(), useCustomerRequestDetail()
+Nodes (0): 
 
 ### Community 39 - "Community 39"
 Cohesion: 0.5
@@ -459,17 +459,17 @@ Nodes (0):
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `buildPhilippinesLocationLabel()` connect `Community 10` to `Community 0`, `Community 3`, `Community 4`, `Community 6`, `Community 12`, `Community 15`, `Community 22`, `Community 24`?**
-  _High betweenness centrality (0.235) - this node is a cross-community bridge._
-- **Why does `getPublicUrl()` connect `Community 2` to `Community 11`, `Community 12`, `Community 6`?**
-  _High betweenness centrality (0.106) - this node is a cross-community bridge._
-- **Why does `normalizeProposal()` connect `Community 0` to `Community 10`?**
-  _High betweenness centrality (0.102) - this node is a cross-community bridge._
+- **Why does `buildPhilippinesLocationLabel()` connect `Community 6` to `Community 1`, `Community 4`, `Community 9`, `Community 10`, `Community 11`, `Community 17`, `Community 18`, `Community 24`?**
+  _High betweenness centrality (0.248) - this node is a cross-community bridge._
+- **Why does `getPublicUrl()` connect `Community 3` to `Community 0`, `Community 9`, `Community 2`, `Community 10`?**
+  _High betweenness centrality (0.140) - this node is a cross-community bridge._
+- **Why does `normalizeProposal()` connect `Community 1` to `Community 6`?**
+  _High betweenness centrality (0.104) - this node is a cross-community bridge._
 - **Are the 11 inferred relationships involving `buildPhilippinesLocationLabel()` (e.g. with `buildFreelancerTasks()` and `normalizeRequest()`) actually correct?**
   _`buildPhilippinesLocationLabel()` has 11 INFERRED edges - model-reasoned connections that need verification._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.1 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
