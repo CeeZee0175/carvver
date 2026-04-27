@@ -124,16 +124,14 @@ export function normalizeBarangayName(regionName, cityName, barangayName) {
 export function coercePhilippinesLocation({
   region = "",
   city = "",
-  barangay = "",
 } = {}) {
   const nextRegion = normalizeRegionName(region);
   const nextCity = normalizeCityName(nextRegion, city);
-  const nextBarangay = normalizeBarangayName(nextRegion, nextCity, barangay);
 
   return {
     region: nextRegion,
     city: nextCity,
-    barangay: nextBarangay,
+    barangay: "",
   };
 }
 
@@ -151,9 +149,8 @@ export function getRegionMapData() {
 export function buildPhilippinesLocationLabel({
   region = "",
   city = "",
-  barangay = "",
 } = {}) {
-  return [barangay, city, region].filter(Boolean).join(", ");
+  return [city, region].filter(Boolean).join(", ");
 }
 
 export { normalizeLocationText };

@@ -74,7 +74,6 @@ function normalizeRequest(row, profile, mediaRows) {
   const customerLocation = buildPhilippinesLocationLabel({
     region: profile?.region,
     city: profile?.city,
-    barangay: profile?.barangay,
   });
   const media = (mediaRows || []).map((item) => ({
     ...item,
@@ -240,4 +239,3 @@ export function useFreelancerRequestFilters(requests, { search = "", category = 
     return next;
   }, [category, requests, search, sort]);
 }
-

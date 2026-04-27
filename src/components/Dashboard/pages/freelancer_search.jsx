@@ -383,7 +383,6 @@ export default function FreelancerSearch() {
               buildPhilippinesLocationLabel({
                 region: customer?.region,
                 city: customer?.city,
-                barangay: customer?.barangay,
               }) ||
               "Location not specified",
           };
@@ -453,7 +452,7 @@ export default function FreelancerSearch() {
                   aria-hidden="true"
                 >
                   <Motion.path
-                    d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                    d="M 0,10 L 300,10"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.2"

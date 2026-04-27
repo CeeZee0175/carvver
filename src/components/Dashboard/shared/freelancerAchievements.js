@@ -211,7 +211,6 @@ export function buildFreelancerAchievementMetrics({
   const locationSignal = buildPhilippinesLocationLabel({
     region: String(profile?.region || "").trim(),
     city: String(profile?.city || "").trim(),
-    barangay: String(profile?.barangay || "").trim(),
   });
   const profileSignals = [
     displayName,

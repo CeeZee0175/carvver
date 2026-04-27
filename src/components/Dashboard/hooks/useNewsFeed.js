@@ -123,7 +123,6 @@ function normalizeServicePost(row, mediaRows, packageRows) {
     buildPhilippinesLocationLabel({
       region: profile?.region,
       city: profile?.city,
-      barangay: profile?.barangay,
     });
 
   return {
@@ -174,7 +173,6 @@ function normalizeRequestPost(row, profile, mediaRows) {
   const profileLocation = buildPhilippinesLocationLabel({
     region: profile?.region,
     city: profile?.city,
-    barangay: profile?.barangay,
   });
 
   return {

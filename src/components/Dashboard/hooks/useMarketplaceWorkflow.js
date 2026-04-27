@@ -227,7 +227,6 @@ function normalizeProposal(row) {
         buildPhilippinesLocationLabel({
           region: freelancer?.region,
           city: freelancer?.city,
-          barangay: freelancer?.barangay,
         }) || "Philippines",
     },
   };

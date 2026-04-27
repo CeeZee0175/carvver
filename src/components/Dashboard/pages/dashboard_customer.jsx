@@ -758,7 +758,6 @@ export default function DashboardCustomer() {
                   buildPhilippinesLocationLabel({
                     region: freelancer.region,
                     city: freelancer.city,
-                    barangay: freelancer.barangay,
                   }) || "Location not set";
 
                 return (

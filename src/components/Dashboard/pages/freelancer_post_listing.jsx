@@ -14,6 +14,12 @@ import {
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import { ALL_SERVICE_CATEGORIES } from "../../../lib/serviceCategories";
+import {
+  buildPhilippinesLocationLabel,
+  coercePhilippinesLocation,
+  getCitiesByRegion,
+  PH_REGION_OPTIONS,
+} from "../../../lib/phLocations";
 import SearchableCombobox from "../../Shared/searchable_combobox";
 import {
   fetchFreelancerListingForEdit,
@@ -61,6 +67,15 @@ function normalizePackagesForForm(packages = []) {
   }));
 }
 
+function deriveListingLocationParts(location = "") {
+  const [city = "", region = ""] = String(location || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return coercePhilippinesLocation({ region, city });
+}
+
 export default function FreelancerPostListing() {
   const navigate = useNavigate();
   const uploadRef = useRef(null);
@@ -71,7 +86,8 @@ export default function FreelancerPostListing() {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [fulfillmentType, setFulfillmentType] = useState("digital");
-  const [location, setLocation] = useState("");
+  const [region, setRegion] = useState("");
+  const [city, setCity] = useState("");
   const [description, setDescription] = useState("");
   const [highlightsText, setHighlightsText] = useState("");
   const [packages, setPackages] = useState(INITIAL_PACKAGES);
@@ -115,7 +131,9 @@ export default function FreelancerPostListing() {
         setTitle(listing.title || "");
         setCategory(listing.category || "");
         setFulfillmentType(listing.fulfillment_type || "digital");
-        setLocation(listing.location || "");
+        const locationParts = deriveListingLocationParts(listing.location);
+        setRegion(locationParts.region);
+        setCity(locationParts.city);
         setDescription(listing.listing_overview || listing.description || "");
         setHighlightsText(
           Array.isArray(listing.listing_highlights)
@@ -183,6 +201,7 @@ export default function FreelancerPostListing() {
         .filter(Boolean),
     [highlightsText]
   );
+  const cityOptions = useMemo(() => getCitiesByRegion(region), [region]);
 
   const updatePackage = (index, field, value) => {
     setPackages((prev) =>
@@ -252,6 +271,11 @@ export default function FreelancerPostListing() {
     try {
       setSubmittingMode(mode);
       setError("");
+      const normalizedLocation = coercePhilippinesLocation({ region, city });
+      const listingLocation = buildPhilippinesLocationLabel(normalizedLocation);
+      if (!normalizedLocation.region || !normalizedLocation.city) {
+        throw new Error("Please choose your region and city.");
+      }
 
       const savedListing = await saveFreelancerServiceListing({
         listingId,
@@ -259,7 +283,7 @@ export default function FreelancerPostListing() {
         category,
         fulfillmentType,
         description,
-        location,
+        location: listingLocation,
         highlights,
         packages,
         mediaItems: mediaItems.map((item) =>
@@ -330,7 +354,7 @@ export default function FreelancerPostListing() {
                   aria-hidden="true"
                 >
                   <Motion.path
-                    d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                    d="M 0,10 L 300,10"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.2"
@@ -358,7 +382,7 @@ export default function FreelancerPostListing() {
                 >
                   {submittingMode === "draft" ? (
                     <>
-                      <LoaderCircle className="requestSubmitBtn__spinner" />
+                      <LoaderCircle className="freelancerListingSpinner" />
                       <span>Saving...</span>
                     </>
                   ) : (
@@ -390,7 +414,7 @@ export default function FreelancerPostListing() {
               >
                 {submittingMode === "publish" || submittingMode === "save" ? (
                   <>
-                    <LoaderCircle className="requestSubmitBtn__spinner" />
+                    <LoaderCircle className="freelancerListingSpinner" />
                     <span>{listingPublished ? "Saving..." : "Publishing..."}</span>
                   </>
                 ) : (
@@ -496,13 +520,32 @@ export default function FreelancerPostListing() {
                 </label>
 
                 <label className="freelancerListingField">
-                  <span className="freelancerListingField__label">Location</span>
-                  <input
-                    className="freelancerListingField__input"
-                    type="text"
-                    placeholder="City, province, or area you serve"
-                    value={location}
-                    onChange={(event) => setLocation(event.target.value)}
+                  <span className="freelancerListingField__label">Region</span>
+                  <SearchableCombobox
+                    value={region}
+                    onSelect={(nextRegion) => {
+                      setRegion(nextRegion);
+                      setCity("");
+                    }}
+                    options={PH_REGION_OPTIONS}
+                    placeholder="Choose your region"
+                    searchHint="Choose service region"
+                    noResultsText="No regions found"
+                    ariaLabel="Choose listing region"
+                  />
+                </label>
+
+                <label className="freelancerListingField">
+                  <span className="freelancerListingField__label">City</span>
+                  <SearchableCombobox
+                    value={city}
+                    onSelect={setCity}
+                    options={cityOptions}
+                    placeholder={region ? "Choose your city" : "Choose a region first"}
+                    searchHint="Choose service city"
+                    noResultsText="No cities found"
+                    ariaLabel="Choose listing city"
+                    disabled={!region}
                   />
                 </label>
 

@@ -129,7 +129,6 @@ export function useServiceListingDetail(serviceId) {
         buildPhilippinesLocationLabel({
           region: profile?.region,
           city: profile?.city,
-          barangay: profile?.barangay,
         }) ||
         "Location not set";
 
@@ -158,7 +157,6 @@ export function useServiceListingDetail(serviceId) {
             buildPhilippinesLocationLabel({
               region: profile?.region,
               city: profile?.city,
-              barangay: profile?.barangay,
             }) || "Philippines",
           portfolioUrl: String(profile?.freelancer_portfolio_url || "").trim(),
           verified: Boolean(profile?.freelancer_verified_at || serviceRow.is_verified),

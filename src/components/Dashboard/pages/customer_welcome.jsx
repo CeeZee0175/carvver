@@ -8,7 +8,6 @@ import SearchableCombobox from "../../Shared/searchable_combobox";
 import {
   buildPhilippinesLocationLabel,
   coercePhilippinesLocation,
-  getBarangaysByRegionCity,
   getCitiesByRegion,
   PHILIPPINES_COUNTRY,
   PH_REGION_OPTIONS,
@@ -179,7 +178,6 @@ function deriveInitialValues(profile, user) {
     ...coercePhilippinesLocation({
       region: String(profile?.region || metadata.region || "").trim(),
       city: String(profile?.city || "").trim(),
-      barangay: String(profile?.barangay || "").trim(),
     }),
   };
 }
@@ -211,10 +209,6 @@ function validateLocation(values) {
 
   if (!String(values.city || "").trim()) {
     errors.city = "Please choose your city.";
-  }
-
-  if (!String(values.barangay || "").trim()) {
-    errors.barangay = "Please add your barangay or area.";
   }
 
   return errors;
@@ -254,17 +248,12 @@ export default function CustomerWelcome() {
     bio: "",
     region: "",
     city: "",
-    barangay: "",
   });
   const [fieldErrors, setFieldErrors] = useState({});
 
   const cityOptions = useMemo(
     () => getCitiesByRegion(formValues.region),
     [formValues.region]
-  );
-  const barangayOptions = useMemo(
-    () => getBarangaysByRegionCity(formValues.region, formValues.city),
-    [formValues.city, formValues.region]
   );
 
   useEffect(() => {
@@ -334,13 +323,11 @@ export default function CustomerWelcome() {
       ...prev,
       region: nextRegion,
       city: "",
-      barangay: "",
     }));
     setFieldErrors((prev) => ({
       ...prev,
       region: "",
       city: "",
-      barangay: "",
     }));
     if (saveError) setSaveError("");
   };
@@ -349,12 +336,10 @@ export default function CustomerWelcome() {
     setFormValues((prev) => ({
       ...prev,
       city: nextCity,
-      barangay: "",
     }));
     setFieldErrors((prev) => ({
       ...prev,
       city: "",
-      barangay: "",
     }));
     if (saveError) setSaveError("");
   };
@@ -405,7 +390,6 @@ export default function CustomerWelcome() {
       const normalizedLocation = coercePhilippinesLocation({
         region: String(formValues.region || "").trim(),
         city: String(formValues.city || "").trim(),
-        barangay: String(formValues.barangay || "").trim(),
       });
 
       await upsertProfile({
@@ -418,7 +402,6 @@ export default function CustomerWelcome() {
         country: PHILIPPINES_COUNTRY,
         region: normalizedLocation.region,
         city: normalizedLocation.city,
-        barangay: normalizedLocation.barangay,
         address: buildPhilippinesLocationLabel(normalizedLocation),
         customer_onboarding_completed_at: new Date().toISOString(),
       });
@@ -516,7 +499,7 @@ export default function CustomerWelcome() {
                         <span className="customerWelcomeIntro__number">02</span>
                         <div>
                           <strong>Add your location</strong>
-                          <span>Choose your region, city, and barangay or area.</span>
+                          <span>Choose your region and city.</span>
                         </div>
                       </div>
                     </div>
@@ -699,28 +682,6 @@ export default function CustomerWelcome() {
                       ) : null}
                     </label>
 
-                    <label className="customerWelcomeField customerWelcomeField--wide">
-                      <span className="customerWelcomeField__label">Barangay / area</span>
-                      <SearchableCombobox
-                        value={formValues.barangay}
-                        onSelect={(nextValue) => updateField("barangay", nextValue)}
-                        options={barangayOptions}
-                        placeholder={
-                          formValues.city
-                            ? "Choose your barangay or type your area"
-                            : "Choose a city first"
-                        }
-                        ariaLabel="Choose your barangay or area"
-                        error={Boolean(fieldErrors.barangay)}
-                        disabled={!formValues.city}
-                        allowCustomValue
-                        customValueLabel="Use"
-                        noResultsText="No barangays found. Type your area and press Enter."
-                      />
-                      {fieldErrors.barangay ? (
-                        <span className="customerWelcomeField__error">{fieldErrors.barangay}</span>
-                      ) : null}
-                    </label>
                   </div>
 
                   {saveError ? (

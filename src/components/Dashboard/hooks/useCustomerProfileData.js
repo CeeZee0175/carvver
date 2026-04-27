@@ -512,7 +512,6 @@ export function useCustomerProfileData() {
       bio,
       region,
       city,
-      barangay,
       age,
       avatarFile,
       removeAvatar = false,
@@ -546,15 +545,12 @@ export function useCustomerProfileData() {
       const normalizedLocationParts = coercePhilippinesLocation({
         region: String(region || "").trim(),
         city: String(city || "").trim(),
-        barangay: String(barangay || "").trim(),
       });
       const normalizedRegion = normalizedLocationParts.region;
       const normalizedCity = normalizedLocationParts.city;
-      const normalizedBarangay = normalizedLocationParts.barangay;
       const normalizedLocation = buildPhilippinesLocationLabel({
         region: normalizedRegion,
         city: normalizedCity,
-        barangay: normalizedBarangay,
       });
 
       let nextAvatarUrl = removeAvatar ? null : profile?.avatar_url || null;
@@ -568,13 +564,9 @@ export function useCustomerProfileData() {
         last_name: normalizedLastName,
         display_name: String(displayName || "").trim() || null,
         bio: String(bio || "").trim() || null,
-        country:
-          normalizedRegion || normalizedCity || normalizedBarangay
-            ? PHILIPPINES_COUNTRY
-            : null,
+        country: normalizedRegion || normalizedCity ? PHILIPPINES_COUNTRY : null,
         region: normalizedRegion || null,
         city: normalizedCity || null,
-        barangay: normalizedBarangay || null,
         address: normalizedLocation || null,
         age: normalizedAge,
         avatar_url: nextAvatarUrl,

@@ -210,14 +210,13 @@ export function buildCustomerAchievementMetrics({
   const bio = String(profile?.bio || "").trim();
   const region = String(profile?.region || "").trim();
   const city = String(profile?.city || "").trim();
-  const barangay = String(profile?.barangay || "").trim();
   const country = String(profile?.country || "").trim();
   const address = String(profile?.address || "").trim();
   const avatarUrl = String(profile?.avatar_url || "").trim();
   const createdAt = profile?.created_at ? new Date(profile.created_at) : null;
   const now = Date.now();
   const locationSignal =
-    buildPhilippinesLocationLabel({ region, city, barangay }) || address || country;
+    buildPhilippinesLocationLabel({ region, city }) || address || country;
 
   const profileSignals = [displayName, avatarUrl, bio, locationSignal].filter(Boolean).length;
   const ageDays =
@@ -231,7 +230,7 @@ export function buildCustomerAchievementMetrics({
     hasBio: Boolean(bio),
     hasLocation: Boolean(locationSignal),
     hasCountry: Boolean(locationSignal),
-    hasAddress: Boolean(barangay || address),
+    hasAddress: Boolean(address),
     profileSignalCount: profileSignals,
     showcasedBadgeCount: showcaseIds.filter(Boolean).length,
     accountAgeDays: ageDays,

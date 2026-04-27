@@ -9,7 +9,6 @@ import { ALL_SERVICE_CATEGORIES } from "../../../lib/serviceCategories";
 import {
   buildPhilippinesLocationLabel,
   coercePhilippinesLocation,
-  getBarangaysByRegionCity,
   getCitiesByRegion,
   PHILIPPINES_COUNTRY,
   PH_REGION_OPTIONS,
@@ -217,7 +216,6 @@ function deriveInitialValues(profile, user) {
     ...coercePhilippinesLocation({
       region: String(profile?.region || metadata.region || "").trim(),
       city: String(profile?.city || "").trim(),
-      barangay: String(profile?.barangay || "").trim(),
     }),
   };
 }
@@ -245,16 +243,11 @@ export default function FreelancerWelcome() {
     portfolioUrl: "",
     region: "",
     city: "",
-    barangay: "",
   });
 
   const cityOptions = useMemo(
     () => getCitiesByRegion(formValues.region),
     [formValues.region]
-  );
-  const barangayOptions = useMemo(
-    () => getBarangaysByRegionCity(formValues.region, formValues.city),
-    [formValues.city, formValues.region]
   );
 
   useEffect(() => {
@@ -325,13 +318,11 @@ export default function FreelancerWelcome() {
       ...prev,
       region: nextRegion,
       city: "",
-      barangay: "",
     }));
     setFieldErrors((prev) => ({
       ...prev,
       region: "",
       city: "",
-      barangay: "",
     }));
     if (saveError) setSaveError("");
   };
@@ -340,12 +331,10 @@ export default function FreelancerWelcome() {
     setFormValues((prev) => ({
       ...prev,
       city: nextCity,
-      barangay: "",
     }));
     setFieldErrors((prev) => ({
       ...prev,
       city: "",
-      barangay: "",
     }));
     if (saveError) setSaveError("");
   };
@@ -460,7 +449,6 @@ export default function FreelancerWelcome() {
       const normalizedLocation = coercePhilippinesLocation({
         region: String(formValues.region || "").trim(),
         city: String(formValues.city || "").trim(),
-        barangay: String(formValues.barangay || "").trim(),
       });
 
       await upsertProfile({
@@ -473,7 +461,6 @@ export default function FreelancerWelcome() {
         country: PHILIPPINES_COUNTRY,
         region: normalizedLocation.region,
         city: normalizedLocation.city,
-        barangay: normalizedLocation.barangay,
         address: buildPhilippinesLocationLabel(normalizedLocation),
         freelancer_headline: String(formValues.headline || "").trim(),
         freelancer_primary_category: String(formValues.primaryCategory || "").trim(),
@@ -601,8 +588,7 @@ export default function FreelancerWelcome() {
                         <div>
                           <strong>Set your location</strong>
                           <span>
-                            Choose the region, city, and barangay or area you
-                            want shown with your profile.
+                            Choose the region and city you want shown with your profile.
                           </span>
                         </div>
                       </div>
@@ -975,34 +961,6 @@ export default function FreelancerWelcome() {
                       ) : null}
                     </label>
 
-                    <label className="customerWelcomeField customerWelcomeField--wide">
-                      <span className="customerWelcomeField__label">
-                        Barangay / area
-                      </span>
-                      <SearchableCombobox
-                        value={formValues.barangay}
-                        onSelect={(nextValue) =>
-                          updateField("barangay", nextValue)
-                        }
-                        options={barangayOptions}
-                        placeholder={
-                          formValues.city
-                            ? "Choose your barangay or type your area"
-                            : "Choose a city first"
-                        }
-                        ariaLabel="Choose your barangay or area"
-                        error={Boolean(fieldErrors.barangay)}
-                        disabled={!formValues.city}
-                        allowCustomValue
-                        customValueLabel="Use"
-                        noResultsText="No barangays found. Type your area and press Enter."
-                      />
-                      {fieldErrors.barangay ? (
-                        <span className="customerWelcomeField__error">
-                          {fieldErrors.barangay}
-                        </span>
-                      ) : null}
-                    </label>
                   </div>
 
                   {saveError ? (

@@ -54,7 +54,6 @@ function buildCounterpartMeta(profile, role) {
   const location = buildPhilippinesLocationLabel({
     region: profile.region,
     city: profile.city,
-    barangay: profile.barangay,
   });
 
   return {

@@ -19,7 +19,6 @@ import SearchableCombobox from "../../Shared/searchable_combobox";
 import { ALL_SERVICE_CATEGORIES } from "../../../lib/serviceCategories";
 import {
   coercePhilippinesLocation,
-  getBarangaysByRegionCity,
   getCitiesByRegion,
   PH_REGION_OPTIONS,
 } from "../../../lib/phLocations";
@@ -103,7 +102,6 @@ export default function FreelancerProfile() {
     portfolioUrl: "",
     region: "",
     city: "",
-    barangay: "",
   });
 
   useEffect(() => {
@@ -111,7 +109,6 @@ export default function FreelancerProfile() {
     const normalizedLocation = coercePhilippinesLocation({
       region: profile.region || "",
       city: profile.city || "",
-      barangay: profile.barangay || "",
     });
 
     setFormValues({
@@ -128,7 +125,6 @@ export default function FreelancerProfile() {
       portfolioUrl: profile.freelancer_portfolio_url || "",
       region: normalizedLocation.region,
       city: normalizedLocation.city,
-      barangay: normalizedLocation.barangay,
     });
   }, [editing, profile]);
 
@@ -143,10 +139,6 @@ export default function FreelancerProfile() {
   const cityOptions = useMemo(
     () => getCitiesByRegion(formValues.region),
     [formValues.region]
-  );
-  const barangayOptions = useMemo(
-    () => getBarangaysByRegionCity(formValues.region, formValues.city),
-    [formValues.city, formValues.region]
   );
 
   const avatarSrc = removeAvatar
@@ -208,7 +200,6 @@ export default function FreelancerProfile() {
     const normalizedLocation = coercePhilippinesLocation({
       region: profile?.region || "",
       city: profile?.city || "",
-      barangay: profile?.barangay || "",
     });
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
@@ -232,7 +223,6 @@ export default function FreelancerProfile() {
       portfolioUrl: profile?.freelancer_portfolio_url || "",
       region: normalizedLocation.region,
       city: normalizedLocation.city,
-      barangay: normalizedLocation.barangay,
     });
   };
 
@@ -313,7 +303,6 @@ export default function FreelancerProfile() {
         portfolioUrl: formValues.portfolioUrl,
         region: formValues.region,
         city: formValues.city,
-        barangay: formValues.barangay,
         avatarFile,
         removeAvatar,
       });
@@ -352,7 +341,7 @@ export default function FreelancerProfile() {
                 aria-hidden="true"
               >
                 <Motion.path
-                  d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                  d="M 0,10 L 300,10"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.2"
@@ -776,7 +765,6 @@ export default function FreelancerProfile() {
                         ...prev,
                         region: nextValue,
                         city: "",
-                        barangay: "",
                       }))
                     }
                     options={PH_REGION_OPTIONS}
@@ -799,7 +787,6 @@ export default function FreelancerProfile() {
                       setFormValues((prev) => ({
                         ...prev,
                         city: nextValue,
-                        barangay: "",
                       }))
                     }
                     options={cityOptions}
@@ -812,36 +799,6 @@ export default function FreelancerProfile() {
                 ) : (
                   <div className="profileField__display">
                     {formValues.city || "No city added yet"}
-                  </div>
-                )}
-              </label>
-
-              <label className="profileField profileField--wide">
-                <span className="profileField__label">Barangay / area</span>
-                {editing ? (
-                  <SearchableCombobox
-                    value={formValues.barangay}
-                    onSelect={(nextValue) =>
-                      setFormValues((prev) => ({
-                        ...prev,
-                        barangay: nextValue,
-                      }))
-                    }
-                    options={barangayOptions}
-                    placeholder={
-                      formValues.city
-                        ? "Choose your barangay or type your area"
-                        : "Choose a city first"
-                    }
-                    ariaLabel="Choose your barangay or area"
-                    disabled={!formValues.city}
-                    allowCustomValue
-                    customValueLabel="Use"
-                    noResultsText="No barangays found. Type your area and press Enter."
-                  />
-                ) : (
-                  <div className="profileField__display">
-                    {formValues.barangay || "No barangay or area added yet"}
                   </div>
                 )}
               </label>

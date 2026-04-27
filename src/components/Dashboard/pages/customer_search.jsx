@@ -340,7 +340,6 @@ export default function CustomerSearch() {
               buildPhilippinesLocationLabel({
                 region: profile?.region,
                 city: profile?.city,
-                barangay: profile?.barangay,
               }) ||
               "",
           };
@@ -357,7 +356,6 @@ export default function CustomerSearch() {
             buildPhilippinesLocationLabel({
               region: row.region,
               city: row.city,
-              barangay: row.barangay,
             }) || "",
         }));
 

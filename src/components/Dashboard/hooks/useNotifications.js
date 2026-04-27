@@ -82,7 +82,6 @@ function buildBaseNotifications({ profile, role, savedCount, pendingOrders, rece
     buildPhilippinesLocationLabel({
       region: String(profile?.region || "").trim(),
       city: String(profile?.city || "").trim(),
-      barangay: String(profile?.barangay || "").trim(),
     }) ||
     String(profile?.address || "").trim() ||
     String(profile?.country || "").trim();

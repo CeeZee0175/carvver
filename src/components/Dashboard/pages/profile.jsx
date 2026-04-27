@@ -21,7 +21,6 @@ import SearchableCombobox from "../../Shared/searchable_combobox";
 import {
   buildPhilippinesLocationLabel,
   coercePhilippinesLocation,
-  getBarangaysByRegionCity,
   getCitiesByRegion,
   PH_REGION_OPTIONS,
 } from "../../../lib/phLocations";
@@ -125,7 +124,6 @@ export default function Profile() {
     bio: "",
     region: "",
     city: "",
-    barangay: "",
     age: "",
   });
   const [avatarFile, setAvatarFile] = useState(null);
@@ -136,17 +134,12 @@ export default function Profile() {
     () => getCitiesByRegion(formValues.region),
     [formValues.region]
   );
-  const barangayOptions = useMemo(
-    () => getBarangaysByRegionCity(formValues.region, formValues.city),
-    [formValues.city, formValues.region]
-  );
 
   useEffect(() => {
     if (!profile || editing) return;
     const normalizedLocation = coercePhilippinesLocation({
       region: profile.region || "",
       city: profile.city || "",
-      barangay: profile.barangay || "",
     });
 
     setFormValues({
@@ -156,7 +149,6 @@ export default function Profile() {
       bio: profile.bio || "",
       region: normalizedLocation.region,
       city: normalizedLocation.city,
-      barangay: normalizedLocation.barangay,
       age: profile.age == null ? "" : String(profile.age),
     });
   }, [editing, profile]);
@@ -191,7 +183,6 @@ export default function Profile() {
     buildPhilippinesLocationLabel({
       region: String(profile?.region || "").trim(),
       city: String(profile?.city || "").trim(),
-      barangay: String(profile?.barangay || "").trim(),
     }) ||
     String(profile?.address || profile?.country || "").trim();
   const ageLabel = profile?.age == null ? "" : String(profile.age);
@@ -248,7 +239,6 @@ export default function Profile() {
     const normalizedLocation = coercePhilippinesLocation({
       region: profile?.region || "",
       city: profile?.city || "",
-      barangay: profile?.barangay || "",
     });
 
     if (previewUrlRef.current) {
@@ -266,7 +256,6 @@ export default function Profile() {
       bio: profile?.bio || "",
       region: normalizedLocation.region,
       city: normalizedLocation.city,
-      barangay: normalizedLocation.barangay,
       age: profile?.age == null ? "" : String(profile.age),
     });
   };
@@ -336,7 +325,6 @@ export default function Profile() {
         bio: formValues.bio,
         region: formValues.region,
         city: formValues.city,
-        barangay: formValues.barangay,
         age: formValues.age,
         avatarFile,
         removeAvatar,
@@ -670,7 +658,6 @@ export default function Profile() {
                         ...prev,
                         region: nextValue,
                         city: "",
-                        barangay: "",
                       }))
                     }
                     options={PH_REGION_OPTIONS}
@@ -693,7 +680,6 @@ export default function Profile() {
                       setFormValues((prev) => ({
                         ...prev,
                         city: nextValue,
-                        barangay: "",
                       }))
                     }
                     options={cityOptions}
@@ -706,36 +692,6 @@ export default function Profile() {
                 ) : (
                   <div className="profileField__display">
                     {formValues.city || "No city added yet"}
-                  </div>
-                )}
-              </label>
-
-              <label className="profileField">
-                <span className="profileField__label">Barangay / area</span>
-                {editing ? (
-                  <SearchableCombobox
-                    value={formValues.barangay}
-                    onSelect={(nextValue) =>
-                      setFormValues((prev) => ({
-                        ...prev,
-                        barangay: nextValue,
-                      }))
-                    }
-                    options={barangayOptions}
-                    placeholder={
-                      formValues.city
-                        ? "Choose your barangay or type your area"
-                        : "Choose a city first"
-                    }
-                    ariaLabel="Choose your barangay or area"
-                    disabled={!formValues.city}
-                    allowCustomValue
-                    customValueLabel="Use"
-                    noResultsText="No barangays found. Type your area and press Enter."
-                  />
-                ) : (
-                  <div className="profileField__display">
-                    {formValues.barangay || "No barangay or area added yet"}
                   </div>
                 )}
               </label>

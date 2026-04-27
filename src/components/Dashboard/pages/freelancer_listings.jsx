@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { motion as Motion} from "framer-motion";
+import { LoaderCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import "./profile.css";
@@ -144,7 +145,7 @@ export default function FreelancerListings() {
                   aria-hidden="true"
                 >
                   <Motion.path
-                    d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                    d="M 0,10 L 300,10"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.2"
@@ -354,7 +355,14 @@ export default function FreelancerListings() {
                               onClick={() => handlePublish(listing.id)}
                               disabled={actionsLocked}
                             >
-                              {publishBusy ? "Publishing..." : "Publish"}
+                              {publishBusy ? (
+                                <>
+                                  <LoaderCircle className="freelancerListingSpinner" />
+                                  <span>Publishing...</span>
+                                </>
+                              ) : (
+                                <span>Publish</span>
+                              )}
                             </Motion.button>
 
                             <Motion.button
@@ -366,7 +374,14 @@ export default function FreelancerListings() {
                               onClick={() => handleDeleteDraft(listing.id)}
                               disabled={actionsLocked}
                             >
-                              {deleteBusy ? "Deleting..." : "Delete draft"}
+                              {deleteBusy ? (
+                                <>
+                                  <LoaderCircle className="freelancerListingSpinner" />
+                                  <span>Deleting...</span>
+                                </>
+                              ) : (
+                                <span>Delete draft</span>
+                              )}
                             </Motion.button>
                           </>
                         )}

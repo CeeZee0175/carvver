@@ -1,5 +1,5 @@
 .freelancerDashboardPage {
-  gap: clamp(20px, 2.8vw, 30px);
+  gap: clamp(18px, 2.4vw, 28px);
 }
 
 .freelancerDashboardPage .profileHero {
@@ -38,39 +38,39 @@
 }
 
 .freelancerDashboard__heroActions {
-  margin-top: 22px;
+  margin-top: 18px;
   justify-content: center;
 }
 
 .freelancerDashboardWorkspace__desc,
 .freelancerDashboardWorkspace__cta {
   font-family: Inter, system-ui, sans-serif;
-  font-size: 14px;
-  line-height: 1.66;
+  font-size: 13px;
+  line-height: 1.58;
   color: rgba(27, 16, 46, 0.66);
 }
 
 .freelancerDashboardSection {
-  padding-top: 26px;
+  padding-top: 20px;
 }
 
 .freelancerDashboardSection__head {
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .freelancerDashboardWorkspace {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
 .freelancerDashboardWorkspace__item {
   min-width: 0;
   display: grid;
-  gap: 10px;
-  padding: 18px;
+  gap: 8px;
+  padding: 15px 16px;
   border: 1px solid rgba(42, 20, 80, 0.1);
-  border-radius: 22px;
+  border-radius: 18px;
   background: rgba(255, 255, 255, 0.8);
   box-shadow: 0 16px 44px rgba(12, 7, 18, 0.05);
   text-align: left;
@@ -79,7 +79,7 @@
 
 .freelancerDashboardWorkspace__title {
   font-family: Inter, system-ui, sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.18;
   font-weight: 850;
   color: rgba(27, 16, 46, 0.96);

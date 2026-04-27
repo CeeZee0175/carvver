@@ -133,7 +133,6 @@ export default function CustomerFreelancerProfile() {
     buildPhilippinesLocationLabel({
       region: profile?.region,
       city: profile?.city,
-      barangay: profile?.barangay,
     }) ||
     String(profile?.country || PHILIPPINES_COUNTRY);
   const specialties = Array.isArray(profile?.freelancer_specialties)

@@ -203,7 +203,7 @@ export default function DashboardFreelancer() {
               ) : requestsLoading ? (
                 <div className="freelancerRequestGrid freelancerRequestGrid--preview">
                   {Array.from({ length: 3 }).map((_, index) => (
-                    <div key={index} className="freelancerRequestCard" style={{ minHeight: 400 }} />
+                    <div key={index} className="freelancerRequestCard" style={{ minHeight: 260 }} />
                   ))}
                 </div>
               ) : requests.length === 0 ? (

@@ -156,7 +156,6 @@ function buildFreelancerTasks(profile) {
         buildPhilippinesLocationLabel({
           region: String(profile?.region || "").trim(),
           city: String(profile?.city || "").trim(),
-          barangay: String(profile?.barangay || "").trim(),
         })
       ),
     },
@@ -221,7 +220,6 @@ export function useFreelancerProfileData() {
       buildPhilippinesLocationLabel({
         region: String(profile?.region || "").trim(),
         city: String(profile?.city || "").trim(),
-        barangay: String(profile?.barangay || "").trim(),
       }) ||
       String(profile?.address || "").trim() ||
       "No location added yet",
@@ -241,7 +239,6 @@ export function useFreelancerProfileData() {
       portfolioUrl,
       region,
       city,
-      barangay,
       avatarFile,
       removeAvatar = false,
     }) => {
@@ -252,7 +249,6 @@ export function useFreelancerProfileData() {
       const normalizedLocation = coercePhilippinesLocation({
         region: String(region || "").trim(),
         city: String(city || "").trim(),
-        barangay: String(barangay || "").trim(),
       });
 
       const normalizedValues = {
@@ -269,7 +265,6 @@ export function useFreelancerProfileData() {
         portfolioUrl: String(portfolioUrl || "").trim(),
         region: normalizedLocation.region,
         city: normalizedLocation.city,
-        barangay: normalizedLocation.barangay,
       };
 
       const errors = {
@@ -295,7 +290,6 @@ export function useFreelancerProfileData() {
         country: PHILIPPINES_COUNTRY,
         region: normalizedValues.region,
         city: normalizedValues.city,
-        barangay: normalizedValues.barangay,
         address: buildPhilippinesLocationLabel(normalizedValues),
         avatar_url: nextAvatarUrl,
         freelancer_headline: normalizedValues.headline,

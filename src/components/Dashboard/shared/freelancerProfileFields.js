@@ -87,9 +87,5 @@ export function validateFreelancerLocation(values) {
     errors.city = "Please choose your city.";
   }
 
-  if (!String(values.barangay || "").trim()) {
-    errors.barangay = "Please add your barangay or area.";
-  }
-
   return errors;
 }
