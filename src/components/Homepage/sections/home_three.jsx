@@ -1,140 +1,82 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   AnimatePresence,
-  LayoutGroup, motion as Motion,
+  LayoutGroup,
+  motion as Motion,
   useInView,
   useReducedMotion,
 } from "framer-motion";
-import {
-  BadgeCheck,
-  CreditCard,
-  Image,
-  Search,
-  Share2,
-  ShieldCheck,
-} from "lucide-react";
 import "./home_three.css";
 
-const CUSTOMER_CARDS = [
+const CUSTOMER_STEPS = [
   {
     id: "customer-1",
     step: "01",
     title: "Discover services faster",
     description:
-      "Browse categories, filter by location, and find service providers without jumping across multiple social media platforms.",
-    Icon: Search,
-    accent: "rgba(124,58,237,0.92)",
-    glow: "rgba(124,58,237,0.12)",
+      "Browse categories, compare providers, and find work that fits without chasing scattered social posts.",
+    detail: "Search, location, profiles, and service previews stay in one flow.",
   },
   {
     id: "customer-2",
     step: "02",
     title: "Choose with more confidence",
     description:
-      "Check profiles, reviews, badges, and verified providers to better understand who you are hiring.",
-    Icon: ShieldCheck,
-    accent: "rgba(42,20,80,0.92)",
-    glow: "rgba(42,20,80,0.10)",
+      "Read reviews, check badges, and understand the provider before starting the order.",
+    detail: "Trust signals sit close to the listing, where decisions actually happen.",
   },
   {
     id: "customer-3",
     step: "03",
-    title: "Pay securely and receive your service",
+    title: "Pay securely and receive the work",
     description:
-      "Payments are held securely first, helping reduce scams and making refunds easier when issues are proven.",
-    Icon: CreditCard,
-    accent: "rgba(242,193,78,0.98)",
-    glow: "rgba(242,193,78,0.14)",
+      "Carvver keeps the order structured from payment to delivery, so the handoff feels clearer for both sides.",
+    detail: "Payment, messages, delivery notes, and completion stay connected.",
   },
 ];
 
-const PROVIDER_CARDS = [
+const PROVIDER_STEPS = [
   {
     id: "provider-1",
     step: "01",
-    title: "Create your listing and showcase your work",
+    title: "Create a listing people can understand",
     description:
-      "Set up your profile, describe your service, and upload samples, screenshots, or teasers to attract customers.",
-    Icon: Image,
-    accent: "rgba(124,58,237,0.92)",
-    glow: "rgba(124,58,237,0.12)",
+      "Set the category, service details, packages, and media so customers can judge your work quickly.",
+    detail: "Your listing becomes the place people inspect, book, and share.",
   },
   {
     id: "provider-2",
     step: "02",
-    title: "Build trust and get discovered",
+    title: "Build trust while you grow",
     description:
-      "Earn achievements, badges, and even a verified badge to strengthen your credibility within the platform.",
-    Icon: BadgeCheck,
-    accent: "rgba(42,20,80,0.92)",
-    glow: "rgba(42,20,80,0.10)",
+      "Profile progress, badges, reviews, and verification help your work look credible inside the marketplace.",
+    detail: "The strongest trust signals show up where customers are deciding.",
   },
   {
     id: "provider-3",
     step: "03",
-    title: "Share, communicate, and grow",
+    title: "Share, talk, and manage orders",
     description:
-      "Promote your listing inside Carvver and across social media, talk directly with customers, and manage your service requests more easily.",
-    Icon: Share2,
-    accent: "rgba(242,193,78,0.98)",
-    glow: "rgba(242,193,78,0.14)",
+      "Promote your listing, answer customers, and keep request or order details organized in one platform.",
+    detail: "Discovery, messages, and order updates keep momentum in the same place.",
   },
 ];
 
-const SWIPE_THRESHOLD = 70;
-
-function TypewriterTitle({ id, text = "How It Works", active }) {
-  const [displayText, setDisplayText] = useState("");
-  const startedRef = useRef(false);
+function RevealTitle({ id, text = "How It Works", active }) {
   const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (!active || startedRef.current) return;
-    startedRef.current = true;
-
-    if (reduceMotion) {
-      queueMicrotask(() => setDisplayText(text));
-      return undefined;
-    }
-
-    let timeoutId;
-    let index = 0;
-
-    const tick = () => {
-      index += 1;
-      setDisplayText(text.slice(0, index));
-
-      if (index < text.length) {
-        timeoutId = setTimeout(tick, 88);
-      }
-    };
-
-    timeoutId = setTimeout(tick, 140);
-
-    return () => clearTimeout(timeoutId);
-  }, [active, reduceMotion, text]);
 
   return (
     <div className="homeThreeTitle">
       <div className="homeThreeTitle__wrap">
-        <h2 id={id} className="homeThree__title">
-          <span>{displayText}</span>
-
-          {!reduceMotion && (
-            <Motion.span
-              className="homeThree__cursor"
-              aria-hidden="true"
-              animate={{ opacity: [1, 0, 1] }}
-              transition={{
-                duration: 0.9,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              |
-            </Motion.span>
-          )}
-        </h2>
+        <Motion.h2
+          id={id}
+          className="homeThree__title"
+          initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+          animate={active || reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+          transition={{ duration: 0.5, ease: [0.2, 0.95, 0.2, 1] }}
+        >
+          {text}
+        </Motion.h2>
 
         <Motion.svg
           className="homeThree__underline"
@@ -148,18 +90,15 @@ function TypewriterTitle({ id, text = "How It Works", active }) {
             strokeWidth="2.2"
             strokeLinecap="round"
             d="M 0,10 L 300,10"
-            initial={{ pathLength: 0, opacity: 0 }}
+            initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
             animate={
-              active
-                ? {
-                    pathLength: 1,
-                    opacity: 1,
-                  }
+              active || reduceMotion
+                ? { pathLength: 1, opacity: 1 }
                 : { pathLength: 0, opacity: 0 }
             }
             transition={{
-              pathLength: { duration: 1.1, ease: "easeInOut" },
-              opacity: { duration: 0.35 },
+              pathLength: { duration: 0.72, ease: [0.2, 0.95, 0.2, 1], delay: 0.12 },
+              opacity: { duration: 0.22, delay: 0.08 },
             }}
           />
         </Motion.svg>
@@ -170,194 +109,106 @@ function TypewriterTitle({ id, text = "How It Works", active }) {
 
 function RoleToggle({ value, onChange }) {
   return (
-    <div className="homeThreeToggle" role="tablist" aria-label="How it works audience">
-      <div className="homeThreeToggle__inner">
-        <div className="homeThreeToggle__slot">
-          {value === "customer" && (
+    <LayoutGroup id="home-three-role-toggle">
+      <div className="homeThreeToggle" role="tablist" aria-label="How it works audience">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={value === "customer"}
+          className={`homeThreeToggle__btn ${
+            value === "customer" ? "homeThreeToggle__btn--active" : ""
+          }`}
+          onClick={() => onChange("customer")}
+        >
+          {value === "customer" ? (
             <Motion.span
-              layoutId="homeThreeToggleLine"
-              className="homeThreeToggle__line"
+              layoutId="homeThreeToggleIndicator"
+              className="homeThreeToggle__indicator"
               transition={{ type: "spring", stiffness: 420, damping: 34 }}
             />
-          )}
+          ) : null}
+          <span className="homeThreeToggle__text">Customer</span>
+        </button>
 
-          <Motion.button
-            type="button"
-            role="tab"
-            aria-selected={value === "customer"}
-            className={`homeThreeToggle__btn ${value === "customer" ? "homeThreeToggle__btn--active" : ""}`}
-            onClick={() => onChange("customer")}
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.985 }}
-          >
-            Customer
-          </Motion.button>
-        </div>
-
-        <span className="homeThreeToggle__sep" aria-hidden="true">
-          |
-        </span>
-
-        <div className="homeThreeToggle__slot">
-          {value === "provider" && (
+        <button
+          type="button"
+          role="tab"
+          aria-selected={value === "provider"}
+          className={`homeThreeToggle__btn ${
+            value === "provider" ? "homeThreeToggle__btn--active" : ""
+          }`}
+          onClick={() => onChange("provider")}
+        >
+          {value === "provider" ? (
             <Motion.span
-              layoutId="homeThreeToggleLine"
-              className="homeThreeToggle__line"
+              layoutId="homeThreeToggleIndicator"
+              className="homeThreeToggle__indicator"
               transition={{ type: "spring", stiffness: 420, damping: 34 }}
             />
-          )}
-
-          <Motion.button
-            type="button"
-            role="tab"
-            aria-selected={value === "provider"}
-            className={`homeThreeToggle__btn ${value === "provider" ? "homeThreeToggle__btn--active" : ""}`}
-            onClick={() => onChange("provider")}
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.985 }}
-          >
-            Service Providers
-          </Motion.button>
-        </div>
+          ) : null}
+          <span className="homeThreeToggle__text">Service Providers</span>
+        </button>
       </div>
-    </div>
+    </LayoutGroup>
   );
 }
 
-function VerticalCardStack({ cards, stackKey, inView }) {
+function ProcessLayout({ steps, role, inView }) {
   const reduceMotion = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [dragReady, setDragReady] = useState(false);
+  const activeStep = steps[activeIndex] || steps[0];
 
   useEffect(() => {
     queueMicrotask(() => setActiveIndex(0));
-  }, [stackKey]);
-
-  useEffect(() => {
-    if (!inView) return;
-
-    queueMicrotask(() => setDragReady(false));
-
-    const timer = setTimeout(() => {
-      setDragReady(true);
-    }, reduceMotion ? 0 : 420);
-
-    return () => clearTimeout(timer);
-  }, [inView, stackKey, reduceMotion]);
-
-  const displayCards = useMemo(() => {
-    const reordered = [];
-
-    for (let i = 0; i < cards.length; i += 1) {
-      const index = (activeIndex + i) % cards.length;
-      reordered.push({ ...cards[index], stackPosition: i });
-    }
-
-    return reordered.reverse();
-  }, [cards, activeIndex]);
-
-  const handleDragEnd = (_, info) => {
-    const { offset, velocity } = info;
-    const swipe = Math.abs(offset.y) * velocity.y;
-
-    if (offset.y < -SWIPE_THRESHOLD || swipe < -1000) {
-      setActiveIndex((prev) => (prev + 1) % cards.length);
-      return;
-    }
-
-    if (offset.y > SWIPE_THRESHOLD || swipe > 1000) {
-      setActiveIndex((prev) => (prev - 1 + cards.length) % cards.length);
-    }
-  };
+  }, [role]);
 
   return (
-    <div className="homeThreeStack">
-      <Motion.div
-        className="homeThreeStack__stage"
-        initial={{ opacity: 0, y: 12 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.55, ease: [0.2, 0.95, 0.2, 1], delay: 0.14 }}
-      >
-        <LayoutGroup id={`homeThreeStack-${stackKey}`}>
-          <AnimatePresence initial={false} mode="popLayout">
-            {displayCards.map((card) => {
-              const isTopCard = card.stackPosition === 0;
-              const Icon = card.Icon;
+    <Motion.div
+      className="homeThreeProcess"
+      initial={{ opacity: 0, y: 16 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, ease: [0.2, 0.95, 0.2, 1], delay: 0.16 }}
+    >
+      <div className="homeThreeRail" aria-label={`${role} steps`}>
+        {steps.map((step, index) => {
+          const active = index === activeIndex;
 
-              return (
-                <Motion.article
-                  key={`${stackKey}-${card.id}`}
-                  layout="position"
-                  className={`homeThreeCard ${isTopCard ? "homeThreeCard--top" : ""}`}
-                  style={{
-                    zIndex: cards.length - card.stackPosition,
-                    "--card-accent": card.accent,
-                    "--card-glow": card.glow,
-                  }}
-                  initial={false}
-                  animate={{
-                    opacity: 1 - card.stackPosition * 0.12,
-                    scale: 1 - card.stackPosition * 0.045,
-                    y: card.stackPosition * 22,
-                  }}
-                  exit={{ opacity: 0, scale: 0.96, y: -26 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 320,
-                    damping: 30,
-                  }}
-                  drag={isTopCard && dragReady && !reduceMotion ? "y" : false}
-                  dragConstraints={{ top: 0, bottom: 0 }}
-                  dragElastic={0.14}
-                  dragMomentum={false}
-                  dragSnapToOrigin
-                  onDragEnd={handleDragEnd}
-                  whileDrag={
-                    reduceMotion
-                      ? undefined
-                      : {
-                          scale: 1.015,
-                          boxShadow: "0 30px 100px rgba(12,7,18,0.18)",
-                        }
-                  }
-                  whileTap={reduceMotion ? undefined : { scale: isTopCard ? 0.992 : 1 }}
-                >
-                  <div className="homeThreeCard__top">
-                    <span className="homeThreeCard__step">Step {card.step}</span>
-
-                    <span className="homeThreeCard__iconWrap" aria-hidden="true">
-                      <Icon className="homeThreeCard__icon" />
-                    </span>
-                  </div>
-
-                  <div className="homeThreeCard__bar" aria-hidden="true" />
-
-                  <h3 className="homeThreeCard__title">{card.title}</h3>
-
-                  <p className="homeThreeCard__desc">{card.description}</p>
-
-                  {isTopCard && dragReady && (
-                    <div className="homeThreeCard__hint">Drag up or down</div>
-                  )}
-                </Motion.article>
-              );
-            })}
-          </AnimatePresence>
-        </LayoutGroup>
-      </Motion.div>
-
-      <div className="homeThreeDots" aria-label="Stack navigation">
-        {cards.map((_, index) => (
-          <button
-            key={index}
-            type="button"
-            className={`homeThreeDots__btn ${index === activeIndex ? "homeThreeDots__btn--active" : ""}`}
-            onClick={() => setActiveIndex(index)}
-            aria-label={`Go to step ${index + 1}`}
-          />
-        ))}
+          return (
+            <button
+              key={step.id}
+              type="button"
+              className={`homeThreeRail__item ${active ? "homeThreeRail__item--active" : ""}`}
+              onClick={() => setActiveIndex(index)}
+              aria-current={active ? "step" : undefined}
+            >
+              <span className="homeThreeRail__number">{step.step}</span>
+              <span className="homeThreeRail__copy">
+                <strong>{step.title}</strong>
+              </span>
+            </button>
+          );
+        })}
       </div>
-    </div>
+
+      <div className="homeThreeDetail" aria-live="polite">
+        <AnimatePresence mode="wait">
+          <Motion.article
+            key={`${role}-${activeStep.id}`}
+            className="homeThreeDetail__card"
+            initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -12 }}
+            transition={{ duration: 0.28, ease: [0.2, 0.95, 0.2, 1] }}
+          >
+            <span className="homeThreeDetail__number">{activeStep.step}</span>
+            <h3 className="homeThreeDetail__title">{activeStep.title}</h3>
+            <p className="homeThreeDetail__desc">{activeStep.description}</p>
+            <div className="homeThreeDetail__line" aria-hidden="true" />
+            <p className="homeThreeDetail__note">{activeStep.detail}</p>
+          </Motion.article>
+        </AnimatePresence>
+      </div>
+    </Motion.div>
   );
 }
 
@@ -366,22 +217,20 @@ export default function HomeThree() {
   const inView = useInView(ref, { amount: 0.42, once: true });
   const [role, setRole] = useState("customer");
 
-  const cards = role === "customer" ? CUSTOMER_CARDS : PROVIDER_CARDS;
+  const steps = role === "customer" ? CUSTOMER_STEPS : PROVIDER_STEPS;
 
   return (
     <section className="homeThree" ref={ref} aria-labelledby="homeThree-title">
       <div className="homeThree__inner">
-        <TypewriterTitle id="homeThree-title" text="How It Works" active={inView} />
-
-        <Motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, ease: [0.2, 0.95, 0.2, 1], delay: 0.18 }}
-        >
+        <div className="homeThree__head">
+          <RevealTitle id="homeThree-title" text="How It Works" active={inView} />
+          <p className="homeThree__intro">
+            A clearer path for hiring and selling, with the important decisions kept in one place.
+          </p>
           <RoleToggle value={role} onChange={setRole} />
-        </Motion.div>
+        </div>
 
-        <VerticalCardStack cards={cards} stackKey={role} inView={inView} />
+        <ProcessLayout steps={steps} role={role} inView={inView} />
       </div>
     </section>
   );

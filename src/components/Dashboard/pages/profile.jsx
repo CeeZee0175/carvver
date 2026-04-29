@@ -45,6 +45,7 @@ import {
   TypewriterHeading,
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
+import MarketplaceComments from "../shared/marketplace_comments";
 import "./profile.css";
 
 function formatCompactDate(value) {
@@ -901,6 +902,23 @@ export default function Profile() {
           )}
         </section>
       </Reveal>
+
+      {profile?.id ? (
+        <Reveal delay={0.17}>
+          <section className="profileSection">
+            <MarketplaceComments
+              targetType="customer_profile"
+              targetId={profile.id}
+              targetOwnerId={profile.id}
+              allowCompose={false}
+              title="Profile comments"
+              description="Freelancer comments about your customer profile appear here."
+              emptyTitle="No freelancer comments yet."
+              emptyDescription="When freelancers leave profile comments, they will appear here."
+            />
+          </section>
+        </Reveal>
+      ) : null}
 
       <Reveal delay={0.18}>
         <section className="profileSection">

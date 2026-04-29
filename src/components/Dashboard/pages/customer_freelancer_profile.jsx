@@ -31,6 +31,7 @@ import {
 import { useCustomerFavoriteFreelancers } from "../hooks/useCustomerFavoriteFreelancers";
 import VerifiedBadge from "../shared/VerifiedBadge";
 import { getFreelancerAchievementById } from "../shared/freelancerAchievements";
+import MarketplaceComments from "../shared/marketplace_comments";
 import "./customer_freelancer_profile.css";
 
 const supabase = createClient();
@@ -402,7 +403,23 @@ export default function CustomerFreelancerProfile() {
             </section>
           </Reveal>
 
-          <Reveal delay={0.16}>
+          <Reveal delay={0.18}>
+            <section className="customerFreelancerSection">
+              <MarketplaceComments
+                targetType="freelancer_profile"
+                targetId={freelancerId}
+                targetOwnerId={freelancerId}
+                title="Profile comments"
+                description="Ask a short question or leave context for this freelancer."
+                emptyTitle="No profile comments yet."
+                emptyDescription="Customers can start a focused thread on this freelancer profile."
+                composePlaceholder="Write a profile comment"
+                composeHelper="Customers can comment here. Project details still work best in messages."
+              />
+            </section>
+          </Reveal>
+
+          <Reveal delay={0.2}>
             <section className="customerFreelancerSection">
               <div className="customerFreelancerSection__head">
                 <div>

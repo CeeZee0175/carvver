@@ -1,116 +1,82 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion as Motion, useInView, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion as Motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Check, LoaderCircle } from "lucide-react";
 import { createClient } from "../../../lib/supabase/client";
 import "./home_four.css";
 
 const supabase = createClient();
 const NEWSLETTER_TABLE = "newsletter_signups";
+const WHEEL_SENSITIVITY = 0.00115;
+const TOUCH_SENSITIVITY = 0.006;
 
-const labelContainerVariants = {
-  initial: {},
-  animate: {
-    transition: {
-      staggerChildren: 0.035,
-    },
+const STORY_STEPS = [
+  {
+    id: "find",
+    number: "01",
+    title: "Find real services",
+    text: "Open the marketplace and get straight to work you can inspect: categories, profiles, media, and clear listing details.",
   },
-};
+  {
+    id: "book",
+    number: "02",
+    title: "Book with trust",
+    text: "Reviews, badges, order details, and payment status stay close to the decision, so both sides know what is happening.",
+  },
+  {
+    id: "next",
+    number: "03",
+    title: "See what comes next",
+    text: "We are shaping Carvver around practical marketplace updates, cleaner trust tools, and smoother service flows.",
+  },
+];
 
-const labelLetterVariants = {
-  initial: {
-    y: 0,
-    opacity: 1,
-    color: "rgba(27,16,46,0.62)",
-  },
-  animate: {
-    y: -22,
-    opacity: 0.92,
-    color: "rgba(27,16,46,0.46)",
-    transition: {
-      type: "spring",
-      stiffness: 280,
-      damping: 20,
-    },
-  },
-};
+const ROTATING_PHRASES = [
+  "cleaner discovery",
+  "trusted bookings",
+  "sharper listings",
+  "better service flow",
+];
 
-function FlipText({
-  word,
-  active,
-  duration = 0.5,
-  delayMultiple = 0.08,
-}) {
-  return (
-    <span className="homeFour__flip">
-      {word.split("").map((char, i) => (
-        <Motion.span
-          key={`${char}-${i}`}
-          className={`homeFour__char ${char === " " ? "homeFour__char--space" : ""}`}
-          initial={false}
-          animate={active ? { rotateX: 0, opacity: 1 } : { rotateX: -90, opacity: 0 }}
-          transition={{
-            duration,
-            delay: i * delayMultiple,
-            ease: [0.2, 0.95, 0.2, 1],
-          }}
-        >
-          {char === " " ? "\u00A0" : char}
-        </Motion.span>
-      ))}
-    </span>
-  );
+function clampProgress(value) {
+  return Math.min(Math.max(value, 0), 1);
 }
 
-function TypewriterDescription({
-  text,
-  active,
-  speed = 18,
-  initialDelay = 720,
-}) {
-  const [displayText, setDisplayText] = useState("");
-  const startedRef = useRef(false);
-  const reduceMotion = useReducedMotion();
+function resolveChapterIndex(progress) {
+  if (progress >= 0.72) return 2;
+  if (progress >= 0.38) return 1;
+  return 0;
+}
 
-  useEffect(() => {
-    if (!active || startedRef.current) return;
-    startedRef.current = true;
+function isSectionActive(element) {
+  if (!element || typeof window === "undefined") return false;
 
-    if (reduceMotion) {
-      queueMicrotask(() => setDisplayText(text));
-      return undefined;
-    }
+  const rect = element.getBoundingClientRect();
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  const rootStyles = window.getComputedStyle(document.documentElement);
+  const navHeight = Number.parseFloat(rootStyles.getPropertyValue("--nav-h")) || 66;
 
-    let timeoutId;
-    let index = 0;
+  return rect.top <= navHeight + 32 && rect.bottom >= viewportHeight * 0.72;
+}
 
-    const tick = () => {
-      index += 1;
-      setDisplayText(text.slice(0, index));
+function getNavHeight() {
+  if (typeof window === "undefined") return 66;
 
-      if (index < text.length) {
-        timeoutId = setTimeout(tick, speed);
-      }
-    };
+  const rootStyles = window.getComputedStyle(document.documentElement);
+  return Number.parseFloat(rootStyles.getPropertyValue("--nav-h")) || 66;
+}
 
-    timeoutId = setTimeout(tick, initialDelay);
+function getSectionLockTop(element) {
+  if (!element || typeof window === "undefined") return 0;
 
-    return () => clearTimeout(timeoutId);
-  }, [active, text, speed, initialDelay, reduceMotion]);
+  const rect = element.getBoundingClientRect();
+  return Math.max(0, Math.round(window.scrollY + rect.top - getNavHeight()));
+}
 
-  return (
-    <p className="homeFour__desc">
-      <span>{displayText}</span>
-      {!reduceMotion && displayText.length < text.length && (
-        <Motion.span
-          className="homeFour__descCursor"
-          aria-hidden="true"
-          animate={{ opacity: [1, 0, 1] }}
-          transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
-        >
-          |
-        </Motion.span>
-      )}
-    </p>
+function isEditableTarget(target) {
+  if (!(target instanceof HTMLElement)) return false;
+
+  return Boolean(
+    target.closest("input, textarea, select, button, a, [contenteditable='true']")
   );
 }
 
@@ -122,10 +88,6 @@ function EmailInput({
   status,
   message,
 }) {
-  const [isFocused, setIsFocused] = useState(false);
-  const reduceMotion = useReducedMotion();
-  const showLabel = isFocused || value.length > 0;
-
   return (
     <form
       className="homeFourForm"
@@ -134,7 +96,7 @@ function EmailInput({
       aria-busy={isSubmitting}
       noValidate
     >
-      <Motion.div
+      <div
         className={`homeFourInput ${
           status === "error"
             ? "homeFourInput--error"
@@ -142,44 +104,20 @@ function EmailInput({
             ? "homeFourInput--success"
             : ""
         }`}
-        animate={
-          reduceMotion
-            ? {}
-            : status === "error"
-            ? { x: [0, -5, 5, -3, 3, 0] }
-            : { x: 0 }
-        }
-        transition={{ duration: 0.3 }}
       >
-        <Motion.div
-          className="homeFourInput__label"
-          variants={labelContainerVariants}
-          initial="initial"
-          animate={showLabel ? "animate" : "initial"}
-          aria-hidden="true"
-        >
-          {"Enter your email".split("").map((char, index) => (
-            <Motion.span
-              key={index}
-              className="homeFourInput__labelChar"
-              variants={labelLetterVariants}
-            >
-              {char === " " ? "\u00A0" : char}
-            </Motion.span>
-          ))}
-        </Motion.div>
+        <label className="homeFourInput__label" htmlFor="home-four-email">
+          Email address
+        </label>
 
         <input
+          id="home-four-email"
           type="email"
           inputMode="email"
           autoComplete="email"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onChange={(event) => onChange(event.target.value)}
           className="homeFourInput__control"
-          placeholder="Enter your email"
-          aria-label="Email address"
+          placeholder="you@example.com"
           aria-invalid={status === "error"}
           disabled={isSubmitting}
         />
@@ -197,8 +135,8 @@ function EmailInput({
               : "Submit email"
           }
           disabled={isSubmitting}
-          whileHover={isSubmitting ? undefined : { y: -1.5, scale: 1.03 }}
-          whileTap={isSubmitting ? undefined : { scale: 0.95 }}
+          whileHover={isSubmitting ? undefined : { y: -1 }}
+          whileTap={isSubmitting ? undefined : { scale: 0.97 }}
           transition={{ type: "spring", stiffness: 360, damping: 24 }}
         >
           <AnimatePresence mode="wait" initial={false}>
@@ -208,7 +146,7 @@ function EmailInput({
                 initial={{ opacity: 0, scale: 0.72 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.72 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.18 }}
                 className="homeFourInput__iconWrap"
               >
                 <LoaderCircle className="homeFourInput__submitIcon homeFourInput__submitIcon--loading" />
@@ -216,10 +154,10 @@ function EmailInput({
             ) : status === "success" ? (
               <Motion.span
                 key="check"
-                initial={{ opacity: 0, scale: 0.7, rotate: -12 }}
-                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                exit={{ opacity: 0, scale: 0.7, rotate: 12 }}
-                transition={{ duration: 0.22 }}
+                initial={{ opacity: 0, scale: 0.72 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.72 }}
+                transition={{ duration: 0.18 }}
                 className="homeFourInput__iconWrap"
               >
                 <Check className="homeFourInput__submitIcon" />
@@ -227,10 +165,10 @@ function EmailInput({
             ) : (
               <Motion.span
                 key="arrow"
-                initial={{ opacity: 0, scale: 0.7, rotate: 12 }}
-                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                exit={{ opacity: 0, scale: 0.7, rotate: -12 }}
-                transition={{ duration: 0.22 }}
+                initial={{ opacity: 0, scale: 0.72 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.72 }}
+                transition={{ duration: 0.18 }}
                 className="homeFourInput__iconWrap"
               >
                 <ArrowRight className="homeFourInput__submitIcon" />
@@ -238,7 +176,7 @@ function EmailInput({
             )}
           </AnimatePresence>
         </Motion.button>
-      </Motion.div>
+      </div>
 
       <div className="homeFourFeedback" aria-live="polite">
         <AnimatePresence mode="wait">
@@ -252,23 +190,15 @@ function EmailInput({
                   ? "homeFourFeedback__text--success"
                   : ""
               }`}
-              initial={{ opacity: 0, y: 6, filter: "blur(6px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -4, filter: "blur(6px)" }}
-              transition={{ duration: 0.22 }}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18 }}
             >
               {message}
             </Motion.p>
           ) : (
-            <Motion.p
-              key="empty"
-              className="homeFourFeedback__spacer"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              &nbsp;
-            </Motion.p>
+            <p className="homeFourFeedback__spacer">&nbsp;</p>
           )}
         </AnimatePresence>
       </div>
@@ -276,168 +206,100 @@ function EmailInput({
   );
 }
 
-const DECORATIONS = [
-  { id: "plane-a", kind: "plane", className: "homeFour__decor--planeA", float: { y: [0, -8, 0], rotate: [0, -4, 0] }, duration: 5.6 },
-  { id: "plane-b", kind: "plane", className: "homeFour__decor--planeB", float: { y: [0, 10, 0], rotate: [0, 5, 0] }, duration: 6.2 },
-  { id: "star-a", kind: "star", className: "homeFour__decor--star", float: { rotate: [0, 10, 0], scale: [1, 1.04, 1] }, duration: 4.8 },
-  { id: "ring-a", kind: "ring", className: "homeFour__decor--ring", float: { rotate: [0, 360] }, duration: 14, ease: "linear" },
-  { id: "scribble-a", kind: "scribbleA", className: "homeFour__decor--scribbleA", float: { x: [0, 8, 0], y: [0, -4, 0] }, duration: 5.4 },
-  { id: "scribble-b", kind: "scribbleB", className: "homeFour__decor--scribbleB", float: { x: [0, -6, 0], y: [0, 5, 0] }, duration: 6.1 },
-  { id: "spark-a", kind: "spark", className: "homeFour__decor--sparkA", float: { y: [0, -7, 0], rotate: [0, 8, 0] }, duration: 4.2 },
-  { id: "spark-b", kind: "spark", className: "homeFour__decor--sparkB", float: { y: [0, 6, 0], rotate: [0, -10, 0] }, duration: 4.7 },
-  { id: "spark-c", kind: "spark", className: "homeFour__decor--sparkC", float: { scale: [1, 1.1, 1], rotate: [0, 6, 0] }, duration: 5.1 },
-  { id: "dash-a", kind: "dash", className: "homeFour__decor--dashA", float: { x: [0, 6, 0] }, duration: 5 },
-  { id: "dash-b", kind: "dash", className: "homeFour__decor--dashB", float: { x: [0, -5, 0] }, duration: 5.5 },
-  { id: "dash-c", kind: "dash", className: "homeFour__decor--dashC", float: { y: [0, -5, 0] }, duration: 4.6 },
-  { id: "dot-a", kind: "dot", className: "homeFour__decor--dotA", float: { scale: [1, 1.18, 1] }, duration: 3.9 },
-  { id: "dot-b", kind: "dot", className: "homeFour__decor--dotB", float: { scale: [1, 1.16, 1] }, duration: 4.4 },
-  { id: "burst-a", kind: "burst", className: "homeFour__decor--burstA", float: { rotate: [0, 14, 0], scale: [1, 1.06, 1] }, duration: 5.2 },
-  { id: "burst-b", kind: "burst", className: "homeFour__decor--burstB", float: { rotate: [0, -12, 0], scale: [1, 1.05, 1] }, duration: 5.8 },
-];
-
-function DecorationShape({ kind }) {
-  if (kind === "plane") {
-    return (
-      <svg viewBox="0 0 120 120">
-        <path
-          d="M18 60L98 24L70 96L55 68L18 60Z"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="4"
-          strokeLinejoin="round"
-        />
-        <path d="M55 68L98 24" fill="none" stroke="currentColor" strokeWidth="4" />
-      </svg>
-    );
-  }
-
-  if (kind === "star") {
-    return (
-      <svg viewBox="0 0 100 100">
-        <path
-          d="M50 10L58 38L88 50L58 62L50 90L42 62L12 50L42 38L50 10Z"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="4"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-
-  if (kind === "ring") {
-    return (
-      <svg viewBox="0 0 120 120">
-        <circle cx="60" cy="60" r="34" fill="none" stroke="currentColor" strokeWidth="4" />
-        <circle cx="60" cy="60" r="50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="7 7" />
-      </svg>
-    );
-  }
-
-  if (kind === "scribbleA") {
-    return (
-      <svg viewBox="0 0 220 80">
-        <path
-          d="M8 48C28 22 54 18 74 38C94 58 118 60 140 38C162 16 188 18 210 40"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-      </svg>
-    );
-  }
-
-  if (kind === "scribbleB") {
-    return (
-      <svg viewBox="0 0 220 80">
-        <path
-          d="M10 34C35 58 56 58 82 36C108 14 132 14 156 36C180 58 198 58 212 46"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-      </svg>
-    );
-  }
-
-  if (kind === "spark") {
-    return (
-      <svg viewBox="0 0 80 80">
-        <path d="M40 8V72M8 40H72M18 18L62 62M62 18L18 62" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
-      </svg>
-    );
-  }
-
-  if (kind === "dash") {
-    return (
-      <svg viewBox="0 0 120 40">
-        <path d="M10 20H110" fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round" />
-      </svg>
-    );
-  }
-
-  if (kind === "burst") {
-    return (
-      <svg viewBox="0 0 100 100">
-        <path d="M50 8L56 36L84 22L66 48L94 58L64 62L72 92L50 70L28 92L36 62L6 58L34 48L16 22L44 36L50 8Z" fill="none" stroke="currentColor" strokeWidth="4" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-
+function MarketplacePanel() {
   return (
-    <svg viewBox="0 0 40 40">
-      <circle cx="20" cy="20" r="14" fill="currentColor" />
-    </svg>
+    <div className="homeFourBrowser">
+      <div className="homeFourBrowser__top">
+        <span />
+        <span />
+        <span />
+      </div>
+      <div className="homeFourSearch">
+        <span>Search handmade cakes</span>
+        <strong>24 nearby services</strong>
+      </div>
+      <div className="homeFourServiceList">
+        <article>
+          <div />
+          <span>
+            <strong>Custom celebration cake</strong>
+            <small>Makati, NCR</small>
+          </span>
+          <b>PHP 1,800</b>
+        </article>
+        <article>
+          <div />
+          <span>
+            <strong>Gift-ready crochet bouquet</strong>
+            <small>Quezon City, NCR</small>
+          </span>
+          <b>PHP 950</b>
+        </article>
+      </div>
+    </div>
   );
 }
 
-function Decorations({ active }) {
-  const reduceMotion = useReducedMotion();
+function TrustPanel() {
+  return (
+    <div className="homeFourTrust">
+      <div className="homeFourTrustCard homeFourTrustCard--payment">
+        <span>Payment held</span>
+        <strong>Order #2048</strong>
+        <div className="homeFourTrustCard__meter">
+          <i />
+        </div>
+      </div>
+      <div className="homeFourTrustCard homeFourTrustCard--review">
+        <span>Provider rating</span>
+        <strong>4.9 from completed orders</strong>
+      </div>
+      <div className="homeFourTrustCard homeFourTrustCard--badge">
+        <span>Profile signals</span>
+        <strong>Verified, reviewed, badge earned</strong>
+      </div>
+    </div>
+  );
+}
+
+function UpdatePanel() {
+  return (
+    <div className="homeFourUpdatePanel">
+      <span>Next on Carvver</span>
+      <strong>Cleaner sharing, better listings, stronger trust flows.</strong>
+    </div>
+  );
+}
+
+function RotatingPhrase({ visible, reduceMotion }) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (!visible || reduceMotion) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      setIndex((current) => (current + 1) % ROTATING_PHRASES.length);
+    }, 1900);
+
+    return () => window.clearInterval(intervalId);
+  }, [visible, reduceMotion]);
+
+  if (!visible) return null;
 
   return (
-    <div className="homeFour__decorLayer" aria-hidden="true">
-      {DECORATIONS.map((decor, index) => (
-        <Motion.div
-          key={decor.id}
-          className={`homeFour__decor ${decor.className}`}
-          initial={
-            reduceMotion
-              ? false
-              : { x: "-50%", y: "-50%", scale: 0.12, rotate: -18, opacity: 0 }
-          }
-          animate={
-            reduceMotion || active
-              ? {
-                  x: "calc(-50% + var(--pop-x))",
-                  y: "calc(-50% + var(--pop-y))",
-                  scale: 1,
-                  rotate: "var(--pop-rotate)",
-                  opacity: 1,
-                }
-              : {}
-          }
-          transition={{
-            duration: 0.72,
-            delay: index * 0.035,
-            ease: [0.18, 0.92, 0.28, 1],
-          }}
+    <div className="homeFourRotate" aria-live="polite">
+      <span>Building toward</span>
+      <AnimatePresence mode="wait" initial={false}>
+        <Motion.strong
+          key={reduceMotion ? ROTATING_PHRASES[0] : ROTATING_PHRASES[index]}
+          initial={reduceMotion ? false : { y: "110%", opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={reduceMotion ? { opacity: 0 } : { y: "-110%", opacity: 0 }}
+          transition={{ type: "spring", stiffness: 320, damping: 28 }}
         >
-          <Motion.div
-            className="homeFour__decorFloat"
-            animate={reduceMotion ? {} : decor.float}
-            transition={{
-              duration: decor.duration,
-              repeat: Infinity,
-              ease: decor.ease || "easeInOut",
-              delay: index * 0.08,
-            }}
-          >
-            <DecorationShape kind={decor.kind} />
-          </Motion.div>
-        </Motion.div>
-      ))}
+          {reduceMotion ? ROTATING_PHRASES[0] : ROTATING_PHRASES[index]}
+        </Motion.strong>
+      </AnimatePresence>
     </div>
   );
 }
@@ -449,11 +311,7 @@ function isValidEmail(email) {
 function getSubscribeErrorMessage(error) {
   if (!error) return "We couldn't save your email. Please try again.";
 
-  if (error.code === "42P01") {
-    return "We couldn't save your email. Please try again in a moment.";
-  }
-
-  if (error.code === "42501") {
+  if (error.code === "42P01" || error.code === "42501") {
     return "We couldn't save your email. Please try again in a moment.";
   }
 
@@ -462,12 +320,209 @@ function getSubscribeErrorMessage(error) {
 
 export default function HomeFour() {
   const ref = useRef(null);
-  const inView = useInView(ref, { amount: 0.46, once: true });
-
+  const touchStartYRef = useRef(null);
+  const progressRef = useRef(0);
+  const reduceMotionRef = useRef(false);
+  const isCompactRef = useRef(false);
+  const isLockedRef = useRef(false);
+  const lockedTopRef = useRef(0);
+  const reduceMotion = useReducedMotion();
+  const [isCompact, setIsCompact] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+
+  const progress = reduceMotion || isCompact ? 1 : scrollProgress;
+  const activeChapter = resolveChapterIndex(progress);
+  const activeStep = STORY_STEPS[activeChapter] || STORY_STEPS[0];
+  const isExpanded = progress >= 0.78;
+  const titleShift = Math.round(progress * 38);
+  const visualStyle = {
+    "--home-four-progress": progress,
+    "--home-four-visual-width": `${58 + progress * 42}%`,
+    "--home-four-visual-height": `${360 + progress * 230}px`,
+    "--home-four-visual-radius": `${18 + progress * 10}px`,
+    "--home-four-visual-y": `${(1 - progress) * 18}px`,
+    "--home-four-shadow-alpha": 0.07 + progress * 0.06,
+    "--home-four-grid-opacity": 0.32 + progress * 0.3,
+    "--home-four-market-opacity": 1 - progress * 0.34,
+    "--home-four-market-x": `${progress * -8}%`,
+    "--home-four-market-y": `${progress * -7}%`,
+    "--home-four-market-scale": 0.94 + progress * 0.06,
+    "--home-four-trust-opacity": clampProgress((progress - 0.2) * 2.6),
+    "--home-four-trust-x": `${(1 - progress) * 12}%`,
+    "--home-four-trust-y": `${(1 - progress) * 14}%`,
+    "--home-four-updates-opacity": clampProgress((progress - 0.64) * 3.2),
+    "--home-four-updates-y": `${(1 - progress) * 18}%`,
+    "--home-four-updates-scale": 0.92 + progress * 0.08,
+  };
+
+  useEffect(() => {
+    progressRef.current = scrollProgress;
+  }, [scrollProgress]);
+
+  useEffect(() => {
+    reduceMotionRef.current = Boolean(reduceMotion);
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    isCompactRef.current = isCompact;
+
+    if (isCompact) {
+      isLockedRef.current = false;
+      touchStartYRef.current = null;
+    }
+  }, [isCompact]);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      isLockedRef.current = false;
+      touchStartYRef.current = null;
+    }
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const mediaQuery = window.matchMedia("(max-width: 720px)");
+    const syncCompactState = () => {
+      setIsCompact(mediaQuery.matches);
+    };
+
+    syncCompactState();
+    mediaQuery.addEventListener("change", syncCompactState);
+
+    return () => {
+      mediaQuery.removeEventListener("change", syncCompactState);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const canControlScroll = () =>
+      !reduceMotionRef.current &&
+      !isCompactRef.current &&
+      ref.current &&
+      (isLockedRef.current || isSectionActive(ref.current));
+
+    const lockToSection = () => {
+      if (!ref.current) return;
+
+      const nextTop = getSectionLockTop(ref.current);
+      lockedTopRef.current = nextTop;
+      isLockedRef.current = true;
+
+      if (Math.abs(window.scrollY - nextTop) > 1) {
+        window.scrollTo({ top: nextTop, behavior: "auto" });
+      }
+    };
+
+    const holdLockedPosition = () => {
+      if (!isLockedRef.current) return;
+
+      const lockedTop = lockedTopRef.current;
+
+      if (Math.abs(window.scrollY - lockedTop) > 1) {
+        window.scrollTo({ top: lockedTop, behavior: "auto" });
+      }
+    };
+
+    const releaseLock = () => {
+      isLockedRef.current = false;
+    };
+
+    const preventNativeScroll = (event) => {
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+
+      event.stopPropagation();
+    };
+
+    const applyControlledDelta = (event, deltaY, sensitivity) => {
+      if (!deltaY || !canControlScroll() || isEditableTarget(event.target)) return false;
+
+      const currentProgress = progressRef.current;
+      const atStart = currentProgress <= 0.002;
+      const atEnd = currentProgress >= 0.998;
+
+      if ((deltaY > 0 && atEnd) || (deltaY < 0 && atStart)) {
+        releaseLock();
+        return false;
+      }
+
+      preventNativeScroll(event);
+      lockToSection();
+
+      const nextProgress = clampProgress(currentProgress + deltaY * sensitivity);
+      progressRef.current = nextProgress;
+      setScrollProgress(nextProgress);
+      holdLockedPosition();
+
+      return true;
+    };
+
+    const handleWheel = (event) => {
+      applyControlledDelta(event, event.deltaY, WHEEL_SENSITIVITY);
+    };
+
+    const handleTouchStart = (event) => {
+      touchStartYRef.current = event.touches[0]?.clientY ?? null;
+    };
+
+    const handleTouchMove = (event) => {
+      const previousY = touchStartYRef.current;
+      const currentY = event.touches[0]?.clientY;
+
+      if (previousY == null || currentY == null) return;
+
+      const deltaY = previousY - currentY;
+      const wasControlled = applyControlledDelta(event, deltaY, TOUCH_SENSITIVITY);
+      touchStartYRef.current = currentY;
+
+      if (!wasControlled && !isLockedRef.current) {
+        releaseLock();
+      }
+    };
+
+    const handleTouchEnd = () => {
+      touchStartYRef.current = null;
+    };
+
+    const handleKeyDown = (event) => {
+      const keyDeltas = {
+        ArrowDown: 90,
+        PageDown: 260,
+        " ": 260,
+        ArrowUp: -90,
+        PageUp: -260,
+      };
+      const deltaY = keyDeltas[event.key];
+
+      if (!deltaY) return;
+
+      applyControlledDelta(event, deltaY, WHEEL_SENSITIVITY);
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("keydown", handleKeyDown);
+      isLockedRef.current = false;
+      touchStartYRef.current = null;
+    };
+  }, []);
 
   const handleChange = (nextValue) => {
     setEmail(nextValue);
@@ -478,8 +533,8 @@ export default function HomeFour() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
     if (isSubmitting) return;
 
@@ -516,9 +571,7 @@ export default function HomeFour() {
         return;
       }
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       setEmail("");
       setStatus("success");
@@ -532,34 +585,114 @@ export default function HomeFour() {
   };
 
   return (
-    <section className="homeFour" ref={ref} aria-labelledby="homeFour-title">
-      <Decorations active={inView} />
-
-      <div className="homeFour__inner">
-        <h2 id="homeFour-title" className="homeFour__title">
-          <FlipText word="Stay Tuned!" active={inView} />
-        </h2>
-
-        <TypewriterDescription
-          active={inView}
-          text="Be the first to hear about new features, platform updates, and everything we're building at Carvver."
+    <section
+      className={`homeFour ${isExpanded ? "homeFour--expanded" : ""}`}
+      ref={ref}
+      aria-labelledby="homeFour-title"
+      style={visualStyle}
+    >
+      <div className="homeFour__stage">
+        <Motion.div
+          className="homeFour__background"
+          aria-hidden="true"
+          animate={{ opacity: 1 - progress * 0.52 }}
+          transition={{ duration: 0.18 }}
         />
 
-        <Motion.div
-          className="homeFour__inputWrap"
-          initial={{ opacity: 0, y: 10 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.55, ease: [0.2, 0.95, 0.2, 1], delay: 1.05 }}
-        >
-          <EmailInput
-            value={email}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
-            status={status}
-            message={message}
-          />
-        </Motion.div>
+        <div className="homeFour__inner">
+          <div className="homeFour__copy">
+            <h2 id="homeFour-title" className="homeFour__title">
+              <span style={{ transform: `translateX(-${titleShift}px)` }}>
+                The marketplace
+              </span>
+              <span style={{ transform: `translateX(${titleShift}px)` }}>
+                keeps moving.
+              </span>
+            </h2>
+
+            <div className="homeFourStory" aria-label="Carvver marketplace story">
+              <AnimatePresence mode="wait" initial={false}>
+                <Motion.article
+                  key={activeStep.id}
+                  className="homeFourStory__item"
+                  initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -18 }}
+                  transition={{ duration: 0.28, ease: [0.2, 0.95, 0.2, 1] }}
+                >
+                  <span className="homeFourStory__number">{activeStep.number}</span>
+                  <h3>{activeStep.title}</h3>
+                  <p>{activeStep.text}</p>
+                </Motion.article>
+              </AnimatePresence>
+            </div>
+
+            <div className="homeFourStoryList" aria-label="Carvver marketplace story">
+              {STORY_STEPS.map((step) => (
+                <article key={step.id} className="homeFourStoryList__item">
+                  <span>{step.number}</span>
+                  <h3>{step.title}</h3>
+                  <p>{step.text}</p>
+                </article>
+              ))}
+            </div>
+
+            <div className="homeFourProgress" aria-hidden="true">
+              <span />
+            </div>
+
+            <div className="homeFourChapterRail" aria-label="Scroll chapters">
+              {STORY_STEPS.map((step, index) => (
+                <span
+                  key={step.id}
+                  className={`homeFourChapterRail__item ${
+                    index === activeChapter ? "homeFourChapterRail__item--active" : ""
+                  }`}
+                >
+                  <b>{step.number}</b>
+                  <span>{step.title}</span>
+                </span>
+              ))}
+            </div>
+
+            <RotatingPhrase visible={isExpanded} reduceMotion={reduceMotion} />
+
+            <Motion.div
+              className="homeFour__inputWrap"
+              animate={{
+                opacity: isExpanded || reduceMotion ? 1 : 0,
+                y: isExpanded || reduceMotion ? 0 : 14,
+              }}
+              transition={{ duration: 0.28, ease: [0.2, 0.95, 0.2, 1] }}
+            >
+              <EmailInput
+                value={email}
+                onChange={handleChange}
+                onSubmit={handleSubmit}
+                isSubmitting={isSubmitting}
+                status={status}
+                message={message}
+              />
+            </Motion.div>
+          </div>
+
+          <div className="homeFourVisual" aria-hidden="true">
+            <div className="homeFourVisual__grid" />
+            <div className="homeFourVisual__layer homeFourVisual__layer--market">
+              <MarketplacePanel />
+            </div>
+            <div className="homeFourVisual__layer homeFourVisual__layer--trust">
+              <TrustPanel />
+            </div>
+            <div className="homeFourVisual__layer homeFourVisual__layer--updates">
+              <UpdatePanel />
+            </div>
+          </div>
+        </div>
+
+        <p className="homeFourScrollHint">
+          {isExpanded ? "Scroll again to continue" : "Scroll to expand the marketplace"}
+        </p>
       </div>
     </section>
   );

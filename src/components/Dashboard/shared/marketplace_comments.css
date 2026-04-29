@@ -1,0 +1,349 @@
+.marketplaceComments {
+  width: 100%;
+  display: grid;
+  gap: 18px;
+}
+
+.marketplaceComments--compactSurface {
+  gap: 15px;
+}
+
+.marketplaceComments__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.marketplaceComments__title {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: clamp(22px, 2vw, 30px);
+  line-height: 1.12;
+  font-weight: 850;
+  color: rgba(27, 16, 46, 0.95);
+}
+
+.marketplaceComments--compactSurface .marketplaceComments__title {
+  font-size: clamp(20px, 1.8vw, 24px);
+}
+
+.marketplaceComments__sub,
+.marketplaceComments__note,
+.marketplaceComments__empty span,
+.marketplaceCommentsComposer__helper,
+.marketplaceComment__meta,
+.marketplaceComment__text {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.marketplaceComments__sub {
+  margin: 8px 0 0;
+  max-width: 62ch;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: rgba(27, 16, 46, 0.64);
+}
+
+.marketplaceComments__note {
+  margin: 0;
+  padding-block: 2px 4px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  font-weight: 700;
+  color: rgba(42, 20, 80, 0.58);
+}
+
+.marketplaceComments__refresh,
+.marketplaceCommentsComposer__submit,
+.marketplaceComment__action {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  cursor: pointer;
+}
+
+.marketplaceComments__refresh {
+  padding: 0;
+  font-size: 13px;
+  font-weight: 850;
+  color: rgba(124, 58, 237, 0.9);
+}
+
+.marketplaceCommentsComposer {
+  display: grid;
+  gap: 10px;
+}
+
+.marketplaceCommentsComposer__input {
+  width: 100%;
+  min-height: 112px;
+  resize: vertical;
+  border: 1px solid rgba(42, 20, 80, 0.14);
+  border-radius: 16px;
+  padding: 14px 15px;
+  background: rgba(255, 255, 255, 0.78);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: rgba(27, 16, 46, 0.92);
+  outline: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.marketplaceCommentsComposer--compact .marketplaceCommentsComposer__input {
+  min-height: 82px;
+  border-radius: 14px;
+}
+
+.marketplaceCommentsComposer__input:focus {
+  border-color: rgba(124, 58, 237, 0.3);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08);
+}
+
+.marketplaceCommentsComposer__input:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.marketplaceCommentsComposer__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.marketplaceCommentsComposer__helper {
+  font-size: 12.5px;
+  line-height: 1.45;
+  font-weight: 750;
+  color: rgba(27, 16, 46, 0.52);
+}
+
+.marketplaceCommentsComposer__submit {
+  min-height: 40px;
+  padding: 0 18px;
+  border: 1px solid rgba(42, 20, 80, 0.14);
+  border-radius: 14px;
+  background: rgba(42, 20, 80, 0.94);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 850;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease;
+}
+
+.marketplaceCommentsComposer__submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(42, 20, 80, 0.16);
+}
+
+.marketplaceCommentsComposer__submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.54;
+}
+
+.marketplaceComments__list {
+  display: grid;
+  gap: 16px;
+}
+
+.marketplaceComments__empty {
+  padding: 20px 0 4px;
+  border-top: 1px solid rgba(42, 20, 80, 0.1);
+  display: grid;
+  gap: 6px;
+}
+
+.marketplaceComments__empty strong {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.35;
+  color: rgba(27, 16, 46, 0.9);
+}
+
+.marketplaceComments__empty span {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: rgba(27, 16, 46, 0.58);
+}
+
+.marketplaceComment {
+  display: grid;
+  gap: 12px;
+}
+
+.marketplaceComment__main {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.marketplaceComment__avatar {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.82);
+  color: rgba(42, 20, 80, 0.78);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.marketplaceComment__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.marketplaceComment__body {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(42, 20, 80, 0.09);
+}
+
+.marketplaceComment__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  line-height: 1.25;
+  font-weight: 760;
+  color: rgba(27, 16, 46, 0.48);
+}
+
+.marketplaceComment__meta strong {
+  color: rgba(27, 16, 46, 0.92);
+  font-weight: 850;
+}
+
+.marketplaceComment__text {
+  margin: 0;
+  max-width: 72ch;
+  font-size: 14.5px;
+  line-height: 1.66;
+  color: rgba(27, 16, 46, 0.76);
+  overflow-wrap: anywhere;
+}
+
+.marketplaceComment--deleted .marketplaceComment__text,
+.marketplaceComment--deleted .marketplaceComment__meta {
+  color: rgba(27, 16, 46, 0.42);
+}
+
+.marketplaceComment__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.marketplaceComment__action {
+  padding: 0;
+  font-size: 12.5px;
+  line-height: 1.3;
+  font-weight: 850;
+  color: rgba(124, 58, 237, 0.86);
+}
+
+.marketplaceComment__action--danger {
+  color: rgba(185, 28, 28, 0.82);
+}
+
+.marketplaceComment__action:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.marketplaceComment__replies {
+  margin-left: 54px;
+  padding-left: 16px;
+  border-left: 1px solid rgba(42, 20, 80, 0.1);
+  display: grid;
+  gap: 12px;
+}
+
+.marketplaceComment--reply .marketplaceComment__avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  font-size: 11px;
+}
+
+.marketplaceComment--reply .marketplaceComment__main {
+  grid-template-columns: 34px minmax(0, 1fr);
+}
+
+.marketplaceComment--skeleton {
+  min-height: 86px;
+  border-radius: 16px;
+  background: linear-gradient(
+    90deg,
+    rgba(42, 20, 80, 0.055),
+    rgba(255, 255, 255, 0.56),
+    rgba(42, 20, 80, 0.055)
+  );
+  background-size: 220% 100%;
+  animation: marketplaceCommentShimmer 1.35s ease infinite;
+}
+
+@keyframes marketplaceCommentShimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+@media (max-width: 640px) {
+  .marketplaceComments__head,
+  .marketplaceCommentsComposer__foot {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .marketplaceCommentsComposer__submit {
+    width: 100%;
+  }
+
+  .marketplaceComment__main {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .marketplaceComment__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+  }
+
+  .marketplaceComment__replies {
+    margin-left: 18px;
+    padding-left: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketplaceCommentsComposer__input,
+  .marketplaceCommentsComposer__submit,
+  .marketplaceComment--skeleton {
+    animation: none !important;
+    transition: none !important;
+  }
+}

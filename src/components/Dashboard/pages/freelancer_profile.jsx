@@ -42,6 +42,7 @@ import { useFreelancerProfileData } from "../hooks/useFreelancerProfileData";
 import { useFreelancerTrustData } from "../hooks/useFreelancerTrustData";
 import { FREELANCER_SHOWCASE_SLOT_LIMIT } from "../shared/freelancerAchievements";
 import VerifiedBadge from "../shared/VerifiedBadge";
+import MarketplaceComments from "../shared/marketplace_comments";
 import "./profile.css";
 import "./freelancer_pages.css";
 
@@ -1012,6 +1013,23 @@ export default function FreelancerProfile() {
           )}
         </section>
       </Reveal>
+
+      {profile?.id ? (
+        <Reveal delay={0.21}>
+          <section className="profileSection">
+            <MarketplaceComments
+              targetType="freelancer_profile"
+              targetId={profile.id}
+              targetOwnerId={profile.id}
+              allowCompose={false}
+              title="Profile comments"
+              description="Customer comments about your freelancer profile appear here."
+              emptyTitle="No profile comments yet."
+              emptyDescription="When customers comment on your profile, they will appear here."
+            />
+          </section>
+        </Reveal>
+      ) : null}
 
       {trustWarnings.length > 0 ? (
         <Reveal delay={0.22}>

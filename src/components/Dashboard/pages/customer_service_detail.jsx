@@ -16,6 +16,7 @@ import { useCustomerFavoriteFreelancers } from "../hooks/useCustomerFavoriteFree
 import VerifiedBadge from "../shared/VerifiedBadge";
 import { useCart } from "../hooks/useCart";
 import { useServiceListingDetail } from "../hooks/useServiceListingDetail";
+import MarketplaceComments from "../shared/marketplace_comments";
 import "./service_listing_detail.css";
 
 const supabase = createClient();
@@ -512,6 +513,20 @@ export default function CustomerServiceDetail() {
                     );
                   })}
                 </div>
+              </article>
+
+              <article className="serviceDetailCard serviceDetailCommentsCard">
+                <MarketplaceComments
+                  targetType="service"
+                  targetId={service.id}
+                  targetOwnerId={service.freelancer?.id}
+                  title="Listing comments"
+                  description="Ask clear questions or leave notes about this service before you book."
+                  emptyTitle="No questions or notes yet."
+                  emptyDescription="Customers can start a focused thread about this listing."
+                  composePlaceholder="Ask about availability, scope, or package details"
+                  composeHelper="Customers can comment here. Booking details still belong in messages."
+                />
               </article>
             </div>
 

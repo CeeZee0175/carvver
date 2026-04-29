@@ -17,6 +17,7 @@ import {
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import { createRequestProposal } from "../hooks/useMarketplaceWorkflow";
 import { useFreelancerRequestDetail } from "../hooks/useFreelancerRequestMarketplace";
+import MarketplaceComments from "../shared/marketplace_comments";
 
 function InlineStatus({ tone = "neutral", message }) {
   if (!message) return null;
@@ -267,6 +268,21 @@ export default function FreelancerRequestDetail() {
                 >
                   Start conversation
                 </Motion.button>
+              </article>
+
+              <article className="freelancerRequestDetailCard">
+                <MarketplaceComments
+                  className="marketplaceComments--compactSurface"
+                  targetType="customer_profile"
+                  targetId={request.customer.id}
+                  targetOwnerId={request.customer.id}
+                  title="Customer comments"
+                  description="Leave public profile context for this customer. Request-specific details belong in messages."
+                  emptyTitle="No freelancer comments yet."
+                  emptyDescription="Freelancers can leave profile comments here."
+                  composePlaceholder="Write a customer profile comment"
+                  composeHelper="Keep request details in messages and proposals."
+                />
               </article>
 
               <article className="freelancerRequestDetailCard">
