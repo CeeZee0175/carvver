@@ -12,6 +12,8 @@ import {
   TypewriterHeading,
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
+import DashboardPagination from "../shared/dashboard_pagination";
+import { usePagedItems } from "../shared/dashboard_pagination_hooks";
 import {
   acceptRequestProposal,
   useCustomerRequestDetail,
@@ -37,6 +39,13 @@ export default function CustomerRequestDetail() {
   const navigate = useNavigate();
   const { requestId = "" } = useParams();
   const { loading, request, error, reload } = useCustomerRequestDetail(requestId);
+  const proposals = request?.proposals || [];
+  const {
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    pagedItems: pagedProposals,
+  } = usePagedItems(proposals, 5, [requestId, proposals.length]);
   const [actionState, setActionState] = useState({
     pendingId: "",
     error: "",
@@ -213,7 +222,7 @@ export default function CustomerRequestDetail() {
                   />
                 ) : (
                   <div className="workflowProposalList">
-                    {request.proposals.map((proposal) => {
+                    {pagedProposals.map((proposal) => {
                       const accepted = proposal.status === "accepted";
 
                       return (
@@ -284,6 +293,15 @@ export default function CustomerRequestDetail() {
                     })}
                   </div>
                 )}
+
+                {request.proposals.length > 0 ? (
+                  <DashboardPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    label="Request proposals pagination"
+                  />
+                ) : null}
               </article>
             </div>
 

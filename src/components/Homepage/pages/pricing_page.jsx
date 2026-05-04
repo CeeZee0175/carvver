@@ -31,7 +31,7 @@ const PRICING_AUDIENCES = {
       {
         name: "Carvver Pro",
         badge: "Most popular",
-        price: "P500",
+        price: "P149",
         period: "per month",
         summary: "For creators who want more reach, better margins, and stronger presentation.",
         features: [
@@ -88,7 +88,7 @@ const PRICING_AUDIENCES = {
       {
         name: "Carvver Pro",
         badge: "Most popular",
-        price: "P500",
+        price: "P149",
         period: "per month",
         summary: "For buyers who want faster discovery, cleaner browsing, and stronger support.",
         features: [

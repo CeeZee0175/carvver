@@ -14,6 +14,8 @@ import {
   TypewriterHeading,
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
+import DashboardPagination from "../shared/dashboard_pagination";
+import { usePagedItems } from "../shared/dashboard_pagination_hooks";
 import {
   deleteFreelancerDraft,
   listFreelancerServiceListings,
@@ -89,6 +91,12 @@ export default function FreelancerListings() {
   );
 
   const visibleListings = activeTab === "published" ? published : drafts;
+  const {
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    pagedItems: pagedListings,
+  } = usePagedItems(visibleListings, 9, [activeTab, listings.length]);
 
   const handlePublish = async (listingId) => {
     try {
@@ -265,7 +273,7 @@ export default function FreelancerListings() {
             />
           ) : (
             <div className="freelancerListingsGrid">
-              {visibleListings.map((listing, index) => {
+              {pagedListings.map((listing, index) => {
                 const cover = listing.previewMedia?.publicUrl || "";
                 const publishBusy = busyKey === `publish:${listing.id}`;
                 const deleteBusy = busyKey === `delete:${listing.id}`;
@@ -392,6 +400,15 @@ export default function FreelancerListings() {
               })}
             </div>
           )}
+
+          {!loading && !error && visibleListings.length > 0 ? (
+            <DashboardPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              label="My listings pagination"
+            />
+          ) : null}
         </section>
       </Reveal>
     </FreelancerDashboardFrame>

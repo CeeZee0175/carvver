@@ -421,6 +421,301 @@
   gap: 12px;
 }
 
+.freelancerPayoutSelect {
+  position: relative;
+}
+
+.freelancerPayoutSelect__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.freelancerPayoutSelect__trigger--open,
+.freelancerPayoutSelect__trigger:hover {
+  border-color: rgba(109, 40, 217, 0.28);
+  box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.08);
+}
+
+.freelancerPayoutSelect__chevron,
+.freelancerPayoutSelect__check {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.freelancerPayoutSelect__menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 18px;
+  border: 1px solid rgba(209, 213, 219, 0.82);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 22px 58px rgba(42, 20, 80, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(18px);
+}
+
+.freelancerPayoutSelect__option {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: transparent;
+  cursor: pointer;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 760;
+  color: #111827;
+}
+
+.freelancerPayoutSelect__option:hover,
+.freelancerPayoutSelect__option--selected {
+  background: rgba(109, 40, 217, 0.08);
+  color: #4c1d95;
+}
+
+.freelancerPhoneField {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  border-radius: 16px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  overflow: hidden;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.freelancerPhoneField:focus-within {
+  border-color: #6d28d9;
+  box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.12);
+  transform: translateY(-1px);
+}
+
+.freelancerPhoneField__prefix {
+  min-height: 50px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  border-right: 1px solid #e5e7eb;
+  background: rgba(250, 245, 255, 0.92);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 850;
+  color: #4c1d95;
+}
+
+.freelancerPhoneField__input {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.freelancerBillingSection {
+  overflow: visible;
+}
+
+.freelancerBillingLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(320px, 1.18fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.freelancerBillingSummary,
+.freelancerBillingQr {
+  border: 1px solid rgba(42, 20, 80, 0.1);
+  border-radius: 22px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.88), rgba(250, 245, 255, 0.74));
+  box-shadow:
+    14px 18px 42px rgba(42, 20, 80, 0.08),
+    -10px -10px 24px rgba(255, 255, 255, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(18px);
+}
+
+.freelancerBillingSummary {
+  padding: 20px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.freelancerBillingStatus {
+  width: fit-content;
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(107, 114, 128, 0.18);
+  background: rgba(255, 255, 255, 0.78);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 850;
+  color: #374151;
+}
+
+.freelancerBillingStatus--success {
+  color: #166534;
+  border-color: rgba(22, 163, 74, 0.18);
+  background: rgba(22, 163, 74, 0.08);
+}
+
+.freelancerBillingStatus--danger {
+  color: #9f1239;
+  border-color: rgba(225, 29, 72, 0.16);
+  background: rgba(225, 29, 72, 0.08);
+}
+
+.freelancerBillingPrice {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: clamp(32px, 4vw, 46px);
+  line-height: 1;
+  font-weight: 900;
+  color: #111827;
+}
+
+.freelancerBillingSummary p,
+.freelancerBillingQr__head p {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #6b7280;
+}
+
+.freelancerBillingFacts {
+  display: grid;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.freelancerBillingFacts span {
+  padding-left: 12px;
+  border-left: 2px solid rgba(245, 158, 11, 0.36);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12.5px;
+  line-height: 1.45;
+  font-weight: 750;
+  color: #4b5563;
+}
+
+.freelancerBillingQr {
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.freelancerBillingQr__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.freelancerBillingQr__head h3 {
+  margin: 0 0 4px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 18px;
+  line-height: 1.1;
+  font-weight: 850;
+  color: #111827;
+}
+
+.freelancerBillingTimer {
+  display: grid;
+  gap: 2px;
+  justify-items: end;
+  flex: 0 0 auto;
+}
+
+.freelancerBillingTimer span {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 10.5px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.freelancerBillingTimer strong {
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 20px;
+  line-height: 1;
+  color: #111827;
+}
+
+.freelancerBillingQr__surface {
+  width: min(100%, 310px);
+  aspect-ratio: 1;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(42, 20, 80, 0.12);
+  background: #ffffff;
+  display: grid;
+  place-items: center;
+}
+
+.freelancerBillingQr__imageLink,
+.freelancerBillingQr__imageLink img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.freelancerBillingQr__imageLink img {
+  object-fit: contain;
+  border-radius: 0;
+  image-rendering: auto;
+}
+
+.freelancerBillingQr__image--expired {
+  filter: grayscale(1);
+  opacity: 0.58;
+}
+
+.freelancerBillingQr__empty {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  text-align: center;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 750;
+  color: #6b7280;
+}
+
+.freelancerBillingQr__fullLink {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: #5b21b6;
+  text-decoration: none;
+}
+
 .customerSettingsActionsRow--split {
   justify-content: space-between;
 }
@@ -504,7 +799,8 @@
   .customerSettingsOverview,
   .customerSettingsForm__row,
   .customerSettingsBillingLayout,
-  .customerSettingsHistory__summary {
+  .customerSettingsHistory__summary,
+  .freelancerBillingLayout {
     grid-template-columns: 1fr;
   }
 }
@@ -525,6 +821,18 @@
   .customerSettingsAction {
     width: 100%;
     justify-content: center;
+  }
+
+  .freelancerBillingQr__head {
+    flex-direction: column;
+  }
+
+  .freelancerBillingTimer {
+    justify-items: start;
+  }
+
+  .freelancerBillingQr__surface {
+    width: 100%;
   }
 }
 

@@ -13,6 +13,8 @@ import {
   TypewriterHeading,
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
+import DashboardPagination from "../shared/dashboard_pagination";
+import { usePagedItems } from "../shared/dashboard_pagination_hooks";
 import SearchableCombobox from "../../Shared/searchable_combobox";
 import {
   useFreelancerRequestFilters,
@@ -114,6 +116,12 @@ export default function FreelancerBrowseRequests() {
     category,
     sort,
   });
+  const {
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    pagedItems: pagedRequests,
+  } = usePagedItems(filteredRequests, 9, [search, category, sort]);
 
   return (
     <FreelancerDashboardFrame mainClassName="profilePage profilePage--details freelancerMarketplacePage">
@@ -279,7 +287,7 @@ export default function FreelancerBrowseRequests() {
             />
           ) : (
             <div className="freelancerRequestGrid">
-              {filteredRequests.map((request, index) => (
+              {pagedRequests.map((request, index) => (
                 <RequestCard
                   key={request.id}
                   request={request}
@@ -291,6 +299,15 @@ export default function FreelancerBrowseRequests() {
               ))}
             </div>
           )}
+
+          {!loading && filteredRequests.length > 0 ? (
+            <DashboardPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              label="Request listings pagination"
+            />
+          ) : null}
         </section>
       </Reveal>
     </FreelancerDashboardFrame>

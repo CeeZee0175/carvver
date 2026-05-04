@@ -555,13 +555,21 @@ export default function CustomerPayment() {
                         <span>Preparing your QR code...</span>
                       </div>
                     ) : paymentSession?.qrImageUrl ? (
-                      <img
-                        className={`customerPaymentQrCard__image ${
-                          qrExpired ? "customerPaymentQrCard__image--expired" : ""
-                        }`}
-                        src={paymentSession.qrImageUrl}
-                        alt="GCash or Maya payment QR code"
-                      />
+                      <a
+                        className="customerPaymentQrCard__imageLink"
+                        href={paymentSession.qrImageUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="Open payment QR full size"
+                      >
+                        <img
+                          className={`customerPaymentQrCard__image ${
+                            qrExpired ? "customerPaymentQrCard__image--expired" : ""
+                          }`}
+                          src={paymentSession.qrImageUrl}
+                          alt="GCash or Maya payment QR code"
+                        />
+                      </a>
                     ) : (
                       <div className="customerPaymentQrCard__loading">
                         <span>Generate a QR code to continue.</span>
@@ -617,6 +625,20 @@ export default function CustomerPayment() {
                           ) : null}
                           <span>Retry status</span>
                         </Motion.button>
+                      ) : null}
+
+                      {paymentSession?.qrImageUrl ? (
+                        <Motion.a
+                          className="profileEditor__btn profileEditor__btn--ghost customerPaymentAction customerPaymentAction--ghost"
+                          whileHover={{ y: -1.5 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={PROFILE_SPRING}
+                          href={paymentSession.qrImageUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Open full-size QR
+                        </Motion.a>
                       ) : null}
 
                       {showPaidState ? (

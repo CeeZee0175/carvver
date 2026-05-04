@@ -18,6 +18,8 @@ import {
   Reveal,
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
+import DashboardPagination from "../shared/dashboard_pagination";
+import { usePagedItems } from "../shared/dashboard_pagination_hooks";
 import "./browse_categories.css";
 import "./profile.css";
 
@@ -62,6 +64,12 @@ export default function CustomerOrders() {
     if (filter === "all") return orders;
     return orders.filter((order) => order.status === filter);
   }, [filter, orders]);
+  const {
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    pagedItems: pagedOrders,
+  } = usePagedItems(filteredOrders, 8, [filter, orders.length]);
 
   return (
     <CustomerDashboardFrame mainClassName="profilePage profilePage--details customerOrdersPage">
@@ -203,7 +211,7 @@ export default function CustomerOrders() {
             />
           ) : (
             <div className="profileOrderList">
-              {filteredOrders.map((order) => {
+              {pagedOrders.map((order) => {
                 const meta = STATUS_META[order.status] || STATUS_META.pending;
                 const freelancerName = getCustomerDisplayName(order.freelancer);
                 const packageName = String(order.selected_package_name || "").trim();
@@ -354,6 +362,15 @@ export default function CustomerOrders() {
               })}
             </div>
           )}
+
+          {!loading && filteredOrders.length > 0 ? (
+            <DashboardPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              label="Customer orders pagination"
+            />
+          ) : null}
         </section>
       </Reveal>
     </CustomerDashboardFrame>

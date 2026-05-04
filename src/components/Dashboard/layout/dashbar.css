@@ -1278,6 +1278,28 @@
   }
 }
 
+@media (max-width: 420px){
+  .dashbar__inner{
+    gap: 8px;
+    padding-inline: 12px;
+  }
+
+  .dashbar__right{
+    gap: 6px;
+  }
+
+  .dashbarPill--pro{
+    display: none;
+  }
+
+  .dashbarIconBtn,
+  .dashbarProfile{
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce){
   .dashbarEnter,
   .dashbarShell--ready .dashbarEnter{

@@ -13,6 +13,8 @@ import {
   Reveal,
   TypewriterHeading,
 } from "../shared/customerProfileShared";
+import DashboardPagination from "../shared/dashboard_pagination";
+import { usePagedItems } from "../shared/dashboard_pagination_hooks";
 import { useCustomerAccountSettings } from "../hooks/useCustomerAccountSettings";
 import "./profile.css";
 import "./customer_settings.css";
@@ -133,6 +135,12 @@ export default function CustomerSettings() {
     pending: false,
     error: "",
   });
+  const {
+    currentPage: billingPage,
+    setCurrentPage: setBillingPage,
+    totalPages: billingTotalPages,
+    pagedItems: pagedBillingHistory,
+  } = usePagedItems(billingHistory, 6, [billingHistory.length]);
 
   useEffect(() => {
     if (location.search.includes("emailChange=success")) {
@@ -607,7 +615,7 @@ export default function CustomerSettings() {
                     </div>
 
                     <div className="customerSettingsHistoryList">
-                      {billingHistory.map((entry, index) => (
+                      {pagedBillingHistory.map((entry, index) => (
                         <Motion.article
                           key={entry.id}
                           className="customerSettingsHistoryItem"
@@ -646,6 +654,12 @@ export default function CustomerSettings() {
                         </Motion.article>
                       ))}
                     </div>
+                    <DashboardPagination
+                      currentPage={billingPage}
+                      totalPages={billingTotalPages}
+                      onPageChange={setBillingPage}
+                      label="Billing history pagination"
+                    />
                   </>
                 ) : (
                   <EmptySurface

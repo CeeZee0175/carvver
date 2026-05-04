@@ -138,7 +138,7 @@ const FAQ_SECTIONS = [
         id: "03",
         question: "What plans does Carvver offer?",
         answer:
-          "Carvver currently shows three public plans: Basic, Carvver Pro, and Business. Pro is P500 per month and Business is P1,500 per month. On the freelancer side, Carvver Pro removes the standard 5% platform commission.",
+          "Carvver currently shows three public plans: Basic, Carvver Pro, and Business. Pro is P149 per month and Business is P1,500 per month. On the freelancer side, Carvver Pro removes the standard 5% platform commission.",
       },
       {
         id: "04",

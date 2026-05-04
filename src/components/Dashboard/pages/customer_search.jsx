@@ -17,10 +17,12 @@ import {
   getProfileDisplayName,
   getProfileInitials,
 } from "../shared/profileIdentity";
+import DashboardPagination from "../shared/dashboard_pagination";
 import "./profile.css";
 import "./dashboard_search.css";
 
 const supabase = createClient();
+const SEARCH_PAGE_SIZE = 12;
 
 function sanitizeSearchTerm(value) {
   return String(value || "")
@@ -223,12 +225,21 @@ export default function CustomerSearch() {
   const [loading, setLoading] = useState(false);
   const [services, setServices] = useState([]);
   const [freelancers, setFreelancers] = useState([]);
+  const [serviceCount, setServiceCount] = useState(0);
+  const [freelancerCount, setFreelancerCount] = useState(0);
+  const [servicePage, setServicePage] = useState(1);
+  const [freelancerPage, setFreelancerPage] = useState(1);
   const [error, setError] = useState("");
 
   const query = useMemo(
     () => sanitizeSearchTerm(searchParams.get("q") || ""),
     [searchParams]
   );
+
+  useEffect(() => {
+    setServicePage(1);
+    setFreelancerPage(1);
+  }, [query]);
 
   useEffect(() => {
     let active = true;
@@ -239,6 +250,8 @@ export default function CustomerSearch() {
         setLoading(false);
         setServices([]);
         setFreelancers([]);
+        setServiceCount(0);
+        setFreelancerCount(0);
         setError("");
         return;
       }
@@ -247,11 +260,14 @@ export default function CustomerSearch() {
       setError("");
 
       try {
+        const serviceFrom = (servicePage - 1) * SEARCH_PAGE_SIZE;
+        const freelancerFrom = (freelancerPage - 1) * SEARCH_PAGE_SIZE;
         const [serviceResult, freelancerResult] = await Promise.all([
           supabase
             .from("services")
             .select(
-              "id, freelancer_id, title, category, price, location, description, listing_overview, profiles(display_name, first_name, last_name, avatar_url, freelancer_headline, region, city, barangay, freelancer_verified_at)"
+              "id, freelancer_id, title, category, price, location, description, listing_overview, profiles(display_name, first_name, last_name, avatar_url, freelancer_headline, region, city, barangay, freelancer_verified_at)",
+              { count: "exact" }
             )
             .eq("is_published", true)
             .or(
@@ -263,11 +279,12 @@ export default function CustomerSearch() {
                 `listing_overview.ilike.%${query}%`,
               ].join(",")
             )
-            .limit(12),
+            .range(serviceFrom, serviceFrom + SEARCH_PAGE_SIZE - 1),
           supabase
             .from("profiles")
             .select(
-              "id, display_name, first_name, last_name, avatar_url, bio, freelancer_headline, freelancer_primary_category, region, city, barangay, freelancer_verified_at"
+              "id, display_name, first_name, last_name, avatar_url, bio, freelancer_headline, freelancer_primary_category, region, city, barangay, freelancer_verified_at",
+              { count: "exact" }
             )
             .eq("role", "freelancer")
             .or(
@@ -280,7 +297,7 @@ export default function CustomerSearch() {
                 `freelancer_primary_category.ilike.%${query}%`,
               ].join(",")
             )
-            .limit(12),
+            .range(freelancerFrom, freelancerFrom + SEARCH_PAGE_SIZE - 1),
         ]);
 
         if (serviceResult.error) throw serviceResult.error;
@@ -362,10 +379,14 @@ export default function CustomerSearch() {
         if (!active) return;
         setServices(nextServices);
         setFreelancers(nextFreelancers);
+        setServiceCount(serviceResult.count || 0);
+        setFreelancerCount(freelancerResult.count || 0);
       } catch (nextError) {
         if (!active) return;
         setServices([]);
         setFreelancers([]);
+        setServiceCount(0);
+        setFreelancerCount(0);
         setError(
           String(nextError?.message || "We couldn't load search results right now.")
         );
@@ -379,7 +400,10 @@ export default function CustomerSearch() {
     return () => {
       active = false;
     };
-  }, [query]);
+  }, [freelancerPage, query, servicePage]);
+
+  const serviceTotalPages = Math.max(1, Math.ceil(serviceCount / SEARCH_PAGE_SIZE));
+  const freelancerTotalPages = Math.max(1, Math.ceil(freelancerCount / SEARCH_PAGE_SIZE));
 
   return (
     <CustomerDashboardFrame mainClassName="profilePage profilePage--details dashboardSearchPage">
@@ -479,7 +503,7 @@ export default function CustomerSearch() {
                   </p>
                 </div>
                 <span className="dashboardSearchSection__count">
-                  {loading ? "Loading" : `${services.length} found`}
+                  {loading ? "Loading" : `${serviceCount} found`}
                 </span>
               </div>
 
@@ -511,6 +535,15 @@ export default function CustomerSearch() {
                   ))}
                 </div>
               )}
+
+              {!loading && services.length > 0 ? (
+                <DashboardPagination
+                  currentPage={servicePage}
+                  totalPages={serviceTotalPages}
+                  onPageChange={setServicePage}
+                  label="Service search pagination"
+                />
+              ) : null}
             </section>
           </Reveal>
 
@@ -524,7 +557,7 @@ export default function CustomerSearch() {
                   </p>
                 </div>
                 <span className="dashboardSearchSection__count">
-                  {loading ? "Loading" : `${freelancers.length} found`}
+                  {loading ? "Loading" : `${freelancerCount} found`}
                 </span>
               </div>
 
@@ -556,6 +589,15 @@ export default function CustomerSearch() {
                   ))}
                 </div>
               )}
+
+              {!loading && freelancers.length > 0 ? (
+                <DashboardPagination
+                  currentPage={freelancerPage}
+                  totalPages={freelancerTotalPages}
+                  onPageChange={setFreelancerPage}
+                  label="Freelancer search pagination"
+                />
+              ) : null}
             </section>
           </Reveal>
         </>

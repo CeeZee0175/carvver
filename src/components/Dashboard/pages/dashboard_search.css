@@ -124,7 +124,7 @@
 .dashboardSearchGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px;
 }
 
 .dashboardSearchGrid--wide {
@@ -133,17 +133,19 @@
 
 .dashboardSearchCard {
   min-height: 100%;
-  border-radius: 24px;
+  border-radius: 18px;
   border: 1px solid rgba(42, 20, 80, 0.1);
   background: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 16px 44px rgba(12, 7, 18, 0.05);
+  box-shadow:
+    10px 14px 34px rgba(12, 7, 18, 0.055),
+    -8px -8px 20px rgba(255, 255, 255, 0.58);
   overflow: hidden;
   display: grid;
 }
 
 .dashboardSearchCard__media {
   position: relative;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 8.5;
   background:
     radial-gradient(circle at 18% 18%, rgba(242, 193, 78, 0.14), transparent 48%),
     radial-gradient(circle at 84% 20%, rgba(124, 58, 237, 0.12), transparent 56%),
@@ -173,8 +175,8 @@
 
 .dashboardSearchCard__body {
   display: grid;
-  gap: 14px;
-  padding: 18px;
+  gap: 11px;
+  padding: 14px;
 }
 
 .dashboardSearchCard__meta,
@@ -187,8 +189,8 @@
 
 .dashboardSearchCard__chip,
 .dashboardSearchCard__status {
-  min-height: 30px;
-  padding: 0 10px;
+  min-height: 26px;
+  padding: 0 9px;
   border-radius: 999px;
   border: 1px solid rgba(42, 20, 80, 0.1);
   background: rgba(255, 255, 255, 0.88);
@@ -226,7 +228,7 @@
 .dashboardSearchCard__title {
   margin: 0;
   font-family: Inter, system-ui, sans-serif;
-  font-size: 21px;
+  font-size: 17px;
   line-height: 1.18;
   font-weight: 850;
   letter-spacing: -0.03em;
@@ -338,7 +340,7 @@
     rgba(255, 255, 255, 0.86);
   border: 1px solid rgba(42, 20, 80, 0.1);
   font-family: Inter, system-ui, sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 850;
   color: rgba(42, 20, 80, 0.84);
 }

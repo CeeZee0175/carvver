@@ -54,6 +54,7 @@ import {
 import { useCart } from "../hooks/useCart";
 import { useCustomerFavoriteFreelancers } from "../hooks/useCustomerFavoriteFreelancers";
 import VerifiedBadge from "../shared/VerifiedBadge";
+import DashboardPagination from "../shared/dashboard_pagination";
 
 const supabase = createClient();
 
@@ -2222,30 +2223,18 @@ export default function BrowseCategories() {
         {!loading && totalPages > 1 && (
           <ScrollReveal>
             <section className="browsePaginationWrap">
-              <div className="browsePagination">
-                {Array.from({ length: totalPages }, (_, i) => {
-                  const page = i + 1;
-                  return (
-                    <Motion.button
-                      key={page}
-                      type="button"
-                      className={`browsePagination__btn ${currentPage === page ? "browsePagination__btn--active" : ""}`}
-                      whileHover={reduceMotion ? undefined : { y: -1 }}
-                      whileTap={{ scale: 0.95 }}
-                      transition={cardTransition}
-                      onClick={() => {
-                        setCurrentPage(page);
-                        window.scrollTo({
-                          top: 0,
-                          behavior: reduceMotion ? "auto" : "smooth",
-                        });
-                      }}
-                    >
-                      {page}
-                    </Motion.button>
-                  );
-                })}
-              </div>
+              <DashboardPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  window.scrollTo({
+                    top: 0,
+                    behavior: reduceMotion ? "auto" : "smooth",
+                  });
+                }}
+                label="Browse services pagination"
+              />
             </section>
           </ScrollReveal>
         )}

@@ -17,10 +17,12 @@ import {
   getProfileDisplayName,
   getProfileInitials,
 } from "../shared/profileIdentity";
+import DashboardPagination from "../shared/dashboard_pagination";
 import "./profile.css";
 import "./dashboard_search.css";
 
 const supabase = createClient();
+const SEARCH_PAGE_SIZE = 12;
 
 function sanitizeSearchTerm(value) {
   return String(value || "")
@@ -234,12 +236,21 @@ export default function FreelancerSearch() {
   const [loading, setLoading] = useState(false);
   const [requests, setRequests] = useState([]);
   const [listings, setListings] = useState([]);
+  const [requestCount, setRequestCount] = useState(0);
+  const [listingCount, setListingCount] = useState(0);
+  const [requestPage, setRequestPage] = useState(1);
+  const [listingPage, setListingPage] = useState(1);
   const [error, setError] = useState("");
 
   const query = useMemo(
     () => sanitizeSearchTerm(searchParams.get("q") || ""),
     [searchParams]
   );
+
+  useEffect(() => {
+    setRequestPage(1);
+    setListingPage(1);
+  }, [query]);
 
   useEffect(() => {
     let active = true;
@@ -250,6 +261,8 @@ export default function FreelancerSearch() {
         setLoading(false);
         setRequests([]);
         setListings([]);
+        setRequestCount(0);
+        setListingCount(0);
         setError("");
         return;
       }
@@ -266,11 +279,14 @@ export default function FreelancerSearch() {
           throw new Error("Please sign in again to search your freelancer pages.");
         }
 
+        const requestFrom = (requestPage - 1) * SEARCH_PAGE_SIZE;
+        const listingFrom = (listingPage - 1) * SEARCH_PAGE_SIZE;
         const [requestResult, listingResult] = await Promise.all([
           supabase
             .from("customer_requests")
             .select(
-              "id, customer_id, title, category, description, budget_amount, location, timeline, status"
+              "id, customer_id, title, category, description, budget_amount, location, timeline, status",
+              { count: "exact" }
             )
             .eq("status", "open")
             .or(
@@ -281,11 +297,12 @@ export default function FreelancerSearch() {
                 `location.ilike.%${query}%`,
               ].join(",")
             )
-            .limit(12),
+            .range(requestFrom, requestFrom + SEARCH_PAGE_SIZE - 1),
           supabase
             .from("services")
             .select(
-              "id, freelancer_id, title, category, location, price, description, listing_overview, is_published, created_at, updated_at"
+              "id, freelancer_id, title, category, location, price, description, listing_overview, is_published, created_at, updated_at",
+              { count: "exact" }
             )
             .eq("freelancer_id", session.user.id)
             .or(
@@ -297,7 +314,7 @@ export default function FreelancerSearch() {
                 `listing_overview.ilike.%${query}%`,
               ].join(",")
             )
-            .limit(12),
+            .range(listingFrom, listingFrom + SEARCH_PAGE_SIZE - 1),
         ]);
 
         if (requestResult.error) throw requestResult.error;
@@ -416,10 +433,14 @@ export default function FreelancerSearch() {
         if (!active) return;
         setRequests(nextRequests);
         setListings(nextListings);
+        setRequestCount(requestResult.count || 0);
+        setListingCount(listingResult.count || 0);
       } catch (nextError) {
         if (!active) return;
         setRequests([]);
         setListings([]);
+        setRequestCount(0);
+        setListingCount(0);
         setError(
           String(nextError?.message || "We couldn't load search results right now.")
         );
@@ -433,7 +454,10 @@ export default function FreelancerSearch() {
     return () => {
       active = false;
     };
-  }, [query]);
+  }, [listingPage, query, requestPage]);
+
+  const requestTotalPages = Math.max(1, Math.ceil(requestCount / SEARCH_PAGE_SIZE));
+  const listingTotalPages = Math.max(1, Math.ceil(listingCount / SEARCH_PAGE_SIZE));
 
   return (
     <FreelancerDashboardFrame mainClassName="profilePage profilePage--details dashboardSearchPage">
@@ -533,7 +557,7 @@ export default function FreelancerSearch() {
                   </p>
                 </div>
                 <span className="dashboardSearchSection__count">
-                  {loading ? "Loading" : `${requests.length} found`}
+                  {loading ? "Loading" : `${requestCount} found`}
                 </span>
               </div>
 
@@ -565,6 +589,15 @@ export default function FreelancerSearch() {
                   ))}
                 </div>
               )}
+
+              {!loading && requests.length > 0 ? (
+                <DashboardPagination
+                  currentPage={requestPage}
+                  totalPages={requestTotalPages}
+                  onPageChange={setRequestPage}
+                  label="Request search pagination"
+                />
+              ) : null}
             </section>
           </Reveal>
 
@@ -578,7 +611,7 @@ export default function FreelancerSearch() {
                   </p>
                 </div>
                 <span className="dashboardSearchSection__count">
-                  {loading ? "Loading" : `${listings.length} found`}
+                  {loading ? "Loading" : `${listingCount} found`}
                 </span>
               </div>
 
@@ -614,6 +647,15 @@ export default function FreelancerSearch() {
                   ))}
                 </div>
               )}
+
+              {!loading && listings.length > 0 ? (
+                <DashboardPagination
+                  currentPage={listingPage}
+                  totalPages={listingTotalPages}
+                  onPageChange={setListingPage}
+                  label="Listing search pagination"
+                />
+              ) : null}
             </section>
           </Reveal>
         </>

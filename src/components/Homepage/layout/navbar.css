@@ -698,6 +698,47 @@
   }
 }
 
+@media (max-width: 640px){
+  :root{
+    --nav-pad: 16px;
+  }
+
+  .navInner{
+    height: 60px;
+    gap: 10px;
+  }
+
+  .navGroup{
+    display: none;
+  }
+
+  .navActions > .btn{
+    display: none;
+  }
+
+  .navBrand{
+    padding-inline: 0;
+    font-size: 31px;
+  }
+
+  .mobilePanel{
+    margin-top: 0;
+    border-radius: 0 0 18px 18px;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .mobileActions{
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .mobileActions .btn{
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 @media (max-width: 1180px){
   .navInner{
     grid-template-columns: auto minmax(0, 1fr) auto;

@@ -42,6 +42,8 @@ import {
   DashboardBreadcrumbs,
 } from "../shared/customerProfileShared";
 import VerifiedBadge from "../shared/VerifiedBadge";
+import DashboardPagination from "../shared/dashboard_pagination";
+import { usePagedItems } from "../shared/dashboard_pagination_hooks";
 
 const supabase = createClient();
 
@@ -553,6 +555,12 @@ export default function FavBook() {
 
     return list;
   }, [savedItems, activeCategory, searchQuery, sortBy]);
+  const {
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    pagedItems,
+  } = usePagedItems(filteredItems, 12, [activeCategory, searchQuery, sortBy, savedItems.length]);
 
   /* ── Remove handler (optimistic UI) ── */
 
@@ -815,7 +823,7 @@ export default function FavBook() {
           ) : filteredItems.length > 0 ? (
             <LayoutGroup>
               <AnimatePresence mode="popLayout">
-                {filteredItems.map((item, index) => (
+                {pagedItems.map((item, index) => (
                   <FavCard
                     key={item.id}
                     item={item}
@@ -838,6 +846,15 @@ export default function FavBook() {
             />
           )}
         </section>
+
+        {!loading && filteredItems.length > 0 ? (
+          <DashboardPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            label="Saved services pagination"
+          />
+        ) : null}
       </div>
 
       {/* ── Footer ── */}

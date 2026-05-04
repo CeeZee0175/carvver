@@ -1496,8 +1496,17 @@ export async function saveFreelancerPayoutMethod(values) {
   const accountReference = normalizeText(values?.accountReference);
 
   if (!payoutMethod) throw new Error("Choose a payout method.");
+  if (!["gcash", "maya", "bank_transfer"].includes(payoutMethod)) {
+    throw new Error("Choose GCash, Maya, or bank transfer.");
+  }
   if (!accountName) throw new Error("Add the account name.");
   if (!accountReference) throw new Error("Add the payout account reference.");
+  if (
+    ["gcash", "maya"].includes(payoutMethod) &&
+    !/^\+639\d{9}$/.test(accountReference)
+  ) {
+    throw new Error("Add a valid Philippine wallet number after +63.");
+  }
 
   const { data, error } = await supabase
     .from("freelancer_payout_methods")

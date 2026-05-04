@@ -11,6 +11,8 @@ import {
   TypewriterHeading,
 } from "../shared/customerProfileShared";
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
+import DashboardPagination from "../shared/dashboard_pagination";
+import { usePagedItems } from "../shared/dashboard_pagination_hooks";
 import { useFreelancerOrders } from "../hooks/useMarketplaceWorkflow";
 
 function formatPayoutState(value) {
@@ -33,6 +35,12 @@ function formatFulfillmentLabel(value) {
 export default function FreelancerOrders() {
   const navigate = useNavigate();
   const { loading, orders, summary, payoutMethod, error, reload } = useFreelancerOrders();
+  const {
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    pagedItems: pagedOrders,
+  } = usePagedItems(orders, 8, [orders.length]);
 
   return (
     <FreelancerDashboardFrame mainClassName="profilePage profilePage--details workflowPage">
@@ -124,7 +132,7 @@ export default function FreelancerOrders() {
                 />
               ) : (
                 <div className="workflowProposalList">
-                  {orders.map((order) => (
+                  {pagedOrders.map((order) => (
                     <article key={order.id} className="workflowProposalCard">
                       <div className="workflowProposalCard__top">
                         <div>
@@ -167,6 +175,15 @@ export default function FreelancerOrders() {
                   ))}
                 </div>
               )}
+
+              {!loading && !error && orders.length > 0 ? (
+                <DashboardPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  label="Freelancer orders pagination"
+                />
+              ) : null}
             </article>
           </div>
 

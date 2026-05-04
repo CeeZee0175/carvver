@@ -24,6 +24,8 @@ import {
 import { PROFILE_SPRING } from "../shared/customerProfileConfig";
 import { useNewsFeed } from "../hooks/useNewsFeed";
 import VerifiedBadge from "../shared/VerifiedBadge";
+import DashboardPagination from "../shared/dashboard_pagination";
+import { usePagedItems } from "../shared/dashboard_pagination_hooks";
 import carvverIcon from "../../../assets/carvver_icon.png";
 import "./profile.css";
 import "./news_feed.css";
@@ -278,8 +280,14 @@ function NewsFeedCard({ post, role, currentUserId, onOpen }) {
 function NewsFeedPageContent({ role }) {
   const navigate = useNavigate();
   const { loading, posts, warning, error, currentUserId, reload } = useNewsFeed({
-    limit: 24,
+    limit: 48,
   });
+  const {
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    pagedItems: pagedPosts,
+  } = usePagedItems(posts, 12, [posts.length, role]);
   const homePath = role === "freelancer" ? "/dashboard/freelancer" : "/dashboard/customer";
   const handleScrollToTop = () => {
     if (typeof window === "undefined") return;
@@ -382,7 +390,7 @@ function NewsFeedPageContent({ role }) {
             />
           ) : (
             <div className="newsFeedList">
-              {posts.map((post) => (
+              {pagedPosts.map((post) => (
                 <NewsFeedCard
                   key={post.id}
                   post={post}
@@ -393,6 +401,15 @@ function NewsFeedPageContent({ role }) {
               ))}
             </div>
           )}
+
+          {!loading && posts.length > 0 ? (
+            <DashboardPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              label="News feed pagination"
+            />
+          ) : null}
         </section>
       </Reveal>
 
