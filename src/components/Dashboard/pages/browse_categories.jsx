@@ -350,43 +350,7 @@ function ScrollReveal({ children, delay = 0, y = 20, className }) {
 }
 
 function TypewriterHeading({ text = "Browse Services" }) {
-  const [displayText, setDisplayText] = useState("");
-  const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (reduceMotion) {
-      queueMicrotask(() => setDisplayText(text));
-      return undefined;
-    }
-
-    let timeoutId;
-    let index = 0;
-
-    const tick = () => {
-      index += 1;
-      setDisplayText(text.slice(0, index));
-      if (index < text.length) timeoutId = setTimeout(tick, 65);
-    };
-
-    timeoutId = setTimeout(tick, 80);
-    return () => clearTimeout(timeoutId);
-  }, [text, reduceMotion]);
-
-  return (
-    <h1 className="browseCategories__title">
-      {displayText}
-      {!reduceMotion && displayText.length < text.length && (
-        <Motion.span
-          className="browseCategories__cursor"
-          aria-hidden="true"
-          animate={{ opacity: [1, 0, 1] }}
-          transition={{ duration: 0.85, repeat: Infinity, ease: "easeInOut" }}
-        >
-          |
-        </Motion.span>
-      )}
-    </h1>
-  );
+  return <h1 className="browseCategories__title">{text}</h1>;
 }
 
 function MapViewportController({ focusTarget }) {
@@ -1935,7 +1899,7 @@ export default function BrowseCategories() {
                 aria-hidden="true"
               >
                 <Motion.path
-                  d="M 0,10 Q 75,0 150,10 Q 225,20 300,10"
+                  d="M 0,10 L 300,10"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.2"

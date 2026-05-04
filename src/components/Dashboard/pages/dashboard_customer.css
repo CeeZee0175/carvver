@@ -41,6 +41,31 @@
   gap: 16px;
 }
 
+/* Compact customer dashboard header refresh */
+.profileHero.dashLandingHero {
+  justify-items: start;
+  text-align: left;
+  gap: 18px;
+  padding: 0;
+}
+
+.dashLandingHero .profileHero__heading {
+  justify-items: start;
+  max-width: 900px;
+  margin-inline: 0;
+}
+
+.dashLandingHero .profileHero__sub {
+  margin: 8px 0 0;
+  max-width: 64ch;
+}
+
+.dashLandingHero__actions {
+  justify-content: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+}
+
 .dashLandingAction {
   position: relative;
   overflow: hidden;

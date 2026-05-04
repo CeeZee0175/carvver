@@ -719,7 +719,10 @@
 .dashbarProfileMenu{
   right: 0;
   min-width: 285px;
-  overflow: hidden;
+  max-height: min(720px, calc(100vh - var(--dashbar-h) - 28px));
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124,58,237,0.34) transparent;
 }
 
 .dashbarProfileMenu__header{
@@ -784,7 +787,7 @@
 }
 
 .dashbarProfileMenu__group{
-  padding: 10px;
+  padding: 8px 10px;
 }
 
 .dashbarProfileMenu__group + .dashbarProfileMenu__group{
@@ -793,7 +796,7 @@
 
 .dashbarProfileMenu__item{
   width: 100%;
-  min-height: 44px;
+  min-height: 40px;
   border: 0;
   background: transparent;
   padding: 0 10px;

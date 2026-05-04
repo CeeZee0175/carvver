@@ -32,7 +32,7 @@
 
 .freelancerMarketplaceHero__title {
   margin: 0;
-  font-family: "Dancing Script", cursive;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: clamp(56px, 6vw, 86px);
   line-height: 0.94;
   font-weight: 700;
@@ -796,4 +796,62 @@
   .freelancerListingSpinner {
     animation: none !important;
   }
+}
+
+/* Compact freelancer marketplace header refresh */
+.freelancerMarketplacePage {
+  gap: clamp(18px, 2.4vw, 30px);
+}
+
+.freelancerMarketplaceHero {
+  gap: 14px;
+  padding: 0;
+}
+
+.freelancerMarketplaceHero__top {
+  gap: clamp(14px, 3vw, 28px);
+}
+
+.freelancerMarketplaceHero__copy {
+  gap: 8px;
+  min-width: 0;
+}
+
+.freelancerMarketplaceHero__titleWrap {
+  max-width: min(920px, 100%);
+  padding-bottom: 11px;
+}
+
+.freelancerMarketplaceHero__title {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.06;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+
+.freelancerMarketplaceHero__line {
+  left: 0;
+  width: min(190px, 100%);
+  height: 5px;
+}
+
+.freelancerMarketplaceHero__line path {
+  d: path("M0 10 L300 10");
+}
+
+.freelancerMarketplaceHero__sub {
+  max-width: 64ch;
+  font-size: 14px;
+  line-height: 1.58;
+}
+
+.freelancerMarketplaceHero__meta {
+  gap: 10px;
+}
+
+.freelancerMarketplaceHero__metaItem {
+  min-height: 56px;
+  padding: 8px 12px;
 }

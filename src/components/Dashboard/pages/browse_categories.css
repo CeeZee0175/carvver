@@ -117,7 +117,7 @@
 
 .browseCategories__title {
   margin: 0;
-  font-family: "Dancing Script", cursive;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: clamp(50px, 5.5vw, 74px);
   line-height: 0.95;
   font-weight: 700;
@@ -146,6 +146,44 @@
   font-size: 15px;
   line-height: 1.7;
   color: rgba(27, 16, 46, 0.7);
+}
+
+/* Compact dashboard header refresh */
+.browseHero {
+  text-align: left;
+  padding: 0;
+}
+
+.browseHero__titleWrap {
+  max-width: min(920px, 100%);
+  padding-bottom: 11px;
+}
+
+.browseCategories__title {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.06;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+
+.browseHero__line {
+  left: 0;
+  right: auto;
+  width: min(190px, 100%);
+  height: 5px;
+}
+
+.browseHero__line path {
+  d: path("M0 10 L300 10");
+}
+
+.browseHero__sub {
+  margin: 8px 0 0;
+  max-width: 64ch;
+  font-size: 14px;
+  line-height: 1.58;
 }
 
 /* ── Controls ── */

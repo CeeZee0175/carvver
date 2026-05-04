@@ -93,7 +93,7 @@
 
 .cartHero__title {
   margin: 10px 0 0;
-  font-family: "Dancing Script", cursive;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: clamp(56px, 6vw, 84px);
   line-height: 0.94;
   font-weight: 700;
@@ -866,4 +866,61 @@
     transition: none !important;
     animation: none !important;
   }
+}
+
+/* Compact dashboard header refresh */
+.cartPage {
+  gap: clamp(18px, 2.4vw, 28px);
+}
+
+.cartHero {
+  justify-items: start;
+  text-align: left;
+  padding: 0;
+  gap: 12px;
+}
+
+.cartHero__heading {
+  justify-items: start;
+  max-width: 880px;
+  margin-inline: 0;
+}
+
+.cartHero__titleWrap {
+  justify-self: start;
+  max-width: min(920px, 100%);
+  padding-bottom: 11px;
+}
+
+.cartHero__title {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.06;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+
+.cartHero__line {
+  left: 0;
+  right: auto;
+  width: min(190px, 100%);
+  height: 5px;
+}
+
+.cartHero__line path {
+  d: path("M0 10 L300 10");
+}
+
+.cartHero__sub {
+  margin: 8px 0 0;
+  max-width: 64ch;
+  font-size: 14px;
+  line-height: 1.58;
+}
+
+.cartHero__stats {
+  justify-content: flex-start;
+  gap: 10px 18px;
+  margin-top: 10px;
 }

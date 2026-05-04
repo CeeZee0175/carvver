@@ -27,43 +27,7 @@ import {
 const SPRING = { type: "spring", stiffness: 340, damping: 26 };
 
 function TypewriterHeading({ text = "Notifications" }) {
-  const [displayText, setDisplayText] = useState("");
-  const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (reduceMotion) {
-      queueMicrotask(() => setDisplayText(text));
-      return undefined;
-    }
-
-    let timeoutId;
-    let index = 0;
-
-    const tick = () => {
-      index += 1;
-      setDisplayText(text.slice(0, index));
-      if (index < text.length) timeoutId = setTimeout(tick, 65);
-    };
-
-    timeoutId = setTimeout(tick, 80);
-    return () => clearTimeout(timeoutId);
-  }, [text, reduceMotion]);
-
-  return (
-    <span className="notifPage__titleTextValue">
-      {displayText}
-      {!reduceMotion && displayText.length < text.length && (
-        <Motion.span
-          className="notifPage__cursor"
-          aria-hidden="true"
-          animate={{ opacity: [1, 0, 1] }}
-          transition={{ duration: 0.85, repeat: Infinity, ease: "easeInOut" }}
-        >
-          |
-        </Motion.span>
-      )}
-    </span>
-  );
+  return <span className="notifPage__titleTextValue">{text}</span>;
 }
 
 function NotificationRow({ item, index, onToggleRead, onOpen }) {

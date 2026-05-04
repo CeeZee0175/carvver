@@ -1,16 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion as Motion } from "framer-motion";
-import { ExternalLink, FileText, Trash2, Upload } from "lucide-react";
+import { ExternalLink, FileText, Paperclip, Send, Smile, Trash2 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   EmptySurface,
   Reveal,
   DashboardBreadcrumbs,
-  TypewriterHeading,
 } from "./customerProfileShared";
 import { PROFILE_SPRING } from "./customerProfileConfig";
 import { formatConversationTime, useMessagesInbox } from "../hooks/useMessagesInbox";
 import "./messages_workspace.css";
+
+const QUICK_EMOJIS = ["👍", "🙏", "✨", "🔥", "😊", "🙌", "✅", "💬"];
 
 function MessageThreadButton({ thread, active, onSelect }) {
   return (
@@ -72,7 +73,6 @@ function MessageHeaderActionButton({
   open,
   onToggle,
   onClose,
-  onUpload,
   onDelete,
   disabled,
 }) {
@@ -130,16 +130,6 @@ function MessageHeaderActionButton({
             exit={{ opacity: 0, y: 6, scale: 0.98, filter: "blur(6px)" }}
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
           >
-            <button
-              type="button"
-              className="messagesConversation__actionItem"
-              role="menuitem"
-              onClick={onUpload}
-              disabled={disabled}
-            >
-              <Upload className="messagesConversation__actionIcon" />
-              <span>Upload file</span>
-            </button>
             <button
               type="button"
               className="messagesConversation__actionItem messagesConversation__actionItem--danger"
@@ -295,6 +285,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
   const location = useLocation();
   const composerRef = useRef(null);
   const fileInputRef = useRef(null);
+  const emojiMenuRef = useRef(null);
 
   const searchParams = useMemo(
     () => new URLSearchParams(location.search),
@@ -303,6 +294,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
 
   const [draft, setDraft] = useState("");
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
+  const [emojiMenuOpen, setEmojiMenuOpen] = useState(false);
 
   const {
     loading,
@@ -351,8 +343,35 @@ export default function MessagesWorkspace({ role = "customer" }) {
   }, [sending]);
 
   useEffect(() => {
-    queueMicrotask(() => setActionMenuOpen(false));
+    queueMicrotask(() => {
+      setActionMenuOpen(false);
+      setEmojiMenuOpen(false);
+    });
   }, [activeThread?.id]);
+
+  useEffect(() => {
+    if (!emojiMenuOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (emojiMenuRef.current?.contains(event.target)) return;
+      setEmojiMenuOpen(false);
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setEmojiMenuOpen(false);
+        composerRef.current?.focus();
+      }
+    };
+
+    window.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [emojiMenuOpen]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -365,6 +384,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
 
   const handleUploadFile = () => {
     setActionMenuOpen(false);
+    setEmojiMenuOpen(false);
     fileInputRef.current?.click();
   };
 
@@ -382,6 +402,12 @@ export default function MessagesWorkspace({ role = "customer" }) {
     );
     if (!confirmed) return;
     await hideConversation(activeThread?.id);
+  };
+
+  const handleEmojiSelect = (emoji) => {
+    setDraft((current) => `${current}${emoji}`);
+    setEmojiMenuOpen(false);
+    requestAnimationFrame(() => composerRef.current?.focus());
   };
 
   const titleText = "Messages";
@@ -410,7 +436,7 @@ export default function MessagesWorkspace({ role = "customer" }) {
           <div className="messagesHero__heading">
             <div className="messagesHero__titleWrap">
               <h1 className="messagesHero__title">
-                <TypewriterHeading text={titleText} />
+                {titleText}
               </h1>
 
               <Motion.svg
@@ -541,7 +567,6 @@ export default function MessagesWorkspace({ role = "customer" }) {
                       open={actionMenuOpen}
                       onToggle={() => setActionMenuOpen((current) => !current)}
                       onClose={() => setActionMenuOpen(false)}
-                      onUpload={handleUploadFile}
                       onDelete={handleDeleteConversation}
                       disabled={sending || hidingThread || !activeThread}
                     />
@@ -592,46 +617,105 @@ export default function MessagesWorkspace({ role = "customer" }) {
                     disabled={sending || startingThread || hidingThread || !activeThread}
                   />
 
-                  <div className="messagesComposer__field">
-                    <label className="messagesComposer__label" htmlFor="messages-composer">
-                      Reply
-                    </label>
+                  <div className="messagesComposer__dock">
+                    <div className="messagesComposer__toolbar">
+                      <div className="messagesComposer__tools">
+                        <button
+                          type="button"
+                          className="messagesComposer__tool"
+                          aria-label="Attach file"
+                          title="Attach file"
+                          onClick={handleUploadFile}
+                          disabled={sending || startingThread || hidingThread || !activeThread}
+                        >
+                          <Paperclip className="messagesComposer__toolIcon" />
+                        </button>
 
-                    <textarea
-                      id="messages-composer"
-                      ref={composerRef}
-                      className="messagesComposer__control"
-                      value={draft}
-                      onChange={(event) => setDraft(event.target.value)}
-                      placeholder={
-                        startingThread
-                          ? "Opening your thread..."
-                          : sending
-                            ? "Sending..."
-                          : "Type your message here..."
-                      }
-                      disabled={sending || startingThread || !activeThread}
-                    />
-                  </div>
+                        <div className="messagesComposer__emojiWrap" ref={emojiMenuRef}>
+                          <button
+                            type="button"
+                            className={`messagesComposer__tool ${
+                              emojiMenuOpen ? "messagesComposer__tool--active" : ""
+                            }`}
+                            aria-label="Add emoji"
+                            title="Add emoji"
+                            aria-haspopup="menu"
+                            aria-expanded={emojiMenuOpen}
+                            onClick={() => setEmojiMenuOpen((current) => !current)}
+                            disabled={sending || startingThread || hidingThread || !activeThread}
+                          >
+                            <Smile className="messagesComposer__toolIcon" />
+                          </button>
 
-                  <div className="messagesComposer__actions">
-                    <p className="messagesComposer__error" role="status" aria-live="polite">
-                      {error ? error : "\u00A0"}
-                    </p>
+                          <AnimatePresence>
+                            {emojiMenuOpen ? (
+                              <Motion.div
+                                className="messagesComposer__emojiMenu"
+                                role="menu"
+                                initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                                transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+                              >
+                                {QUICK_EMOJIS.map((emoji) => (
+                                  <button
+                                    key={emoji}
+                                    type="button"
+                                    className="messagesComposer__emoji"
+                                    role="menuitem"
+                                    aria-label={`Insert ${emoji}`}
+                                    onClick={() => handleEmojiSelect(emoji)}
+                                  >
+                                    {emoji}
+                                  </button>
+                                ))}
+                              </Motion.div>
+                            ) : null}
+                          </AnimatePresence>
+                        </div>
+                      </div>
 
-                    <button
-                      type="submit"
-                      className="messagesComposer__submit"
-                      disabled={
-                        sending ||
-                        startingThread ||
-                        hidingThread ||
-                        !activeThread ||
-                        !String(draft || "").trim()
-                      }
-                    >
-                      {sending ? "Sending..." : "Send message"}
-                    </button>
+                      <p className="messagesComposer__error" role="status" aria-live="polite">
+                        {error ? error : "\u00A0"}
+                      </p>
+                    </div>
+
+                    <div className="messagesComposer__inputRow">
+                      <label className="messagesComposer__label" htmlFor="messages-composer">
+                        Reply
+                      </label>
+
+                      <textarea
+                        id="messages-composer"
+                        ref={composerRef}
+                        className="messagesComposer__control"
+                        value={draft}
+                        onChange={(event) => setDraft(event.target.value)}
+                        placeholder={
+                          startingThread
+                            ? "Opening your thread..."
+                            : sending
+                              ? "Sending..."
+                              : "Type a message..."
+                        }
+                        disabled={sending || startingThread || !activeThread}
+                      />
+
+                      <button
+                        type="submit"
+                        className="messagesComposer__submit"
+                        disabled={
+                          sending ||
+                          startingThread ||
+                          hidingThread ||
+                          !activeThread ||
+                          !String(draft || "").trim()
+                        }
+                      >
+                        <span>{sending ? "Sending" : "Send"}</span>
+                        <Send className="messagesComposer__sendIcon" />
+                      </button>
+                    </div>
                   </div>
                 </form>
               </>

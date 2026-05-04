@@ -255,7 +255,15 @@ function MatrixTitle({ id, text = "Categories", active = true }) {
   );
 }
 
-function HeroSection({ onBrowse, onStart }) {
+function HeroSection({ onSearch, onStart, onCategorySelect }) {
+  const [query, setQuery] = useState("");
+  const quickCategories = FEATURED_CATEGORIES.slice(0, 4);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    onSearch(query);
+  };
+
   return (
     <section className="homeHero" aria-labelledby="homeHero-title">
       <BeamsBackground className="homeHero__beams" intensity="medium" />
@@ -270,7 +278,7 @@ function HeroSection({ onBrowse, onStart }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.62, ease: [0.22, 1, 0.36, 1] }}
           >
-            Book creative services without the guesswork.
+            Find services ready to book.
           </Motion.h1>
           <Motion.p
             className="homeHero__text"
@@ -278,19 +286,57 @@ function HeroSection({ onBrowse, onStart }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.62, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
           >
-            Browse local listings, compare packages, message providers, and check out in one place.
+            Search local creative work, compare packages, message providers, and book through Carvver.
           </Motion.p>
 
-          <Motion.div
-            className="homeHero__actions"
+          <Motion.form
+            className="homeHeroSearch"
+            onSubmit={handleSubmit}
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.18 }}
           >
-            <button type="button" className="homeHero__primary" onClick={onBrowse}>
+            <label className="homeHeroSearch__label" htmlFor="homeHeroSearchInput">
+              Search services
+            </label>
+            <div className="homeHeroSearch__box">
               <Search className="homeHero__buttonIcon" />
-              Browse services
-            </button>
+              <input
+                id="homeHeroSearchInput"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search logo design, video editing, events..."
+              />
+              <button type="submit">Search</button>
+            </div>
+          </Motion.form>
+
+          <Motion.div
+            className="homeHeroQuick"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.46, delay: 0.24 }}
+          >
+            <span>Popular</span>
+            <div className="homeHeroQuick__list">
+              {quickCategories.map((category) => (
+                <button
+                  key={category.id}
+                  type="button"
+                  onClick={() => onCategorySelect(category.title)}
+                >
+                  {category.title}
+                </button>
+              ))}
+            </div>
+          </Motion.div>
+
+          <Motion.div
+            className="homeHero__actions"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.46, delay: 0.3 }}
+          >
             <button type="button" className="homeHero__secondary" onClick={onStart}>
               Start selling
               <ArrowRight className="homeHero__buttonIcon" />
@@ -300,28 +346,41 @@ function HeroSection({ onBrowse, onStart }) {
 
         <Motion.div
           className="homeHeroPreview"
-          aria-hidden="true"
+          aria-label="Marketplace preview"
           initial={{ opacity: 0, y: 26, rotateX: 6 }}
           animate={{ opacity: 1, y: 0, rotateX: 0 }}
           transition={{ duration: 0.7, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="homeHeroPreview__media">
-            <img
-              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1300&auto=format&fit=crop"
-              alt=""
-            />
+          <div className="homeHeroPreview__service">
+            <span>Service listing</span>
+            <strong>Event photo package</strong>
+            <p>Coverage details, sample media, and package choices stay in one view.</p>
           </div>
-          <div className="homeHeroPreview__panel">
-            <div>
-              <span>Service listing</span>
-              <strong>Brand content sprint</strong>
-            </div>
-            <p>Portfolio media, package choices, messages, and payment flow stay close to the booking.</p>
+          <div className="homeHeroPreview__packages">
+            {["Starter", "Full day", "Rush edit"].map((label, index) => (
+              <div
+                key={label}
+                className={
+                  index === 1
+                    ? "homeHeroPreview__package homeHeroPreview__package--active"
+                    : "homeHeroPreview__package"
+                }
+              >
+                <span>{label}</span>
+                <strong>{index === 0 ? "P2.5k" : index === 1 ? "P6k" : "P3k"}</strong>
+              </div>
+            ))}
           </div>
-          <div className="homeHeroPreview__flow">
-            <span>Browse</span>
+          <div className="homeHeroPreview__message">
             <span>Message</span>
-            <span>Book</span>
+            <p>Can you cover a morning shoot and deliver selected edits this week?</p>
+          </div>
+          <div className="homeHeroPreview__checkout">
+            <span>
+              <Check className="homeHeroPreview__check" />
+              Package selected
+            </span>
+            <strong>Review booking</strong>
           </div>
         </Motion.div>
       </div>
@@ -976,14 +1035,20 @@ export default function HomeExperience() {
     return () => window.clearTimeout(timerId);
   }, [location.hash, scrollToIndex]);
 
-  const handleBrowse = async () => {
+  const handleHeroSearch = async (value = "") => {
+    const query = value.trim();
+
     try {
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
       if (session) {
-        navigate("/dashboard/customer/browse-services");
+        navigate(
+          query
+            ? `/dashboard/customer/search?q=${encodeURIComponent(query)}`
+            : "/dashboard/customer/browse-services"
+        );
         return;
       }
     } catch {
@@ -991,6 +1056,25 @@ export default function HomeExperience() {
     }
 
     navigate("/sign-up");
+  };
+
+  const handleHeroCategory = async (category) => {
+    setFeaturedCategoryIntent(category);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session) {
+        navigate(buildCategoryPath("/dashboard/customer/browse-services", category));
+        return;
+      }
+    } catch {
+      // Fall through to sign-up.
+    }
+
+    navigate(buildCategoryPath("/sign-up", category));
   };
 
   const handleStartSelling = async () => {
@@ -1024,7 +1108,11 @@ export default function HomeExperience() {
   return (
     <main className="homeExperience">
       <section {...sectionProps[0]} ref={setSectionRef(0)} data-home-section>
-        <HeroSection onBrowse={handleBrowse} onStart={handleStartSelling} />
+        <HeroSection
+          onSearch={handleHeroSearch}
+          onStart={handleStartSelling}
+          onCategorySelect={handleHeroCategory}
+        />
       </section>
 
       <section {...sectionProps[1]} ref={setSectionRef(1)} data-home-section>

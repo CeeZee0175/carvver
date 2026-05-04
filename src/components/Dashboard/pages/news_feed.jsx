@@ -166,11 +166,15 @@ function NewsFeedCard({ post, role, currentUserId, onOpen }) {
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="newsFeedCard__top">
-        <FeedAuthor post={post} />
+      <div className="newsFeedCard__media">
+        <FeedMedia post={post} />
       </div>
 
-      <div className="newsFeedCard__body">
+      <div className="newsFeedCard__content">
+        <div className="newsFeedCard__top">
+          <FeedAuthor post={post} />
+        </div>
+
         <div className="newsFeedCard__copy">
           <div className="newsFeedCard__labels">
             <span>{post.category}</span>
@@ -195,99 +199,117 @@ function NewsFeedCard({ post, role, currentUserId, onOpen }) {
           </div>
         </div>
 
-        <div className="newsFeedCard__media">
-          <FeedMedia post={post} />
-        </div>
-      </div>
-
-      <div
-        className={`newsFeedCard__actions ${
-          canOpenPrimary ? "newsFeedCard__actions--split" : ""
-        }`}
-      >
-        {canOpenPrimary ? (
-          <Motion.button
-            type="button"
-            className="newsFeedCard__primary"
-            whileHover={{ y: -1.5 }}
-            whileTap={{ scale: 0.98 }}
-            transition={PROFILE_SPRING}
-            onClick={() => onOpen(primaryPath)}
-          >
-            <span>{primaryLabel}</span>
-            <ArrowRight className="newsFeedCard__btnIcon" />
-          </Motion.button>
-        ) : null}
-
-        <div className="newsFeedCard__shareWrap">
-          <Motion.button
-            type="button"
-            className="newsFeedCard__shareToggle"
-            aria-expanded={shareOpen}
-            aria-haspopup="menu"
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.98 }}
-            transition={PROFILE_SPRING}
-            onClick={() => setShareOpen((open) => !open)}
-          >
-            <Share2 className="newsFeedCard__btnIcon" />
-            <span>Share</span>
-          </Motion.button>
-
-          {shareOpen ? (
-            <div className="newsFeedShareMenu" role="menu">
-              <button
-                type="button"
-                className="newsFeedShareMenu__item"
-                role="menuitem"
-                onClick={() => handleShareOpen(shareLinks.facebook)}
-              >
-                Facebook
-              </button>
-              <button
-                type="button"
-                className="newsFeedShareMenu__item"
-                role="menuitem"
-                onClick={() => handleShareOpen(shareLinks.twitter)}
-              >
-                X
-              </button>
-              <button
-                type="button"
-                className="newsFeedShareMenu__item"
-                role="menuitem"
-                onClick={() => handleShareOpen(shareLinks.reddit)}
-              >
-                Reddit
-              </button>
-              <button
-                type="button"
-                className="newsFeedShareMenu__item"
-                role="menuitem"
-                onClick={handleCopyLink}
-              >
-                <LinkIcon className="newsFeedShareMenu__icon" />
-                <span>Copy link</span>
-              </button>
-            </div>
+        <div
+          className={`newsFeedCard__actions ${
+            canOpenPrimary ? "newsFeedCard__actions--split" : ""
+          }`}
+        >
+          {canOpenPrimary ? (
+            <Motion.button
+              type="button"
+              className="newsFeedCard__primary"
+              whileHover={{ y: -1.5 }}
+              whileTap={{ scale: 0.98 }}
+              transition={PROFILE_SPRING}
+              onClick={() => onOpen(primaryPath)}
+            >
+              <span>{primaryLabel}</span>
+              <ArrowRight className="newsFeedCard__btnIcon" />
+            </Motion.button>
           ) : null}
+
+          <div className="newsFeedCard__shareWrap">
+            <Motion.button
+              type="button"
+              className="newsFeedCard__shareToggle"
+              aria-expanded={shareOpen}
+              aria-haspopup="menu"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              transition={PROFILE_SPRING}
+              onClick={() => setShareOpen((open) => !open)}
+            >
+              <Share2 className="newsFeedCard__btnIcon" />
+              <span>Share</span>
+            </Motion.button>
+
+            {shareOpen ? (
+              <div className="newsFeedShareMenu" role="menu">
+                <button
+                  type="button"
+                  className="newsFeedShareMenu__item"
+                  role="menuitem"
+                  onClick={() => handleShareOpen(shareLinks.facebook)}
+                >
+                  Facebook
+                </button>
+                <button
+                  type="button"
+                  className="newsFeedShareMenu__item"
+                  role="menuitem"
+                  onClick={() => handleShareOpen(shareLinks.twitter)}
+                >
+                  X
+                </button>
+                <button
+                  type="button"
+                  className="newsFeedShareMenu__item"
+                  role="menuitem"
+                  onClick={() => handleShareOpen(shareLinks.reddit)}
+                >
+                  Reddit
+                </button>
+                <button
+                  type="button"
+                  className="newsFeedShareMenu__item"
+                  role="menuitem"
+                  onClick={handleCopyLink}
+                >
+                  <LinkIcon className="newsFeedShareMenu__icon" />
+                  <span>Copy link</span>
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     </Motion.article>
   );
 }
 
+const NEWS_FEED_FILTERS = [
+  { id: "all", label: "All updates" },
+  { id: "service", label: "Services" },
+  { id: "request", label: "Requests" },
+];
+
 function NewsFeedPageContent({ role }) {
   const navigate = useNavigate();
+  const [activeFilter, setActiveFilter] = useState("all");
   const { loading, posts, warning, error, currentUserId, reload } = useNewsFeed({
     limit: 48,
   });
+  const filteredPosts = useMemo(
+    () =>
+      activeFilter === "all"
+        ? posts
+        : posts.filter((post) => post.type === activeFilter),
+    [activeFilter, posts]
+  );
+  const filterCounts = useMemo(
+    () => ({
+      all: posts.length,
+      service: posts.filter((post) => post.type === "service").length,
+      request: posts.filter((post) => post.type === "request").length,
+    }),
+    [posts]
+  );
   const {
     currentPage,
     setCurrentPage,
     totalPages,
     pagedItems: pagedPosts,
-  } = usePagedItems(posts, 12, [posts.length, role]);
+  } = usePagedItems(filteredPosts, 10, [filteredPosts.length, role, activeFilter]);
   const homePath = role === "freelancer" ? "/dashboard/freelancer" : "/dashboard/customer";
   const handleScrollToTop = () => {
     if (typeof window === "undefined") return;
@@ -307,10 +329,10 @@ function NewsFeedPageContent({ role }) {
         <section className="newsFeedHero">
           <div className="newsFeedHero__copy">
             <div className="newsFeedHero__titleWrap">
-              <h1 className="newsFeedHero__title">News Feed</h1>
+              <h1 className="newsFeedHero__title">Marketplace Feed</h1>
             </div>
             <p className="newsFeedHero__sub">
-              Follow fresh service listings and open customer requests across Carvver.
+              Scan new listings and open requests without leaving your dashboard.
             </p>
           </div>
 
@@ -357,10 +379,34 @@ function NewsFeedPageContent({ role }) {
         <section className="newsFeedSection">
           <div className="newsFeedSection__head">
             <div>
-              <h2 className="newsFeedSection__title">Marketplace updates</h2>
+              <h2 className="newsFeedSection__title">
+                {role === "freelancer" ? "Work worth checking" : "Services worth checking"}
+              </h2>
               <p className="newsFeedSection__sub">
-                {loading ? "Loading posts..." : `${posts.length} post${posts.length === 1 ? "" : "s"} visible`}
+                {loading
+                  ? "Loading posts..."
+                  : `${filteredPosts.length} of ${posts.length} update${
+                      posts.length === 1 ? "" : "s"
+                    } visible`}
               </p>
+            </div>
+
+            <div className="newsFeedFilters" role="tablist" aria-label="News feed filters">
+              {NEWS_FEED_FILTERS.map((filter) => (
+                <button
+                  key={filter.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeFilter === filter.id}
+                  className={`newsFeedFilters__tab ${
+                    activeFilter === filter.id ? "newsFeedFilters__tab--active" : ""
+                  }`}
+                  onClick={() => setActiveFilter(filter.id)}
+                >
+                  <span>{filter.label}</span>
+                  <strong>{filterCounts[filter.id] || 0}</strong>
+                </button>
+              ))}
             </div>
           </div>
 
@@ -388,6 +434,15 @@ function NewsFeedPageContent({ role }) {
               onAction={reload}
               className="newsFeedEmpty"
             />
+          ) : filteredPosts.length === 0 ? (
+            <EmptySurface
+              icon={Newspaper}
+              title="Nothing in this view yet"
+              description="Switch filters or refresh to check the latest marketplace activity."
+              actionLabel="Show all"
+              onAction={() => setActiveFilter("all")}
+              className="newsFeedEmpty"
+            />
           ) : (
             <div className="newsFeedList">
               {pagedPosts.map((post) => (
@@ -402,7 +457,7 @@ function NewsFeedPageContent({ role }) {
             </div>
           )}
 
-          {!loading && posts.length > 0 ? (
+          {!loading && filteredPosts.length > 0 ? (
             <DashboardPagination
               currentPage={currentPage}
               totalPages={totalPages}

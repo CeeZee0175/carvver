@@ -32,7 +32,7 @@
 
 .workflowHero__title {
   margin: 0;
-  font-family: "Dancing Script", cursive;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: clamp(54px, 6vw, 84px);
   line-height: 0.94;
   font-weight: 700;
@@ -567,5 +567,68 @@
   .workflowField__control,
   .workflowField__textarea {
     transition: none !important;
+  }
+}
+
+/* Compact dashboard/detail header refresh */
+.workflowPage {
+  gap: clamp(18px, 2.3vw, 28px);
+}
+
+.workflowHero {
+  gap: 14px;
+  padding: 0;
+}
+
+.workflowHero__top {
+  gap: clamp(14px, 3vw, 28px);
+}
+
+.workflowHero__copy {
+  gap: 8px;
+  min-width: 0;
+}
+
+.workflowHero__titleWrap {
+  max-width: min(920px, 100%);
+  padding-bottom: 11px;
+}
+
+.workflowHero__title {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.06;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+
+.workflowHero__line {
+  left: 0;
+  width: min(190px, 100%);
+  height: 5px;
+}
+
+.workflowHero__line path {
+  d: path("M0 10 L300 10");
+}
+
+.workflowHero__sub {
+  max-width: 64ch;
+  font-size: 14px;
+  line-height: 1.58;
+}
+
+.workflowMeta {
+  gap: 12px 18px;
+}
+
+@media (max-width: 720px) {
+  .workflowHero__top {
+    gap: 14px;
+  }
+
+  .workflowHero__actions {
+    width: 100%;
   }
 }

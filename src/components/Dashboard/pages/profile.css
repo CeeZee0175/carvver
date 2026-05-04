@@ -340,7 +340,7 @@
 
 .profileHero__title {
   margin: 10px 0 0;
-  font-family: "Dancing Script", cursive;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: clamp(56px, 6vw, 84px);
   line-height: 0.94;
   font-weight: 700;
@@ -1956,5 +1956,98 @@
   .profileBadgeChip--skeleton {
     animation: none !important;
     background: rgba(42, 20, 80, 0.06) !important;
+  }
+}
+
+/* Compact protected-page header language */
+.profileHero {
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.62fr);
+  gap: clamp(16px, 2.2vw, 24px);
+  padding: clamp(18px, 2.4vw, 24px);
+  border-radius: 20px;
+}
+
+.profileHero--centered {
+  justify-items: start;
+  text-align: left;
+}
+
+.profileHero--centered .profileHero__heading {
+  justify-items: start;
+}
+
+.profileHero--centered .profileHero__sub {
+  margin-inline: 0;
+}
+
+.profileHero__titleWrap,
+.profilePage--details .profileHero__titleWrap,
+.customerOrdersPage .profileHero__titleWrap {
+  max-width: min(920px, 100%);
+  padding-bottom: 11px;
+}
+
+.profileHero__title,
+.profilePage--details .profileHero__title,
+.customerOrdersPage__titleText {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.06;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.profileHero__line {
+  left: 0;
+  right: auto;
+  bottom: 0;
+  width: min(190px, 100%);
+  height: 5px;
+}
+
+.profileHero__line path,
+.customerOrdersPage__line path {
+  d: path("M0 10 L300 10");
+}
+
+.profileHero__sub {
+  margin-top: 8px;
+  max-width: 64ch;
+  font-size: 14px;
+  line-height: 1.58;
+}
+
+.profileHero__stats {
+  gap: 10px;
+}
+
+.profileMiniStat {
+  min-height: 72px;
+  padding: 12px;
+  border-radius: 14px;
+}
+
+@media (max-width: 780px) {
+  .profileHero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profileHero__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .profileHero {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .profileHero__title,
+  .profilePage--details .profileHero__title,
+  .customerOrdersPage__titleText {
+    font-size: clamp(28px, 10vw, 38px);
   }
 }

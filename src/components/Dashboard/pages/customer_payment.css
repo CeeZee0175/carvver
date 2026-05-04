@@ -46,6 +46,39 @@
   pointer-events: none;
 }
 
+/* Compact payment header refresh */
+.customerPaymentPage {
+  gap: clamp(1.1rem, 2.4vw, 1.75rem);
+}
+
+.customerPaymentHero {
+  gap: 0.85rem;
+}
+
+.customerPaymentHero__titleWrap {
+  padding-bottom: 0.7rem;
+}
+
+.customerPaymentHero__title {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: clamp(1.9rem, 4vw, 2.875rem);
+  line-height: 1.06;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  color: rgba(27, 16, 46, 0.98);
+  overflow-wrap: anywhere;
+}
+
+.customerPaymentHero__line {
+  left: 0;
+  width: min(190px, 100%);
+  height: 5px;
+}
+
+.customerPaymentHero__line path {
+  d: path("M0 10 L300 10");
+}
+
 .customerPaymentOverview {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

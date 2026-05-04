@@ -6,13 +6,16 @@ import {
   BadgeCheck,
   Bell,
   CheckCheck,
+  ClipboardList,
   Home,
   LogOut,
   MessageCircle,
   Newspaper,
+  PlusCircle,
   Search,
   Settings,
   ShieldCheck,
+  ShoppingBag,
   UserRound,
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
@@ -190,6 +193,11 @@ export default function FreelancerDashBar() {
     } catch {
       toast.error("Failed to sign out. Please try again.");
     }
+  };
+
+  const handleProfileMenuNavigate = (path) => {
+    setOpenProfile(false);
+    navigate(path);
   };
 
   const handleOpenNotification = async (item) => {
@@ -498,10 +506,7 @@ export default function FreelancerDashBar() {
                     type="button"
                     className="dashbarProfileMenu__item"
                     role="menuitem"
-                    onClick={() => {
-                      setOpenProfile(false);
-                      navigate("/dashboard/freelancer");
-                    }}
+                    onClick={() => handleProfileMenuNavigate("/dashboard/freelancer")}
                   >
                     <Home className="dashbarProfileMenu__itemIcon" />
                     <span>Dashboard Home</span>
@@ -511,10 +516,59 @@ export default function FreelancerDashBar() {
                     type="button"
                     className="dashbarProfileMenu__item"
                     role="menuitem"
-                    onClick={() => {
-                      setOpenProfile(false);
-                      navigate("/dashboard/freelancer/profile");
-                    }}
+                    onClick={() => handleProfileMenuNavigate("/dashboard/freelancer/browse-requests")}
+                  >
+                    <Search className="dashbarProfileMenu__itemIcon" />
+                    <span>Browse Requests</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => handleProfileMenuNavigate("/dashboard/freelancer/post-listing")}
+                  >
+                    <PlusCircle className="dashbarProfileMenu__itemIcon" />
+                    <span>Post Listing</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => handleProfileMenuNavigate("/dashboard/freelancer/listings")}
+                  >
+                    <ClipboardList className="dashbarProfileMenu__itemIcon" />
+                    <span>My Listings</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => handleProfileMenuNavigate("/dashboard/freelancer/messages")}
+                  >
+                    <MessageCircle className="dashbarProfileMenu__itemIcon" />
+                    <span>Messages</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => handleProfileMenuNavigate("/dashboard/freelancer/orders")}
+                  >
+                    <ShoppingBag className="dashbarProfileMenu__itemIcon" />
+                    <span>Orders</span>
+                  </button>
+                </div>
+
+                <div className="dashbarProfileMenu__group">
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => handleProfileMenuNavigate("/dashboard/freelancer/profile")}
                   >
                     <UserRound className="dashbarProfileMenu__itemIcon" />
                     <span>View Profile</span>
@@ -524,10 +578,7 @@ export default function FreelancerDashBar() {
                     type="button"
                     className="dashbarProfileMenu__item"
                     role="menuitem"
-                    onClick={() => {
-                      setOpenProfile(false);
-                      navigate("/dashboard/freelancer/news-feed");
-                    }}
+                    onClick={() => handleProfileMenuNavigate("/dashboard/freelancer/news-feed")}
                   >
                     <Newspaper className="dashbarProfileMenu__itemIcon" />
                     <span>News Feed</span>
@@ -537,10 +588,7 @@ export default function FreelancerDashBar() {
                     type="button"
                     className="dashbarProfileMenu__item"
                     role="menuitem"
-                    onClick={() => {
-                      setOpenProfile(false);
-                      navigate("/dashboard/freelancer/profile/achievements");
-                    }}
+                    onClick={() => handleProfileMenuNavigate("/dashboard/freelancer/profile/achievements")}
                   >
                     <BadgeCheck className="dashbarProfileMenu__itemIcon" />
                     <span>Achievements</span>
@@ -550,10 +598,7 @@ export default function FreelancerDashBar() {
                     type="button"
                     className="dashbarProfileMenu__item"
                     role="menuitem"
-                    onClick={() => {
-                      setOpenProfile(false);
-                      navigate("/dashboard/freelancer/profile/verification");
-                    }}
+                    onClick={() => handleProfileMenuNavigate("/dashboard/freelancer/profile/verification")}
                   >
                     <ShieldCheck className="dashbarProfileMenu__itemIcon" />
                     <span>{user.verified ? "Verification" : "Get Verified"}</span>
@@ -563,23 +608,7 @@ export default function FreelancerDashBar() {
                     type="button"
                     className="dashbarProfileMenu__item"
                     role="menuitem"
-                    onClick={() => {
-                      setOpenProfile(false);
-                      navigate("/dashboard/freelancer/listings");
-                    }}
-                  >
-                    <Home className="dashbarProfileMenu__itemIcon" />
-                    <span>My Listings</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="dashbarProfileMenu__item"
-                    role="menuitem"
-                    onClick={() => {
-                      setOpenProfile(false);
-                      navigate("/dashboard/freelancer/settings");
-                    }}
+                    onClick={() => handleProfileMenuNavigate("/dashboard/freelancer/settings")}
                   >
                     <Settings className="dashbarProfileMenu__itemIcon" />
                     <span>Account Settings</span>

@@ -415,7 +415,7 @@ export default function CustomerPayment() {
                 aria-hidden="true"
               >
                 <Motion.path
-                  d="M 0,10 Q 67,0 134,10 Q 201,20 268,10"
+                  d="M 0,10 L 268,10"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.2"

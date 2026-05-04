@@ -127,43 +127,7 @@ function ScrollReveal({ children, delay = 0, y = 20, className }) {
 /* ─── Typewriter Heading ─── */
 
 function TypewriterHeading({ text = "Saved Listings" }) {
-  const [displayText, setDisplayText] = useState("");
-  const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (reduceMotion) {
-      queueMicrotask(() => setDisplayText(text));
-      return undefined;
-    }
-
-    let timeoutId;
-    let index = 0;
-
-    const tick = () => {
-      index += 1;
-      setDisplayText(text.slice(0, index));
-      if (index < text.length) timeoutId = setTimeout(tick, 65);
-    };
-
-    timeoutId = setTimeout(tick, 80);
-    return () => clearTimeout(timeoutId);
-  }, [text, reduceMotion]);
-
-  return (
-    <h1 className="favHero__title">
-      {displayText}
-      {!reduceMotion && displayText.length < text.length && (
-        <Motion.span
-          className="favHero__cursor"
-          aria-hidden="true"
-          animate={{ opacity: [1, 0, 1] }}
-          transition={{ duration: 0.85, repeat: Infinity, ease: "easeInOut" }}
-        >
-          |
-        </Motion.span>
-      )}
-    </h1>
-  );
+  return <h1 className="favHero__title">{text}</h1>;
 }
 
 /* ─── Fav Card ─── */

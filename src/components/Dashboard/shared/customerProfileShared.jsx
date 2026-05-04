@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import { motion as Motion, useInView, useReducedMotion } from "framer-motion";
 import { ChevronRight, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -81,57 +81,8 @@ export function Reveal({
 export function TypewriterHeading({
   text,
   className = "",
-  speed = 72,
-  initialDelay = 120,
 }) {
-  const [displayText, setDisplayText] = useState("");
-  const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (reduceMotion) return;
-
-    let timeoutId = null;
-    let cancelled = false;
-    let index = 0;
-
-    queueMicrotask(() => setDisplayText(""));
-
-    const tick = () => {
-      if (cancelled) return;
-
-      index += 1;
-      setDisplayText(text.slice(0, index));
-
-      if (index < text.length) {
-        timeoutId = setTimeout(tick, speed);
-      }
-    };
-
-    timeoutId = setTimeout(tick, initialDelay);
-
-    return () => {
-      cancelled = true;
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [initialDelay, reduceMotion, speed, text]);
-
-  const resolvedText = reduceMotion ? text : displayText;
-
-  return (
-    <span className={className}>
-      {resolvedText}
-      {!reduceMotion && resolvedText.length < text.length && (
-        <Motion.span
-          className="profileHero__cursor"
-          aria-hidden="true"
-          animate={{ opacity: [1, 0, 1] }}
-          transition={{ duration: 0.88, repeat: Infinity, ease: "easeInOut" }}
-        >
-          |
-        </Motion.span>
-      )}
-    </span>
-  );
+  return <span className={className}>{text}</span>;
 }
 
 export function DashboardBreadcrumbs({ items, homePath = "/dashboard/customer" }) {

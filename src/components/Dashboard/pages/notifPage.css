@@ -144,7 +144,7 @@
 
 .notifPage__title{
   margin: 0;
-  font-family: "Dancing Script", cursive;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-size: clamp(52px, 6vw, 78px);
   line-height: 0.95;
   font-weight: 700;
@@ -184,6 +184,48 @@
   font-size: 15px;
   line-height: 1.68;
   color: var(--notif-ink-soft);
+}
+
+/* Compact notification header refresh */
+.notifPage__hero{
+  justify-items: start;
+  text-align: left;
+  margin-top: 0;
+}
+
+.notifPage__titleWrap{
+  justify-self: start;
+}
+
+.notifPage__title,
+.notifPage__titleTextValue{
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.06;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+
+.notifPage__titleText{
+  padding-bottom: 11px;
+}
+
+.notifPage__line{
+  left: 0;
+  width: min(190px, 100%);
+  height: 5px;
+}
+
+.notifPage__line path{
+  d: path("M0 10 L300 10");
+}
+
+.notifPage__sub{
+  margin: 8px 0 0;
+  max-width: 64ch;
+  font-size: 14px;
+  line-height: 1.58;
 }
 
 .notifToolbar{

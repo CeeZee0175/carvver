@@ -5,13 +5,16 @@ import {
   ArrowRight,
   Bell,
   CheckCheck,
+  Home,
   LogOut,
   MessageCircle,
   Newspaper,
+  PenLine,
   Search,
   Settings,
   ShoppingBag,
   ShoppingCart,
+  Trophy,
   UserRound,
   Bookmark,
 } from "lucide-react";
@@ -501,6 +504,54 @@ export default function DashBar() {
                     type="button"
                     className="dashbarProfileMenu__item"
                     role="menuitem"
+                    onClick={() => handleProfileMenuNavigate("/dashboard/customer")}
+                  >
+                    <Home className="dashbarProfileMenu__itemIcon" />
+                    <span>Dashboard Home</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => handleProfileMenuNavigate("/dashboard/customer/browse-services")}
+                  >
+                    <Search className="dashbarProfileMenu__itemIcon" />
+                    <span>Browse Services</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => handleProfileMenuNavigate("/dashboard/customer/post-request")}
+                  >
+                    <PenLine className="dashbarProfileMenu__itemIcon" />
+                    <span>Post Request</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => handleProfileMenuNavigate("/dashboard/customer/messages")}
+                  >
+                    <MessageCircle className="dashbarProfileMenu__itemIcon" />
+                    <span>Messages</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => handleProfileMenuNavigate("/dashboard/customer/cart")}
+                  >
+                    <ShoppingCart className="dashbarProfileMenu__itemIcon" />
+                    <span>Cart</span>
+                  </button>
+                </div>
+
+                <div className="dashbarProfileMenu__group">
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
                     onClick={() => handleProfileMenuNavigate("/dashboard/customer/profile")}
                   >
                     <UserRound className="dashbarProfileMenu__itemIcon" />
@@ -532,6 +583,15 @@ export default function DashBar() {
                   >
                     <ShoppingBag className="dashbarProfileMenu__itemIcon" />
                     <span>My Orders</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="dashbarProfileMenu__item"
+                    role="menuitem"
+                    onClick={() => handleProfileMenuNavigate("/dashboard/customer/profile/achievements")}
+                  >
+                    <Trophy className="dashbarProfileMenu__itemIcon" />
+                    <span>Achievements</span>
                   </button>
                   <button
                     type="button"
